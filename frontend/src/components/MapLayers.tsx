@@ -6,7 +6,7 @@
  * libraries and municipal sports centres.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Layers, X } from 'lucide-react';
+import { BookOpen, Dumbbell, Layers, Trophy, TreePine, X, type LucideIcon } from 'lucide-react';
 import L from 'leaflet';
 import { useMap } from 'react-leaflet';
 import officialPlaces from '../data/studentPlaces.json';
@@ -24,7 +24,18 @@ export const MAP_LAYERS: { id: LayerId; label: string; color: string; minZoom: n
   { id: 'malls', label: 'Centros comerciales', color: '#CC4A86', minZoom: 12 },
   { id: 'roads', label: 'Carreteras', color: '#E3A13B', minZoom: 0 },
 ];
-export const DEFAULT_LAYERS: LayerId[] = ['metro', 'supermarkets'];
+const SHORTCUT_ICONS: Partial<Record<LayerId, LucideIcon>> = {
+  parks: TreePine, libraries: BookOpen, gyms: Dumbbell, sports: Trophy,
+};
+const SHORTCUT_LAYERS = MAP_LAYERS.flatMap((layer) => {
+  const Icon = SHORTCUT_ICONS[layer.id];
+  return Icon ? [{ ...layer, Icon }] : [];
+});
+const OTHER_LAYERS = MAP_LAYERS.filter(({ id }) => !SHORTCUT_ICONS[id]);
+
+export const DEFAULT_LAYERS: LayerId[] = ['metro', 'supermarkets', ...SHORTCUT_LAYERS.map(({ id }) => id)];
+
+const layerLabelClass = "relative after:absolute after:inset-x-0 after:top-1/2 after:h-px after:origin-left after:scale-x-0 after:bg-current after:transition-transform after:content-[''] data-[hidden=true]:after:scale-x-100 motion-reduce:after:transition-none";
 
 type Point = [number, number, string];
 type LayerData = { kind: 'points'; items: Point[] } | { kind: 'lines'; lines: [number, number][][] };
@@ -34,25 +45,31 @@ const cache = new Map<LayerId, Promise<LayerData>>();
 
 function loadLayer(id: LayerId): Promise<LayerData> {
   if (!cache.has(id)) {
+    const municipalPoints = (kind: string) => official.filter((place) => place.kind === kind)
+      .map((place): Point => [place.coords[0], place.coords[1], place.name]);
     let promise: Promise<LayerData>;
     if (id === 'libraries' || id === 'sports') {
-      const kinds = id === 'libraries' ? ['library'] : ['sport', 'gym'];
-      promise = Promise.resolve({
-        kind: 'points',
-        items: official.filter((p) => kinds.includes(p.kind)).map((p) => [p.coords[0], p.coords[1], p.name] as Point),
-      });
+      promise = Promise.resolve({ kind: 'points', items: municipalPoints(id === 'libraries' ? 'library' : 'sport') });
     } else {
-      promise = fetch(`/layers/${id}.json`).then((r) => r.json()).then((data) => (
-        id === 'roads' ? { kind: 'lines', lines: data.lines } : { kind: 'points', items: data.items }
+      promise = fetch(`/layers/${id}.json`).then((response) => {
+        if (!response.ok) throw new Error(`Could not load map layer: ${id}`);
+        return response.json();
+      }).then((data) => (
+        id === 'roads'
+          ? { kind: 'lines', lines: data.lines }
+          : { kind: 'points', items: id === 'gyms' ? [...data.items, ...municipalPoints('gym')] : data.items }
       ));
     }
-    cache.set(id, promise);
+    cache.set(id, promise.catch((error) => {
+      cache.delete(id);
+      throw error;
+    }));
   }
   return cache.get(id)!;
 }
 
 /** Draws the enabled layers. Points grow slightly with zoom; names show on hover. */
-export function MapLayersOverlay({ enabled }: { enabled: Set<LayerId> }) {
+export function MapLayersOverlay({ enabled }: { enabled: ReadonlySet<LayerId> }) {
   const map = useMap();
   const renderer = useMemo(() => L.canvas({ padding: 0.5, tolerance: 4 }), []);
   const groups = useRef(new Map<LayerId, L.LayerGroup>());
@@ -101,6 +118,8 @@ export function MapLayersOverlay({ enabled }: { enabled: Set<LayerId> }) {
         }
         groups.current.set(layer.id, group);
         sync.current();
+      }).catch((error) => {
+        if (!cancelled) console.warn(error);
       });
     }
     sync.current();
@@ -130,27 +149,46 @@ export function MapLayersOverlay({ enabled }: { enabled: Set<LayerId> }) {
   return null;
 }
 
-/** "Mostrar en el mapa" panel with one toggle per layer. Collapses to a button on small screens. */
-export function MapLayersPanel({ enabled, onToggle }: { enabled: Set<LayerId>; onToggle: (id: LayerId) => void }) {
+type LayerControlsProps = { enabled: ReadonlySet<LayerId>; onToggle: (id: LayerId) => void };
+
+export function MapLayerShortcuts({ enabled, onToggle }: LayerControlsProps) {
+  return (
+    <div role="group" aria-label="Equipamientos visibles en el mapa" className="flex flex-wrap gap-1">
+      {SHORTCUT_LAYERS.map(({ id, label, color, Icon }) => {
+        const visible = enabled.has(id);
+        return (
+          <button key={id} type="button" aria-pressed={visible} onClick={() => onToggle(id)}
+            className="pointer-events-auto inline-flex min-h-11 items-center gap-1.5 rounded-md border border-border px-2 text-xs font-medium text-ink hover:border-ink/40 hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ink aria-[pressed=false]:bg-surface aria-[pressed=false]:text-muted lg:min-h-8">
+            <Icon size={14} style={{ color }} aria-hidden="true" />
+            <span className={layerLabelClass} data-hidden={!visible}>{label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Additional layer controls. */
+export function MapLayersPanel({ enabled, onToggle }: LayerControlsProps) {
   const [open, setOpen] = useState(() => window.matchMedia('(min-width: 1024px)').matches);
   if (!open) {
     return (
       <button type="button" onClick={() => setOpen(true)}
         className="pointer-events-auto inline-flex h-10 items-center gap-2 rounded-full border border-border bg-bg px-4 text-sm font-semibold text-ink shadow-popover transition hover:bg-surface">
-        <Layers size={16} aria-hidden="true" /> Mostrar en el mapa
+        <Layers size={16} aria-hidden="true" /> Más capas
       </button>
     );
   }
   return (
     <div className="pointer-events-auto w-60 rounded-2xl border border-border bg-bg p-3 shadow-popover">
       <div className="mb-2 flex items-center justify-between">
-        <span className="flex items-center gap-2 text-sm font-semibold"><Layers size={15} aria-hidden="true" /> Mostrar en el mapa</span>
+        <span className="flex items-center gap-2 text-sm font-semibold"><Layers size={15} aria-hidden="true" /> Más capas</span>
         <button type="button" onClick={() => setOpen(false)} aria-label="Ocultar capas" className="rounded-full p-1 text-muted hover:bg-surface hover:text-ink">
           <X size={15} aria-hidden="true" />
         </button>
       </div>
       <div className="grid grid-cols-1 gap-1">
-        {MAP_LAYERS.map((layer) => {
+        {OTHER_LAYERS.map((layer) => {
           const on = enabled.has(layer.id);
           return (
             <button key={layer.id} type="button" role="switch" aria-checked={on} onClick={() => onToggle(layer.id)}
@@ -159,7 +197,7 @@ export function MapLayersPanel({ enabled, onToggle }: { enabled: Set<LayerId>; o
                 {layer.id === 'roads'
                   ? <span className="h-1 w-3.5 rounded-full" style={{ background: layer.color }} />
                   : <span className="h-3 w-3 rounded-full border-2 border-bg shadow-[0_0_0_1px_rgba(13,17,23,0.15)]" style={{ background: layer.color }} />}
-                {layer.label}
+                <span className={layerLabelClass} data-hidden={!on}>{layer.label}</span>
               </span>
               <span className={'relative h-5 w-9 rounded-full transition ' + (on ? 'bg-ink' : 'bg-border')}>
                 <span className={'absolute top-0.5 h-4 w-4 rounded-full bg-bg shadow transition-all ' + (on ? 'left-[18px]' : 'left-0.5')} />

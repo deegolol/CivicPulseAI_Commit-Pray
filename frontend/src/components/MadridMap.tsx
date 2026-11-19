@@ -5,7 +5,7 @@
  * - Soft translucent polygon tints so Madrid streets stay legible.
  * - Auto-fit bounds to the active campus + Top 10 zones when results load or campus changes.
  */
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import type { Feature } from 'geojson';
 import {
   Circle,
@@ -31,7 +31,7 @@ import type {
 } from '../api/types';
 import { MADRID_CENTER, MADRID_DEFAULT_ZOOM } from '../config';
 import { formatEuro, formatKm } from '../utils/format';
-import { DEFAULT_LAYERS, MapLayersOverlay, MapLayersPanel, type LayerId } from './MapLayers';
+import { MapLayersOverlay, MapLayersPanel, MapLayerShortcuts, type LayerId } from './MapLayers';
 
 // Includes mainland Spain, the Balearic Islands and the Canary Islands.
 const SPAIN_BOUNDS = L.latLngBounds([27.4, -18.3], [44.1, 4.8]);
@@ -54,6 +54,8 @@ interface MadridMapProps {
   budget: number;
   isScoring?: boolean;
   isVisible?: boolean;
+  layers: ReadonlySet<LayerId>;
+  onToggleLayer: (id: LayerId) => void;
 }
 
 function createPricePillIcon(
@@ -285,13 +287,9 @@ export function MadridMap({
   budget,
   isScoring = false,
   isVisible = true,
+  layers,
+  onToggleLayer,
 }: MadridMapProps) {
-  const [layers, setLayers] = useState<Set<LayerId>>(() => new Set(DEFAULT_LAYERS));
-  const toggleLayer = useCallback((id: LayerId) => setLayers((current) => {
-    const next = new Set(current);
-    if (next.has(id)) next.delete(id); else next.add(id);
-    return next;
-  }), []);
   const campusLatLng = useMemo<[number, number] | null>(() =>
     activeCampus ? [activeCampus.coords[1], activeCampus.coords[0]] : null, [activeCampus]);
   const geoJsonRef = useRef<LeafletGeoJSON | null>(null);
@@ -531,11 +529,11 @@ export function MadridMap({
 
       {/* Layer toggles: supermarkets, Metro, parks, libraries, gyms, sports, malls, roads */}
       <div className="pointer-events-none absolute top-3 right-3 z-[500]">
-        <MapLayersPanel enabled={layers} onToggle={toggleLayer} />
+        <MapLayersPanel enabled={layers} onToggle={onToggleLayer} />
       </div>
 
       {/* Clean minimal map key */}
-      <div className="pointer-events-none absolute bottom-20 left-3 z-[400] flex flex-wrap items-center gap-x-3 gap-y-1 rounded-full border border-border bg-bg/95 px-3 py-1.5 text-[11px] text-muted lg:bottom-6 lg:left-4">
+      <div className="pointer-events-none absolute bottom-20 left-3 z-[400] flex max-w-[calc(100%-1.5rem)] flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-border bg-bg/95 px-3 py-1.5 text-[11px] text-muted lg:bottom-6 lg:left-4">
         <span className="inline-flex items-center gap-1.5 font-medium text-ink">
           <span className="h-2.5 w-2.5 rounded-full bg-brand" />
           Recomendada
@@ -544,6 +542,7 @@ export function MadridMap({
           <span className="h-2.5 w-2.5 rounded-full border border-ink/40 bg-bg" />
           Alquiler estimado
         </span>
+        <MapLayerShortcuts enabled={layers} onToggle={onToggleLayer} />
       </div>
     </div>
   );

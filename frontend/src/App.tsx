@@ -39,6 +39,7 @@ import {
 import { AreaDetailPanel } from './components/AreaDetailPanel';
 import { CompareModal } from './components/CompareModal';
 import { MadridMap } from './components/MadridMap';
+import { DEFAULT_LAYERS, type LayerId } from './components/MapLayers';
 import { OnboardingScreen, type SearchReview } from './components/OnboardingScreen';
 import { TopFilterBar } from './components/TopFilterBar';
 import type { ResultFilters } from './components/ResultsFilters';
@@ -181,6 +182,7 @@ export function App() {
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [compareOpen, setCompareOpen] = useState(false);
   const [mobileView, setMobileView] = useState<'list' | 'map'>('list');
+  const [mapLayers, setMapLayers] = useState<ReadonlySet<LayerId>>(() => new Set(DEFAULT_LAYERS));
   const [desktop, setDesktop] = useState(() => window.matchMedia('(min-width: 1024px)').matches);
   const mapVisible = screen === 'results' && (desktop || mobileView === 'map');
 
@@ -501,6 +503,15 @@ export function App() {
     navigate('home');
   };
 
+  function toggleMapLayer(layer: LayerId) {
+    setMapLayers((current) => {
+      const next = new Set(current);
+      if (next.has(layer)) next.delete(layer);
+      else next.add(layer);
+      return next;
+    });
+  }
+
   function handleApplyFilters(filters: ResultFilters) {
     setCampusId(filters.campusId);
     setBudget(filters.budget);
@@ -654,6 +665,8 @@ export function App() {
           } relative z-0 min-w-0 flex-1`}
         >
           {(mapVisible || geoData) && <MadridMap
+            layers={mapLayers}
+            onToggleLayer={toggleMapLayer}
             geoData={geoData}
             scoresById={scoresById}
             top10RankById={top10RankById}
