@@ -31,3 +31,8 @@
 ## T18 · 19/11/2026 · done
 - Qué: AI_USAGE.md con aportes de los cinco agentes, decisiones humanas documentadas y funcionamiento de la IA del producto.
 - Verificación: enlaces del documento, 27 tests y tres frases de la demo con caché, ranking y explicación offline. Detecté el uso de cifras mock en el respaldo web y el presupuesto perdido si el texto contiene € en el parser offline; avisos enviados a WEB y API. WEB corrigió su respaldo con resultados reales.
+
+## T21 · 19/11/2026 · apoyo QA
+- Probé tres recorridos Chrome (dos escritorio, uno móvil) con datos reales, comparador, enlace de anuncios y respuesta 503 simulada en explicación. Pasaron 27 tests de backend y el build de frontend.
+- Reporté a WEB/T21 el umbral de Metro que elimina todos los barrios y el filtro de presupuesto descartado por la UI. Reporté a API el símbolo € perdido al normalizar el texto sin LLM ni caché.
+- Dejé evidencia a SHIP y pasé los resultados de las consultas cacheadas a quien tiene T19.
