@@ -311,6 +311,31 @@ export function App() {
     });
   };
 
+  /** 1-click compare Top 3 non-excluded zones immediately */
+  const handleCompareTop3 = () => {
+    const top3Ids = results
+      .filter((r) => !r.excluded)
+      .slice(0, 3)
+      .map((r) => r.id);
+    if (top3Ids.length >= 2) {
+      setCompareIds(top3Ids);
+      setCompareOpen(true);
+    }
+  };
+
+  /** 1-click compare from AreaDetailPanel: compares this area against the top 2 other zones */
+  const handleQuickCompareFromDetail = (areaId: string) => {
+    const others = results
+      .filter((r) => !r.excluded && r.id !== areaId)
+      .slice(0, 2)
+      .map((r) => r.id);
+    const nextIds = [areaId, ...others];
+    if (nextIds.length >= 2) {
+      setCompareIds(nextIds);
+      setCompareOpen(true);
+    }
+  };
+
   const handleSearchSubmit = async (queryText: string) => {
     setScreen('results');
     setSelectedAreaId(null);
@@ -544,6 +569,8 @@ export function App() {
             onHoverArea={setHoveredAreaId}
             compareIds={compareIds}
             onToggleCompare={handleToggleCompare}
+            onOpenCompare={() => setCompareOpen(true)}
+            onCompareTop3={handleCompareTop3}
             loading={loading || ((isScoring || aiLoading) && rawResults.length === 0)}
           />
         </section>
@@ -585,9 +612,7 @@ export function App() {
               budget={budget}
               housingType={housingType}
               referenceM2={referenceM2}
-              isCompared={compareIds.includes(selectedArea.id)}
-              canAddCompare={compareIds.length < 3}
-              onToggleCompare={handleToggleCompare}
+              onQuickCompare={handleQuickCompareFromDetail}
               onClose={() => setSelectedAreaId(null)}
             />
           </aside>
@@ -623,6 +648,7 @@ export function App() {
           areas={comparedAreas}
           indicators={meta?.indicators ?? []}
           housingType={housingType}
+          budget={budget}
           onRemove={handleToggleCompare}
           onClose={() => setCompareOpen(false)}
         />

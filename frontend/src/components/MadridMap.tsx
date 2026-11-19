@@ -1,9 +1,9 @@
 /**
- * Support map for Screen B (T25).
- * - Only Top 10 neighborhoods highlighted in 5-step blue scale (#EEF3FF → #1F4FD6); rest muted grey (#ECEEF2)
- * - Bidirectional hover sync with ZoneList (hoveredAreaId)
- * - Campus marker as Madrid red dot (#D7262E) with clean label + optional max-distance circle
- * - Minimalist basemap without noisy labels + labels only for top highlighted neighborhoods
+ * Redesigned Airbnb-style price-pill Madrid map (clean, scannable, auto-fitted to Top 10 + campus).
+ * - Floating price pills (~388 €) directly on Top 10 neighborhoods: Madrid red for #1 recommended,
+ *   crisp white pills for #2–#10 (turning dark ink on hover/select, synced bidirectionally with ZoneList).
+ * - Soft translucent polygon tints so Madrid streets stay legible.
+ * - Auto-fit bounds to the active campus + Top 10 zones when results load or campus changes.
  */
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
@@ -11,6 +11,7 @@ import {
   CircleMarker,
   GeoJSON,
   MapContainer,
+  Marker,
   TileLayer,
   Tooltip,
   useMap,
@@ -42,14 +43,45 @@ interface MadridMapProps {
   isVisible?: boolean;
 }
 
-/** 5-step blue scale for Top 10 ranked areas (T25); everything else stays muted grey */
-function getTop10BlueFill(rank?: number): string {
-  if (!rank) return '#ECEEF2';
-  if (rank <= 2) return '#1F4FD6';
-  if (rank <= 4) return '#4D7CF5';
-  if (rank <= 6) return '#8FB0FF';
-  if (rank <= 8) return '#C9D8FF';
-  return '#EEF3FF';
+function createPricePillIcon(
+  priceLabel: string,
+  rank: number,
+  isRecommended: boolean,
+  isActive: boolean,
+) {
+  const bg = isActive
+    ? '#0D1117'
+    : isRecommended
+      ? '#D7262E'
+      : '#FFFFFF';
+  const color = isActive || isRecommended ? '#FFFFFF' : '#0D1117';
+  const border = isActive
+    ? '2px solid #0D1117'
+    : isRecommended
+      ? '2px solid #FFFFFF'
+      : '1px solid #CFD5DF';
+  const shadow = isActive || isRecommended
+    ? '0 4px 12px rgba(13,17,23,0.28)'
+    : '0 2px 6px rgba(13,17,23,0.14)';
+  const scale = isActive ? 'scale(1.1)' : 'scale(1)';
+
+  return L.divIcon({
+    className: 'price-pill-marker',
+    iconSize: [74, 28],
+    iconAnchor: [37, 14],
+    html: `<div style="
+      display:inline-flex;align-items:center;justify-content:center;gap:3px;
+      padding:3px 9px;border-radius:9999px;
+      background:${bg};color:${color};border:${border};
+      box-shadow:${shadow};transform:${scale};
+      transition:transform 140ms ease-out,background-color 140ms ease-out;
+      font-family:'Bricolage Grotesque','Instrument Sans',sans-serif;
+      font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer;
+    ">
+      ${isRecommended ? '<span style="font-size:10px;opacity:0.9">#1</span>' : `<span style="font-size:10px;opacity:0.65">#${rank}</span>`}
+      <span>${priceLabel}</span>
+    </div>`,
+  });
 }
 
 function buildTooltipHtml(
@@ -90,19 +122,21 @@ function buildTooltipHtml(
   </div>`;
 }
 
-function MapFlyController({
-  targetCoords,
-  zoom,
+/** Handles invalidateSize on mobile toggle, auto-fit bounds on Top 10 + campus, and flyTo on selection */
+function MapViewportController({
+  boundsPoints,
+  boundsSignature,
+  selectedCoords,
   visible,
 }: {
-  targetCoords: [number, number] | null;
-  zoom: number;
+  boundsPoints: [number, number][];
+  boundsSignature: string;
+  selectedCoords: [number, number] | null;
   visible: boolean;
 }) {
   const map = useMap();
-  const isFirstRender = useRef(true);
+  const lastBoundsSig = useRef<string>('');
 
-  // Recalculate Leaflet container dimensions whenever the map becomes visible (mobile toggle)
   useEffect(() => {
     if (!visible) return;
     const id = window.setTimeout(() => {
@@ -111,24 +145,34 @@ function MapFlyController({
     return () => window.clearTimeout(id);
   }, [map, visible]);
 
+  // Auto-fit bounds cleanly around campus + Top 10 whenever the campus or Top 10 set changes
   useEffect(() => {
-    if (!visible || !targetCoords) return;
-    const [lat, lon] = targetCoords;
+    if (!visible || boundsPoints.length < 2) return;
+    if (lastBoundsSig.current === boundsSignature) return;
+    const size = map.getSize();
+    if (size.x === 0 || size.y === 0) return;
+
+    lastBoundsSig.current = boundsSignature;
+    const bounds = L.latLngBounds(boundsPoints);
+    if (!bounds.isValid()) return;
+    map.fitBounds(bounds, { padding: [46, 46], maxZoom: 13, animate: true, duration: 0.45 });
+  }, [map, boundsPoints, boundsSignature, visible]);
+
+  // Smooth pan to selected neighborhood
+  useEffect(() => {
+    if (!visible || !selectedCoords) return;
+    const [lat, lon] = selectedCoords;
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
     const size = map.getSize();
     if (size.x === 0 || size.y === 0) return;
 
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReduced) {
-      map.setView(targetCoords, zoom, { animate: false });
+      map.setView(selectedCoords, Math.max(map.getZoom(), 13), { animate: false });
     } else {
-      map.flyTo(targetCoords, zoom, { duration: 0.55, easeLinearity: 0.25 });
+      map.flyTo(selectedCoords, Math.max(map.getZoom(), 13), { duration: 0.45 });
     }
-  }, [map, targetCoords, zoom, visible]);
+  }, [map, selectedCoords, visible]);
 
   return null;
 }
@@ -168,6 +212,7 @@ export function MadridMap({
   onSelectRef.current = onSelectArea;
   onHoverRef.current = onHoverArea;
 
+  /** Soft translucent polygons so Madrid streets remain legible beneath the price pills */
   const getStyleForFeature = useCallback((feature?: AreaFeature): PathOptions => {
     const id = feature?.properties?.id;
     const rank = id ? top10Ref.current[id] : undefined;
@@ -175,18 +220,39 @@ export function MadridMap({
     const isHovered = id === hoveredRef.current;
     const isRecommended = id === recommendedRef.current;
 
+    if (isSelected) {
+      return {
+        fillColor: '#1F4FD6',
+        fillOpacity: 0.28,
+        color: '#0D1117',
+        weight: 2.5,
+        opacity: 1,
+      };
+    }
+    if (isRecommended) {
+      return {
+        fillColor: '#D7262E',
+        fillOpacity: isHovered ? 0.24 : 0.16,
+        color: '#D7262E',
+        weight: 2.25,
+        opacity: 0.95,
+      };
+    }
+    if (rank) {
+      return {
+        fillColor: '#4D7CF5',
+        fillOpacity: isHovered ? 0.28 : 0.14,
+        color: isHovered ? '#1F4FD6' : '#4D7CF5',
+        weight: isHovered ? 2 : 1.25,
+        opacity: isHovered ? 1 : 0.65,
+      };
+    }
     return {
-      fillColor: getTop10BlueFill(rank),
-      fillOpacity: rank ? (isSelected || isHovered || isRecommended ? 0.88 : 0.72) : isHovered ? 0.55 : 0.35,
-      color: isSelected
-        ? '#0D1117'
-        : isRecommended
-          ? '#D7262E'
-          : isHovered
-            ? '#1F4FD6'
-            : '#FFFFFF',
-      weight: isSelected || isRecommended ? 2.5 : isHovered ? 2 : 1,
-      opacity: 1,
+      fillColor: '#94A3B8',
+      fillOpacity: isHovered ? 0.14 : 0.02,
+      color: isHovered ? '#5D6673' : '#CBD5E1',
+      weight: isHovered ? 1.2 : 0.5,
+      opacity: isHovered ? 0.7 : 0.35,
     };
   }, []);
 
@@ -206,33 +272,65 @@ export function MadridMap({
     });
   }, [scoresById, top10RankById, selectedAreaId, hoveredAreaId, recommendedAreaId, budget, getStyleForFeature]);
 
-  const flyTarget = useMemo<[number, number] | null>(() => {
+  // Top 10 floating price pill markers
+  const pricePills = useMemo(() => {
+    return Object.entries(top10RankById)
+      .map(([id, rank]) => {
+        const centroid = centroidsById[id];
+        const area = scoresById[id];
+        if (!centroid || !area) return null;
+        const priceLabel =
+          area.est_rent_eur_month != null ? `~${formatEuro(area.est_rent_eur_month)}` : `#${rank}`;
+        return {
+          id,
+          rank,
+          name: area.name,
+          district: area.district,
+          distanceKm: area.distance_km,
+          priceLabel,
+          coords: [centroid[1], centroid[0]] as [number, number],
+          isRecommended: id === recommendedAreaId,
+        };
+      })
+      .filter((x): x is NonNullable<typeof x> => Boolean(x))
+      .sort((a, b) => b.rank - a.rank); // render #1 last so it stays on top
+  }, [top10RankById, centroidsById, scoresById, recommendedAreaId]);
+
+  // Bounds points: active campus + Top 10 price pills
+  const boundsPoints = useMemo<[number, number][]>(() => {
+    const pts: [number, number][] = pricePills.map((p) => p.coords);
+    if (activeCampus) {
+      pts.push([activeCampus.coords[1], activeCampus.coords[0]]);
+    }
+    return pts;
+  }, [pricePills, activeCampus]);
+
+  const boundsSignature = useMemo(() => {
+    const ids = pricePills.map((p) => p.id).sort().join(',');
+    return `${activeCampus?.id ?? 'none'}:${ids}`;
+  }, [activeCampus?.id, pricePills]);
+
+  const selectedCoords = useMemo<[number, number] | null>(() => {
     if (selectedAreaId && centroidsById[selectedAreaId]) {
       const [lon, lat] = centroidsById[selectedAreaId];
       return [lat, lon];
     }
-    if (activeCampus) {
-      return [activeCampus.coords[1], activeCampus.coords[0]];
-    }
     return null;
-  }, [selectedAreaId, centroidsById, activeCampus]);
+  }, [selectedAreaId, centroidsById]);
 
-  const onEachFeature = useCallback(
-    (feature: AreaFeature, layer: Layer) => {
-      const { id, name, district } = feature.properties;
-      layer.bindTooltip(
-        buildTooltipHtml(name, district, scoresRef.current[id], top10Ref.current[id], budgetRef.current),
-        { sticky: true, direction: 'top', offset: [0, -8], className: 'clean-tooltip' },
-      );
+  const onEachFeature = useCallback((feature: AreaFeature, layer: Layer) => {
+    const { id, name, district } = feature.properties;
+    layer.bindTooltip(
+      buildTooltipHtml(name, district, scoresRef.current[id], top10Ref.current[id], budgetRef.current),
+      { sticky: true, direction: 'top', offset: [0, -8], className: 'clean-tooltip' },
+    );
 
-      layer.on({
-        mouseover: () => onHoverRef.current(id),
-        mouseout: () => onHoverRef.current(null),
-        click: () => onSelectRef.current(id),
-      });
-    },
-    [],
-  );
+    layer.on({
+      mouseover: () => onHoverRef.current(id),
+      mouseout: () => onHoverRef.current(null),
+      click: () => onSelectRef.current(id),
+    });
+  }, []);
 
   const campusShort = activeCampus?.name.split(' · ')[0] ?? '';
 
@@ -249,9 +347,10 @@ export function MadridMap({
           url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        <MapFlyController
-          targetCoords={flyTarget}
-          zoom={selectedAreaId ? 13 : MADRID_DEFAULT_ZOOM}
+        <MapViewportController
+          boundsPoints={boundsPoints}
+          boundsSignature={boundsSignature}
+          selectedCoords={selectedCoords}
           visible={isVisible}
         />
 
@@ -279,6 +378,31 @@ export function MadridMap({
           />
         )}
 
+        {/* Airbnb-style floating price pills on Top 10 zones */}
+        {pricePills.map((pill) => {
+          const isActive = pill.id === selectedAreaId || pill.id === hoveredAreaId;
+          return (
+            <Marker
+              key={pill.id}
+              position={pill.coords}
+              icon={createPricePillIcon(pill.priceLabel, pill.rank, pill.isRecommended, isActive)}
+              zIndexOffset={isActive ? 1000 : pill.isRecommended ? 500 : 100 - pill.rank}
+              eventHandlers={{
+                click: () => onSelectArea(pill.id),
+                mouseover: () => onHoverArea(pill.id),
+                mouseout: () => onHoverArea(null),
+              }}
+            >
+              <Tooltip direction="top" offset={[0, -14]} className="clean-tooltip">
+                <div className="text-xs font-semibold text-ink">{pill.name}</div>
+                <div className="text-[11px] text-muted">
+                  {pill.district} · {formatKm(pill.distanceKm)}
+                </div>
+              </Tooltip>
+            </Marker>
+          );
+        })}
+
         {/* Campus marker: Madrid red dot (#D7262E) with clean label */}
         {activeCampus && (
           <CircleMarker
@@ -304,17 +428,16 @@ export function MadridMap({
         </div>
       )}
 
-      {/* Compact 5-step blue legend (top-right on mobile so it never touches the bottom Lista button) */}
-      <div className="pointer-events-none absolute top-3 right-3 z-[400] flex items-center gap-2.5 rounded-[8px] border border-border bg-bg px-3 py-1.5 text-[11px] text-muted lg:top-auto lg:right-auto lg:bottom-4 lg:left-4">
-        <span>Top 10</span>
-        <div className="flex items-center gap-0.5">
-          <span className="h-2.5 w-4 rounded-l-sm bg-map-1" />
-          <span className="h-2.5 w-4 bg-map-2" />
-          <span className="h-2.5 w-4 bg-map-3" />
-          <span className="h-2.5 w-4 bg-map-4" />
-          <span className="h-2.5 w-4 rounded-r-sm bg-map-5" />
-        </div>
-        <span className="font-medium text-ink">Mejor encaje</span>
+      {/* Clean minimal map key */}
+      <div className="pointer-events-none absolute top-3 right-3 z-[400] flex items-center gap-3 rounded-[8px] border border-border bg-bg px-3 py-1.5 text-[11px] text-muted lg:top-auto lg:right-auto lg:bottom-4 lg:left-4">
+        <span className="inline-flex items-center gap-1.5 font-medium text-ink">
+          <span className="h-2.5 w-2.5 rounded-full bg-brand" />
+          Recomendada
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-full border border-ink/40 bg-bg" />
+          Top 10 (€/mes)
+        </span>
       </div>
     </div>
   );

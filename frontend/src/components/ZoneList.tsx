@@ -6,7 +6,7 @@
  * - Bidirectional hover sync with MadridMap. No sparkles, no AI badges, no gradients, zero %.
  */
 import { useMemo, useState } from 'react';
-import { Check, ChevronDown, ChevronUp, ExternalLink, Scale } from 'lucide-react';
+import { Check, ChevronDown, ChevronUp, ExternalLink, Scale, X } from 'lucide-react';
 import type { Recommendation, ScoreResultItem } from '../api/types';
 import { formatEuro, formatKm } from '../utils/format';
 
@@ -24,6 +24,8 @@ interface ZoneListProps {
   onHoverArea: (areaId: string | null) => void;
   compareIds: string[];
   onToggleCompare: (areaId: string) => void;
+  onOpenCompare: () => void;
+  onCompareTop3: () => void;
   loading: boolean;
 }
 
@@ -48,6 +50,8 @@ export function ZoneList({
   onHoverArea,
   compareIds,
   onToggleCompare,
+  onOpenCompare,
+  onCompareTop3,
   loading,
 }: ZoneListProps) {
   const [explanationOpen, setExplanationOpen] = useState(false);
@@ -262,14 +266,24 @@ export function ZoneList({
               </article>
             )}
 
-            {/* Section heading for remaining zones */}
+            {/* Section heading + 1-click "Comparar top 3" */}
             {listResults.length > 0 && (
               <div className="flex items-center justify-between pt-1">
                 <span className="text-xs font-medium text-muted">
                   {recommendedArea
                     ? 'Otras alternativas para ti'
-                    : `Mostrando las ${Math.min(visibleResults.length, 10)} mejores zonas en azul`}
+                    : `Mostrando las ${Math.min(visibleResults.length, 10)} mejores zonas`}
                 </span>
+                {visibleResults.length >= 2 && (
+                  <button
+                    type="button"
+                    onClick={onCompareTop3}
+                    className="inline-flex items-center gap-1.5 rounded-[8px] border border-border bg-bg px-2.5 py-1 text-xs font-medium text-ink transition hover:border-ink/40 hover:bg-surface"
+                  >
+                    <Scale className="h-3.5 w-3.5" strokeWidth={1.75} />
+                    <span>Comparar top 3</span>
+                  </button>
+                )}
               </div>
             )}
 
@@ -412,6 +426,47 @@ export function ZoneList({
           </>
         )}
       </div>
+
+      {/* Sticky Compare Dock at bottom of list whenever >= 1 zone is picked */}
+      {compareIds.length > 0 && (
+        <div className="sticky bottom-0 z-20 shrink-0 border-t border-border bg-bg px-4 py-3 shadow-popover">
+          <div className="flex flex-wrap items-center gap-1.5 pb-2">
+            {compareIds.map((id) => {
+              const item = results.find((r) => r.id === id);
+              if (!item) return null;
+              return (
+                <span
+                  key={id}
+                  className="inline-flex items-center gap-1 rounded-[6px] border border-border bg-surface py-0.5 pr-1 pl-2 text-[11px] font-medium text-ink"
+                >
+                  <span>{item.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => onToggleCompare(id)}
+                    aria-label={`Quitar ${item.name}`}
+                    className="rounded p-0.5 text-muted hover:text-ink"
+                  >
+                    <X className="h-3 w-3" strokeWidth={1.75} />
+                  </button>
+                </span>
+              );
+            })}
+          </div>
+          <button
+            type="button"
+            disabled={compareIds.length < 2}
+            onClick={onOpenCompare}
+            className="flex min-h-[38px] w-full items-center justify-center gap-2 rounded-[8px] bg-ink px-4 py-2 text-xs font-medium text-bg transition hover:opacity-90 disabled:bg-surface disabled:text-muted"
+          >
+            <Scale className="h-3.5 w-3.5" strokeWidth={1.75} />
+            <span>
+              {compareIds.length >= 2
+                ? `Comparar ahora (${compareIds.length})`
+                : 'Elige 1 barrio más para comparar'}
+            </span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

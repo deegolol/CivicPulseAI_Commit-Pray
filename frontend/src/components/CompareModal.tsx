@@ -1,6 +1,7 @@
 /**
- * Editorial comparison modal for 2–3 Madrid neighborhoods (T13 + T24).
- * Overlaid Recharts RadarChart + side-by-side real-unit comparison table (zero %).
+ * Clean side-by-side comparison modal for 2–3 Madrid neighborhoods.
+ * Shows protagonist ~€/mes price, distance in km, and fractional 0–5 Star Ratings for every dimension,
+ * plus an overlaid radar chart and direct "Ver pisos" links. Zero technical unit clutter.
  */
 import { useEffect, useMemo } from 'react';
 import { ExternalLink, Scale, X } from 'lucide-react';
@@ -10,63 +11,36 @@ import {
   Radar,
   RadarChart,
   ResponsiveContainer,
-  Tooltip as RechartsTooltip,
 } from 'recharts';
 import type { HousingType, IndicatorMeta, ScoreResultItem } from '../api/types';
 import { HOUSING_TYPE_LABELS } from '../config';
-import {
-  formatDecimal,
-  formatEuro,
-  formatEuroPerM2,
-  formatInteger,
-  formatKm,
-  getAirQualityLabel,
-  getFitLabel,
-  getFitLevel,
-} from '../utils/format';
+import { formatEuro, formatKm } from '../utils/format';
+import { normalizedToStars, StarRating } from './StarRating';
 
 interface CompareModalProps {
   areas: ScoreResultItem[];
   indicators: IndicatorMeta[];
   housingType: HousingType;
+  budget: number;
   onRemove: (areaId: string) => void;
   onClose: () => void;
 }
 
-/** 3 clean urban series colors (blue, fit-green, ink) */
-const SERIES_COLORS = ['#1F4FD6', '#12805C', '#0D1117'] as const;
+const SERIES_COLORS = ['#D7262E', '#1F4FD6', '#12805C'] as const;
 
-function shortAxisLabel(key: string, fallback: string): string {
-  switch (key) {
-    case 'rent_eur_m2':
-      return 'Precio';
-    case 'distance_km':
-      return 'Cercanía';
-    case 'air_no2':
-      return 'Aire';
-    case 'transit_stops':
-      return 'Metro';
-    case 'services_count':
-      return 'Servicios';
-    default:
-      return fallback;
-  }
-}
-
-function formatCellValue(key: string, value: number | null | undefined, unit: string): string {
-  if (value == null) return 'Sin dato';
-  if (key === 'rent_eur_m2') return formatEuroPerM2(value);
-  if (key === 'distance_km') return formatKm(value);
-  if (key === 'air_no2') return `${formatInteger(value)} µg/m³ (${getAirQualityLabel(value)})`;
-  if (key === 'transit_stops') return `${formatDecimal(value)} est./km²`;
-  if (key === 'services_count') return `${formatInteger(value)}`;
-  return `${formatDecimal(value)} ${unit}`;
-}
+const FRIENDLY_LABELS: Record<string, string> = {
+  rent_eur_m2: 'Precio',
+  distance_km: 'Cercanía',
+  air_no2: 'Calidad del aire',
+  transit_stops: 'Metro',
+  services_count: 'Servicios y deporte',
+};
 
 export function CompareModal({
   areas,
   indicators,
   housingType,
+  budget,
   onRemove,
   onClose,
 }: CompareModalProps) {
@@ -80,31 +54,20 @@ export function CompareModal({
 
   const allMetrics = useMemo(
     () => [
-      { key: 'distance_km', label: 'Distancia al campus', unit: 'km', higherIsBetter: false },
+      { key: 'distance_km', label: FRIENDLY_LABELS.distance_km },
       ...indicators.map((ind) => ({
         key: ind.key,
-        label: ind.label,
-        unit: ind.unit,
-        higherIsBetter: ind.higher_is_better,
+        label: FRIENDLY_LABELS[ind.key] ?? ind.label,
       })),
     ],
     [indicators],
   );
 
-  // Build overlaid radar dataset using normalized 0–10 scale (no %)
   const radarData = useMemo(() => {
     return allMetrics.map((metric) => {
-      const row: Record<string, string | number> = {
-        axis: shortAxisLabel(metric.key, metric.label),
-      };
+      const row: Record<string, string | number> = { axis: metric.label };
       areas.forEach((area, idx) => {
-        const norm = area.breakdown[metric.key]?.normalized ?? 0.5;
-        row[`s${idx}`] = Number((norm * 10).toFixed(1));
-        const raw =
-          metric.key === 'distance_km'
-            ? area.distance_km
-            : (area.breakdown[metric.key]?.value ?? null);
-        row[`label${idx}`] = formatCellValue(metric.key, raw, metric.unit);
+        row[`s${idx}`] = normalizedToStars(area.breakdown[metric.key]?.normalized);
       });
       return row;
     });
@@ -117,10 +80,7 @@ export function CompareModal({
       aria-label="Comparador de barrios"
       className="fixed inset-0 z-[700] flex items-center justify-center p-4"
     >
-      <div
-        className="fixed inset-0 bg-ink/35"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 bg-ink/35" onClick={onClose} />
 
       <div className="relative z-10 flex max-h-[90dvh] w-full max-w-3xl flex-col overflow-hidden rounded-[10px] border border-border bg-bg shadow-popover">
         {/* Header */}
@@ -131,10 +91,10 @@ export function CompareModal({
             </div>
             <div>
               <h2 className="font-display text-lg font-bold text-ink">
-                Comparativa de zonas
+                Comparativa rápida
               </h2>
               <p className="text-xs text-muted">
-                Comparando {areas.length} barrios en unidades reales ({HOUSING_TYPE_LABELS[housingType].toLowerCase()})
+                {areas.length} zonas valoradas sobre 5 estrellas ({HOUSING_TYPE_LABELS[housingType].toLowerCase()})
               </p>
             </div>
           </div>
@@ -149,8 +109,8 @@ export function CompareModal({
           </button>
         </header>
 
-        {/* Scrollable Body */}
-        <div className="flex-1 space-y-6 overflow-y-auto p-6">
+        {/* Scrollable body */}
+        <div className="flex-1 space-y-5 overflow-y-auto p-6">
           {/* Legend chips */}
           <div className="flex flex-wrap gap-2">
             {areas.map((area, idx) => (
@@ -178,70 +138,12 @@ export function CompareModal({
             ))}
           </div>
 
-          {/* Overlaid Radar Chart (when >= 3 metrics) */}
-          {radarData.length >= 3 && (
-            <section className="rounded-[10px] border border-border bg-surface p-4">
-              <h3 className="text-xs font-medium text-muted">
-                Perfil comparado (más hacia fuera = mejor resultado en ese indicador)
-              </h3>
-              <div className="mt-2 h-64 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart data={radarData} outerRadius="74%">
-                    <PolarGrid stroke="#E4E7EC" />
-                    <PolarAngleAxis
-                      dataKey="axis"
-                      tick={{ fill: '#0D1117', fontSize: 12 }}
-                    />
-                    {areas.map((area, idx) => (
-                      <Radar
-                        key={area.id}
-                        name={area.name}
-                        dataKey={`s${idx}`}
-                        stroke={SERIES_COLORS[idx % SERIES_COLORS.length]}
-                        strokeWidth={2}
-                        fill={SERIES_COLORS[idx % SERIES_COLORS.length]}
-                        fillOpacity={0.12}
-                      />
-                    ))}
-                    <RechartsTooltip
-                      content={({ active, payload }) => {
-                        if (!active || !payload?.length) return null;
-                        const row = payload[0].payload as Record<string, string>;
-                        return (
-                          <div className="rounded-[8px] border border-border bg-bg px-3 py-2 text-xs shadow-popover">
-                            <div className="font-semibold text-ink">{row.axis}</div>
-                            <div className="mt-1 space-y-0.5 tabular-nums">
-                              {areas.map((area, idx) => (
-                                <div key={area.id} className="flex items-center gap-2">
-                                  <span
-                                    className="h-2 w-2 rounded-full"
-                                    style={{
-                                      backgroundColor: SERIES_COLORS[idx % SERIES_COLORS.length],
-                                    }}
-                                  />
-                                  <span className="text-muted">{area.name}:</span>
-                                  <span className="font-medium text-ink">
-                                    {row[`label${idx}`]}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      }}
-                    />
-                  </RadarChart>
-                </ResponsiveContainer>
-              </div>
-            </section>
-          )}
-
-          {/* Side-by-side table in real units */}
+          {/* Side-by-side table with Star Ratings */}
           <div className="overflow-x-auto rounded-[10px] border border-border">
             <table className="w-full border-collapse text-left text-xs">
               <thead>
                 <tr className="border-b border-border bg-surface">
-                  <th className="px-4 py-3 font-medium text-muted">Indicador</th>
+                  <th className="px-4 py-3 font-medium text-muted">Qué comparamos</th>
                   {areas.map((area, idx) => (
                     <th key={area.id} className="px-4 py-3 font-semibold text-ink">
                       <div className="flex items-center gap-1.5">
@@ -256,78 +158,71 @@ export function CompareModal({
                 </tr>
               </thead>
               <tbody className="divide-y divide-border bg-bg tabular-nums">
-                {/* Estimated monthly rent row */}
+                {/* Coste estimado */}
                 <tr>
-                  <td className="px-4 py-3 font-medium text-muted">Coste estimado</td>
-                  {areas.map((area) => (
-                    <td key={area.id} className="px-4 py-3">
-                      <div className="font-display text-base font-bold text-ink">
-                        {area.est_rent_eur_month != null
-                          ? `~${formatEuro(area.est_rent_eur_month)}/mes`
-                          : 'Sin dato'}
-                      </div>
-                      {area.fits_budget !== null && (
-                        <span
-                          className={`mt-0.5 inline-block rounded-[6px] px-2 py-0.5 text-[10px] font-medium ${
-                            area.fits_budget
-                              ? 'bg-fit-soft text-fit'
-                              : 'bg-over-soft text-over'
-                          }`}
-                        >
-                          {area.fits_budget ? 'Encaja' : 'Por encima'}
-                        </span>
-                      )}
-                    </td>
-                  ))}
-                </tr>
-
-                {/* Qualitative fit row */}
-                <tr>
-                  <td className="px-4 py-3 font-medium text-muted">Ajuste a tu perfil</td>
-                  {areas.map((area) => (
-                    <td key={area.id} className="px-4 py-3 font-medium text-ink">
-                      {getFitLabel(getFitLevel(area.score, area.excluded))}
-                    </td>
-                  ))}
-                </tr>
-
-                {/* All metric rows */}
-                {allMetrics.map((metric) => {
-                  const vals = areas.map((a) =>
-                    metric.key === 'distance_km'
-                      ? a.distance_km
-                      : (a.breakdown[metric.key]?.value ?? null),
-                  );
-                  const numericVals = vals.filter((v): v is number => v != null);
-                  const bestVal =
-                    numericVals.length > 0
-                      ? metric.higherIsBetter
-                        ? Math.max(...numericVals)
-                        : Math.min(...numericVals)
-                      : null;
-
-                  return (
-                    <tr key={metric.key}>
-                      <td className="px-4 py-3 font-medium text-muted">{metric.label}</td>
-                      {areas.map((area, idx) => {
-                        const v = vals[idx];
-                        const isBest = bestVal !== null && v === bestVal && numericVals.length > 1;
-                        return (
-                          <td
-                            key={area.id}
-                            className={`px-4 py-3 ${
-                              isBest ? 'font-semibold text-fit' : 'text-ink'
+                  <td className="px-4 py-3 font-medium text-muted">Precio estimado</td>
+                  {areas.map((area) => {
+                    const over =
+                      area.est_rent_eur_month != null && area.est_rent_eur_month > budget
+                        ? Math.round(area.est_rent_eur_month - budget)
+                        : 0;
+                    return (
+                      <td key={area.id} className="px-4 py-3">
+                        <div className="font-display text-base font-bold text-ink">
+                          {area.est_rent_eur_month != null
+                            ? `~${formatEuro(area.est_rent_eur_month)}/mes`
+                            : 'Sin dato'}
+                        </div>
+                        {area.est_rent_eur_month != null && (
+                          <span
+                            className={`mt-0.5 inline-block rounded-[6px] px-2 py-0.5 text-[10px] font-medium ${
+                              over === 0 ? 'bg-fit-soft text-fit' : 'bg-over-soft text-over'
                             }`}
                           >
-                            {formatCellValue(metric.key, v, metric.unit)}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  );
-                })}
+                            {over === 0 ? 'Encaja' : `Se pasa ${formatEuro(over)}`}
+                          </span>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
 
-                {/* Listings link row */}
+                {/* Distancia en km */}
+                <tr>
+                  <td className="px-4 py-3 font-medium text-muted">Distancia al campus</td>
+                  {areas.map((area) => (
+                    <td key={area.id} className="px-4 py-3 font-semibold text-ink">
+                      {formatKm(area.distance_km)}
+                    </td>
+                  ))}
+                </tr>
+
+                {/* Valoración global en estrellas */}
+                <tr>
+                  <td className="px-4 py-3 font-medium text-muted">Valoración global</td>
+                  {areas.map((area) => (
+                    <td key={area.id} className="px-4 py-3">
+                      <StarRating value={Math.round((area.score / 100) * 50) / 10} size="sm" />
+                    </td>
+                  ))}
+                </tr>
+
+                {/* Fractional 0–5 Star Ratings per dimension */}
+                {allMetrics.map((metric) => (
+                  <tr key={metric.key}>
+                    <td className="px-4 py-3 font-medium text-muted">{metric.label}</td>
+                    {areas.map((area) => (
+                      <td key={area.id} className="px-4 py-3">
+                        <StarRating
+                          value={normalizedToStars(area.breakdown[metric.key]?.normalized)}
+                          size="sm"
+                        />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+
+                {/* Direct listing link */}
                 <tr>
                   <td className="px-4 py-3 font-medium text-muted">Anuncios</td>
                   {areas.map((area) => {
@@ -354,6 +249,34 @@ export function CompareModal({
               </tbody>
             </table>
           </div>
+
+          {/* Visual Radar overview below the star table */}
+          {radarData.length >= 3 && (
+            <section className="rounded-[10px] border border-border bg-surface p-4">
+              <h3 className="text-xs font-medium text-muted">
+                Perfil visual (0 a 5 estrellas por criterio)
+              </h3>
+              <div className="mt-1 h-56 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart data={radarData} outerRadius="72%">
+                    <PolarGrid stroke="#E4E7EC" />
+                    <PolarAngleAxis dataKey="axis" tick={{ fill: '#0D1117', fontSize: 12 }} />
+                    {areas.map((area, idx) => (
+                      <Radar
+                        key={area.id}
+                        name={area.name}
+                        dataKey={`s${idx}`}
+                        stroke={SERIES_COLORS[idx % SERIES_COLORS.length]}
+                        strokeWidth={2}
+                        fill={SERIES_COLORS[idx % SERIES_COLORS.length]}
+                        fillOpacity={0.12}
+                      />
+                    ))}
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+            </section>
+          )}
         </div>
       </div>
     </div>

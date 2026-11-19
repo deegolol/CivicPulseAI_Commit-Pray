@@ -1,11 +1,9 @@
 /**
- * Neighborhood detail panel (T25).
- * Side panel on desktop, full-screen overlay on mobile.
- * Big Bricolage Grotesque price, Madrid red primary CTA "Ver pisos en Idealista",
- * thin comparison bars vs Madrid median, per-indicator source links, and CRTM attribution.
+ * Neighborhood detail panel with 0–5 fractional star ratings (e.g., 4.3) + 1-click compare.
+ * Student-friendly ratings up front; raw technical units & official source links neatly collapsible below.
  */
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, Check, ExternalLink, Scale, X } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronUp, ExternalLink, Scale, X } from 'lucide-react';
 import { getAreaDetail } from '../api/client';
 import type {
   AreaDetailResponse,
@@ -21,8 +19,8 @@ import {
   formatEuroPerM2,
   formatInteger,
   formatKm,
-  getAirQualityLabel,
 } from '../utils/format';
+import { normalizedToStars, StarRating } from './StarRating';
 
 interface AreaDetailPanelProps {
   area: ScoreResultItem;
@@ -31,17 +29,23 @@ interface AreaDetailPanelProps {
   budget: number;
   housingType: HousingType;
   referenceM2?: number;
-  isCompared: boolean;
-  canAddCompare: boolean;
-  onToggleCompare: (areaId: string) => void;
+  onQuickCompare: (areaId: string) => void;
   onClose: () => void;
 }
 
-function formatIndicatorValue(key: string, value: number | null | undefined, unit: string): string {
+const FRIENDLY_LABELS: Record<string, string> = {
+  rent_eur_m2: 'Precio del alquiler',
+  distance_km: 'Cercanía al campus',
+  air_no2: 'Calidad del aire',
+  transit_stops: 'Transporte en Metro',
+  services_count: 'Servicios y deporte',
+};
+
+function formatRawTechnical(key: string, value: number | null | undefined, unit: string): string {
   if (value == null) return 'Sin dato';
   if (key === 'rent_eur_m2') return formatEuroPerM2(value);
   if (key === 'distance_km') return formatKm(value);
-  if (key === 'air_no2') return `${formatInteger(value)} µg/m³ (${getAirQualityLabel(value)})`;
+  if (key === 'air_no2') return `${formatInteger(value)} µg/m³ NO₂`;
   if (key === 'transit_stops') return `${formatDecimal(value)} est./km²`;
   if (key === 'services_count') return `${formatInteger(value)} equipamientos`;
   return `${formatDecimal(value)} ${unit}`;
@@ -54,26 +58,20 @@ export function AreaDetailPanel({
   budget,
   housingType,
   referenceM2,
-  isCompared,
-  canAddCompare,
-  onToggleCompare,
+  onQuickCompare,
   onClose,
 }: AreaDetailPanelProps) {
   const [detail, setDetail] = useState<AreaDetailResponse | null>(null);
-  const [detailLoading, setDetailLoading] = useState(false);
+  const [showTechData, setShowTechData] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    setDetailLoading(true);
     getAreaDetail(area.id)
       .then((res) => {
         if (!cancelled) setDetail(res);
       })
       .catch(() => {
         if (!cancelled) setDetail(null);
-      })
-      .finally(() => {
-        if (!cancelled) setDetailLoading(false);
       });
     return () => {
       cancelled = true;
@@ -94,33 +92,38 @@ export function AreaDetailPanel({
   const primaryLink = area.listing_links[0];
   const secondaryLinks = area.listing_links.slice(1);
   const hasCrtm = Boolean(sourcesById.crtm);
+  const overallStars = Math.round((area.score / 100) * 50) / 10;
 
-  const indicatorRows = [
+  const ratingRows = [
     {
       key: 'distance_km',
-      label: 'Distancia al campus',
-      unit: 'km',
-      value: area.distance_km,
-      medianValue: null as number | null,
-      normalized: area.breakdown.distance_km?.normalized ?? 0.5,
+      label: FRIENDLY_LABELS.distance_km,
+      stars: normalizedToStars(area.breakdown.distance_km?.normalized),
+      subtitle: `${formatKm(area.distance_km)} de tu campus`,
+      rawValue: formatRawTechnical('distance_km', area.distance_km, 'km'),
+      medianValue: null as string | null,
       note: 'Distancia en línea recta al centroide del barrio',
       source: undefined as SourceInfo | undefined,
     },
-    ...indicators.map((ind) => ({
-      key: ind.key,
-      label: ind.label,
-      unit: ind.unit,
-      value: area.breakdown[ind.key]?.value ?? detail?.values[ind.key] ?? null,
-      medianValue: detail?.city_median?.[ind.key] ?? null,
-      normalized: area.breakdown[ind.key]?.normalized ?? 0.5,
-      note: detail?.notes?.[ind.key],
-      source: sourcesById[ind.source],
-    })),
+    ...indicators.map((ind) => {
+      const val = area.breakdown[ind.key]?.value ?? detail?.values[ind.key] ?? null;
+      const med = detail?.city_median?.[ind.key] ?? null;
+      return {
+        key: ind.key,
+        label: FRIENDLY_LABELS[ind.key] ?? ind.label,
+        stars: normalizedToStars(area.breakdown[ind.key]?.normalized),
+        subtitle: null as string | null,
+        rawValue: formatRawTechnical(ind.key, val, ind.unit),
+        medianValue: med != null ? formatRawTechnical(ind.key, med, ind.unit) : null,
+        note: detail?.notes?.[ind.key],
+        source: sourcesById[ind.source],
+      };
+    }),
   ];
 
   return (
     <div className="flex h-full flex-col bg-bg">
-      {/* Sticky header */}
+      {/* Sticky header with 1-click Compare button */}
       <div className="flex shrink-0 items-center justify-between border-b border-border px-5 py-3.5">
         <button
           type="button"
@@ -128,31 +131,17 @@ export function AreaDetailPanel({
           className="inline-flex min-h-[36px] items-center gap-1.5 rounded-[8px] px-2 py-1 text-xs font-medium text-muted transition hover:bg-surface hover:text-ink"
         >
           <ArrowLeft className="h-4 w-4" strokeWidth={1.75} />
-          <span>Volver a la lista</span>
+          <span>Volver</span>
         </button>
 
         <div className="flex items-center gap-1.5">
           <button
             type="button"
-            onClick={() => onToggleCompare(area.id)}
-            disabled={!isCompared && !canAddCompare}
-            className={`inline-flex min-h-[34px] items-center gap-1.5 rounded-[8px] border px-2.5 py-1 text-xs font-medium transition disabled:opacity-40 ${
-              isCompared
-                ? 'border-ink bg-surface text-ink'
-                : 'border-border bg-bg text-ink hover:bg-surface'
-            }`}
+            onClick={() => onQuickCompare(area.id)}
+            className="inline-flex min-h-[34px] items-center gap-1.5 rounded-[8px] border border-border bg-bg px-3 py-1 text-xs font-medium text-ink transition hover:border-ink/40 hover:bg-surface"
           >
-            {isCompared ? (
-              <>
-                <Check className="h-3.5 w-3.5" strokeWidth={1.75} />
-                <span>Comparando</span>
-              </>
-            ) : (
-              <>
-                <Scale className="h-3.5 w-3.5" strokeWidth={1.75} />
-                <span>Comparar</span>
-              </>
-            )}
+            <Scale className="h-3.5 w-3.5" strokeWidth={1.75} />
+            <span>Comparar</span>
           </button>
 
           <button
@@ -168,7 +157,7 @@ export function AreaDetailPanel({
 
       {/* Scrollable body */}
       <div className="flex-1 overflow-y-auto p-5">
-        {/* Title */}
+        {/* Title + overall 0–5 star rating */}
         <div>
           <div className="flex items-center gap-2 text-xs text-muted">
             <span className="font-semibold text-ink tabular-nums">#{area.rank}</span>
@@ -178,9 +167,10 @@ export function AreaDetailPanel({
           <h2 className="font-display mt-1 text-2xl leading-tight font-bold text-ink">
             {area.name}
           </h2>
-          <p className="mt-1 text-xs text-muted tabular-nums">
-            {formatKm(area.distance_km)} de tu campus
-          </p>
+          <div className="mt-2 flex items-center gap-2">
+            <StarRating value={overallStars} size="md" />
+            <span className="text-xs text-muted">Valoración para tu perfil</span>
+          </div>
         </div>
 
         {/* Hero budget block */}
@@ -214,7 +204,7 @@ export function AreaDetailPanel({
             </p>
           )}
           <p className="mt-1 text-[11px] text-muted">
-            Estimación con datos oficiales (referencia de {m2Used} m²).
+            Estimación oficial con referencia de {m2Used} m².
           </p>
 
           {/* Primary Madrid Red CTA */}
@@ -248,104 +238,89 @@ export function AreaDetailPanel({
           )}
         </section>
 
-        {/* Indicators with thin bars vs Madrid median */}
-        <section className="mt-6 space-y-4">
-          <h3 className="text-xs font-semibold text-ink">
-            Datos del barrio frente a la mediana de Madrid
-          </h3>
-
-          {detailLoading ? (
-            <div className="space-y-3">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-10 animate-pulse rounded-[8px] bg-surface" />
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {indicatorRows.map((row) => {
-                const barWidth = Math.max(8, Math.min(100, Math.round(row.normalized * 100)));
-                return (
-                  <div key={row.key} className="space-y-1.5">
-                    <div className="flex items-baseline justify-between gap-2 text-xs">
-                      <span className="font-medium text-ink">{row.label}</span>
-                      <span className="font-semibold text-ink tabular-nums">
-                        {formatIndicatorValue(row.key, row.value, row.unit)}
-                      </span>
+        {/* Clean 0–5 Star Ratings section (no noisy technical units) */}
+        <section className="mt-6 space-y-3">
+          <h3 className="text-xs font-semibold text-ink">Valoración del barrio</h3>
+          <div className="divide-y divide-border rounded-[10px] border border-border bg-bg">
+            {ratingRows.map((row) => (
+              <div
+                key={row.key}
+                className="flex items-center justify-between gap-3 px-4 py-3"
+              >
+                <div className="min-w-0">
+                  <div className="text-xs font-medium text-ink">{row.label}</div>
+                  {row.subtitle && (
+                    <div className="mt-0.5 text-[11px] text-muted tabular-nums">
+                      {row.subtitle}
                     </div>
-
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface">
-                      <div
-                        className="h-full rounded-full bg-map-5 transition-all duration-200"
-                        style={{ width: `${barWidth}%` }}
-                      />
-                    </div>
-
-                    <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted">
-                      <span className="tabular-nums">
-                        {row.medianValue != null && (
-                          <>Mediana Madrid: {formatIndicatorValue(row.key, row.medianValue, row.unit)}</>
-                        )}
-                        {row.note && (
-                          <>
-                            {row.medianValue != null ? ' · ' : ''}
-                            {row.note}
-                          </>
-                        )}
-                      </span>
-                      {row.source && (
-                        <a
-                          href={row.source.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-0.5 font-medium text-ink underline decoration-border underline-offset-2 hover:text-brand"
-                        >
-                          <span>Fuente</span>
-                          <ExternalLink className="h-2.5 w-2.5" strokeWidth={1.75} />
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                  )}
+                </div>
+                <StarRating value={row.stars} size="sm" />
+              </div>
+            ))}
+          </div>
         </section>
 
-        {/* Official Sources + Mandatory CRTM Attribution */}
-        {sources.length > 0 && (
-          <section className="mt-6 border-t border-border pt-4">
-            <h3 className="text-[11px] font-semibold text-muted">Fuentes oficiales</h3>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {sources.map((src) => (
-                <a
-                  key={src.id}
-                  href={src.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 rounded-[6px] border border-border bg-surface px-2.5 py-1 text-[11px] text-ink transition hover:border-ink/40"
-                >
-                  <span>{src.publisher}</span>
-                  <ExternalLink className="h-3 w-3 text-muted" strokeWidth={1.75} />
-                </a>
+        {/* Collapsible official technical data & sources (for transparency / jury) */}
+        <section className="mt-5 border-t border-border pt-4">
+          <button
+            type="button"
+            onClick={() => setShowTechData((v) => !v)}
+            className="flex w-full items-center justify-between rounded-[8px] py-1.5 text-xs font-medium text-muted transition hover:text-ink"
+          >
+            <span>Ver datos oficiales y fuentes</span>
+            {showTechData ? (
+              <ChevronUp className="h-4 w-4" strokeWidth={1.75} />
+            ) : (
+              <ChevronDown className="h-4 w-4" strokeWidth={1.75} />
+            )}
+          </button>
+
+          {showTechData && (
+            <div className="mt-3 space-y-2.5 rounded-[10px] border border-border bg-surface p-3.5 text-[11px]">
+              {ratingRows.map((row) => (
+                <div key={row.key} className="space-y-0.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium text-ink">{row.label}</span>
+                    <span className="font-semibold text-ink tabular-nums">{row.rawValue}</span>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-muted">
+                    <span>
+                      {row.medianValue ? `Mediana Madrid: ${row.medianValue}` : ''}
+                      {row.note ? `${row.medianValue ? ' · ' : ''}${row.note}` : ''}
+                    </span>
+                    {row.source && (
+                      <a
+                        href={row.source.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-0.5 font-medium text-ink underline decoration-border hover:text-brand"
+                      >
+                        <span>Fuente</span>
+                        <ExternalLink className="h-2.5 w-2.5" strokeWidth={1.75} />
+                      </a>
+                    )}
+                  </div>
+                </div>
               ))}
             </div>
+          )}
 
-            {hasCrtm && (
-              <p className="mt-3 text-[11px] leading-relaxed text-muted">
-                Transporte:{' '}
-                <a
-                  href="https://www.crtm.es/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-medium text-ink underline decoration-border underline-offset-2 hover:text-brand"
-                >
-                  Powered by CRTM
-                </a>
-                . Datos transformados y agregados por barrio a partir de fuentes abiertas oficiales.
-              </p>
-            )}
-          </section>
-        )}
+          {hasCrtm && (
+            <p className="mt-3 text-[11px] leading-relaxed text-muted">
+              Transporte:{' '}
+              <a
+                href="https://www.crtm.es/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-ink underline decoration-border underline-offset-2 hover:text-brand"
+              >
+                Powered by CRTM
+              </a>
+              . Datos transformados y agregados por barrio.
+            </p>
+          )}
+        </section>
       </div>
     </div>
   );

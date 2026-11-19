@@ -59,3 +59,11 @@
 - Qué: tarjeta destacada **"Nuestra recomendación para ti"** instantánea desde `/api/score` (`recommendation`: `headline`, `reasons` con check simple, bloque `A tener en cuenta` para `caveats`, botones `Ver pisos` en rojo Madrid y `Ver detalle`), etiquetas discretas de `highlights` en alternativas (`Más barata`, `Más cerca`, `Mejor aire`, `Mejor comunicada`), borde rojo Madrid (`#D7262E`) en el polígono recomendado en `MadridMap.tsx`, y manejo amable de HTTP `429` en `/api/ai/*` (T26).
 - Verificación: `cd frontend && npm run build` limpio + navegador integrado en `1440×900` y `390×844` (0 errores consola, 0 `%` en DOM, 0 overflow móvil). Captura en `docs/screenshots/t28_desktop.png`.
 - Siguiente: volver a escucha constante con `sh coordination/wait.sh antigravity@diego WEB`.
+
+## 15:00 · Mejoras UX mapa + estrellas 0-5 + comparador 1 clic (petición de Diego) · done
+- Qué:
+  - Mapa rediseñado estilo Airbnb (`MadridMap.tsx`): pines flotantes con precio (`~353 €`) en el Top 10 (rojo Madrid `#D7262E` para `#1`, blanco limpio para `#2–#10`, negro al pasar el ratón/seleccionar), polígonos translúcidos suaves para mantener legibles las calles y `fitBounds` automático al campus + Top 10.
+  - Nuevo componente `StarRating.tsx` con estrellas amarillas fraccionarias de 0 a 5 (p. ej. `4,3` = 4 llenas + 0,3 + número al lado) en `AreaDetailPanel.tsx` y `CompareModal.tsx`, ocultando unidades técnicas crudas bajo el desplegable "Ver datos oficiales y fuentes".
+  - Comparador en 1 clic: botón `"Comparar top 3"` encima de la lista, botón `"Comparar"` directo dentro del detalle y dock fijo inferior en la lista con los barrios elegidos y CTA `"Comparar ahora"`.
+  - Enviado aviso a `codex@diego` (API) por `msg.sh` con el feedback de Diego sobre "gimnasio" vs "polideportivos" y porcentajes en `recommendation.reasons`.
+- Verificación: `cd frontend && npm run build` limpio + navegador integrado (`1440×900`): 0 errores de consola, 0 HTTP ≥ 400, 0 `%` en DOM.
