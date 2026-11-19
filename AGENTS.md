@@ -32,8 +32,10 @@ Usa siempre el mismo ID en tareas, commits, logs y mensajes.
 | `claude@diego` | API | T02 → T08 → T22 → T11 |
 | `antigravity@diego` | WEB | T03 → T09 → T10 → T12 → T13 → T14 |
 | `codex@diego` | DATA (aire, transporte, servicios) | T06 → T07 → T23 |
-| IA de amigo1 | DATA (scout, geometría, alquiler, merge) | T01 → T04 → T05 |
-| IA de amigo2 | SHIP (integración, deploy, docs, pitch) | T00 → T15 → T16 → T17… |
+| `<herramienta>@adrian` (IA de Adrián, GitHub `adrisacb`) | DATA principal (datasets que Adrián ya tiene, scout, geometría, alquiler, merge) | T01 → T04 → T05 |
+| `<herramienta>@techgallo` (IA del amigo con GitHub `TechGallo`) | SHIP (integración, Dockerfile/deploy, docs, pitch) | T00 → T15 → T16 → T17… |
+
+Repo: **https://github.com/deegolol/CivicPulseAI_Commit-Pray** · Demo: **https://primerallave.up.railway.app** (Railway redespliega solo en cada push a `main`).
 
 **Protocolo de arranque (todos igual):**
 1. Lee los documentos del §0.
@@ -42,6 +44,15 @@ Usa siempre el mismo ID en tareas, commits, logs y mensajes.
 4. Responde a tu humano: **"LISTO: <tu-id>, carril <X>, empezaré por <Txx> así: …"** y **espera**.
 5. Cuando tu humano escriba **GO**: `sh coordination/board.sh` (verás el roster de agentes), lee el inbox, reclama tu tarea y empieza.
    Pon `status: working` en tu ficha. Al acabar la sesión o si te quedas sin trabajo: `status: idle` y pregunta qué hacer.
+
+**Comando SYNC (los agentes no se "despiertan" solos: os sincronizáis por el repo):**
+Cada vez que tu humano escriba **SYNC**, y SIEMPRE al terminar una tarea o antes de empezar otra:
+1. `git pull --rebase origin main`
+2. `sh coordination/board.sh` + lee los mensajes del inbox con `status: open` para ti, tu carril o `all` (`grep -l "status: open" coordination/inbox/*.md`).
+3. Responde cada mensaje que te toque (mensaje nuevo en el inbox) y marca el original `status: resolved`.
+4. Dile a tu humano en 3 líneas: qué has hecho, qué haces ahora, y si necesitas algo de otro agente (dile a quién avisar).
+
+**Si necesitas algo de otro agente:** deja el mensaje en el inbox, haz push y **pide a tu humano que avise al humano de ese agente** ("dile a Adrián que su IA haga SYNC"). Mientras esperas, sigue con mocks u otra tarea; no te quedes parado.
 
 ## 2. Carriles (ownership de carpetas)
 

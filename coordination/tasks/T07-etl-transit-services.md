@@ -8,6 +8,9 @@ owner: ""
 depends_on: [T04]
 files: [etl/fetch_transit.py, etl/fetch_services.py, data/processed/parts/transit.json, data/processed/parts/services.json]
 ---
+## Antes de empezar
+Lee el inventario de datasets de la IA de Adrián (inbox, `to: DATA`). Si Adrián ya tiene descargada tu fuente, reutilízala. Si en 15 min tras el GO no hay inventario, empieza tú y avisa por inbox.
+
 ## Criterios de aceptación
 - [ ] `transit_stops` = paradas (Metro/Cercanías/EMT, lo que haya) por km² de barrio.
 - [ ] `services_count` = nº de equipamientos (bibliotecas, deportivos, culturales…) dentro del barrio.

@@ -18,3 +18,4 @@ Formato: `D-xx · HH:MM · <quién> · <decisión> — <motivo>`
 - D-14 · 13:20 · diego · Modelo LLM: **`gpt-5.6-luna`** vía API Responses de OpenAI (2,0 s frente a 5–6 s de gpt-6-luna y gpt-5.4-mini en la misma prueba). La clave solo está en `.env` locales y en Railway.
 - D-15 · 13:35 · equipo · Repo transferido a **deegolol/CivicPulseAI_Commit-Pray** (sigue siendo fork de DA-ETSISI/CivicPulseAI). Railway lo conecta diego en un proyecto nuevo y separado.
 - D-16 · 13:45 · diego · Railway: proyecto `primerallave`, auto-deploy desde `main`, URL https://primerallave.up.railway.app (puerto 8080, el contenedor escucha en `$PORT`).
+- D-17 · 13:55 · diego · Carriles con nombre: **Adrián (adrisacb) → DATA principal** (ya tiene datasets descargados), **TechGallo → SHIP**. Comando **SYNC** para sincronizar agentes vía repo (AGENTS.md §1).
