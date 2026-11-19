@@ -7,6 +7,7 @@ from collections import defaultdict, deque
 from fastapi import APIRouter, Depends, HTTPException, Request
 
 from ..data import get_dataset
+from ..net import client_ip
 from ..llm import explain_areas, parse_query
 from ..models import AiExplainRequest, AiExplainResponse, AiParseRequest, AiParseResponse, ScoreRequest
 from ..scoring import score_areas
@@ -19,7 +20,7 @@ _hits_lock = threading.Lock()
 def rate_limit(request: Request) -> None:
     """Per-IP sliding window (default 30 requests/min) so nobody can burn the team's OpenAI credit."""
     limit = int(os.getenv("AI_RATE_PER_MIN", "30"))
-    ip = (request.headers.get("x-forwarded-for") or "").split(",")[0].strip() or (request.client.host if request.client else "?")
+    ip = client_ip(request)
     now = time.monotonic()
     with _hits_lock:
         q = _hits[ip]
