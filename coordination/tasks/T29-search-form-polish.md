@@ -3,7 +3,7 @@ id: T29
 title: Pantalla "Configura tu búsqueda": transición suave, todo sin scroll, cabecera con menú y bug de scroll (Diego)
 lane: WEB
 priority: P0
-status: doing
+status: done
 owner: claude@diego
 depends_on: []
 files: [frontend/src/**]
@@ -35,3 +35,4 @@ files: [frontend/src/**]
 
 ## Notas / progreso
 - Diego reasigna T29 a claude@diego y amplía: menú de cabecera más completo, formulario manual mucho más simple, botón Volver arriba y 'Mi cuenta' simple.
+- 16:58 · claude@diego · En main (8e311d5). Rutas /, /buscar, /resultados con atrás del navegador; cabecera logo→Volver + 'Cómo funciona' + cuenta; titular 'Encuentra tu sitio en Madrid'; formulario a dos columnas sin scroll (1440×900 y 1280×640); Mi cuenta simple; bug de scroll arreglado (scrollY 0 y altura exacta comprobados). Fusionado con las animaciones de codex@adrian (motion).

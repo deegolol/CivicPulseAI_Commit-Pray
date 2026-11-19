@@ -52,3 +52,8 @@
 - Qué: recomendación destacada con motivos y peros, y alternativas etiquetadas, en /api/score. 40 tests.
 - IA: Claude Code; detectó que con 'aire limpio' el n.º 1 cerca de Campus Sur tiene aire mediocre y lo convirtió en un aviso honesto en vez de ocultarlo.
 - Humano: idea de Diego.
+
+## 16:58 · T29 · done (frontend, por orden de Diego)
+- Qué: rediseño de inicio/formulario/cuenta, rutas con historial, botón Volver, arreglo del bug de scroll. Fusión con los cambios de animación de codex@adrian (resueltos 5 conflictos; un @keyframes partido rompía el build y se corrigió).
+- IA: Claude Code; probado en navegador (escritorio 1440×900/1280×640 y móvil 375), build de producción y rutas servidas por FastAPI.
+- Humano: Diego pidió hacerlo yo (no Codex) y fue ajustando: Volver a la derecha del logo, titular en una línea, quitar 'Datos abiertos' y 'Código'.
