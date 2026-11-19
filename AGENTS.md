@@ -49,7 +49,7 @@ Repo: **https://github.com/deegolol/CivicPulseAI_Commit-Pray** · Demo: **https:
 
 **Eres 100 % autónomo.** No esperas OK de nadie: encadenas tus tareas, integras tú mismo en `main` cuando los checks pasan y sigues. Los humanos (Diego, Adrián, TechGallo) miran y **te frenan solo si ven algo**.
 
-**NUNCA preguntes "¿sigo?", "¿continúo con…?" ni "¿quieres que…?" entre tareas (D-23).** Sigue solo hasta acabar todas las tareas de tu carril; cuando no te quede ninguna, ayuda a otro carril (P0 primero, avisando por `msg.sh`). Los humanos revisarán todo al final y pedirán cambios. Tus mensajes al humano son **informes de progreso**, no preguntas.
+**NUNCA preguntes "¿sigo?", "¿continúo con…?" ni "¿quieres que…?" entre tareas (D-23).** Sigue solo hasta acabar todas las tareas de tu carril; cuando no te quede ninguna, ayuda a otro carril (P0 primero, avisando por `msg.sh`); y si no hay nada, escucha con `wait.sh` (ver abajo). Los humanos revisarán todo al final y pedirán cambios. Tus mensajes al humano son **informes de progreso**, no preguntas.
 
 **Ciclo autónomo por tarea:**
 1. SYNC → reclamas la siguiente tarea de tu carril (prioridad y dependencias) → rama `txx-descripcion`.
@@ -57,7 +57,9 @@ Repo: **https://github.com/deegolol/CivicPulseAI_Commit-Pray** · Demo: **https:
 3. Escribe el **informe de tanda** en tu log (`coordination/log/<tu-id>.md`) y díselo a tu humano en 3–5 líneas (qué, cómo probarlo, decisiones), **sin esperar respuesta**.
 4. Si tu trabajo afecta a otro carril, `msg.sh` a ese carril. Y vuelta al paso 1.
 
-**Escucha constante:** haz SYNC (`sh coordination/sync.sh <tu-id> <TU_CARRIL>`) **después de cada commit y como mínimo cada 10 minutos**, y siempre antes de reclamar una tarea. Si hay un mensaje para ti, lo atiendes antes de seguir.
+**Escucha constante (D-26):**
+- **Mientras trabajas:** haz SYNC (`sh coordination/sync.sh <tu-id> <TU_CARRIL>`) **cada ~1 minuto de trabajo**: después de cada paso (cada edición o prueba relevante), de cada commit y antes de reclamar una tarea. Si hay un mensaje para ti, lo atiendes antes de seguir.
+- **Si no tienes tareas: NO te pares ni te quedes `idle` esperando a tu humano.** Ejecuta `sh coordination/wait.sh <tu-id> <TU_CARRIL>`: se queda escuchando (mira el repo cada 15 s, hasta 9 min) y termina en cuanto llega un mensaje para ti, tu carril o todos. Lo atiendes, haces SYNC y vuelves a lanzarlo. Si termina sin mensajes, haz SYNC (por si hay tareas nuevas) y vuelve a lanzarlo. Repite en bucle.
 
 **Comandos de tu humano (te los puede escribir en cualquier momento):**
 

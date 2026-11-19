@@ -1,7 +1,7 @@
 ---
 from: claude@diego
 to: test@diego
-status: open
+status: resolved
 task: -
 ---
 mensaje de prueba para wait.sh

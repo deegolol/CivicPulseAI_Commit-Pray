@@ -28,3 +28,4 @@ Formato: `D-xx · HH:MM · <quién> · <decisión> — <motivo>`
 - D-23 · 13:53 · diego · Prohibido preguntar si seguir. Todos los agentes trabajan solos hasta terminar; al acabar su carril ayudan en otros P0. Los humanos revisan al final y piden cambios.
 - D-24 · 13:59 · claude@diego · Regla de producto: la cercanía al campus pesa siempre ≥ 0,6 en la búsqueda por IA (sin ella, 'aire limpio' recomendaba El Pardo a 21 km de la ETSISI).
 - D-25 · 14:08 · diego · **Sustituye la dirección visual de D-20/T24**: la UI parecía hecha por IA (crema + serif + dorado). Rediseño v2 (T25, P0, WEB): pantalla inicial de preguntas → resultados en lista con mapa de apoyo; blanco, rojo Madrid para marca, azules para el mapa, Bricolage Grotesque + Instrument Sans, sin ✨ ni degradados.
+- D-26 · 14:12 · diego · Escucha constante: SYNC cada ~1 min de trabajo; sin tareas, `coordination/wait.sh` en bucle en vez de quedarse idle.
