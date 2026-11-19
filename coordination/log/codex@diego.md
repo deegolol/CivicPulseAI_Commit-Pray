@@ -11,3 +11,8 @@
 - Decisión: una estación por código de red y nombre, punto oficial de código principal y superficie del barrio en EPSG:25830. Se documentó la atribución exigida por CRTM.
 - IA: Codex implementó y validó los cruces y generó las piezas. Los datasets se seleccionaron a partir del inventario de Adrián.
 - Siguiente: verificar el agregado de main cuando Adrián lo publique.
+
+## 13:55 · T23 · done
+- Qué: se evaluó la capa opcional de residencias. Los recursos abiertos municipales no traen alojamientos y la alternativa georreferenciada tiene condiciones de redistribución más restrictivas.
+- Decisión: omitir la capa y avisar a SHIP, conforme a la alternativa prevista en T23.
+- IA: Codex comprobó los recursos del catálogo y descargó muestras de los formatos oficiales.
