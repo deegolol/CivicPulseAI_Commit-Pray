@@ -9,3 +9,4 @@
 
 ## 13:50 · T08 · doing
 - Qué: motor de scoring + POST /api/score.
+- 14:05 · review. IA: Claude Code escribió motor, endpoint y 9 tests (detectó y corrigió un test mal planteado). Humano: pendiente de revisión de Diego.
