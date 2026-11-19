@@ -36,6 +36,8 @@
 ### 4:00–4:40 · Impacto — TechGallo
 > "Hay herramientas que recomiendan barrios, como Madriwa, y portales que enseñan anuncios. **PrimeraLlave une las dos cosas para estudiantes**: tu campus, tu presupuesto y tus prioridades, con datos oficiales, y de ahí directo al piso. Funciona con cualquier campus y es trasladable a cualquier ciudad con portal de datos abiertos."
 
+> «El siguiente paso es crear una cuenta para guardar viviendas y recibir recordatorios y avisos de presupuesto».
+
 ### 4:40–5:00 · Cierre — TechGallo
 > "Encontrar tu primera casa en Madrid no debería ser una lotería. **PrimeraLlave: tu primera llave en Madrid.** Lo tenéis en primerallave.up.railway.app. Gracias."
 
