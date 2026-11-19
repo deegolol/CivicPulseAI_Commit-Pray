@@ -16,6 +16,7 @@ from __future__ import annotations
 from math import asin, cos, radians, sin, sqrt
 from statistics import median
 
+from .listings import build_listing_links
 from .models import Area, BreakdownItem, Campus, Indicator, ScoreRequest, ScoreResult
 
 DISTANCE_KEY = "distance_km"
@@ -109,6 +110,7 @@ def score_areas(areas: list[Area], indicators: list[Indicator], campus: Campus, 
                 est_rent_eur_month=est_rent,
                 fits_budget=fits,
                 affordable_m2=affordable,
+                listing_links=build_listing_links(area.district, budget, req.housing_type),
                 breakdown=breakdown,
             )
         )
