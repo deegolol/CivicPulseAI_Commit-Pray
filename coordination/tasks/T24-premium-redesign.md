@@ -35,7 +35,14 @@ Referencias de tono: Airbnb, Linear, Revolut. Poco ruido, mucho aire, jerarquía
   1. Logo + nombre (APP_NAME) y el lema "Tu primera llave en Madrid".
   2. **Buscador en lenguaje natural** grande (placeholder: "Estudio en la ETSISI, tengo 500 € y quiero zona tranquila…") con 3 ejemplos en chips (T12 lo conecta; ahora puede ser solo visual).
   3. Campus (select bonito), **presupuesto con número grande** + slider, tipo de vivienda como control segmentado (Habitación / Estudio / Piso).
-  4. "Tus prioridades" plegable: sliders con etiquetas "Poco · Mucho" en vez de porcentajes.
+  4. **PROHIBIDO mostrar porcentajes o pesos (orden de Diego).** Cada control va en su unidad real:
+     - Presupuesto: **€/mes** (slider + número grande, p. ej. 300–1.200 €).
+     - Distancia máxima al campus: **km** (radio; dibuja el círculo en el mapa alrededor del campus).
+     - Tipo: Habitación / Estudio / Piso.
+     - Calidad del aire: **µg/m³ de NO₂ máximo** o niveles con nombre ("Buena ≤ 30 · Aceptable ≤ 40"), nunca %.
+     - Transporte: **paradas cerca** (mínimo) o "Bien comunicado" sí/no.
+     - "Lo que más me importa": chips para elegir (Precio · Cercanía · Aire limpio · Transporte · Servicios), sin números. Por dentro el frontend lo traduce a `weights` (p. ej. chip elegido = 1, no elegido = 0,2) y a `filters` (`max_distance_km`, `only_within_budget`…), pero el usuario nunca ve un %.
+   - El resultado también en unidades: "~353 €/mes · 1,3 km · NO₂ 25 µg/m³", y la puntuación como "Encaje alto/medio/bajo" o estrellas, no "79/100" a secas.
 - **A la derecha:** carril con las 3 mejores zonas en tarjetas (puesto, nombre, ~€/mes en serif, km, "Encaja"). Al hacer clic, el detalle se abre como panel lateral.
 - **Detalle de la zona:** el héroe es el bloque "Con tu presupuesto: **~353 €/mes**", con la etiqueta "Encaja" y el CTA principal **"Ver pisos en esta zona"**. Debajo, el desglose de la puntuación en barras finas y las fuentes con enlace.
 
