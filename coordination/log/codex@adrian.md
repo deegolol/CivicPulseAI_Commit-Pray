@@ -27,3 +27,7 @@
 - Qué: agregado de alquiler, NO₂, Metro y equipamientos en los 131 barrios, con procedencia y notas.
 - Verificación: ETL con descargas y offline, 19 tests del backend y prueba de las cuatro métricas y distancia en el desglose de la API.
 - Coordinación: avisos a DATA, API y SHIP. Enviado a SHIP el texto de DATA para la defensa de T20.
+
+## T18 · 19/11/2026 · done
+- Qué: AI_USAGE.md con aportes de los cinco agentes, decisiones humanas documentadas y funcionamiento de la IA del producto.
+- Verificación: enlaces del documento, 27 tests y tres frases de la demo con caché, ranking y explicación offline. Detecté el uso de cifras mock en el respaldo web y el presupuesto perdido si el texto contiene € en el parser offline; avisos enviados a WEB y API. WEB corrigió su respaldo con resultados reales.
