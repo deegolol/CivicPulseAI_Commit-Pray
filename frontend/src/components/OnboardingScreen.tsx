@@ -65,19 +65,18 @@ export function OnboardingScreen({
   const needs = (field: string) => !review?.inferredFields.has(field);
 
   return (
-    <div className="relative isolate flex min-h-dvh flex-col overflow-x-clip bg-[#f5f6f1] text-ink">
-      <img aria-hidden="true" alt="" src="/madrid-ilustracion.png" width="1300" height="667" className="pointer-events-none absolute top-12 left-[37%] -z-10 w-[88%] max-w-[1200px] -rotate-12 opacity-30 select-none lg:top-28 lg:left-[31%] lg:opacity-95" />
+    <div className="flex min-h-dvh flex-col bg-bg text-ink">
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-5 py-6 sm:px-9">
         <BrandLogo />
         <AccountButton />
       </header>
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-5 pt-9 pb-16 sm:px-9 lg:pt-20">
-        <div className="max-w-[39rem]">
-          <h1 className="font-display text-3xl leading-[1.08] font-bold tracking-tight sm:text-5xl">
+        <div className="mx-auto max-w-[39rem]">
+          <h1 className="text-center font-display text-3xl leading-[1.08] font-bold tracking-tight sm:text-5xl">
             {review ? 'Completa tu búsqueda' : manualOpen ? 'Configura tu búsqueda' : '¿Dónde vas a vivir este curso?'}
           </h1>
-          <p className="mt-3 text-sm text-muted sm:text-base">
+          <p className="mt-3 text-center text-sm text-muted sm:text-base">
             {review && interpretation
               ? interpretation
               : 'Encuentra barrios de Madrid según tu campus, tu presupuesto y lo que te importa.'}
@@ -118,7 +117,7 @@ export function OnboardingScreen({
                   </button>
                 </div>
               </form>
-              <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+              <div className="mt-3 flex gap-2 overflow-x-auto pb-1 sm:justify-center">
                 {EXAMPLE_QUERIES.map((example, index) => (
                   <button
                     key={example}
@@ -234,6 +233,10 @@ export function OnboardingScreen({
             </form>
           )}
         </div>
+        {!review && !manualOpen && (
+          <img src="/madrid-ilustracion.png" alt="" width="1300" height="667"
+            className="pointer-events-none mx-auto mt-6 block h-auto w-full max-w-[48rem] select-none sm:mt-8" />
+        )}
       </main>
     </div>
   );
