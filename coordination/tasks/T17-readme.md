@@ -3,8 +3,8 @@ id: T17
 title: README final
 lane: SHIP
 priority: P0
-status: todo
-owner: ""
+status: doing
+owner: claude@diego
 depends_on: []
 files: [README.md, docs/screenshots/]
 ---
