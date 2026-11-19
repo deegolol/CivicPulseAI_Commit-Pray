@@ -3,8 +3,8 @@ id: T28
 title: Tarjeta "Nuestra recomendación para ti" + etiquetas de alternativas (petición de Diego)
 lane: WEB
 priority: P0
-status: todo
-owner: ""
+status: doing
+owner: antigravity@diego
 depends_on: [T27]
 files: [frontend/src/**]
 ---
