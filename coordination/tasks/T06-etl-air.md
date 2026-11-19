@@ -3,8 +3,8 @@ id: T06
 title: ETL calidad del aire por barrio
 lane: DATA
 priority: P1
-status: todo
-owner: ""
+status: doing
+owner: codex@diego
 depends_on: [T04]
 files: [etl/fetch_air.py, data/processed/parts/air.json]
 ---
