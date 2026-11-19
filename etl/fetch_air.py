@@ -167,7 +167,7 @@ def main() -> None:
     part = build_part(features, means, stations, source, YEAR)
     content = json.dumps(part, ensure_ascii=False, indent=2, allow_nan=False) + "\n"
     write_atomic(OUTPUT, content.encode("utf-8"))
-    print(f"{len(part['values'])} barrios con NO₂ medio de {YEAR} en {OUTPUT.relative_to(ROOT)}.")
+    print(f"{len(part['values'])} barrios con NO2 medio de {YEAR} en {OUTPUT.relative_to(ROOT)}.")
 
 
 if __name__ == "__main__":
