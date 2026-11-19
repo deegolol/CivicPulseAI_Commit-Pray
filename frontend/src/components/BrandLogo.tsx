@@ -3,7 +3,7 @@ import { APP_NAME } from '../config';
 
 export function BrandLogo({ compact = false }: { compact?: boolean }) {
   const size = compact ? 'text-base' : 'text-xl';
-  const iconSize = compact ? 'h-7' : 'h-8';
+  const iconSize = compact ? 'h-6' : 'h-7';
 
   return (
     <span className={`inline-flex shrink-0 items-center gap-2.5 whitespace-nowrap leading-none ${size}`}>
