@@ -38,3 +38,7 @@
 ## 14:57 · T27 · texto de recomendación
 - Por feedback de Diego, la tarjeta separa los recuentos oficiales de deporte y bibliotecas, indica el alcance municipal si Servicios pesa mucho y expresa aire y Metro en lenguaje sencillo.
 - Las medidas siguen disponibles en el desglose. Probé el caso ETSIINF con deporte y añadí una prueba de regresión. 42 tests en verde.
+
+## T25 · Logo de PrimeraLlave
+- Diego pidió una marca simple y premium. Codex diseñó una puerta geométrica en carbón, blanco y rojo, y reutilizó el símbolo en las dos cabeceras y el favicon.
+- Verificado en Chromium a 1280 y 390 px y con npm run build. Integrado como 25a163b.
