@@ -1,7 +1,32 @@
 # Fuentes de datos abiertos
 
-> Rellenado por el carril DATA (T01, T04–T07). Se copia al README (entregable obligatorio).
+Descargas directas comprobadas el 19/11/2026. Los resultados de aire, transporte y servicios se concretan en T06 y T07 con `codex@diego`.
 
-| ID | Dataset | Organismo | URL | Formato | Licencia | Granularidad | Descargado | Transformación |
-|---|---|---|---|---|---|---|---|---|
-| | | | | | | | | |
+| ID | Dataset y organismo | Descarga y formato | Licencia o condiciones | Granularidad original | Transformación prevista |
+|---|---|---|---|---|---|
+| geometria | Barrios municipales, Ayuntamiento de Madrid | [ZIP/SHP](https://datos.madrid.es/dataset/300496-0-barrios-madrid/resource/300496-3-barrios-madrid/download/300496-3-barrios-madrid.zip) | [CC BY 4.0](https://datos.madrid.es/dataset/300496-0-barrios-madrid) | 131 barrios, 21 distritos | Reproyectar ETRS89/UTM 30N a WGS84, simplificar polígonos y normalizar códigos a tres y dos caracteres, respectivamente. |
+| alquiler | SERPAVI 2011–2024, MIVAU | [XLSX](https://cdn.mivau.gob.es/portal-web-mivau/vivienda/serpavi/2026-03_09_bd_SERPAVI_2011-2024%20-%20DEFINITIVO%20WEB_v2.xlsx) | [Régimen general de reutilización estatal, RD 1495/2011](https://www.boe.es/eli/es/rd/2011/10/24/1495/con). Sin licencia específica identificada en el XLSX. | Distrito y sección censal | Hoja Distritos, `ALQM2_LV_M_VC_24`: mediana mensual en €/m² de vivienda colectiva. Usar los 21 distritos de Madrid y etiquetar el valor como distrital en cada barrio. |
+| aire | Calidad del aire horaria, Ayuntamiento de Madrid | [CSV](https://datos.madrid.es/dataset/201200-0-calidad-aire-horario/resource/201200-1-calidad-aire-horario-csv/download/201200-1-calidad-aire-horario-csv.csv) | [CC BY 4.0](https://datos.madrid.es/dataset/201200-0-calidad-aire-horario) | Estación y hora | Seleccionar NO₂ (magnitud 8), filtrar horas con bandera válida y calcular un promedio comparable por estación. |
+| aire_estaciones | Estaciones de control, Ayuntamiento de Madrid | [CSV](https://datos.madrid.es/dataset/212629-0-estaciones-control-aire/resource/212629-0-estaciones-control-aire-csv/download/212629-0-estaciones-control-aire-csv.csv) | [CC BY 4.0](https://datos.madrid.es/dataset/212629-0-estaciones-control-aire) | Punto de estación | Unir por código de estación, convertir coordenadas y asignar a cada barrio la estación con NO₂ válido más cercana a su centroide. |
+| crtm | M4 Estaciones, Consorcio Regional de Transportes de Madrid | [GeoJSON de la capa de estaciones](https://services5.arcgis.com/UxADft6QPcvFyDU1/arcgis/rest/services/M4_Red/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=geojson) | [Licencia de datos estáticos del CRTM](https://www.crtm.es/licencia-de-uso/) | Estación de Metro | Filtrar el municipio de Madrid, cruzar los puntos con los barrios y dividir el recuento por la superficie en km². |
+| servicios_bibliotecas | Bibliotecas de Madrid, Ayuntamiento de Madrid | [CSV](https://datos.madrid.es/dataset/201747-0-bibliobuses-bibliotecas/resource/201747-1-bibliobuses-bibliotecas-csv/download/201747-1-bibliobuses-bibliotecas-csv.csv) | [CC BY 4.0](https://datos.madrid.es/dataset/201747-0-bibliobuses-bibliotecas) | Equipamiento | Cruzar longitud y latitud con los barrios y combinar el recuento con los polideportivos. |
+| servicios_deporte | Centros deportivos municipales, Ayuntamiento de Madrid | [CSV](https://datos.madrid.es/dataset/200186-0-polideportivos/resource/200186-0-polideportivos-csv/download/200186-0-polideportivos-csv.csv) | [CC BY 4.0](https://datos.madrid.es/dataset/200186-0-polideportivos) | Equipamiento | Cruzar longitud y latitud con los barrios y combinar el recuento con las bibliotecas. |
+| campus | Ubicación de los centros, Universidad Politécnica de Madrid | [ETSISI](https://www.etsisi.upm.es/ubicacion-como-llegar/), [ETSIINF](https://dia.etsiinf.upm.es/index.php?pagina=166), fichas web | Referencia institucional para la ubicación | Centro universitario | Verificar en T04 los puntos de Campus Sur y Montegancedo y expresar las coordenadas como `[lon, lat]`. |
+
+## Archivos aportados por Adrián
+
+Tamaños aproximados en MB decimales. Se revisaron el 19/11/2026. Las descargas verificadas arriba son las entradas reproducibles del ETL.
+
+| Archivo | Tamaño | Cobertura y campos comprobados | Evaluación |
+|---|---:|---|---|
+| `Barrios/BARRIOS.*` | 0,36 MB | 131 registros con `COD_BAR`, `CODDIS`, `NOMBRE` y `NOMDIS`. Incluye geometría y proyección. | Respaldo válido. Los ocho componentes coinciden byte a byte con el ZIP oficial. |
+| `2025-01-28_bd_SERPAVI_2011-2023-(Navarra-incluida).xlsx` | 64,33 MB | Edición MIVAU 2011–2023, con €/m² de vivienda colectiva en hojas de distritos y secciones censales. | Descartado para producción. La edición oficial 2024 tiene el mismo indicador y cubre los 21 distritos. |
+| `201200-1-calidad-aire-horario-csv.csv` | 22,19 MB | 01/01/2025 al 31/10/2026. Código de estación, magnitud, mediciones y banderas por hora. NO₂ en 23 estaciones. | Coincide con la descarga oficial. Usar un período homogéneo y filtrar validez en T06. |
+| `212629-0-estaciones-control-aire-csv.csv` | 0,005 MB | 24 estaciones con código, coordenadas ETRS89 y marca de disponibilidad de NO₂. | Coincide con la descarga oficial. Cruzar con las estaciones que tienen lecturas válidas. |
+| `M4_Red_-2771742649083437760.geojson` | 0,38 MB | 293 puntos con ID de estación y municipio, 242 en Madrid. | Coincide con la descarga oficial. Cubre Metro. |
+| `201747-1-bibliobuses-bibliotecas-csv.csv` | 0,09 MB | 52 filas con latitud y longitud, 50 con código de barrio informado. | Coincide con la descarga oficial. Usar el cruce espacial para resolver la cobertura por barrio. |
+| `200186-0-polideportivos-csv.csv` | 0,16 MB | 82 filas con latitud y longitud, 80 con código de barrio informado. | Coincide con la descarga oficial. Usar el cruce espacial para resolver la cobertura por barrio. |
+
+## Granularidad del MVP
+
+El mapa y el ranking usan 131 barrios. El alquiler usa la mediana oficial de 2024 de cada uno de los 21 distritos de Madrid. Cada barrio hereda el valor de su distrito y lo indica en `notes.rent_eur_m2`. SERPAVI incluye 2.442 secciones censales de Madrid, 2.421 con valor numérico. Una mediana de barrio a partir de esa tabla exigiría un cruce territorial y una metodología adicional, ya que las medianas de sección no se combinan en una mediana poblacional de barrio. El indicador de alquiler refleja contratos declarados de vivienda colectiva. La estimación mensual para una habitación aplica los m² de referencia del contrato de la app.

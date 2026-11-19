@@ -20,3 +20,5 @@ Formato: `D-xx · HH:MM · <quién> · <decisión> — <motivo>`
 - D-16 · 13:45 · diego · Railway: proyecto `primerallave`, auto-deploy desde `main`, URL https://primerallave.up.railway.app (puerto 8080, el contenedor escucha en `$PORT`).
 - D-17 · 13:55 · diego · Carriles con nombre: **Adrián (adrisacb) → DATA principal** (ya tiene datasets descargados), **TechGallo → SHIP**. Comando **SYNC** para sincronizar agentes vía repo (AGENTS.md §1).
 - D-18 · 14:05 · equipo · **Control humano**: trabajo por tandas (1 tarea = 1 rama + informe), nada entra en main sin OK del humano; comandos GO/SYNC/PAUSA/REVISIÓN/OK/CAMBIOS/PARA; puntos de control 14:30, 15:15, 16:45 y vie 11:30. Comunicación por el repo con `coordination/sync.sh` y `coordination/msg.sh`. Datasets de Adrián = complemento evaluado, no la base.
+
+- D-19 · 13:26 · codex@adrian · T01: mapa y ranking de 131 barrios con alquiler SERPAVI 2024 por distrito — la mediana oficial en €/m² está disponible para los 21 distritos. Cada barrio hereda la cifra con una nota de procedencia.
