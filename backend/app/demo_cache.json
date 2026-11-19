@@ -5,10 +5,13 @@
   "housing_type": "room",
   "max_distance_km": null,
   "priorities": {
+   "air_no2": 1.0,
    "rent_eur_m2": 0.8,
-   "distance_km": 0.2
+   "services_count": 0.2,
+   "transit_stops": 0.2,
+   "distance_km": 0.6
   },
-  "interpretation": "Buscas una habitación de hasta 500 € cerca de la ETSISI, priorizando una zona tranquila y con aire limpio."
+  "interpretation": "Buscas una habitación de hasta 500 € cerca de la ETSISI, en una zona tranquila y con aire limpio."
  },
  "voy a la facultad de informatica de montegancedo, busco un estudio para mi solo por menos de 750": {
   "campus_id": "etsiinf",
@@ -16,10 +19,13 @@
   "housing_type": "studio",
   "max_distance_km": null,
   "priorities": {
-   "rent_eur_m2": 0.9,
-   "distance_km": 0.2
+   "air_no2": 0.2,
+   "rent_eur_m2": 0.8,
+   "services_count": 0.2,
+   "transit_stops": 0.2,
+   "distance_km": 0.6
   },
-  "interpretation": "Buscas un estudio para ti solo cerca de la ETSIINF en Montegancedo por menos de 750 € al mes."
+  "interpretation": "Buscas un estudio para ti solo por menos de 750 € al mes cerca de la facultad de informática de Montegancedo."
  },
  "quiero algo barato y bien comunicado en metro cerca del campus sur, maximo 6 km": {
   "campus_id": "etsisi",
@@ -27,9 +33,12 @@
   "housing_type": "room",
   "max_distance_km": 6.0,
   "priorities": {
-   "rent_eur_m2": 1.0,
+   "air_no2": 0.2,
+   "rent_eur_m2": 0.9,
+   "services_count": 0.2,
+   "transit_stops": 0.9,
    "distance_km": 0.9
   },
-  "interpretation": "Buscas una habitación barata y bien comunicada en metro, cerca del Campus Sur, a un máximo de 6 km."
+  "interpretation": "Buscas una habitación barata, bien comunicada en metro y cerca del Campus Sur, a un máximo de 6 km."
  }
 }

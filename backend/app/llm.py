@@ -48,13 +48,13 @@ def llm_enabled() -> bool:
     return os.getenv("LLM_PROVIDER", "none").lower() == "openai" and bool(os.getenv("LLM_API_KEY"))
 
 
-def _call_openai(instructions: str, user_input: str, schema: dict | None = None) -> str:
+def _call_openai(instructions: str, user_input: str, schema: dict | None = None, timeout_env: str = "LLM_TIMEOUT_S", timeout_default: str = "8") -> str:
     """One Responses API call. Raises on any HTTP/timeout/format problem (callers fall back)."""
     body: dict = {"model": os.getenv("LLM_MODEL", "gpt-5.6-luna"), "instructions": instructions, "input": user_input,
                   "reasoning": {"effort": os.getenv("LLM_REASONING_EFFORT", "low")}}
     if schema:
         body["text"] = {"format": {"type": "json_schema", "name": "params", "schema": schema, "strict": True}}
-    timeout = float(os.getenv("LLM_TIMEOUT_S", "8"))
+    timeout = float(os.getenv(timeout_env, timeout_default))
     r = httpx.post(OPENAI_URL, json=body, timeout=timeout,
                    headers={"Authorization": f"Bearer {os.environ['LLM_API_KEY']}"})
     r.raise_for_status()
@@ -107,6 +107,8 @@ def _finish(raw: dict, campuses: list[Campus], keys: list[str], default_campus: 
     dist = float(dist) if isinstance(dist, (int, float)) and 0 < dist <= 60 else None
     prio = raw.get("priorities") or {}
     weights = {k: round(min(max(float(prio.get(k, 0.2) or 0), 0.0), 1.0), 2) for k in keys}
+    if DISTANCE_KEY in weights:  # students commute daily: distance never drops below 0.6 (product rule, D-24)
+        weights[DISTANCE_KEY] = max(weights[DISTANCE_KEY], 0.6)
     return {
         "campus_id": campus,
         "weights": weights,
@@ -189,7 +191,8 @@ def explain_areas(items: list[dict], housing_type: str, query: str | None) -> tu
     if llm_enabled():
         try:
             payload = json.dumps({"busqueda": query or "", "tipo_vivienda": housing_type, "zonas": items}, ensure_ascii=False)
-            return _call_openai(EXPLAIN_INSTRUCTIONS, payload), "llm"
+            # Longer budget than parse: the UI shows results first and the explanation loads after.
+            return _call_openai(EXPLAIN_INSTRUCTIONS, payload, timeout_env="LLM_EXPLAIN_TIMEOUT_S", timeout_default="12"), "llm"
         except Exception:  # noqa: BLE001
             pass
     return template_explain(items, housing_type), "keywords"

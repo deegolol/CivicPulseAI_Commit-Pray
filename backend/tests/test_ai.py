@@ -78,3 +78,9 @@ def test_parse_schema_is_strict_and_built_from_data():
     assert schema["additionalProperties"] is False
     assert set(schema["properties"]["priorities"]["required"]) == set(keys())
     assert None in schema["properties"]["campus_id"]["enum"]
+
+
+def test_distance_always_matters_for_students():
+    ds = get_dataset()
+    out = llm._finish({"priorities": {"distance_km": 0.1, "air_no2": 1}}, ds.campuses, keys(), "etsisi", "llm")
+    assert out["weights"]["distance_km"] >= 0.6

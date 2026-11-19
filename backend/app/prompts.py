@@ -14,6 +14,8 @@ Reglas:
 - max_distance_km: solo si da una distancia explícita en km. Si habla en minutos, null (no lo inventes).
 - priorities: importancia de 0 a 1 de cada criterio según lo que diga. Lo que pida explícitamente → 0.8–1. Lo que no mencione → 0.2.
   El precio casi siempre importa a un estudiante: mínimo 0.5 salvo que diga que no le importa.
+  La cercanía al campus (distance_km) SIEMPRE importa a un estudiante que va a clase cada día: mínimo 0.6,
+  y 0.9–1 si dice "cerca", "andando" o similar. Solo baja de 0.6 si dice explícitamente que le da igual la distancia.
 - interpretation: una frase corta, en español y tuteando, que resuma lo que has entendido (sin inventar datos).
 """
 
