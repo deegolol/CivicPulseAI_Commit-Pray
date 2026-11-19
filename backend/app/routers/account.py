@@ -15,6 +15,7 @@ from pydantic import BaseModel, Field, HttpUrl, StringConstraints, field_validat
 from .. import accounts
 from ..data import get_dataset
 from ..models import HousingType
+from ..net import client_ip
 
 COOKIE = "primerallave_session"
 
@@ -91,7 +92,7 @@ def set_session(response: Response, request: Request, token: str) -> None:
 
 def restrict_attempts(request: Request, path: Path) -> None:
     with accounts.database(path, write=True) as conn:
-        allowed = accounts.allow_attempt(conn, request.client.host if request.client else "local")
+        allowed = accounts.allow_attempt(conn, client_ip(request))
     if not allowed:
         raise HTTPException(429, "Demasiados intentos. Espera un minuto antes de volver a intentarlo.")
 

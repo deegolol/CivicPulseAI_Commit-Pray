@@ -6,6 +6,7 @@ import sqlite3
 import pytest
 from fastapi.testclient import TestClient
 
+from app import accounts
 from app.main import app
 
 PREFIX = "/api/account"
@@ -94,3 +95,18 @@ def test_budget_watch_uses_current_official_estimate(accounts_db):
     assert len(client.get(f"{PREFIX}/workspace").json()["notifications"]) == 1
     assert client.post(f"{PREFIX}/logout", headers={"Content-Type": "text/plain"}).status_code == 415
     assert client.post(f"{PREFIX}/watches", json=payload, headers={"Sec-Fetch-Site": "cross-site"}).status_code == 403
+
+def test_rate_limit_uses_proxy_client_ip(accounts_db, monkeypatch):
+    seen = []
+
+    def deny_attempt(conn, host):
+        seen.append(host)
+        return False
+
+    monkeypatch.setattr(accounts, "allow_attempt", deny_attempt)
+    response = TestClient(app).post(
+        f"{PREFIX}/login", json=CREDS,
+        headers={"X-Forwarded-For": "192.0.2.9, 198.51.100.3"},
+    )
+    assert response.status_code == 429
+    assert seen == ["198.51.100.3"]
