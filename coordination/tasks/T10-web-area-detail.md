@@ -3,8 +3,8 @@ id: T10
 title: Panel de detalle del barrio
 lane: WEB
 priority: P0
-status: todo
-owner: ""
+status: doing
+owner: antigravity@diego
 depends_on: [T03]
 files: [frontend/src/components/AreaDetail.tsx]
 ---
