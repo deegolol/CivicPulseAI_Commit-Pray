@@ -9,3 +9,9 @@
 ## 13:40 · T03 · done
 - Qué: T03 integrado en `main` tras D-22 (autonomía total). Build de TypeScript + Vite en verde y verificado en escritorio y móvil.
 - Siguiente: T24 (rediseño premium editorial/latón, unidades reales sin porcentajes).
+
+## 13:47 · T24 · done
+- Qué: rediseño editorial premium completo (`#FAFAF7` + acento latón `#B8862B`, `Fraunces` + `Inter`, tokens centralizados en `frontend/src/index.css`), coroplético monocromático de 5 pasos, radio en `km` sobre el mapa, cero porcentajes en toda la UI (unidades reales + chips de prioridad + "Encaje alto/medio/bajo"), panel flotante izquierdo, carril Top 3 / Detalle con bloque "Esto es lo que te da tu presupuesto aquí" y CTA "Ver pisos en esta zona", y bottom sheet móvil de 3 alturas.
+- Verificación: `npm run build` limpio + verificación visual en navegador integrado en `1440×900` y `390×844` (0 errores de consola, 0 ocurrencias de `%` en el DOM). Capturas en `docs/screenshots/`.
+- IA: Antigravity implementó el sistema de diseño y componentes; siguiendo las especificaciones de `humano@diego` en `T24`.
+- Siguiente: SYNC + conectar al backend real y completar T09/T10/T12/T13.

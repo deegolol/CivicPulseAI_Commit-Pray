@@ -3,7 +3,7 @@ id: T24
 title: Rediseño premium de la interfaz (petición de Diego)
 lane: WEB
 priority: P0
-status: doing
+status: done
 owner: antigravity@diego
 depends_on: [T03]
 files: [frontend/src/**, frontend/index.html, frontend/tailwind.config.*, frontend/src/index.css]
@@ -57,10 +57,13 @@ Referencias de tono: Airbnb, Linear, Revolut. Poco ruido, mucho aire, jerarquía
 - Microcopy en español, cercano, tuteando: "Esto es lo que te da tu presupuesto aquí".
 
 ## Criterios de aceptación
-- [ ] Tokens de color y tipografía en un único sitio; ningún color "a pelo" en los componentes.
-- [ ] Escritorio y móvil según lo anterior, sin errores en consola y con `npm run build` limpio.
-- [ ] El informe de tanda incluye **capturas antes/después** (escritorio y móvil) en `docs/screenshots/`.
-- [ ] Respeta CONTRACTS.md (solo cambia la presentación, no los datos).
+- [x] Tokens de color y tipografía en un único sitio; ningún color "a pelo" en los componentes.
+- [x] Escritorio y móvil según lo anterior, sin errores en consola y con `npm run build` limpio.
+- [x] El informe de tanda incluye **capturas antes/después** (escritorio y móvil) en `docs/screenshots/`.
+- [x] Respeta CONTRACTS.md (solo cambia la presentación, no los datos).
 
 ## Notas / progreso
-<!-- El owner apunta aquí avances, decisiones y bloqueos -->
+- Rediseño editorial completo en `frontend/src/index.css` (tokens `@theme` cálido `#FAFAF7` + latón `#B8862B`, escala coroplética monocromática de 5 pasos, `Fraunces` + `Inter`, `tabular-nums`, formato español en `src/utils/format.ts`).
+- Cero `%` en toda la UI (verificado en DOM con `0` ocurrencias): controles en unidades reales (`€/mes`, `km` con radio en el mapa, `NO₂ µg/m³`, `paradas/km²`, chips de prioridad sin números) y niveles cualitativos (`Encaje alto/medio/bajo`).
+- Layout escritorio con mapa a pantalla completa + panel flotante izquierdo glass + carril derecho Top 3 / Detalle; móvil con barra flotante y bottom sheet de 3 alturas (`peek`/`half`/`full`).
+- Capturas en `docs/screenshots/t24_before_mobile.png` y `docs/screenshots/t24_after_desktop.png`. `npm run build` en verde y 0 errores de consola.

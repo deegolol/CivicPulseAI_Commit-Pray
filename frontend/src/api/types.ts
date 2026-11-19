@@ -70,6 +70,7 @@ export interface AreaDetailResponse extends AreaRecord {
 export interface MetaResponse {
   level: string;
   generated_at: string;
+  is_mock?: boolean;
   indicators: IndicatorMeta[];
   sources: SourceInfo[];
   campuses: Campus[];
@@ -123,6 +124,8 @@ export interface ScoreResultItem {
 
 export interface ScoreResponse {
   campus_id: string;
+  housing_type?: HousingType;
+  reference_m2?: number;
   results: ScoreResultItem[];
 }
 

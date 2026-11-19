@@ -1,32 +1,147 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
+/**
+ * PrimeraLlave Design System Tokens (T24)
+ * Tone: editorial, calm, trustworthy (warm off-white + brass/key accent).
+ * Single source of truth for all colors, fonts, and shadows.
+ */
+@theme {
+  /* Core palette */
+  --color-canvas: #fafaf7;
+  --color-surface: #ffffff;
+  --color-surface-subtle: #f4f2ec;
+  --color-border: #e7e5e0;
+  --color-ink: #14161a;
+  --color-muted: #5b6170;
+
+  /* Single brass/key accent */
+  --color-accent: #b8862b;
+  --color-accent-hover: #9c7022;
+  --color-accent-soft: #f7f0e2;
+  --color-accent-border: #e4cfa2;
+
+  /* Semantic states */
+  --color-fit: #1f7a5a;
+  --color-fit-soft: #eaf5f0;
+  --color-nofit: #b4473a;
+  --color-nofit-soft: #fbeceb;
+  --color-info: #3b5ba9;
+  --color-info-soft: #eef2fa;
+
+  /* Single-hue 5-step choropleth scale (brass light → intense) */
+  --color-choro-1: #efe3c8;
+  --color-choro-2: #dfc48e;
+  --color-choro-3: #cfa45a;
+  --color-choro-4: #b8862b;
+  --color-choro-5: #8c631b;
+  --color-choro-excluded: #d8d5ce;
+
+  /* Typography */
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-serif: "Fraunces", Georgia, serif;
+
+  /* Layered soft editorial shadows */
+  --shadow-floating: 0 1px 2px rgb(20 22 26 / 0.04), 0 12px 32px -8px rgb(20 22 26 / 0.12);
+  --shadow-card: 0 1px 2px rgb(20 22 26 / 0.04), 0 4px 14px -4px rgb(20 22 26 / 0.07);
+}
+
 @layer base {
   body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: var(--font-sans);
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
   }
 
-  h1, h2, h3, .font-display {
-    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
   }
 }
 
-/* Ensure Leaflet map containers sit beneath app overlays and tooltips look crisp */
+/* Custom slim range input styled with design tokens */
+input[type="range"].editorial-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 9999px;
+  background: var(--color-border);
+  outline: none;
+}
+
+input[type="range"].editorial-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: var(--color-accent);
+  border: 2.5px solid var(--color-surface);
+  box-shadow: 0 1px 4px rgb(20 22 26 / 0.25);
+  cursor: pointer;
+  transition: transform 150ms ease-out, background-color 150ms ease-out;
+}
+
+input[type="range"].editorial-range::-webkit-slider-thumb:hover {
+  background: var(--color-accent-hover);
+  transform: scale(1.08);
+}
+
+input[type="range"].editorial-range:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px var(--color-accent-soft), 0 1px 4px rgb(20 22 26 / 0.25);
+}
+
+/* Leaflet editorial styling */
 .leaflet-container {
-  font-family: 'Inter', system-ui, sans-serif;
-  background-color: #f1f5f9;
+  font-family: var(--font-sans);
+  background-color: var(--color-canvas);
   z-index: 1;
 }
 
+/* Warm minimalist Positron-like look on top of free OSM tiles (zero API key watermarks) */
 .leaflet-tile-pane {
-  filter: saturate(0.65) contrast(0.96);
+  filter: grayscale(100%) brightness(1.06) contrast(0.86) sepia(10%);
 }
 
-.leaflet-tooltip {
-  border-radius: 0.5rem;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 12px rgb(15 23 42 / 0.1);
-  padding: 0.375rem 0.625rem;
-  font-size: 0.75rem;
-  color: #0f172a;
+.leaflet-tooltip.editorial-tooltip {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-floating);
+  padding: 0.5rem 0.75rem;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+.leaflet-tooltip.editorial-tooltip::before {
+  display: none;
+}
+
+.leaflet-control-zoom {
+  border: 1px solid var(--color-border) !important;
+  border-radius: 0.75rem !important;
+  overflow: hidden;
+  box-shadow: var(--shadow-card) !important;
+}
+
+.leaflet-control-zoom a {
+  background-color: var(--color-surface) !important;
+  color: var(--color-ink) !important;
+  border-bottom-color: var(--color-border) !important;
+  width: 34px !important;
+  height: 34px !important;
+  line-height: 34px !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: var(--color-surface-subtle) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
