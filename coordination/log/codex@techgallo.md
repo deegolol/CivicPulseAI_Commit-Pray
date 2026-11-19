@@ -7,3 +7,8 @@
 - Qué: Comandos dev, data y check más la carpeta de datos crudos.
 - IA: Codex preparó y verificó la tanda. Revisión final del equipo según D-22.
 - Verificación: Makefile integrado y probado con el esqueleto vacío y con la app real. make check ejecuta pytest y compila el frontend; make dev arranca API y Vite con el proxy /api comprobado.
+
+## 14:00 · T16 · done
+- Qué: GitHub Actions con jobs de backend y frontend y badge en README.
+- IA: Codex preparó y verificó la tanda. Revisión final del equipo según D-22.
+- Verificación: YAML validado y make check en verde. GitHub ejecuta también los dos jobs al abrir un PR hacia main.
