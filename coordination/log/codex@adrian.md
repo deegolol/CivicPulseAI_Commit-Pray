@@ -22,3 +22,8 @@
 - Decisión: mantener la granularidad distrital en metadatos y en la nota de cada barrio. La ausencia de dato produce null.
 - IA: Codex implementó y verificó el ETL y la prueba de integración. Adrián autorizó integrar por D-22 y aprobó la selección de fuente en T01.
 - Siguiente: regenerar el agregado cuando entren piezas de T06/T07.
+
+## DATA · 19/11/2026 · agregado completo
+- Qué: agregado de alquiler, NO₂, Metro y equipamientos en los 131 barrios, con procedencia y notas.
+- Verificación: ETL con descargas y offline, 19 tests del backend y prueba de las cuatro métricas y distancia en el desglose de la API.
+- Coordinación: avisos a DATA, API y SHIP. Enviado a SHIP el texto de DATA para la defensa de T20.
