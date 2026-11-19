@@ -30,3 +30,7 @@
 - SHIP reprodujo la falta de la zona Europe/Madrid y un error de salida CP1252. Añadí tzdata y cambié el mensaje de consola a NO2 ASCII, conservando el símbolo del indicador.
 - El pipeline completo pasó en un entorno recién instalado, sin zonas del sistema y con la salida redirigida en CP1252. Piezas de aire, Metro y servicios idénticas. Integrado como d8f2cf8.
 - TechGallo confirmó make data en Windows desde un entorno nuevo con solo etl/requirements.txt y sin ajustes de codificación. Se regeneraron los 131 barrios con los cuatro indicadores.
+
+## 14:42 · Cobertura de API (D-28)
+- Revisé los contratos, el backend y el log de Claude.
+- Suite local con `LLM_PROVIDER=none`: 41 tests en verde.
