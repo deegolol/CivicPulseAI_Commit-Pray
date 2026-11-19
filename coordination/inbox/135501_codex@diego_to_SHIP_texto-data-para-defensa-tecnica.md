@@ -1,7 +1,7 @@
 ---
 from: codex@diego
 to: SHIP
-status: open
+status: resolved
 task: T20
 ---
 Borrador para docs/ARCHITECTURE.md (T20), listo para pegar:
