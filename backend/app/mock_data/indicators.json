@@ -1,0 +1,172 @@
+{
+ "generated_at": "MOCK",
+ "level": "barrio",
+ "sources": [
+  {
+   "id": "alquiler",
+   "name": "MOCK — datos de ejemplo (alquiler), NO son reales",
+   "publisher": "MOCK",
+   "url": "",
+   "license": "",
+   "retrieved": "",
+   "granularity": "barrio"
+  },
+  {
+   "id": "aire",
+   "name": "MOCK — datos de ejemplo (aire), NO son reales",
+   "publisher": "MOCK",
+   "url": "",
+   "license": "",
+   "retrieved": "",
+   "granularity": "barrio"
+  },
+  {
+   "id": "crtm",
+   "name": "MOCK — datos de ejemplo (crtm), NO son reales",
+   "publisher": "MOCK",
+   "url": "",
+   "license": "",
+   "retrieved": "",
+   "granularity": "barrio"
+  },
+  {
+   "id": "servicios",
+   "name": "MOCK — datos de ejemplo (servicios), NO son reales",
+   "publisher": "MOCK",
+   "url": "",
+   "license": "",
+   "retrieved": "",
+   "granularity": "barrio"
+  }
+ ],
+ "indicators": [
+  {
+   "key": "rent_eur_m2",
+   "label": "Alquiler",
+   "unit": "€/m²",
+   "higher_is_better": false,
+   "source": "alquiler"
+  },
+  {
+   "key": "air_no2",
+   "label": "Calidad del aire",
+   "unit": "µg/m³ NO₂",
+   "higher_is_better": false,
+   "source": "aire"
+  },
+  {
+   "key": "transit_stops",
+   "label": "Transporte",
+   "unit": "paradas/km²",
+   "higher_is_better": true,
+   "source": "crtm"
+  },
+  {
+   "key": "services_count",
+   "label": "Servicios",
+   "unit": "nº",
+   "higher_is_better": true,
+   "source": "servicios"
+  }
+ ],
+ "areas": [
+  {
+   "id": "001",
+   "name": "Palacio",
+   "district": "Centro",
+   "centroid": [
+    -3.712,
+    40.415
+   ],
+   "values": {
+    "rent_eur_m2": 22.1,
+    "air_no2": 48,
+    "transit_stops": 61.0,
+    "services_count": 14
+   },
+   "notes": {}
+  },
+  {
+   "id": "002",
+   "name": "Embajadores",
+   "district": "Centro",
+   "centroid": [
+    -3.702,
+    40.408
+   ],
+   "values": {
+    "rent_eur_m2": 21.4,
+    "air_no2": 45,
+    "transit_stops": 58.2,
+    "services_count": 11
+   },
+   "notes": {}
+  },
+  {
+   "id": "021",
+   "name": "Palos de Moguer",
+   "district": "Arganzuela",
+   "centroid": [
+    -3.698,
+    40.402
+   ],
+   "values": {
+    "rent_eur_m2": 17.3,
+    "air_no2": 38,
+    "transit_stops": 42.5,
+    "services_count": 9
+   },
+   "notes": {}
+  },
+  {
+   "id": "131",
+   "name": "Entrevías",
+   "district": "Puente de Vallecas",
+   "centroid": [
+    -3.668,
+    40.383
+   ],
+   "values": {
+    "rent_eur_m2": 11.2,
+    "air_no2": 33,
+    "transit_stops": 21.4,
+    "services_count": 5
+   },
+   "notes": {}
+  },
+  {
+   "id": "181",
+   "name": "Casco Histórico de Vallecas",
+   "district": "Villa de Vallecas",
+   "centroid": [
+    -3.621,
+    40.378
+   ],
+   "values": {
+    "rent_eur_m2": 10.8,
+    "air_no2": 29,
+    "transit_stops": 14.9,
+    "services_count": 6
+   },
+   "notes": {}
+  },
+  {
+   "id": "091",
+   "name": "Argüelles",
+   "district": "Moncloa-Aravaca",
+   "centroid": [
+    -3.716,
+    40.429
+   ],
+   "values": {
+    "rent_eur_m2": 19.6,
+    "air_no2": null,
+    "transit_stops": 47.3,
+    "services_count": 10
+   },
+   "notes": {
+    "air_no2": "sin estación cercana (MOCK)"
+   }
+  }
+ ]
+}

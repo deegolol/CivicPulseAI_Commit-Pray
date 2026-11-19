@@ -1,0 +1,221 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "001",
+    "name": "Palacio",
+    "district_id": "CEN",
+    "district": "Centro"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -3.718,
+       40.409
+      ],
+      [
+       -3.706,
+       40.409
+      ],
+      [
+       -3.706,
+       40.421
+      ],
+      [
+       -3.718,
+       40.421
+      ],
+      [
+       -3.718,
+       40.409
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "002",
+    "name": "Embajadores",
+    "district_id": "CEN",
+    "district": "Centro"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -3.708,
+       40.402
+      ],
+      [
+       -3.696,
+       40.402
+      ],
+      [
+       -3.696,
+       40.414
+      ],
+      [
+       -3.708,
+       40.414
+      ],
+      [
+       -3.708,
+       40.402
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "021",
+    "name": "Palos de Moguer",
+    "district_id": "ARG",
+    "district": "Arganzuela"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -3.704,
+       40.396
+      ],
+      [
+       -3.692,
+       40.396
+      ],
+      [
+       -3.692,
+       40.408
+      ],
+      [
+       -3.704,
+       40.408
+      ],
+      [
+       -3.704,
+       40.396
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "131",
+    "name": "Entrevías",
+    "district_id": "PUE",
+    "district": "Puente de Vallecas"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -3.674,
+       40.377
+      ],
+      [
+       -3.662,
+       40.377
+      ],
+      [
+       -3.662,
+       40.389
+      ],
+      [
+       -3.674,
+       40.389
+      ],
+      [
+       -3.674,
+       40.377
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "181",
+    "name": "Casco Histórico de Vallecas",
+    "district_id": "VIL",
+    "district": "Villa de Vallecas"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -3.627,
+       40.372
+      ],
+      [
+       -3.615,
+       40.372
+      ],
+      [
+       -3.615,
+       40.384
+      ],
+      [
+       -3.627,
+       40.384
+      ],
+      [
+       -3.627,
+       40.372
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "091",
+    "name": "Argüelles",
+    "district_id": "MON",
+    "district": "Moncloa-Aravaca"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -3.722,
+       40.423
+      ],
+      [
+       -3.71,
+       40.423
+      ],
+      [
+       -3.71,
+       40.435
+      ],
+      [
+       -3.722,
+       40.435
+      ],
+      [
+       -3.722,
+       40.423
+      ]
+     ]
+    ]
+   }
+  }
+ ]
+}
