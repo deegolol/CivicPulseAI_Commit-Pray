@@ -46,7 +46,27 @@ function prioritiesToWeights(
   return weights;
 }
 
+function readInitialUrlParams() {
+  if (typeof window === 'undefined') return {};
+  const params = new URLSearchParams(window.location.search);
+  const campus = params.get('campus') || undefined;
+  const budgetRaw = Number(params.get('budget'));
+  const budget = Number.isFinite(budgetRaw) && budgetRaw >= 300 && budgetRaw <= 1500 ? budgetRaw : undefined;
+  const typeParam = params.get('type');
+  const housingType: HousingType | undefined =
+    typeParam === 'room' || typeParam === 'studio' || typeParam === 'flat' ? typeParam : undefined;
+  const kmParam = params.get('km');
+  const maxDistanceKm =
+    kmParam === 'any'
+      ? null
+      : kmParam && Number.isFinite(Number(kmParam))
+        ? Math.max(2, Math.min(20, Number(kmParam)))
+        : undefined;
+  return { campus, budget, housingType, maxDistanceKm };
+}
+
 export function App() {
+  const initialParams = useMemo(() => readInitialUrlParams(), []);
   const [meta, setMeta] = useState<MetaResponse | null>(null);
   const [geoData, setGeoData] = useState<BarriosGeoJSON | null>(null);
   const [centroidsById, setCentroidsById] = useState<Record<string, [number, number]>>({});
@@ -56,12 +76,14 @@ export function App() {
   const [isScoring, setIsScoring] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // User search & real-unit filter state
+  // User search & real-unit filter state (hydrated from URL querystring when present)
   const [query, setQuery] = useState('');
-  const [campusId, setCampusId] = useState('etsisi');
-  const [budget, setBudget] = useState(500);
-  const [housingType, setHousingType] = useState<HousingType>('room');
-  const [maxDistanceKm, setMaxDistanceKm] = useState<number | null>(10);
+  const [campusId, setCampusId] = useState(initialParams.campus ?? 'etsisi');
+  const [budget, setBudget] = useState(initialParams.budget ?? 500);
+  const [housingType, setHousingType] = useState<HousingType>(initialParams.housingType ?? 'room');
+  const [maxDistanceKm, setMaxDistanceKm] = useState<number | null>(
+    initialParams.maxDistanceKm !== undefined ? initialParams.maxDistanceKm : 10,
+  );
   const [airLevel, setAirLevel] = useState<AirLevelOption>('any');
   const [wellConnectedOnly, setWellConnectedOnly] = useState(false);
   const [onlyWithinBudget, setOnlyWithinBudget] = useState(false);
@@ -98,7 +120,9 @@ export function App() {
         if (cancelled) return;
         setMeta(metaRes);
         setGeoData(geoRes);
-        setCampusId(metaRes.defaults.campus_id);
+        if (!initialParams.campus) {
+          setCampusId(metaRes.defaults.campus_id);
+        }
 
         const centroidMap: Record<string, [number, number]> = {};
         for (const a of areasRes.areas) {
@@ -131,6 +155,18 @@ export function App() {
     () => prioritiesToWeights(selectedPriorities, availableKeys),
     [selectedPriorities, availableKeys],
   );
+
+  // Sync core search parameters to URL querystring (shareable search links)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    params.set('campus', campusId);
+    params.set('budget', String(budget));
+    params.set('type', housingType);
+    params.set('km', maxDistanceKm === null ? 'any' : String(maxDistanceKm));
+    const nextUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState(null, '', nextUrl);
+  }, [campusId, budget, housingType, maxDistanceKm]);
 
   // Fetch scores whenever inputs change (debounced 250 ms per T09)
   useEffect(() => {
@@ -367,8 +403,18 @@ export function App() {
 
       {/* Error banner if API fails */}
       {error && (
-        <div className="fixed top-4 left-1/2 z-[650] -translate-x-1/2 rounded-xl border border-nofit/30 bg-nofit-soft px-4 py-2 text-xs font-medium text-nofit shadow-floating">
-          {error}
+        <div
+          role="alert"
+          className="fixed top-4 left-1/2 z-[650] flex -translate-x-1/2 items-center gap-3 rounded-xl border border-nofit/30 bg-nofit-soft px-4 py-2 text-xs font-medium text-nofit shadow-floating"
+        >
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="rounded-lg bg-nofit px-2.5 py-1 text-[11px] font-medium text-surface transition hover:opacity-90"
+          >
+            Reintentar
+          </button>
         </div>
       )}
 

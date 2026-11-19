@@ -35,3 +35,8 @@
 - Qué: flujo completo de búsqueda en lenguaje natural (`POST /api/ai/parse` → actualización inmediata de controles → `POST /api/score` → `POST /api/ai/explain` del Top 3), componente editorial `AiExplanation.tsx` con `interpretation`, explicación con cifras reales, etiqueta `"IA"` / `"Modo sin IA"`, skeleton de carga, 3 chips de ejemplo (incluyendo el caso de Lucía) y fallback offline en `client.ts`.
 - Verificación: `cd frontend && npm run build` en verde.
 - Siguiente: T14 (favicon SVG, pulido final responsive móvil/escritorio y QA completo en navegador integrado).
+
+## 13:59 · T14 · done
+- Qué: favicon SVG editorial (`frontend/public/favicon.svg`), metadatos en `index.html`, sincronización de búsqueda en URL querystring (`?campus=&budget=&type=&km=`), botón `Reintentar` en errores y QA end-to-end completo en escritorio (`1440×900`) y móvil (`390×844`) cubriendo T09, T10, T12, T13, T14 y T24.
+- Verificación: `cd frontend && npm run build` limpio + navegador integrado (0 errores consola, 0 HTTP ≥ 400, 0 `%` en DOM, 0 overflow horizontal). Captura móvil guardada en `docs/screenshots/t24_after_mobile.png`.
+- Carril WEB 100% completado (T03, T24, T09, T10, T12, T13, T14).
