@@ -179,7 +179,15 @@ def _finish(raw: dict, campuses: list[Campus], keys: list[str], default_campus: 
 def keyword_parse(query: str, campuses: list[Campus], keys: list[str]) -> dict:
     """Offline fallback: regex + keywords. Less smart, but never fails."""
     q = _norm(query)
-    campus = next((cid for cid, words in CAMPUS_ALIASES.items() if any(w in q for w in words)), None)
+    campus_terms: dict[str, set[str]] = {}
+    for item in campuses:
+        terms = (*CAMPUS_ALIASES.get(item.id, ()), item.name.split(" · ")[-1],
+                 item.id.split("-", maxsplit=1)[-1], *item.aliases)
+        for alias in terms:
+            campus_terms.setdefault(_norm(alias), set()).add(item.id)
+    # Ignore ambiguous university names and prefer the most specific match.
+    campus = next((next(iter(campus_terms[term])) for term in sorted(campus_terms, key=len, reverse=True)
+                   if term and len(campus_terms[term]) == 1 and re.search(rf"\b{re.escape(term)}\b", q)), None)
     m = re.search(r"(\d{2,5})(?:[.,]\d+)?\s*(?:€|eur|euros?|pavos|al mes|/mes)", q)
     budget = float(m.group(1)) if m else None
     # "Estudio en la ETSISI" is the verb, not a studio flat: require a noun-like context.
@@ -189,7 +197,7 @@ def keyword_parse(query: str, campuses: list[Campus], keys: list[str]) -> dict:
     priorities = {k: (1.0 if any(w in q for w in KEYWORDS.get(k, ())) else 0.2) for k in keys}
     if "rent_eur_m2" in priorities and (budget or priorities["rent_eur_m2"] < 1):
         priorities["rent_eur_m2"] = max(priorities["rent_eur_m2"], 0.6)
-    parts = [f"campus {campus.upper()}" if campus else None, f"hasta {int(budget)} €/mes" if budget else None,
+    parts = [next((item.name for item in campuses if item.id == campus), None), f"hasta {int(budget)} €/mes" if budget else None,
              {"room": "habitación", "studio": "estudio", "flat": "piso entero"}[housing],
              f"a menos de {km.group(1)} km" if km else None]
     raw = {"campus_id": campus, "budget_eur_month": budget, "housing_type": housing,

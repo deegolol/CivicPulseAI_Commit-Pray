@@ -34,9 +34,38 @@ MAX_BYTES = 2_000_000
 # https://www.etsisi.upm.es/ubicacion-como-llegar/
 # ETSIINF uses the marker in the UPM center profile.
 # https://www.upm.es/FuturosEstudiantes/Centros/CampusMontegancedo/ETSIngenierosInformaticos
+# Additional locations are documented in data/SOURCES.md.
 CAMPUSES = [
-    {"id": "etsisi", "name": "ETSISI · Campus Sur UPM", "coords": [-3.62789444, 40.3897]},
-    {"id": "etsiinf", "name": "ETSIINF · Campus Montegancedo UPM", "coords": [-3.839679, 40.405474]},
+    {"id": "etsisi", "name": "ETSISI · Campus Sur UPM", "coords": [-3.62789444, 40.3897],
+     "aliases": ["Universidad Politécnica de Madrid", "Vallecas", "Sistemas Informáticos"]},
+    {"id": "etsiinf", "name": "ETSIINF · Campus Montegancedo UPM", "coords": [-3.839679, 40.405474],
+     "aliases": ["Universidad Politécnica de Madrid", "Boadilla", "Facultad de Informática", "FI UPM"]},
+    {"id": "upm-arquitectura", "name": "ETSAM · Arquitectura UPM", "coords": [-3.730669, 40.442954],
+     "aliases": ["Universidad Politécnica de Madrid", "Ciudad Universitaria", "Arquitectura UPM"]},
+    {"id": "upm-industriales", "name": "ETSII · Industriales UPM", "coords": [-3.686851, 40.443066],
+     "aliases": ["Universidad Politécnica de Madrid", "Industriales UPM", "Castellana"]},
+    {"id": "ucm-moncloa", "name": "UCM · Ciudad Universitaria", "coords": [-3.725361, 40.450194],
+     "aliases": ["Universidad Complutense de Madrid", "Campus Moncloa", "Complutense"]},
+    {"id": "uam-cantoblanco", "name": "UAM · Cantoblanco", "coords": [-3.690783, 40.548003],
+     "aliases": ["Universidad Autónoma de Madrid", "Autónoma de Madrid"]},
+    {"id": "uc3m-getafe", "name": "UC3M · Getafe", "coords": [-3.726833, 40.318611],
+     "aliases": ["Universidad Carlos III de Madrid", "Carlos III"]},
+    {"id": "uc3m-leganes", "name": "UC3M · Leganés", "coords": [-3.766889, 40.33225],
+     "aliases": ["Universidad Carlos III de Madrid", "Carlos III"]},
+    {"id": "uc3m-puerta-toledo", "name": "UC3M · Puerta de Toledo", "coords": [-3.710167, 40.407028],
+     "aliases": ["Universidad Carlos III de Madrid", "Carlos III"]},
+    {"id": "urjc-vicalvaro", "name": "URJC · Madrid-Vicálvaro", "coords": [-3.610704, 40.406144],
+     "aliases": ["Universidad Rey Juan Carlos", "Rey Juan Carlos"]},
+    {"id": "urjc-mostoles", "name": "URJC · Móstoles", "coords": [-3.873217, 40.335913],
+     "aliases": ["Universidad Rey Juan Carlos", "Rey Juan Carlos"]},
+    {"id": "urjc-alcorcon", "name": "URJC · Alcorcón", "coords": [-3.844464, 40.350665],
+     "aliases": ["Universidad Rey Juan Carlos", "Rey Juan Carlos"]},
+    {"id": "urjc-fuenlabrada", "name": "URJC · Fuenlabrada", "coords": [-3.818944, 40.285583],
+     "aliases": ["Universidad Rey Juan Carlos", "Rey Juan Carlos"]},
+    {"id": "comillas-icai", "name": "Comillas · ICAI (Alberto Aguilera)", "coords": [-3.711436, 40.431861],
+     "aliases": ["Universidad Pontificia Comillas", "Universidad Pontificia de Comillas"]},
+    {"id": "ceu-moncloa", "name": "CEU San Pablo · Moncloa", "coords": [-3.718045, 40.446684],
+     "aliases": ["Universidad San Pablo CEU", "Universidad CEU San Pablo"]},
 ]
 
 

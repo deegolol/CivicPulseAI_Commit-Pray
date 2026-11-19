@@ -1,0 +1,1122 @@
+[
+  {
+    "kind": "park",
+    "name": "Parque de El Retiro",
+    "coords": [
+      40.41526,
+      -3.6845
+    ]
+  },
+  {
+    "kind": "park",
+    "name": "Casa de Campo",
+    "coords": [
+      40.425323,
+      -3.752689
+    ]
+  },
+  {
+    "kind": "park",
+    "name": "Madrid Río",
+    "coords": [
+      40.398595,
+      -3.714752
+    ]
+  },
+  {
+    "kind": "park",
+    "name": "Parque del Oeste",
+    "coords": [
+      40.431796,
+      -3.728164
+    ]
+  },
+  {
+    "kind": "park",
+    "name": "Parque de El Capricho",
+    "coords": [
+      40.454396,
+      -3.600228
+    ]
+  },
+  {
+    "kind": "park",
+    "name": "Parque Juan Carlos I",
+    "coords": [
+      40.461619,
+      -3.605616
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Antonio Mingote (Latina)",
+    "coords": [
+      40.379442,
+      -3.769439
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Elena Fortún (Retiro)",
+    "coords": [
+      40.403578,
+      -3.672409
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Hortaleza",
+    "coords": [
+      40.477193,
+      -3.64962
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Javier Marías (Moratalaz)",
+    "coords": [
+      40.403992,
+      -3.649438
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública José Acuña (Moncloa - Aravaca)",
+    "coords": [
+      40.427947,
+      -3.716951
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública José Hierro (Usera)",
+    "coords": [
+      40.381882,
+      -3.710616
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública José Luis Sampedro (Chamberí)",
+    "coords": [
+      40.4354,
+      -3.699666
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Luis Martín Santos (Villa de Vallecas)",
+    "coords": [
+      40.38092,
+      -3.613673
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Luis Rosales (Carabanchel)",
+    "coords": [
+      40.373426,
+      -3.748071
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública María Moliner (Villaverde)",
+    "coords": [
+      40.349525,
+      -3.710116
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Miguel Hernández (Puente de Vallecas)",
+    "coords": [
+      40.384497,
+      -3.642918
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Aluche (Latina)",
+    "coords": [
+      40.395971,
+      -3.756272
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Ana María Matute (Carabanchel)",
+    "coords": [
+      40.397867,
+      -3.720088
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Benito Pérez Galdós (Centro)",
+    "coords": [
+      40.427387,
+      -3.7106
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Benjamín Palencia (Villa de Vallecas)",
+    "coords": [
+      40.366911,
+      -3.616442
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Canillejas (San Blas-Canillejas)",
+    "coords": [
+      40.446402,
+      -3.611793
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Ciudad Lineal (Ciudad Lineal)",
+    "coords": [
+      40.436447,
+      -3.637292
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal David Gistau (Salamanca)",
+    "coords": [
+      40.431993,
+      -3.670929
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Dámaso Alonso (Chamartín)",
+    "coords": [
+      40.467453,
+      -3.684611
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Eugenio Trías. Casa de Fieras de El Retiro (Retiro)",
+    "coords": [
+      40.416609,
+      -3.679593
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Francisco Ayala (Vicálvaro)",
+    "coords": [
+      40.399829,
+      -3.621282
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Francisco Ibáñez (Chamartín)",
+    "coords": [
+      40.448106,
+      -3.676231
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Francisco Umbral (Villaverde)",
+    "coords": [
+      40.351187,
+      -3.679346
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Gabriel García Márquez (Usera)",
+    "coords": [
+      40.366768,
+      -3.701141
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Gerardo Diego (Villa de Vallecas)",
+    "coords": [
+      40.377902,
+      -3.62273
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Gloria Fuertes (Barajas)",
+    "coords": [
+      40.460559,
+      -3.593746
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Huerta de la Salud (Hortaleza)",
+    "coords": [
+      40.475717,
+      -3.646673
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Iván de Vargas (Centro)",
+    "coords": [
+      40.414103,
+      -3.709859
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal José Hierro (San Blas-Canillejas)",
+    "coords": [
+      40.433292,
+      -3.610566
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal José Saramago (Fuencarral-El Pardo)",
+    "coords": [
+      40.478601,
+      -3.709441
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal La Chata (Carabanchel)",
+    "coords": [
+      40.383306,
+      -3.742063
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal La Elipa (Ciudad Lineal)",
+    "coords": [
+      40.423434,
+      -3.651829
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Manuel Vázquez Montalbán (Tetuán)",
+    "coords": [
+      40.457495,
+      -3.71054
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Mario Vargas Llosa (Centro)",
+    "coords": [
+      40.426642,
+      -3.699723
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal María Lejárraga (Hortaleza)",
+    "coords": [
+      40.490416,
+      -3.655357
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal María Zambrano (Tetuán)",
+    "coords": [
+      40.469033,
+      -3.697662
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Miguel Delibes (Moratalaz)",
+    "coords": [
+      40.409717,
+      -3.652982
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Pablo Neruda (Ciudad Lineal)",
+    "coords": [
+      40.429411,
+      -3.64169
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Portazgo (Puente de Vallecas)",
+    "coords": [
+      40.39319,
+      -3.655415
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Pozo del Tío Raimundo (Puente de Vallecas)",
+    "coords": [
+      40.373586,
+      -3.660255
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Pío Baroja (Arganzuela)",
+    "coords": [
+      40.400037,
+      -3.707449
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal San Blas (San Blas-Canillejas)",
+    "coords": [
+      40.420232,
+      -3.621811
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal San Fermín (Usera)",
+    "coords": [
+      40.371162,
+      -3.692743
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Vallecas (Puente de Vallecas)",
+    "coords": [
+      40.395024,
+      -3.665554
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Victoria Prego (Carabanchel)",
+    "coords": [
+      40.361618,
+      -3.753702
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Vicálvaro",
+    "coords": [
+      40.405284,
+      -3.608628
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Municipal Ángel González (Latina)",
+    "coords": [
+      40.397075,
+      -3.766489
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Pedro Salinas (Centro)",
+    "coords": [
+      40.407096,
+      -3.711044
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Rafael Alberti (Fuencarral - El Pardo)",
+    "coords": [
+      40.487851,
+      -3.698574
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública Ruiz Egea (Chamberí)",
+    "coords": [
+      40.446603,
+      -3.702879
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Biblioteca Pública del Estado Manuel Alvar  (Salamanca)",
+    "coords": [
+      40.434401,
+      -3.66897
+    ]
+  },
+  {
+    "kind": "library",
+    "name": "Centro Cultural Paco Rabal. Biblioteca Pública (Puente de Vallecas)",
+    "coords": [
+      40.379459,
+      -3.661115
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Alcántara",
+    "coords": [
+      40.428103,
+      -3.673732
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Alfredo Goyeneche",
+    "coords": [
+      40.452121,
+      -3.783283
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Aluche",
+    "coords": [
+      40.382721,
+      -3.773654
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Antiguo Canódromo",
+    "coords": [
+      40.397227,
+      -3.736112
+    ]
+  },
+  {
+    "kind": "gym",
+    "name": "Centro Deportivo Municipal Antonio Díaz Miguel",
+    "coords": [
+      40.471254,
+      -3.695326
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Barajas",
+    "coords": [
+      40.463014,
+      -3.587693
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Barceló",
+    "coords": [
+      40.426813,
+      -3.699267
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Blanca Fernández Ochoa",
+    "coords": [
+      40.382382,
+      -3.746452
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Casa de Campo",
+    "coords": [
+      40.416126,
+      -3.733537
+    ]
+  },
+  {
+    "kind": "gym",
+    "name": "Centro Deportivo Municipal Cea Bermúdez",
+    "coords": [
+      40.43858,
+      -3.706107
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Centro Integrado Arganzuela",
+    "coords": [
+      40.402985,
+      -3.695393
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Cerro Almodóvar",
+    "coords": [
+      40.381688,
+      -3.602328
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Chamartín",
+    "coords": [
+      40.461133,
+      -3.676208
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Circuito Internacional BMX (Dirección General de Deporte)",
+    "coords": [
+      40.384748,
+      -3.689458
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Ciudad de los Poetas",
+    "coords": [
+      40.465921,
+      -3.718933
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Concepción",
+    "coords": [
+      40.437257,
+      -3.64845
+    ]
+  },
+  {
+    "kind": "gym",
+    "name": "Centro Deportivo Municipal Cuatro Caminos",
+    "coords": [
+      40.44794,
+      -3.70403
+    ]
+  },
+  {
+    "kind": "gym",
+    "name": "Centro Deportivo Municipal Daoíz y Velarde 1",
+    "coords": [
+      40.40237,
+      -3.677281
+    ]
+  },
+  {
+    "kind": "gym",
+    "name": "Centro Deportivo Municipal Daoíz y Velarde 2",
+    "coords": [
+      40.400799,
+      -3.67789
+    ]
+  },
+  {
+    "kind": "gym",
+    "name": "Centro Deportivo Municipal El Espinillo",
+    "coords": [
+      40.356342,
+      -3.686595
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal El Olivillo",
+    "coords": [
+      40.406525,
+      -3.745889
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal El Quijote",
+    "coords": [
+      40.453578,
+      -3.713053
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Entrevías",
+    "coords": [
+      40.378413,
+      -3.674532
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Escuelas de San Antón",
+    "coords": [
+      40.423827,
+      -3.69901
+    ]
+  },
+  {
+    "kind": "gym",
+    "name": "Centro Deportivo Municipal Estadio de Atletismo Vallehermoso (Dirección General de Deporte)",
+    "coords": [
+      40.441913,
+      -3.7107
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Estanque del Retiro",
+    "coords": [
+      40.418405,
+      -3.684343
+    ]
+  },
+  {
+    "kind": "gym",
+    "name": "Centro Deportivo Municipal Fabián Roncero",
+    "coords": [
+      40.449657,
+      -3.597577
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Faustina Valladolid",
+    "coords": [
+      40.40419,
+      -3.622901
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Fernando Carro - Las Rosas",
+    "coords": [
+      40.431228,
+      -3.603326
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Fernando Martín",
+    "coords": [
+      40.460935,
+      -3.712192
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Francisco Fernández Ochoa",
+    "coords": [
+      40.365818,
+      -3.740894
+    ]
+  },
+  {
+    "kind": "gym",
+    "name": "Centro Deportivo Municipal Fuente del Berro",
+    "coords": [
+      40.42172,
+      -3.665252
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Félix Rubio",
+    "coords": [
+      40.35743,
+      -3.691529
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Fúcar",
+    "coords": [
+      40.411907,
+      -3.695683
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Gallur",
+    "coords": [
+      40.398475,
+      -3.735371
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Gimnasio Moscardó",
+    "coords": [
+      40.437945,
+      -3.674502
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Hortaleza",
+    "coords": [
+      40.478728,
+      -3.652718
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal José María Cagigal",
+    "coords": [
+      40.43215,
+      -3.736965
+    ]
+  },
+  {
+    "kind": "gym",
+    "name": "Centro Deportivo Municipal Juan de Dios Román",
+    "coords": [
+      40.363916,
+      -3.605186
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal La Almudena",
+    "coords": [
+      40.420606,
+      -3.632424
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal La Bombilla",
+    "coords": [
+      40.432673,
+      -3.731937
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal La Cebada",
+    "coords": [
+      40.410546,
+      -3.709401
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal La Chopera",
+    "coords": [
+      40.412291,
+      -3.686209
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal La Elipa",
+    "coords": [
+      40.414331,
+      -3.65595
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal La Fundi",
+    "coords": [
+      40.394377,
+      -3.691341
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal La Masó - Luis de la Fuente",
+    "coords": [
+      40.484426,
+      -3.714422
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Lago Casa de Campo",
+    "coords": [
+      40.417013,
+      -3.731495
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Las Cruces",
+    "coords": [
+      40.378855,
+      -3.756261
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Los Prunos",
+    "coords": [
+      40.453257,
+      -3.618696
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Luis Aragonés",
+    "coords": [
+      40.464651,
+      -3.627588
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Margot Moles",
+    "coords": [
+      40.409141,
+      -3.603265
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Marqués de Samaranch",
+    "coords": [
+      40.407615,
+      -3.717381
+    ]
+  },
+  {
+    "kind": "gym",
+    "name": "Centro Deportivo Municipal María Jesús Rosa",
+    "coords": [
+      40.478768,
+      -3.708699
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Miguel Guillén Prim",
+    "coords": [
+      40.373819,
+      -3.623151
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Mistral",
+    "coords": [
+      40.473322,
+      -3.597297
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Moratalaz",
+    "coords": [
+      40.398859,
+      -3.632432
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Moscardó",
+    "coords": [
+      40.388503,
+      -3.706303
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Orcasitas",
+    "coords": [
+      40.375582,
+      -3.712459
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Orcasur",
+    "coords": [
+      40.37022,
+      -3.699469
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Pabellón Villa de Madrid",
+    "coords": [
+      40.461457,
+      -3.589107
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Palomeras",
+    "coords": [
+      40.382604,
+      -3.633715
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Paseo de la Dirección",
+    "coords": [
+      40.46232,
+      -3.706807
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Pepu Hernández",
+    "coords": [
+      40.427638,
+      -3.606311
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Peñagrande GoFit",
+    "coords": [
+      40.476792,
+      -3.717567
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Peñuelas",
+    "coords": [
+      40.398655,
+      -3.70496
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Plata y Castañar",
+    "coords": [
+      40.34999,
+      -3.717841
+    ]
+  },
+  {
+    "kind": "gym",
+    "name": "Centro Deportivo Municipal Playa Victoria",
+    "coords": [
+      40.459276,
+      -3.702114
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Pradillo",
+    "coords": [
+      40.449106,
+      -3.671618
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Pueblo Nuevo",
+    "coords": [
+      40.430032,
+      -3.638536
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Raúl González",
+    "coords": [
+      40.34622,
+      -3.684338
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal San Blas",
+    "coords": [
+      40.428934,
+      -3.61523
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal San Cristóbal",
+    "coords": [
+      40.342673,
+      -3.691449
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal San Fermín",
+    "coords": [
+      40.375306,
+      -3.692701
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal San Juan Bautista",
+    "coords": [
+      40.44865,
+      -3.658571
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Santa Ana",
+    "coords": [
+      40.498095,
+      -3.696358
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Tenis Casa de Campo",
+    "coords": [
+      40.421437,
+      -3.73574
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Triángulo de Oro",
+    "coords": [
+      40.465125,
+      -3.692821
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Vallecas Verano",
+    "coords": [
+      40.390369,
+      -3.657214
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Vallehermoso GoFit",
+    "coords": [
+      40.440648,
+      -3.709053
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Vicente del Bosque",
+    "coords": [
+      40.478914,
+      -3.693541
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Wilfred Agbonavbare",
+    "coords": [
+      40.371917,
+      -3.65716
+    ]
+  },
+  {
+    "kind": "sport",
+    "name": "Centro Deportivo Municipal Ángel Nieto",
+    "coords": [
+      40.391462,
+      -3.659864
+    ]
+  }
+]

@@ -4,7 +4,7 @@
  *   - Screen A (OnboardingScreen): map-free entry ("¿Dónde vas a vivir este curso?").
  *     Skipped automatically if URL already carries query params (?campus= / ?budget=).
  *   - Screen B (Results): fixed TopFilterBar + list-first ZoneList (left 440px) + blue-scale MadridMap (right)
- *     + slide-over AreaDetailPanel + CompareModal. On mobile: full-screen list with floating Mapa/Lista toggle.
+ *     + inline neighborhood details + CompareModal. On mobile: full-screen list with floating Mapa/Lista toggle.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { List, Map as MapIcon } from 'lucide-react';
@@ -44,15 +44,6 @@ import { ZoneList } from './components/ZoneList';
 import { formatEuro, formatKm } from './utils/format';
 import { searchPreferences } from './utils/searchPreferences';
 
-function prioritiesToWeights(
-  selected: string[],
-  availableKeys: Set<string>,
-): Record<string, number> {
-  const weights: Record<string, number> = {};
-  for (const key of selected) if (availableKeys.has(key)) weights[key] = 1;
-  return weights;
-}
-
 function readInitialUrlParams() {
   if (typeof window === 'undefined') return { hasParams: false };
   const params = new URLSearchParams(window.location.search);
@@ -78,7 +69,11 @@ function readInitialUrlParams() {
         : undefined;
   const min = Number(params.get('min'));
   const minBudget = min > 0 && budget !== undefined && min <= budget ? min : null;
-  const preferences = params.get('criteria')?.split(',').filter(Boolean);
+  const preferences = params.get('criteria')?.split(',').flatMap((entry) => {
+    const [key, raw = '1'] = entry.split(':');
+    const weight = Number(raw);
+    return key && Number.isFinite(weight) && weight > 0 ? [[key, weight] as const] : [];
+  });
   const mode = params.get('mode');
   const transportMode = mode && Object.prototype.hasOwnProperty.call(TRANSPORT_LABELS, mode) ? mode as TransportMode : 'any';
   const onlyWithinBudget = params.get('range') === '1' || minBudget !== null;
@@ -99,7 +94,6 @@ export function App() {
   const [rawResults, setRawResults] = useState<ScoreResultItem[]>([]);
   const [recommendation, setRecommendation] = useState<Recommendation | null>(null);
   const [highlights, setHighlights] = useState<Record<string, string>>({});
-  const [referenceM2, setReferenceM2] = useState<number | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [isScoring, setIsScoring] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -118,10 +112,9 @@ export function App() {
   const [wellConnectedOnly, setWellConnectedOnly] = useState(false);
   const [onlyWithinBudget, setOnlyWithinBudget] = useState(initial.onlyWithinBudget ?? false);
   const [transportMode, setTransportMode] = useState<TransportMode>(initial.transportMode ?? 'any');
-  const [selectedPriorities, setSelectedPriorities] = useState<string[]>(
-    initial.preferences?.length ? [...new Set(initial.preferences)] : DEFAULT_PRIORITIES,
+  const [preferenceWeights, setPreferenceWeights] = useState<Record<string, number>>(
+    () => Object.fromEntries(initial.preferences?.length ? initial.preferences : DEFAULT_PRIORITIES.map((key) => [key, 1])),
   );
-  const [aiWeightsOverride, setAiWeightsOverride] = useState<Record<string, number> | null>(null);
 
   // Search summary & explanation text (from /api/ai/parse & /api/ai/explain)
   const [aiInterpretation, setAiInterpretation] = useState<string | null>(null);
@@ -196,11 +189,9 @@ export function App() {
   }, [meta]);
 
   const computedWeights = useMemo(() => {
-    const weights = prioritiesToWeights(selectedPriorities, availableKeys);
-    if (!Object.keys(weights).length) return prioritiesToWeights(DEFAULT_PRIORITIES, availableKeys);
-    for (const key of Object.keys(weights)) weights[key] = aiWeightsOverride?.[key] ?? 1;
-    return weights;
-  }, [aiWeightsOverride, selectedPriorities, availableKeys]);
+    const weights = Object.entries(preferenceWeights).filter(([key, value]) => availableKeys.has(key) && value > 0);
+    return Object.fromEntries(weights.length ? weights : DEFAULT_PRIORITIES.map((key) => [key, 1]));
+  }, [preferenceWeights, availableKeys]);
   const activeCriteria = useMemo(() => new Set(Object.keys(computedWeights)), [computedWeights]);
 
   const scoreFilters = useMemo<ScoreFilters>(() => ({
@@ -221,13 +212,13 @@ export function App() {
     params.set('km', maxDistanceKm === null ? 'any' : String(maxDistanceKm));
     if (minBudget !== null) params.set('min', String(minBudget));
     else params.delete('min');
-    params.set('criteria', [...activeCriteria].join(','));
+    params.set('criteria', Object.entries(computedWeights).map(([key, weight]) => weight === 1 ? key : key + ':' + weight).join(','));
     if (transportMode !== 'any') params.set('mode', transportMode);
     else params.delete('mode');
     if (onlyWithinBudget) params.set('range', '1');
     else params.delete('range');
     window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
-  }, [screen, campusId, budget, housingType, maxDistanceKm, minBudget, activeCriteria, transportMode, onlyWithinBudget]);
+  }, [screen, campusId, budget, housingType, maxDistanceKm, minBudget, computedWeights, transportMode, onlyWithinBudget]);
 
   // Cancel obsolete rankings so a slower response cannot replace a newer search.
   useEffect(() => {
@@ -249,7 +240,6 @@ export function App() {
         setRawResults(scored.results);
         setRecommendation(scored.recommendation ?? null);
         setHighlights(scored.highlights ?? {});
-        setReferenceM2(scored.reference_m2);
         setError(null);
         setIsScoring(false);
 
@@ -311,7 +301,6 @@ export function App() {
     return map;
   }, [results]);
 
-  const selectedArea = selectedAreaId ? (scoresById[selectedAreaId] ?? null) : null;
   const comparedAreas = useMemo(
     () =>
       compareIds
@@ -324,25 +313,22 @@ export function App() {
     [meta, campusId],
   );
 
-  const handleTogglePriority = (key: string) => {
-    if (activeCriteria.size === 1 && activeCriteria.has(key)) return;
-    if (activeCriteria.has(key)) {
-      if (key === 'air_no2') setAirLevel('any');
-      if (key === 'transit_stops') {
-        setWellConnectedOnly(false);
-        if (transportMode === 'metro') setTransportMode('any');
-      }
-    }
-    setSelectedPriorities(activeCriteria.has(key)
-      ? [...activeCriteria].filter((item) => item !== key)
-      : [...activeCriteria, key]);
+  const handlePriorityChange = (key: string, weight: number) => {
+    if (weight === 0 && activeCriteria.size === 1 && activeCriteria.has(key)) return;
+    if (weight === 0 && key === 'air_no2') setAirLevel('any');
+    if (weight === 0 && key === 'transit_stops') setWellConnectedOnly(false);
+    const next = { ...preferenceWeights, ...computedWeights };
+    if (weight > 0) next[key] = weight;
+    else delete next[key];
+    setPreferenceWeights(next);
+    setAiExplanation(null);
   };
 
   const handleTransportModeChange = (mode: TransportMode) => {
     setTransportMode(mode);
     const key = mode === 'metro' ? 'transit_stops' : 'distance_km';
     if (mode !== 'any' && availableKeys.has(key) && !activeCriteria.has(key)) {
-      setSelectedPriorities([...activeCriteria, key]);
+      setPreferenceWeights((previous) => ({ ...previous, ...computedWeights, [key]: 1 }));
     }
   };
 
@@ -370,19 +356,6 @@ export function App() {
     }
   };
 
-  /** 1-click compare from AreaDetailPanel: compares this area against the top 2 other zones */
-  const handleQuickCompareFromDetail = (areaId: string) => {
-    const others = results
-      .filter((r) => !r.excluded && r.id !== areaId)
-      .slice(0, 2)
-      .map((r) => r.id);
-    const nextIds = [areaId, ...others];
-    if (nextIds.length >= 2) {
-      setCompareIds(nextIds);
-      setCompareOpen(true);
-    }
-  };
-
   const handleSearchSubmit = async (queryText: string) => {
     if (searching) return;
     setScreen('onboarding');
@@ -394,8 +367,8 @@ export function App() {
 
     try {
       const parsed = await postAiParse({ query: queryText });
-      const inferred = searchPreferences(queryText, parsed, availableKeys);
-      setCampusId(parsed.campus_id || campusId);
+      const inferred = searchPreferences(queryText, parsed, availableKeys, meta?.campuses.find((campus) => campus.id === parsed.campus_id));
+      setCampusId(inferred.inferredFields.has('campus') ? parsed.campus_id : campusId || parsed.campus_id);
       setBudget(inferred.budget ?? budget);
       setMinBudget(inferred.minBudget);
       setHousingType(parsed.housing_type || housingType);
@@ -403,13 +376,12 @@ export function App() {
       setAirLevel('any');
       setWellConnectedOnly(false);
       setTransportMode(inferred.transportMode);
-      setSelectedPriorities(inferred.selectedPriorities);
-      setAiWeightsOverride(Object.fromEntries(inferred.selectedPriorities.map((key) => {
+      setPreferenceWeights(Object.fromEntries(inferred.selectedPriorities.map((key) => {
         const weight = parsed.weights[key] ?? 0;
         return [key, weight >= 0.5 ? weight : 1];
       })));
       setAiInterpretation(parsed.interpretation);
-      setSearchReview({ query: queryText, inferredFields: inferred.inferredFields, inferredPriorities: inferred.inferredPriorities });
+      setSearchReview({ query: queryText, inferredFields: inferred.inferredFields });
     } catch (err) {
       setSearchError(err instanceof ApiError && err.status === 429
         ? err.detail
@@ -423,7 +395,6 @@ export function App() {
     pendingExplanation.current = searchReview?.query ?? null;
     if (!searchReview) {
       setAiInterpretation(null);
-      setAiWeightsOverride(null);
     }
     setSearchReview(null);
     setOnlyWithinBudget(true);
@@ -448,9 +419,9 @@ export function App() {
     }
   };
 
-  const campusShort = activeCampus?.name.split(' · ')[0] ?? campusId.toUpperCase();
+  const campusName = activeCampus?.name ?? campusId.toUpperCase();
   const budgetRange = minBudget === null ? `hasta ${formatEuro(budget)}` : `${formatEuro(minBudget)}–${formatEuro(budget)}`;
-  const summaryLine = `${HOUSING_TYPE_LABELS[housingType]} · ${budgetRange}/mes · ${campusShort}${
+  const summaryLine = `${HOUSING_TYPE_LABELS[housingType]} · ${budgetRange}/mes · ${campusName}${
     maxDistanceKm !== null ? ` (≤ ${formatKm(maxDistanceKm)})` : ''
   }`;
 
@@ -481,8 +452,8 @@ export function App() {
           transportMode={transportMode}
           onTransportModeChange={handleTransportModeChange}
           availableKeys={availableKeys}
-          selectedPriorities={[...activeCriteria]}
-          onTogglePriority={handleTogglePriority}
+          priorityWeights={computedWeights}
+          onPriorityChange={handlePriorityChange}
           onStart={handleStart}
         />
       </div>
@@ -515,8 +486,8 @@ export function App() {
         onWellConnectedChange={setWellConnectedOnly}
         onlyWithinBudget={onlyWithinBudget}
         onOnlyWithinBudgetChange={setOnlyWithinBudget}
-        selectedPriorities={[...activeCriteria]}
-        onTogglePriority={handleTogglePriority}
+        priorityWeights={computedWeights}
+        onPriorityChange={handlePriorityChange}
         transportMode={transportMode}
         onTransportModeChange={handleTransportModeChange}
         compareCount={compareIds.length}
@@ -574,7 +545,9 @@ export function App() {
             explanationLoading={aiLoading}
             selectedAreaId={selectedAreaId}
             hoveredAreaId={hoveredAreaId}
-            onSelectArea={setSelectedAreaId}
+            onSelectArea={(id) => setSelectedAreaId((current) => current === id ? null : id)}
+            renderDetails={(area) => <AreaDetailPanel area={area} indicators={meta?.indicators ?? []}
+              activeCriteria={activeCriteria} sources={meta?.sources ?? []} budget={budget} housingType={housingType} />}
             onHoverArea={setHoveredAreaId}
             compareIds={compareIds}
             onToggleCompare={handleToggleCompare}
@@ -598,7 +571,10 @@ export function App() {
             selectedAreaId={selectedAreaId}
             hoveredAreaId={hoveredAreaId}
             recommendedAreaId={recommendation?.area_id ?? null}
-            onSelectArea={setSelectedAreaId}
+            onSelectArea={(id) => {
+              setSelectedAreaId(id);
+              setMobileView('list');
+            }}
             onHoverArea={setHoveredAreaId}
             activeCampus={activeCampus}
             maxDistanceKm={maxDistanceKm}
@@ -608,48 +584,26 @@ export function App() {
           />}
         </main>
 
-        {/* Area Detail Slide-Over Panel (right side on desktop, full-screen on mobile) */}
-        {selectedArea && (
-          <aside
-            aria-label={`Detalle de ${selectedArea.name}`}
-            className="fixed inset-0 z-50 border-l border-border bg-bg lg:absolute lg:inset-y-0 lg:right-0 lg:left-auto lg:w-[420px] lg:shadow-popover"
+        {/* Mobile view toggle */}
+        <div className="fixed bottom-5 left-1/2 z-30 -translate-x-1/2 lg:hidden">
+          <button
+            type="button"
+            onClick={() => setMobileView((v) => (v === 'list' ? 'map' : 'list'))}
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-xs font-medium text-bg shadow-popover transition active:scale-95"
           >
-            <AreaDetailPanel
-              area={selectedArea}
-              indicators={meta?.indicators ?? []}
-              activeCriteria={activeCriteria}
-              sources={meta?.sources ?? []}
-              budget={budget}
-              housingType={housingType}
-              referenceM2={referenceM2}
-              onQuickCompare={handleQuickCompareFromDetail}
-              onClose={() => setSelectedAreaId(null)}
-            />
-          </aside>
-        )}
-
-        {/* Mobile Floating Toggle Button ("Mapa" / "Lista") */}
-        {!selectedArea && (
-          <div className="fixed bottom-5 left-1/2 z-30 -translate-x-1/2 lg:hidden">
-            <button
-              type="button"
-              onClick={() => setMobileView((v) => (v === 'list' ? 'map' : 'list'))}
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-xs font-medium text-bg shadow-popover transition active:scale-95"
-            >
-              {mobileView === 'list' ? (
-                <>
-                  <MapIcon className="h-4 w-4" strokeWidth={1.75} />
-                  <span>Mapa</span>
-                </>
-              ) : (
-                <>
-                  <List className="h-4 w-4" strokeWidth={1.75} />
-                  <span>Lista</span>
-                </>
-              )}
-            </button>
-          </div>
-        )}
+            {mobileView === 'list' ? (
+              <>
+                <MapIcon className="h-4 w-4" strokeWidth={1.75} />
+                <span>Mapa</span>
+              </>
+            ) : (
+              <>
+                <List className="h-4 w-4" strokeWidth={1.75} />
+                <span>Lista</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Comparison Modal */}

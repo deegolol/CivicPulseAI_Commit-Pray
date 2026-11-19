@@ -24,6 +24,7 @@ export function StarRating({
 
   return (
     <div
+      role="img"
       className="inline-flex items-center gap-1.5"
       aria-label={`${formatDecimal(clamped)} sobre 5 estrellas`}
     >

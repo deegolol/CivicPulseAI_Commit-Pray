@@ -166,3 +166,19 @@ input[type="range"].clean-range::-webkit-slider-thumb:hover {
     transition-duration: 0.01ms !important;
   }
 }
+
+.madrid-basemap {
+  filter: saturate(0) contrast(0.84) brightness(1.1);
+}
+
+.student-place-pin span {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border: 2px solid white;
+  border-radius: 50%;
+  color: white;
+  box-shadow: 0 1px 4px #17242733;
+  font: 700 11px var(--font-sans);
+}

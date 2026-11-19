@@ -5,10 +5,11 @@
  * - Below: clean ordered list with discreet highlight tags ("Más barata", "Más cerca", "Mejor aire", "Mejor comunicada").
  * - Bidirectional hover sync with MadridMap. No sparkles, no AI badges, no gradients, zero %.
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Check, ChevronDown, ChevronUp, ExternalLink, Scale, X } from 'lucide-react';
 import type { Recommendation, ScoreResultItem } from '../api/types';
 import { formatEuro, formatKm } from '../utils/format';
+import { normalizedToStars, StarRating } from './StarRating';
 
 interface ZoneListProps {
   results: ScoreResultItem[];
@@ -21,6 +22,7 @@ interface ZoneListProps {
   selectedAreaId: string | null;
   hoveredAreaId: string | null;
   onSelectArea: (areaId: string) => void;
+  renderDetails: (area: ScoreResultItem) => ReactNode;
   onHoverArea: (areaId: string | null) => void;
   compareIds: string[];
   onToggleCompare: (areaId: string) => void;
@@ -47,6 +49,7 @@ export function ZoneList({
   selectedAreaId,
   hoveredAreaId,
   onSelectArea,
+  renderDetails,
   onHoverArea,
   compareIds,
   onToggleCompare,
@@ -56,10 +59,19 @@ export function ZoneList({
 }: ZoneListProps) {
   const [explanationOpen, setExplanationOpen] = useState(false);
 
-  const visibleResults = useMemo(
-    () => results.filter((r) => !r.excluded).slice(0, 15),
-    [results],
-  );
+  const scrollArea = useRef<HTMLDivElement>(null);
+  const visibleResults = useMemo(() => {
+    const top = results.filter((area) => !area.excluded).slice(0, 15);
+    const selected = results.find((area) => area.id === selectedAreaId);
+    if (selected && !top.some((area) => area.id === selected.id)) return [...top, selected];
+    return top;
+  }, [results, selectedAreaId]);
+
+  useEffect(() => {
+    if (!selectedAreaId || loading) return;
+    const card = scrollArea.current?.querySelector('[data-expanded="true"]');
+    card?.querySelector('[aria-expanded="true"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }, [selectedAreaId, loading]);
 
   // Match the featured recommendation to its live ScoreResultItem (only if not excluded)
   const recommendedArea = useMemo(() => {
@@ -109,7 +121,7 @@ export function ZoneList({
   const recPrimaryLink = recommendedArea?.listing_links[0];
 
   return (
-    <div className="flex h-full flex-col overflow-y-auto bg-bg">
+    <div ref={scrollArea} className="flex h-full flex-col overflow-y-auto bg-bg">
       {/* One-line search summary + collapsible explanation */}
       <div className="border-b border-border bg-surface px-4 py-3">
         <div className="flex items-start justify-between gap-2">
@@ -167,6 +179,7 @@ export function ZoneList({
             {/* Featured Recommendation Hero Card (instant from /api/score, T28) */}
             {recommendation && recommendedArea && (
               <article
+                data-expanded={selectedAreaId === recommendedArea.id}
                 onMouseEnter={() => onHoverArea(recommendedArea.id)}
                 onMouseLeave={() => onHoverArea(null)}
                 className={`rounded-[10px] border-2 bg-bg p-4 transition duration-150 ${
@@ -207,6 +220,8 @@ export function ZoneList({
                     <span className="font-sans text-xs font-normal text-muted">/mes</span>
                   </div>
                 </div>
+
+                <div className="mt-2"><StarRating value={normalizedToStars(recommendedArea.score / 100)} size="md" /></div>
 
                 {/* Headline */}
                 {recommendation.headline && (
@@ -257,12 +272,25 @@ export function ZoneList({
                   )}
                   <button
                     type="button"
+                    aria-expanded={selectedAreaId === recommendedArea.id}
                     onClick={() => onSelectArea(recommendedArea.id)}
                     className="inline-flex min-h-[40px] flex-1 items-center justify-center rounded-[8px] border border-border bg-bg px-3.5 py-2 text-xs font-medium text-ink transition hover:border-ink/40 hover:bg-surface"
                   >
-                    Ver detalle
+                    {selectedAreaId === recommendedArea.id ? 'Ocultar detalle' : 'Ver detalle'}
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={`Comparar ${recommendedArea.name}`}
+                    aria-pressed={compareIds.includes(recommendedArea.id)}
+                    title="Añadir o quitar de la comparación"
+                    disabled={!compareIds.includes(recommendedArea.id) && compareIds.length >= 3}
+                    onClick={() => onToggleCompare(recommendedArea.id)}
+                    className="grid size-10 shrink-0 place-items-center rounded-lg border border-border text-muted hover:bg-surface aria-pressed:bg-surface aria-pressed:text-ink disabled:opacity-40"
+                  >
+                    <Scale size={16} aria-hidden="true" />
                   </button>
                 </div>
+                {selectedAreaId === recommendedArea.id && renderDetails(recommendedArea)}
               </article>
             )}
 
@@ -271,8 +299,8 @@ export function ZoneList({
               <div className="flex items-center justify-between pt-1">
                 <span className="text-xs font-medium text-muted">
                   {recommendedArea
-                    ? 'Otras alternativas para ti'
-                    : `Mostrando las ${Math.min(visibleResults.length, 10)} mejores zonas`}
+                    ? 'Otras zonas por valoración'
+                    : `Mostrando las ${Math.min(visibleResults.length, 15)} mejores zonas`}
                 </span>
                 {visibleResults.length >= 2 && (
                   <button
@@ -303,6 +331,7 @@ export function ZoneList({
                 return (
                   <article
                     key={area.id}
+                    data-expanded={isSelected}
                     onMouseEnter={() => onHoverArea(area.id)}
                     onMouseLeave={() => onHoverArea(null)}
                     className={`rounded-[10px] border bg-bg p-4 transition duration-150 ${
@@ -313,18 +342,7 @@ export function ZoneList({
                           : 'border-border hover:border-ink/40'
                     }`}
                   >
-                    <div
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => onSelectArea(area.id)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          onSelectArea(area.id);
-                        }
-                      }}
-                      className="cursor-pointer focus:outline-none"
-                    >
+                    <div>
                       {/* Discreet highlight tags (Más barata, Más cerca, Mejor aire, Mejor comunicada) */}
                       {tags.length > 0 && (
                         <div className="mb-2 flex flex-wrap gap-1.5">
@@ -343,9 +361,6 @@ export function ZoneList({
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           <div className="flex items-baseline gap-2">
-                            <span className="text-xs font-semibold text-muted tabular-nums">
-                              #{area.rank}
-                            </span>
                             <h3 className="font-display truncate text-base font-bold text-ink">
                               {area.name}
                             </h3>
@@ -353,7 +368,8 @@ export function ZoneList({
                           <p className="mt-0.5 text-xs text-muted">{area.district}</p>
                         </div>
 
-                        {area.est_rent_eur_month != null && (
+                        {area.excluded && <span className="text-xs text-muted">Fuera de filtros</span>}
+                        {!area.excluded && area.est_rent_eur_month != null && (
                           <span
                             className={`shrink-0 rounded-[6px] px-2 py-0.5 text-[11px] font-medium tabular-nums ${
                               overAmount === 0
@@ -365,6 +381,8 @@ export function ZoneList({
                           </span>
                         )}
                       </div>
+
+                      <div className="mt-2"><StarRating value={normalizedToStars(area.score / 100)} size="md" /></div>
 
                       {/* Hero price + distance */}
                       <div className="mt-3 flex items-baseline justify-between gap-2">
@@ -381,7 +399,7 @@ export function ZoneList({
                     </div>
 
                     {/* Footer actions: secondary "Ver pisos" + Compare toggle */}
-                    <div className="mt-3 flex items-center justify-between gap-2 border-t border-border pt-2.5">
+                    <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border pt-2.5">
                       {firstLink ? (
                         <a
                           href={firstLink.url}
@@ -396,11 +414,17 @@ export function ZoneList({
                         <span />
                       )}
 
+                      <button type="button" aria-expanded={isSelected}
+                        onClick={() => onSelectArea(area.id)}
+                        className="inline-flex min-h-[34px] items-center gap-1 rounded-lg px-2 text-xs font-medium text-ink hover:bg-surface">
+                        {isSelected ? 'Ocultar detalle' : 'Ver detalle'}
+                        <ChevronDown className={isSelected ? 'rotate-180' : ''} size={14} aria-hidden="true" />
+                      </button>
                       <button
                         type="button"
                         onClick={() => onToggleCompare(area.id)}
                         disabled={!isCompared && compareIds.length >= 3}
-                        className={`inline-flex min-h-[34px] items-center gap-1.5 rounded-[8px] px-2.5 py-1.5 text-xs font-medium transition disabled:opacity-40 ${
+                        className={`ml-auto inline-flex min-h-[34px] items-center gap-1.5 rounded-[8px] px-2.5 py-1.5 text-xs font-medium transition disabled:opacity-40 ${
                           isCompared
                             ? 'bg-surface text-ink'
                             : 'text-muted hover:bg-surface hover:text-ink'
@@ -419,6 +443,7 @@ export function ZoneList({
                         )}
                       </button>
                     </div>
+                    {isSelected && renderDetails(area)}
                   </article>
                 );
               })}

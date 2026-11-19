@@ -28,6 +28,7 @@ class Campus(BaseModel):
     id: str
     name: str
     coords: tuple[float, float]  # [lon, lat]
+    aliases: list[str] = Field(default_factory=list)
 
 
 class Area(BaseModel):

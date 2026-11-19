@@ -1,5 +1,5 @@
 /** Searchable picker for the campuses supported by the recommendation engine. */
-import { useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import type { Campus } from '../api/types';
 
 function normalize(value: string) {
@@ -7,18 +7,27 @@ function normalize(value: string) {
 }
 
 export function CampusPicker({
-  campuses, campusId, onChange,
-}: { campuses: Campus[]; campusId: string; onChange: (campusId: string) => void }) {
+  campuses, campusId, onChange, keepSelection = false, openOnMount = false,
+}: { campuses: Campus[]; campusId: string; onChange: (campusId: string) => void; keepSelection?: boolean; openOnMount?: boolean }) {
   const id = useId();
+  const input = useRef<HTMLInputElement>(null);
+  const activeOption = useRef<HTMLLIElement>(null);
+  useEffect(() => {
+    if (openOnMount) input.current?.focus();
+  }, [openOnMount]);
   const [draft, setDraft] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
   const selected = campuses.find((item) => item.id === campusId);
   const terms = normalize(draft ?? '').trim().split(/\s+/).filter(Boolean);
   const matches = campuses.filter((item) => {
-    const name = normalize(item.name + ' ' + item.id + (item.name.includes('UPM') ? ' Universidad Politécnica de Madrid' : ''));
+    const name = normalize([item.name, item.id, ...(item.aliases ?? [])].join(' '));
     return terms.every((term) => name.includes(term));
   });
+
+  useEffect(() => {
+    if (open) activeOption.current?.scrollIntoView({ block: 'nearest' });
+  }, [active, open]);
 
   const select = (campus: Campus) => {
     onChange(campus.id);
@@ -30,6 +39,7 @@ export function CampusPicker({
     <div className="relative">
       <label htmlFor={id} className="mb-1.5 block text-sm font-semibold">Universidad o campus</label>
       <input
+        ref={input}
         id={id}
         role="combobox"
         aria-autocomplete="list"
@@ -47,12 +57,15 @@ export function CampusPicker({
         onBlur={() => setOpen(false)}
         onChange={(event) => {
           setDraft(event.target.value);
-          onChange('');
+          if (!keepSelection) onChange('');
           setActive(0);
           setOpen(true);
         }}
         onKeyDown={(event) => {
-          if (event.key === 'Escape') setOpen(false);
+          if (event.key === 'Escape' && open) {
+            event.stopPropagation();
+            setOpen(false);
+          }
           if (!matches.length || !['ArrowDown', 'ArrowUp', 'Enter'].includes(event.key)) return;
           if (!open && event.key === 'Enter') return;
           event.preventDefault();
@@ -62,13 +75,14 @@ export function CampusPicker({
             setActive((index) => (index + (event.key === 'ArrowDown' ? 1 : matches.length - 1)) % matches.length);
           }
         }}
-        className="w-full rounded-lg border border-border bg-bg px-3 py-2.5 text-sm outline-none focus:border-ink"
+        className="block h-11 w-full rounded-lg border border-border bg-bg px-3 text-sm outline-none focus:border-ink"
       />
       {open && (matches.length ? (
-        <ul id={id + '-options'} role="listbox" className="absolute inset-x-0 z-20 mt-1 rounded-lg border border-border bg-bg p-1 shadow-popover">
+        <ul id={id + '-options'} role="listbox" className="absolute inset-x-0 z-20 mt-1 max-h-56 overflow-auto rounded-lg border border-border bg-bg p-1 shadow-popover">
           {matches.map((campus, index) => (
             <li
               key={campus.id}
+              ref={active === index ? activeOption : undefined}
               id={id + '-' + campus.id}
               role="option"
               aria-selected={active === index}

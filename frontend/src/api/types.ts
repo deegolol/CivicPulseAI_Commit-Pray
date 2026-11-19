@@ -36,6 +36,7 @@ export interface IndicatorMeta {
 export interface Campus {
   id: string;
   name: string;
+  aliases?: string[];
   /** [lon, lat] */
   coords: [number, number];
 }

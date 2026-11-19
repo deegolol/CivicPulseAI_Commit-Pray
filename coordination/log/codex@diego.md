@@ -47,3 +47,8 @@
 - Diego pidió completar los cambios pendientes de publicación. Revisé main y las ramas remotas. Implementé búsqueda con revisión y formulario manual, criterios opcionales vinculados al scoring y estrellas globales destacadas.
 - El mapa conserva el color, limita el zoom y el desplazamiento al entorno de España y reduce actualizaciones durante hover. Corregí las fichas que quedaban pegadas al arrastrar (8c73930).
 - QA local con Chromium en escritorio y móvil, build web y 43 tests de backend.
+
+## Revisión de portada, formularios y mapa
+- Diego pidió simplificar el mapa y rehacer la búsqueda y las tarjetas a partir de cuatro capturas. Codex implementó el rediseño y generó la ilustración transparente.
+- El selector ofrece 15 centros con posición oficial. Los criterios tienen tres niveles con peso real y el detalle de la valoración se abre en la propia tarjeta.
+- Verificado con las 43 pruebas de backend, el build web y Chromium en escritorio y móvil. La rama queda disponible para revisión de Diego.

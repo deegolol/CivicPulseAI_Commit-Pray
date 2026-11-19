@@ -31,11 +31,12 @@ import type {
 } from '../api/types';
 import { MADRID_CENTER, MADRID_DEFAULT_ZOOM } from '../config';
 import { formatEuro, formatKm } from '../utils/format';
+import { StudentPlaces, StudentPlacesKey } from './StudentPlaces';
 
 // Includes mainland Spain, the Balearic Islands and the Canary Islands.
 const SPAIN_BOUNDS = L.latLngBounds([27.4, -18.3], [44.1, 4.8]);
 const CAMPUS_STYLE = { color: '#FFFFFF', weight: 2.5, fillColor: '#D7262E', fillOpacity: 1 };
-const RADIUS_STYLE = { color: '#4D7CF5', weight: 1.5, dashArray: '5 5', fillColor: '#4D7CF5', fillOpacity: 0.04 };
+const RADIUS_STYLE = { color: '#789098', weight: 1, dashArray: '5 5', fillOpacity: 0 };
 
 interface MadridMapProps {
   geoData: BarriosGeoJSON | null;
@@ -56,7 +57,6 @@ interface MadridMapProps {
 
 function createPricePillIcon(
   priceLabel: string,
-  rank: number,
   isRecommended: boolean,
   isActive: boolean,
 ) {
@@ -89,7 +89,6 @@ function createPricePillIcon(
       font-family:'Bricolage Grotesque','Instrument Sans',sans-serif;
       font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer;
     ">
-      ${isRecommended ? '<span style="font-size:10px;opacity:0.9">#1</span>' : `<span style="font-size:10px;opacity:0.65">#${rank}</span>`}
       <span>${priceLabel}</span>
     </div>`,
   });
@@ -114,7 +113,7 @@ const PricePillMarker = memo(function PricePillMarker({
     mouseover: () => onHover(pill.id),
     mouseout: () => onHover(null),
   }), [pill.id, onSelect, onHover]);
-  const icon = useMemo(() => createPricePillIcon(pill.priceLabel, pill.rank, pill.isRecommended, active), [pill, active]);
+  const icon = useMemo(() => createPricePillIcon(pill.priceLabel, pill.isRecommended, active), [pill, active]);
   return (
     <Marker position={pill.coords} icon={icon}
       zIndexOffset={active ? 1000 : pill.isRecommended ? 500 : 100 - pill.rank}
@@ -131,7 +130,6 @@ function buildTooltipHtml(
   name: string,
   district: string,
   result: ScoreResultItem | undefined,
-  rank: number | undefined,
   budget: number,
 ): string {
   const rentText =
@@ -153,7 +151,6 @@ function buildTooltipHtml(
 
   return `<div style="min-width:155px">
     <div style="display:flex;align-items:baseline;gap:6px">
-      ${rank ? `<span style="font-size:11px;font-weight:700;color:#1F4FD6">#${rank}</span>` : ''}
       <span style="font-weight:600;font-size:13px;color:#0D1117">${name}</span>
     </div>
     <div style="color:#5D6673;font-size:11px;margin-bottom:5px">${district}</div>
@@ -321,8 +318,8 @@ export function MadridMap({
 
     if (isSelected) {
       return {
-        fillColor: '#1F4FD6',
-        fillOpacity: 0.28,
+        fillColor: '#486979',
+        fillOpacity: 0.18,
         color: '#0D1117',
         weight: 2.5,
         opacity: 1,
@@ -339,9 +336,9 @@ export function MadridMap({
     }
     if (rank) {
       return {
-        fillColor: '#4D7CF5',
-        fillOpacity: isHovered ? 0.28 : 0.14,
-        color: isHovered ? '#1F4FD6' : '#4D7CF5',
+        fillColor: '#638293',
+        fillOpacity: isHovered ? 0.17 : 0.08,
+        color: isHovered ? '#466675' : '#6a8794',
         weight: isHovered ? 2 : 1.25,
         opacity: isHovered ? 1 : 0.65,
       };
@@ -368,7 +365,7 @@ export function MadridMap({
       const pathLayer = layer as L.Path;
       pathLayer.setStyle(getStyleForFeature(feature));
       pathLayer.setTooltipContent(
-        buildTooltipHtml(name, district, scoresById[id], top10RankById[id], budget),
+        buildTooltipHtml(name, district, scoresById[id], budget),
       );
     });
   }, [geoData, scoresById, top10RankById, recommendedAreaId, budget, getStyleForFeature]);
@@ -391,7 +388,7 @@ export function MadridMap({
         const area = scoresById[id];
         if (!centroid || !area) return null;
         const priceLabel =
-          area.est_rent_eur_month != null ? `~${formatEuro(area.est_rent_eur_month)}` : `#${rank}`;
+          area.est_rent_eur_month != null ? `~${formatEuro(area.est_rent_eur_month)}` : 'Sin dato';
         return {
           id,
           rank,
@@ -431,7 +428,7 @@ export function MadridMap({
     const { id, name, district } = feature.properties;
     pathsById.current.set(id, { path: layer as L.Path, feature });
     layer.bindTooltip(
-      buildTooltipHtml(name, district, scoresRef.current[id], top10Ref.current[id], budgetRef.current),
+      buildTooltipHtml(name, district, scoresRef.current[id], budgetRef.current),
       { sticky: true, direction: 'top', offset: [0, -8], className: 'clean-tooltip' },
     );
 
@@ -453,12 +450,15 @@ export function MadridMap({
         minZoom={5}
         maxBounds={SPAIN_BOUNDS}
         maxBoundsViscosity={1}
+        maxZoom={19}
         scrollWheelZoom
         className="h-full w-full"
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.ign.es/">IGN</a> · <a href="https://datos.madrid.es/">Ayuntamiento de Madrid</a> · <a href="https://www.esmadrid.com/">Madrid Destino</a>'
+          url="https://tms-ign-base.idee.es/1.0.0/IGNBaseGris/{z}/{x}/{-y}.jpeg"
+          maxNativeZoom={17}
+          className="madrid-basemap"
           noWrap
         />
 
@@ -487,7 +487,9 @@ export function MadridMap({
           />
         )}
 
-        {/* Airbnb-style floating price pills on Top 10 zones */}
+        <StudentPlaces />
+
+        {/* Floating price pills */}
         {pricePills.map((pill) => (
           <PricePillMarker key={pill.id} pill={pill} active={pill.id === selectedAreaId || pill.id === hoveredAreaId}
             onSelect={onSelectArea} onHover={onHoverArea} />
@@ -514,15 +516,16 @@ export function MadridMap({
       )}
 
       {/* Clean minimal map key */}
-      <div className="pointer-events-none absolute top-3 right-3 z-[400] flex items-center gap-3 rounded-[8px] border border-border bg-bg px-3 py-1.5 text-[11px] text-muted lg:top-auto lg:right-auto lg:bottom-4 lg:left-4">
+      <div className="pointer-events-none absolute top-3 right-3 z-[400] flex max-w-[calc(100%-64px)] flex-wrap items-center gap-x-3 gap-y-1 rounded-[8px] border border-border bg-bg px-3 py-1.5 text-[11px] text-muted lg:top-auto lg:right-auto lg:bottom-6 lg:left-4">
         <span className="inline-flex items-center gap-1.5 font-medium text-ink">
           <span className="h-2.5 w-2.5 rounded-full bg-brand" />
           Recomendada
         </span>
         <span className="inline-flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-full border border-ink/40 bg-bg" />
-          Top 10 (€/mes)
+          Alquiler estimado
         </span>
+        <StudentPlacesKey />
       </div>
     </div>
   );

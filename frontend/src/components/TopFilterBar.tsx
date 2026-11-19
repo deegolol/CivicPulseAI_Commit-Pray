@@ -10,13 +10,14 @@ import type { Campus, HousingType } from '../api/types';
 import { HOUSING_TYPE_LABELS } from '../config';
 import {
   EXAMPLE_QUERIES,
-  priorityOptions,
   TRANSPORT_LABELS,
   type AirLevelOption,
   type TransportMode,
 } from '../constants/filters';
 import { formatEuro, formatKm } from '../utils/format';
 import { BrandLogo } from './BrandLogo';
+import { CampusPicker } from './CampusPicker';
+import { PreferenceControls } from './PreferenceControls';
 
 type ActivePopover = 'campus' | 'budget' | 'type' | 'distance' | 'more' | 'search' | null;
 
@@ -43,8 +44,8 @@ interface TopFilterBarProps {
   onWellConnectedChange: (value: boolean) => void;
   onlyWithinBudget: boolean;
   onOnlyWithinBudgetChange: (value: boolean) => void;
-  selectedPriorities: string[];
-  onTogglePriority: (key: string) => void;
+  priorityWeights: Record<string, number>;
+  onPriorityChange: (key: string, weight: number) => void;
   transportMode: TransportMode;
   onTransportModeChange: (mode: TransportMode) => void;
   compareCount: number;
@@ -74,8 +75,8 @@ export function TopFilterBar({
   onWellConnectedChange,
   onlyWithinBudget,
   onOnlyWithinBudgetChange,
-  selectedPriorities,
-  onTogglePriority,
+  priorityWeights,
+  onPriorityChange,
   transportMode,
   onTransportModeChange,
   compareCount,
@@ -103,7 +104,7 @@ export function TopFilterBar({
   }, []);
 
   const activeCampus = campuses.find((c) => c.id === campusId);
-  const campusShort = activeCampus?.name.split(' · ')[0] ?? campusId.toUpperCase();
+  const campusName = activeCampus?.name ?? campusId.toUpperCase();
 
   const extraFilterCount =
     (airLevel !== 'any' ? 1 : 0) +
@@ -145,7 +146,7 @@ export function TopFilterBar({
                 : 'border-border bg-bg text-ink hover:bg-surface'
             }`}
           >
-            <span>{campusShort}</span>
+            <span className="max-w-36 truncate" title={campusName}>{campusName}</span>
             <ChevronDown className="h-3.5 w-3.5 text-muted" strokeWidth={1.75} />
           </button>
 
@@ -256,29 +257,11 @@ export function TopFilterBar({
           </div>
 
           {openPopover === 'campus' && (
-            <div className="space-y-2">
-              {campuses.map((c) => {
-                const active = c.id === campusId;
-                return (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => {
-                      onCampusChange(c.id);
-                      setOpenPopover(null);
-                    }}
-                    className={`flex w-full items-center justify-between rounded-[8px] border px-3.5 py-2.5 text-left text-xs font-medium transition ${
-                      active
-                        ? 'border-ink bg-surface text-ink'
-                        : 'border-border bg-bg text-ink hover:bg-surface'
-                    }`}
-                  >
-                    <span>{c.name}</span>
-                    {active && <span className="h-2 w-2 rounded-full bg-brand" />}
-                  </button>
-                );
-              })}
-            </div>
+            <CampusPicker campuses={campuses} campusId={campusId} keepSelection openOnMount
+              onChange={(id) => {
+                onCampusChange(id);
+                setOpenPopover(null);
+              }} />
           )}
 
           {openPopover === 'budget' && (
@@ -348,7 +331,7 @@ export function TopFilterBar({
 
           {openPopover === 'more' && (
             <div className="space-y-4">
-              {selectedPriorities.includes('air_no2') && (
+              {Boolean(priorityWeights.air_no2) && (
                 <div className="space-y-2">
                   <span className="block text-xs font-medium text-muted">
                     Calidad del aire
@@ -379,7 +362,7 @@ export function TopFilterBar({
               )}
 
               <div className="space-y-2">
-                {selectedPriorities.includes('transit_stops') && (
+                {Boolean(priorityWeights.transit_stops) && (
                   <label className="flex min-h-[40px] cursor-pointer items-center justify-between rounded-[8px] border border-border px-3 py-2 text-xs font-medium text-ink hover:bg-surface">
                     <span>Solo zonas bien comunicadas en Metro</span>
                     <input
@@ -409,32 +392,7 @@ export function TopFilterBar({
                 </select>
               </label>
 
-              <div className="space-y-2">
-                <span className="block text-xs font-medium text-muted">
-                  Lo que más te importa
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {priorityOptions(availableKeys).map((chip) => {
-                    const active = selectedPriorities.includes(chip.key);
-                    return (
-                      <button
-                        key={chip.key}
-                        type="button"
-                        aria-pressed={active}
-                        disabled={active && selectedPriorities.length === 1}
-                        onClick={() => onTogglePriority(chip.key)}
-                        className={`min-h-[34px] rounded-[8px] border px-3 py-1 text-xs font-medium transition ${
-                          active
-                            ? 'border-ink bg-ink text-bg'
-                            : 'border-border bg-bg text-ink hover:bg-surface'
-                        }`}
-                      >
-                        {chip.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+              <PreferenceControls availableKeys={availableKeys} weights={priorityWeights} onChange={onPriorityChange} />
             </div>
           )}
 
