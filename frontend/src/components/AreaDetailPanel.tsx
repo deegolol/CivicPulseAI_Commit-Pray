@@ -1,10 +1,23 @@
 /**
- * Editorial neighborhood detail panel (T24).
- * Hero: "Esto es lo que te da tu presupuesto aquí" (~X €/mes in Fraunces) +
- * primary brass CTA "Ver pisos en esta zona" + thin indicator bars in real units + official sources.
+ * Editorial neighborhood detail panel (T10 + T24).
+ * - Hero: "Esto es lo que te da tu presupuesto aquí" (~X €/mes in Fraunces) + "Ver pisos en esta zona"
+ * - Recharts Radar comparing the selected neighborhood vs Madrid median (/api/areas/{id})
+ * - Per-indicator real-unit bars, provenance notes ("valor del distrito", services breakdown), and source links
+ * - Mandatory CRTM attribution ("Powered by CRTM") + transformed-data notice per license
  */
-import { ArrowLeft, ExternalLink, MapPin } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { ArrowLeft, ExternalLink, Info, MapPin } from 'lucide-react';
+import {
+  PolarAngleAxis,
+  PolarGrid,
+  Radar,
+  RadarChart,
+  ResponsiveContainer,
+  Tooltip as RechartsTooltip,
+} from 'recharts';
+import { getAreaDetail } from '../api/client';
 import type {
+  AreaDetailResponse,
   HousingType,
   IndicatorMeta,
   ScoreResultItem,
@@ -33,14 +46,31 @@ interface AreaDetailPanelProps {
   onBack: () => void;
 }
 
-function formatIndicatorValue(key: string, value: number | null, unit: string): string {
+function formatIndicatorValue(key: string, value: number | null | undefined, unit: string): string {
   if (value == null) return 'Sin dato';
   if (key === 'rent_eur_m2') return formatEuroPerM2(value);
   if (key === 'distance_km') return formatKm(value);
   if (key === 'air_no2') return `${formatInteger(value)} µg/m³ · ${getAirQualityLabel(value)}`;
-  if (key === 'transit_stops') return `${formatDecimal(value)} paradas/km²`;
+  if (key === 'transit_stops') return `${formatDecimal(value)} est./km²`;
   if (key === 'services_count') return `${formatInteger(value)} equipamientos`;
   return `${formatDecimal(value)} ${unit}`;
+}
+
+function shortRadarLabel(key: string, fallback: string): string {
+  switch (key) {
+    case 'rent_eur_m2':
+      return 'Precio';
+    case 'distance_km':
+      return 'Cercanía';
+    case 'air_no2':
+      return 'Aire';
+    case 'transit_stops':
+      return 'Metro';
+    case 'services_count':
+      return 'Servicios';
+    default:
+      return fallback;
+  }
 }
 
 export function AreaDetailPanel({
@@ -52,6 +82,71 @@ export function AreaDetailPanel({
   referenceM2,
   onBack,
 }: AreaDetailPanelProps) {
+  const [detail, setDetail] = useState<AreaDetailResponse | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+
+  useEffect(() => {
+    if (!area?.id) {
+      setDetail(null);
+      return;
+    }
+    let cancelled = false;
+    setDetailLoading(true);
+    getAreaDetail(area.id)
+      .then((res) => {
+        if (!cancelled) setDetail(res);
+      })
+      .catch(() => {
+        if (!cancelled) setDetail(null);
+      })
+      .finally(() => {
+        if (!cancelled) setDetailLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [area?.id]);
+
+  const sourcesById = useMemo(() => {
+    const map: Record<string, SourceInfo> = {};
+    for (const s of sources) {
+      map[s.id] = s;
+    }
+    return map;
+  }, [sources]);
+
+  // Build radar dataset comparing selected neighborhood vs Madrid median (0–10 relative visual scale, no %)
+  const radarData = useMemo(() => {
+    if (!area || !detail) return [];
+    const points: {
+      axis: string;
+      areaScore: number;
+      medianScore: number;
+      areaLabel: string;
+      medianLabel: string;
+    }[] = [];
+
+    for (const ind of indicators) {
+      const areaVal = detail.values[ind.key];
+      const medianVal = detail.city_median?.[ind.key];
+      if (areaVal == null || medianVal == null || medianVal === 0) continue;
+
+      // Relative index centered at 5.0 for Madrid median; >5 means better than median
+      const ratio = ind.higher_is_better ? areaVal / medianVal : medianVal / areaVal;
+      const clampedArea = Math.max(1.5, Math.min(10, Number((ratio * 5).toFixed(1))));
+
+      points.push({
+        axis: shortRadarLabel(ind.key, ind.label),
+        areaScore: clampedArea,
+        medianScore: 5,
+        areaLabel: formatIndicatorValue(ind.key, areaVal, ind.unit),
+        medianLabel: formatIndicatorValue(ind.key, medianVal, ind.unit),
+      });
+    }
+
+    return points;
+  }, [area, detail, indicators]);
+
   if (!area) {
     return (
       <div className="flex h-full flex-col items-center justify-center p-6 text-center">
@@ -73,6 +168,7 @@ export function AreaDetailPanel({
   const m2Used = referenceM2 ?? HOUSING_REFERENCE_M2[housingType];
   const primaryLink = area.listing_links[0];
   const secondaryLinks = area.listing_links.slice(1);
+  const hasCrtm = Boolean(sourcesById.crtm);
 
   const indicatorRows = [
     {
@@ -80,20 +176,26 @@ export function AreaDetailPanel({
       label: 'Distancia al campus',
       unit: 'km',
       value: area.distance_km,
+      medianValue: null as number | null,
       normalized: area.breakdown.distance_km?.normalized ?? 0.5,
+      note: 'Distancia en línea recta al centroide del barrio',
+      source: undefined as SourceInfo | undefined,
     },
     ...indicators.map((ind) => ({
       key: ind.key,
       label: ind.label,
       unit: ind.unit,
-      value: area.breakdown[ind.key]?.value ?? null,
+      value: area.breakdown[ind.key]?.value ?? detail?.values[ind.key] ?? null,
+      medianValue: detail?.city_median?.[ind.key] ?? null,
       normalized: area.breakdown[ind.key]?.normalized ?? 0.5,
+      note: detail?.notes?.[ind.key],
+      source: sourcesById[ind.source],
     })),
   ];
 
   return (
     <div className="flex h-full flex-col overflow-y-auto p-5">
-      {/* Back to top 3 + rank */}
+      {/* Back to top 3 + qualitative fit pill */}
       <div className="flex items-center justify-between gap-2">
         <button
           type="button"
@@ -143,9 +245,7 @@ export function AreaDetailPanel({
           {area.fits_budget !== null && (
             <span
               className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
-                area.fits_budget
-                  ? 'bg-fit-soft text-fit'
-                  : 'bg-nofit-soft text-nofit'
+                area.fits_budget ? 'bg-fit-soft text-fit' : 'bg-nofit-soft text-nofit'
               }`}
             >
               {area.fits_budget ? 'Encaja' : 'Por encima'}
@@ -180,10 +280,10 @@ export function AreaDetailPanel({
         )}
 
         <p className="mt-1.5 text-[11px] text-muted">
-          Estimación oficial con referencia de {m2Used} m² ({HOUSING_TYPE_LABELS[housingType].toLowerCase()}).
+          Estimación con datos oficiales (referencia de {m2Used} m²).
         </p>
 
-        {/* Primary CTA inside Hero */}
+        {/* Primary CTA */}
         {primaryLink && (
           <a
             href={primaryLink.url}
@@ -214,16 +314,84 @@ export function AreaDetailPanel({
         )}
       </section>
 
-      {/* Thin proportional indicator bars (real units, zero %) */}
-      <section className="mt-5 space-y-3">
+      {/* Recharts Radar: Barrio vs Mediana de Madrid (rendered when >= 3 indicators available) */}
+      {detailLoading ? (
+        <div className="mt-5 h-44 animate-pulse rounded-2xl border border-border bg-canvas" />
+      ) : (
+        radarData.length >= 3 && (
+          <section className="mt-5 rounded-2xl border border-border bg-canvas p-3.5">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-medium text-ink">Frente a la mediana de Madrid</h3>
+              <div className="flex items-center gap-3 text-[10px] text-muted">
+                <span className="inline-flex items-center gap-1">
+                  <span className="h-2 w-2 rounded-full bg-accent" />
+                  Este barrio
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <span className="h-2 w-2 rounded-full bg-muted/60" />
+                  Mediana
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-1 h-44 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart data={radarData} outerRadius="68%">
+                  <PolarGrid stroke="#E7E5E0" />
+                  <PolarAngleAxis
+                    dataKey="axis"
+                    tick={{ fill: '#5B6170', fontSize: 11 }}
+                  />
+                  <Radar
+                    name="Mediana Madrid"
+                    dataKey="medianScore"
+                    stroke="#5B6170"
+                    strokeDasharray="3 3"
+                    fill="#5B6170"
+                    fillOpacity={0.08}
+                  />
+                  <Radar
+                    name={area.name}
+                    dataKey="areaScore"
+                    stroke="#B8862B"
+                    strokeWidth={2}
+                    fill="#B8862B"
+                    fillOpacity={0.22}
+                  />
+                  <RechartsTooltip
+                    content={({ active, payload }) => {
+                      if (!active || !payload?.length) return null;
+                      const item = payload[0].payload as (typeof radarData)[number];
+                      return (
+                        <div className="rounded-xl border border-border bg-surface px-3 py-2 text-[11px] shadow-floating">
+                          <div className="font-semibold text-ink">{item.axis}</div>
+                          <div className="mt-0.5 text-ink tabular-nums">
+                            Barrio: <strong>{item.areaLabel}</strong>
+                          </div>
+                          <div className="text-muted tabular-nums">
+                            Mediana Madrid: {item.medianLabel}
+                          </div>
+                        </div>
+                      );
+                    }}
+                  />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+          </section>
+        )
+      )}
+
+      {/* Thin proportional indicator bars with real units, median comparison, notes & source links */}
+      <section className="mt-5 space-y-3.5">
         <h3 className="text-xs font-medium text-muted">Desglose con datos reales</h3>
-        <div className="space-y-3">
+        <div className="space-y-3.5">
           {indicatorRows.map((row) => {
             const barWidth = Math.max(8, Math.min(100, Math.round(row.normalized * 100)));
             return (
               <div key={row.key} className="space-y-1.5">
                 <div className="flex items-baseline justify-between gap-2 text-xs">
-                  <span className="text-muted">{row.label}</span>
+                  <span className="font-medium text-ink">{row.label}</span>
                   <span className="font-medium text-ink tabular-nums">
                     {formatIndicatorValue(row.key, row.value, row.unit)}
                   </span>
@@ -234,13 +402,41 @@ export function AreaDetailPanel({
                     style={{ width: `${barWidth}%` }}
                   />
                 </div>
+                <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 text-[11px] text-muted">
+                  <span className="inline-flex items-center gap-1">
+                    {row.medianValue != null && (
+                      <span className="tabular-nums">
+                        Mediana Madrid: {formatIndicatorValue(row.key, row.medianValue, row.unit)}
+                      </span>
+                    )}
+                    {row.note && (
+                      <span className="inline-flex items-center gap-0.5 text-muted">
+                        {row.medianValue != null && ' · '}
+                        <Info className="h-3 w-3 shrink-0" strokeWidth={1.5} />
+                        {row.note}
+                      </span>
+                    )}
+                  </span>
+
+                  {row.source && (
+                    <a
+                      href={row.source.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-0.5 font-medium text-accent hover:underline"
+                    >
+                      <span>Fuente</span>
+                      <ExternalLink className="h-2.5 w-2.5" strokeWidth={1.5} />
+                    </a>
+                  )}
+                </div>
               </div>
             );
           })}
         </div>
       </section>
 
-      {/* Official Sources */}
+      {/* Official Sources + Mandatory CRTM Attribution */}
       {sources.length > 0 && (
         <section className="mt-5 border-t border-border pt-4">
           <h3 className="text-[11px] font-medium text-muted">Fuentes oficiales</h3>
@@ -258,6 +454,21 @@ export function AreaDetailPanel({
               </a>
             ))}
           </div>
+
+          {hasCrtm && (
+            <p className="mt-2.5 text-[11px] leading-relaxed text-muted">
+              Transporte:{' '}
+              <a
+                href="https://www.crtm.es/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-ink underline decoration-border underline-offset-2 hover:text-accent"
+              >
+                Powered by CRTM
+              </a>
+              . Datos transformados y agregados por barrio a partir de fuentes abiertas oficiales.
+            </p>
+          )}
         </section>
       )}
     </div>

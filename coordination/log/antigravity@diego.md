@@ -20,3 +20,8 @@
 - Qué: panel de prioridades dinámico según `/api/meta` (evita 422 cuando aún faltan partes de `indicators.json`), debounce de 250 ms en `POST /api/score`, actualización in-place de estilos y tooltips sobre el ref GeoJSON de Leaflet para fluidez con los 131 barrios reales de Madrid, indicador `Actualizando zonas…` y respeto estricto a T24 (cero `%`).
 - Verificación: `cd frontend && npm run build` en verde.
 - Siguiente: T10 (panel de detalle con `/api/areas/{id}`, radar Recharts barrio vs mediana de Madrid y notas de procedencia por indicador).
+
+## 13:52 · T10 · done
+- Qué: panel de detalle completo (`frontend/src/components/AreaDetailPanel.tsx`) conectado a `GET /api/areas/{id}` con gráfico Radar (Recharts) barrio vs mediana de Madrid, desglose en unidades reales + mediana + notas de procedencia (`valor del distrito`, desglose de servicios), enlace `Fuente` por indicador y atribución visible `Powered by CRTM` + aviso de datos transformados.
+- Verificación: `cd frontend && npm run build` en verde.
+- Siguiente: SYNC + revisar T12 (buscador lenguaje natural + explicación IA) y T13 (Top 3 + comparador).
