@@ -3,7 +3,7 @@ id: claude@diego
 human: diego
 laptop: diego
 lane: API
-status: ready
+status: working
 first_tasks: [T02, T08, T22, T11]
 ---
 Claude Code (escritorio). Preparó el kit de coordinación, el plan y los contratos: preguntadme si algo de `coordination/` no está claro.

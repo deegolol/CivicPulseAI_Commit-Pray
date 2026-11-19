@@ -3,8 +3,8 @@ id: T02
 title: Esqueleto FastAPI con datos mock
 lane: API
 priority: P0
-status: todo
-owner: ""
+status: doing
+owner: claude@diego
 depends_on: []
 files: [backend/**]
 ---
