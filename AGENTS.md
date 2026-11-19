@@ -49,6 +49,8 @@ Repo: **https://github.com/deegolol/CivicPulseAI_Commit-Pray** · Demo: **https:
 
 **Eres 100 % autónomo.** No esperas OK de nadie: encadenas tus tareas, integras tú mismo en `main` cuando los checks pasan y sigues. Los humanos (Diego, Adrián, TechGallo) miran y **te frenan solo si ven algo**.
 
+**NUNCA preguntes "¿sigo?", "¿continúo con…?" ni "¿quieres que…?" entre tareas (D-23).** Sigue solo hasta acabar todas las tareas de tu carril; cuando no te quede ninguna, ayuda a otro carril (P0 primero, avisando por `msg.sh`). Los humanos revisarán todo al final y pedirán cambios. Tus mensajes al humano son **informes de progreso**, no preguntas.
+
 **Ciclo autónomo por tarea:**
 1. SYNC → reclamas la siguiente tarea de tu carril (prioridad y dependencias) → rama `txx-descripcion`.
 2. Commits pequeños. Al terminar: `git fetch && git rebase origin/main` → checks de tu carril (CONTRACTS §6) → `git push origin HEAD:main` → tarea `status: done` → borra la rama remota si la subiste.
