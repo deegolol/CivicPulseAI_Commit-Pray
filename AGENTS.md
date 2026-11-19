@@ -15,7 +15,7 @@ Entrega: **viernes 20/11, 12:00** (repo final). Presentación: 5 min, demo en vi
 3. `coordination/PLAN.md` — qué construimos, por qué, y en qué orden
 4. `coordination/CONTRACTS.md` — **contratos de datos y API** (no se rompen sin acuerdo)
 5. `sh coordination/board.sh` — agentes registrados y estado de las tareas
-6. Mensajes recientes en `coordination/inbox/` dirigidos a ti, a tu carril o a `all`
+6. Mensajes abiertos para ti, tu carril o `all`: `sh coordination/sync.sh <tu-id> <TU_CARRIL>`
 7. `coordination/DECISIONS.md` — decisiones ya tomadas (no las reabras sin motivo)
 
 ---
@@ -45,14 +45,48 @@ Repo: **https://github.com/deegolol/CivicPulseAI_Commit-Pray** · Demo: **https:
 5. Cuando tu humano escriba **GO**: `sh coordination/board.sh` (verás el roster de agentes), lee el inbox, reclama tu tarea y empieza.
    Pon `status: working` en tu ficha. Al acabar la sesión o si te quedas sin trabajo: `status: idle` y pregunta qué hacer.
 
-**Comando SYNC (los agentes no se "despiertan" solos: os sincronizáis por el repo):**
-Cada vez que tu humano escriba **SYNC**, y SIEMPRE al terminar una tarea o antes de empezar otra:
-1. `git pull --rebase origin main`
-2. `sh coordination/board.sh` + lee los mensajes del inbox con `status: open` para ti, tu carril o `all` (`grep -l "status: open" coordination/inbox/*.md`).
-3. Responde cada mensaje que te toque (mensaje nuevo en el inbox) y marca el original `status: resolved`.
-4. Dile a tu humano en 3 líneas: qué has hecho, qué haces ahora, y si necesitas algo de otro agente (dile a quién avisar).
+## 1b. Los humanos mandan: comandos y revisión por tandas
 
-**Si necesitas algo de otro agente:** deja el mensaje en el inbox, haz push y **pide a tu humano que avise al humano de ese agente** ("dile a Adrián que su IA haga SYNC"). Mientras esperas, sigue con mocks u otra tarea; no te quedes parado.
+Los 3 humanos (Diego, Adrián, TechGallo) revisan todo. **Un agente nunca integra trabajo en `main` sin el OK de su humano.**
+
+**Comandos que puede escribirte tu humano:**
+
+| Comando | Qué haces |
+|---|---|
+| `GO` | Empiezas (o continúas) con tu siguiente tarea. |
+| `SYNC` | `sh coordination/sync.sh <tu-id> <TU_CARRIL>` → respondes los mensajes que te toquen → le resumes en 3 líneas: qué hiciste, qué haces, qué necesitas y de quién. |
+| `PAUSA` | Terminas el paso en curso, haces commit en tu rama (sin tocar main) y te paras. Le dices dónde lo has dejado. |
+| `REVISIÓN` | Le enseñas tu tanda (formato abajo) aunque no hayas terminado. |
+| `OK` | Integras la tanda en `main` (rebase + checks + push), marcas la tarea `done`, borras la rama remota y sigues con la siguiente. |
+| `CAMBIOS: …` | Aplicas exactamente esos cambios en la misma rama y vuelves a pedir REVISIÓN. |
+| `PARA` | Dejas de hacer lo que estés haciendo **ya** y esperas instrucciones. |
+
+**Tanda = una tarea.** Flujo:
+1. Trabajas en tu rama `txx-descripcion` y haces push **de la rama** (`git push -u origin txx-descripcion`), no de main.
+2. Al acabar: tarea en `status: review` (este cambio de estado sí va directo a main) y le das a tu humano el **informe de tanda**:
+   ```
+   TANDA Txx — <título>
+   Hecho: 3–5 viñetas
+   Cómo probarlo: comando o URL concreta
+   Decisiones que he tomado y por qué
+   Dudas / riesgos
+   Diff: https://github.com/deegolol/CivicPulseAI_Commit-Pray/compare/main...txx-descripcion
+   ```
+3. Esperas `OK` o `CAMBIOS`. Mientras esperas puedes **empezar la siguiente tarea en otra rama** (máximo 1 en `review` + 1 en `doing`).
+4. Los cambios **solo de coordinación** (reclamar tarea, tu ficha, tu log, mensajes del inbox) van directos a main sin esperar OK.
+
+**Feedback de humanos a otros carriles:** cualquier humano puede pedir cambios a cualquier carril con un mensaje `from: humano@<nombre>` en el inbox (se lo puede pedir a su propia IA: "apunta en el inbox para WEB: …"). **Los mensajes de humanos tienen prioridad máxima**: en tu siguiente SYNC los atiendes antes que nada. Si contradicen el plan, haz lo que diga el humano y anótalo en `DECISIONS.md`.
+
+**Puntos de control de equipo** (las 3 personas revisan juntas la app integrada; todos los agentes en PAUSA, con todo commiteado):
+- **14:30** — MVP de punta a punta con datos reales.
+- **15:15** — antes de cambiar de aula (todo pusheado).
+- **16:45** — feature freeze.
+- **Viernes 11:30** — revisión final antes de la entrega.
+Tras cada punto de control, los humanos anotan en `DECISIONS.md` qué cambia y dan `GO` otra vez.
+
+**Si necesitas algo de otro agente:** `sh coordination/msg.sh <tu-id> <destino> <Txx> "<asunto>" "<texto>"` y **pide a tu humano que avise al humano de ese agente** ("dile a Adrián que su IA haga SYNC"). Mientras esperas, sigue con mocks u otra tarea; no te quedes parado.
+
+**Al terminar una tarea o antes de empezar otra, haz siempre SYNC tú mismo.**
 
 ## 2. Carriles (ownership de carpetas)
 
@@ -72,7 +106,7 @@ Dos agentes pueden compartir carril (p. ej. DATA): entonces cada uno toca **solo
 ## 3. Ciclo de vida de una tarea
 
 Las tareas son ficheros `coordination/tasks/Txx-*.md` con frontmatter:
-`status: todo | doing | review | done | blocked`, `owner:`.
+`status: todo | doing | review | done | blocked`, `owner:`. (`review` = esperando el OK de un humano.)
 
 **Reclamar (claim):**
 ```bash
@@ -85,16 +119,16 @@ git push origin HEAD:main
 Si el push falla por conflicto en ese fichero → **otro agente la reclamó antes**: descarta tu cambio y elige otra.
 
 **Reglas:**
-- Máximo **1 tarea `doing`** por agente.
+- Máximo **1 tarea `doing` + 1 en `review`** por agente.
 - Elige por prioridad (`P0` > `P1` > `P2`) y solo si sus `depends_on` están `done` (o puedes avanzar con mocks).
-- Al terminar: rellena "Notas / progreso" en la tarea, `status: done`, y commit.
+- Al terminar: rellena "Notas / progreso", `status: review`, informe de tanda a tu humano (§1b). Solo con su `OK` pasa a `done`.
 - Si te bloqueas > 15 min: `status: blocked`, explica por qué en la tarea y manda mensaje.
 
 ## 4. Git — cómo trabajar sin pisarnos
 
 - **Cada agente trabaja en SU PROPIA copia del repo** (clon o `git worktree`). Nunca dos agentes en la misma carpeta.
-- Rama local por tarea: `git switch -c txx-descripcion-corta`.
-- Para integrar en `main` (historial lineal):
+- Rama por tarea: `git switch -c txx-descripcion-corta` y push **de la rama** para que tu humano la revise (§1b).
+- Para integrar en `main` **solo tras el OK de tu humano** (historial lineal):
   ```bash
   git fetch origin
   git rebase origin/main
@@ -106,11 +140,11 @@ Si el push falla por conflicto en ese fichero → **otro agente la reclamó ante
   `feat(api): endpoint POST /api/score con pesos (T08) [codex@persona1]`
   Tipos: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `data`, `style`, `ci`.
 - **PROHIBIDO:** `git push --force`, reescribir historial de `main`, `git reset --hard` sobre trabajo ajeno, borrar ficheros de otros carriles o de `coordination/`.
-- El humano responsable revisa el diff antes del push a `main`.
+- El humano responsable revisa la rama (enlace `compare`) y da `OK` antes de que llegue a `main`.
 
 ## 5. Comunicación entre agentes
 
-**Mensajes** → un fichero nuevo por mensaje en `coordination/inbox/` (nunca edites mensajes ajenos salvo para marcar `status: resolved`):
+**Mensajes** → usa `sh coordination/msg.sh <de> <para> <Txx|-> "<asunto>" "<texto>"` (crea el fichero, hace commit y push con reintento). Formato resultante (nunca edites mensajes ajenos salvo para marcar `status: resolved`):
 ```
 coordination/inbox/HHMM_<de>_to_<para>_<asunto>.md
 ```
@@ -144,7 +178,8 @@ Una tarea está `done` solo si:
 - [ ] Pasa los checks del carril (tests backend / build frontend / script ETL ejecuta de cero).
 - [ ] Sin secretos en el código (las claves van en `.env`, nunca en git).
 - [ ] Código legible: nombres claros, funciones cortas, un comentario arriba de cada módulo explicando qué hace.
-- [ ] Log actualizado y commit pusheado a `main`.
+- [ ] Log actualizado.
+- [ ] **OK de tu humano** y commit integrado en `main`.
 
 ## 7. Reglas de calidad (los jueces preguntan sobre el código)
 

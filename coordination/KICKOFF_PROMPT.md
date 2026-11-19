@@ -5,8 +5,11 @@ Repo: https://github.com/deegolol/CivicPulseAI_Commit-Pray · Demo: https://prim
 ## Cómo funciona
 1. Cada humano pega el mensaje de su IA. La IA prepara su carpeta, lee las reglas, se registra y responde **LISTO**. Después espera.
 2. Cuando `sh coordination/board.sh` muestre 5 agentes `ready`, cada humano escribe **GO** a su IA.
-3. Cada 20–30 min, o cuando otra IA lo pida, el humano escribe **SYNC**: su IA hace pull, lee el inbox, responde y le resume el estado.
-4. Si una IA necesita algo de otra: deja un mensaje en `coordination/inbox/` y avisa a su humano, que avisa al humano de la otra IA ("haz SYNC").
+3. **Trabajo por tandas (1 tanda = 1 tarea):** la IA trabaja en su rama y al acabar te da un *informe de tanda* con un enlace al diff. Tú respondes **OK** (se integra en main y sigue) o **CAMBIOS: …** (corrige y vuelve a enseñártelo).
+4. Comandos para tu IA: **GO · SYNC · PAUSA · REVISIÓN · OK · CAMBIOS: … · PARA** (detalle en AGENTS.md §1b).
+5. **SYNC** cada 20–30 min, o cuando otra IA lo pida: pull + mensajes + resumen de 3 líneas.
+6. ¿Quieres cambios en el carril de otra persona? Pide a tu IA: "apunta en el inbox para WEB, de humano@<tu-nombre>: …". Los mensajes de humanos tienen prioridad máxima.
+7. Puntos de control con los 3 humanos: **14:30 · 15:15 · 16:45 · viernes 11:30** (todas las IAs en PAUSA).
 
 ---
 
@@ -30,18 +33,24 @@ PASO 2 — Lee AGENTS.md entero y sigue su orden de lectura (BRIEF, PLAN, CONTRA
 PASO 3 — Regístrate según AGENTS.md §1: crea coordination/agents/<tu-id>.md con status: ready,
 lane: DATA y first_tasks: [T01, T04, T05]; haz commit y push a main.
 
-PASO 4 — Pregúntame (soy Adrián) dónde están los datasets que YA he descargado, y ábrelos para ver qué
-contienen. NO los subas todavía.
+PASO 4 — Pregúntame (soy Adrián) dónde están los datasets que YA he descargado y ábrelos. Son un
+COMPLEMENTO, no la base: no asumas que cubren nada. Evalúalos con criterio (¿portal oficial?, ¿completos?,
+¿actuales?, ¿granularidad barrio/distrito?, ¿tienen los campos que pide CONTRACTS.md?). Lo que no pase el
+filtro se descarta y buscas tú la fuente oficial correcta. NO subas nada todavía.
 
-PASO 5 — Respóndeme "LISTO: <tu-id>, carril DATA" + en 5 líneas: qué datasets tengo, para qué indicador
-sirve cada uno y cómo vas a hacer T01. Luego ESPERA. No escribas código hasta que te diga GO.
+PASO 5 — Respóndeme "LISTO: <tu-id>, carril DATA" + en 5 líneas: qué datasets tengo, cuáles sirven y
+cuáles no (y por qué), qué falta por buscar y cómo vas a hacer T01. Luego ESPERA. Nada de código hasta GO.
 
-Cuando diga GO: T01 (lo primero: inventario de MIS datasets en data/SOURCES.md + mensaje en el inbox
-"to: DATA" y "to: all" diciendo qué fuentes cubres tú y cuáles quedan para codex@diego: aire, transporte,
-servicios), luego T04 (geometría de barrios + campus + build_indicators.py + run_all.py) y T05 (precio del
+Cuando diga GO: T01 (lo primero: inventario y evaluación de MIS datasets en data/SOURCES.md + mensaje con
+coordination/msg.sh a DATA y a all diciendo qué fuentes cubres tú y cuáles quedan para codex@diego: aire,
+transporte, servicios), luego T04 (geometría de barrios + campus + build_indicators.py + run_all.py) y T05 (precio del
 alquiler €/m², el dato MÁS importante). No toques los ficheros de codex@diego. Avisa por inbox a DATA y API
 cuando barrios.geojson y parts/rent.json estén en main.
-Cuando te escriba SYNC, sigue el "Comando SYNC" de AGENTS.md §1.
+MUY IMPORTANTE — AGENTS.md §1b: yo (tu humano) mando. Trabajas por tandas: cada tarea en su rama, al
+acabar me das el "informe de tanda" y NO integras en main hasta que te diga OK (si digo CAMBIOS: …, los
+aplicas y me lo vuelves a enseñar). Obedece GO, SYNC, PAUSA, REVISIÓN, OK, CAMBIOS y PARA. Para hablar con
+otros agentes usa coordination/msg.sh, y para ponerte al día coordination/sync.sh. Los mensajes de
+humanos (from: humano@…) tienen prioridad máxima.
 ```
 
 ## 2) TechGallo — carril SHIP (pegar en su IA, abierta en cualquier carpeta)
@@ -77,7 +86,11 @@ si necesitas algo de allí, pídeselo a Diego vía tu humano. Coordina con claud
 montaje de estáticos en backend/app/main.py: ese fichero es suyo. Después T16, T17, T18, T19, T20, T21.
 Eres el integrador: tras cada SYNC haz git pull, make check y comprueba que main funciona y que la demo
 de Railway responde; si algo se rompe, mensaje "to: all" en el inbox y avísame.
-Cuando te escriba SYNC, sigue el "Comando SYNC" de AGENTS.md §1.
+MUY IMPORTANTE — AGENTS.md §1b: yo (tu humano) mando. Trabajas por tandas: cada tarea en su rama, al
+acabar me das el "informe de tanda" y NO integras en main hasta que te diga OK (si digo CAMBIOS: …, los
+aplicas y me lo vuelves a enseñar). Obedece GO, SYNC, PAUSA, REVISIÓN, OK, CAMBIOS y PARA. Para hablar con
+otros agentes usa coordination/msg.sh, y para ponerte al día coordination/sync.sh. Los mensajes de
+humanos (from: humano@…) tienen prioridad máxima.
 ```
 
 ## 3) Antigravity (portátil de Diego) — carril WEB
@@ -104,7 +117,11 @@ que la API está en main, cambia a la API real (proxy /api → http://localhost:
 PrimeraLlave: defínelo solo en APP_NAME (frontend/src/config.ts). Usa tu navegador integrado para comprobar
 la UI en escritorio y en móvil. Lo más importante para el jurado: mapa claro, bloque "Con tu presupuesto:
 ~X €/mes" y botón "Ver pisos en esta zona". Diseño cuidado y responsive.
-Cuando te escriba SYNC, sigue el "Comando SYNC" de AGENTS.md §1.
+MUY IMPORTANTE — AGENTS.md §1b: yo (tu humano) mando. Trabajas por tandas: cada tarea en su rama, al
+acabar me das el "informe de tanda" y NO integras en main hasta que te diga OK (si digo CAMBIOS: …, los
+aplicas y me lo vuelves a enseñar). Obedece GO, SYNC, PAUSA, REVISIÓN, OK, CAMBIOS y PARA. Para hablar con
+otros agentes usa coordination/msg.sh, y para ponerte al día coordination/sync.sh. Los mensajes de
+humanos (from: humano@…) tienen prioridad máxima.
 ```
 
 ## 4) Codex (portátil de Diego) — carril DATA (aire, transporte, servicios)
@@ -127,13 +144,18 @@ No escribas código hasta que te diga GO.
 
 Cuando diga GO: compartes DATA con la IA de Adrián (<herramienta>@adrian), que es la principal: hace T01 (y
 Adrián YA tiene algunos datasets descargados), T04 geometría, T05 alquiler y el merge. Antes de descargar
-nada, lee en el inbox su inventario de datasets ("to: DATA"); si tu fuente ya está, reutilízala. Si 15 min
+nada, lee en el inbox su inventario de datasets ("to: DATA"); si tu fuente está ahí y es oficial, completa y
+actual, reutilízala; si no, busca tú la fuente oficial. Si 15 min
 después del GO no hay inventario, empieza igualmente y avisa por inbox. Tú haces T06 (calidad del aire),
 T07 (transporte y servicios) y T23 (residencias, opcional). Toca SOLO: etl/fetch_air.py,
 etl/fetch_transit.py, etl/fetch_services.py, etl/fetch_residences.py y data/processed/parts/{air,transit,
 services}.json (+ tus filas en data/SOURCES.md). Solo fuentes oficiales. El cruce por barrio lo haces cuando
 barrios.geojson esté en main (te avisarán por inbox).
-Cuando te escriba SYNC, sigue el "Comando SYNC" de AGENTS.md §1.
+MUY IMPORTANTE — AGENTS.md §1b: yo (tu humano) mando. Trabajas por tandas: cada tarea en su rama, al
+acabar me das el "informe de tanda" y NO integras en main hasta que te diga OK (si digo CAMBIOS: …, los
+aplicas y me lo vuelves a enseñar). Obedece GO, SYNC, PAUSA, REVISIÓN, OK, CAMBIOS y PARA. Para hablar con
+otros agentes usa coordination/msg.sh, y para ponerte al día coordination/sync.sh. Los mensajes de
+humanos (from: humano@…) tienen prioridad máxima.
 ```
 
 ## 5) Claude Code (portátil de Diego) — carril API

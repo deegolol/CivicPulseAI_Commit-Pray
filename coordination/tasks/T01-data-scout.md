@@ -9,7 +9,7 @@ depends_on: []
 files: [data/SOURCES.md, coordination/DECISIONS.md]
 ---
 ## Objetivo
-**Adrián ya ha descargado algunos datasets.** Lo PRIMERO: pregunta a Adrián dónde están, inventárialos (nombre, organismo, URL de origen, formato, licencia, granularidad, tamaño) y decide cuáles sirven para nuestros indicadores. Los ficheros < 5 MB pueden ir a `data/raw/` solo si el script ETL no puede descargarlos; los grandes NO se suben: el script ETL los descarga desde su URL oficial.
+**Adrián ya ha descargado algunos datasets. Son un COMPLEMENTO, no la base: no asumas que cubren nada.** Lo PRIMERO: pregunta a Adrián dónde están e inventárialos (nombre, organismo, URL de origen, formato, licencia, granularidad, fecha, tamaño). Evalúalos con criterio: ¿son de un portal **oficial**?, ¿están completos y actualizados?, ¿tienen la granularidad (barrio/distrito) y los campos que necesitamos? Úsalos solo si pasan ese filtro; si están incompletos, desfasados, mal o no encajan, **descártalos y busca tú la fuente oficial adecuada**, explicando el motivo en `data/SOURCES.md`. Los ficheros < 5 MB pueden ir a `data/raw/` solo si el script ETL no puede descargarlos; los grandes NO se suben: el script ETL los descarga desde su URL oficial.
 En cuanto tengas el inventario (máx. 15 min): mensaje a `to: DATA` (codex@diego) y `to: all` diciendo qué fuentes cubres tú y cuáles quedan para codex (aire, transporte, servicios), para no duplicar trabajo.
 
 Después, decidir en ≤ 30 min qué datasets usamos y a qué granularidad (barrio o distrito). Ver tabla de candidatos en `PLAN.md §3`.

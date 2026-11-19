@@ -9,7 +9,7 @@ depends_on: [T04]
 files: [etl/fetch_air.py, data/processed/parts/air.json]
 ---
 ## Antes de empezar
-Lee el inventario de datasets de la IA de Adrián (inbox, `to: DATA`). Si Adrián ya tiene descargada tu fuente, reutilízala. Si en 15 min tras el GO no hay inventario, empieza tú y avisa por inbox.
+Lee el inventario de datasets de la IA de Adrián (inbox, `to: DATA`). Si ahí hay una fuente tuya que es oficial, completa y actual, reutilízala; si no, busca tú la fuente oficial. Si en 15 min tras el GO no hay inventario, empieza tú y avisa por inbox.
 
 ## Criterios de aceptación
 - [ ] Media de NO₂ (u otro contaminante justificado) por estación; cada barrio toma la estación más cercana a su centroide.
