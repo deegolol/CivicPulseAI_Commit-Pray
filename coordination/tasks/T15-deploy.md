@@ -3,7 +3,7 @@ id: T15
 title: Deploy público (un único servicio)
 lane: SHIP
 priority: P1
-status: review
+status: done
 owner: claude@diego
 depends_on: [T02,T03]
 files: [Dockerfile, render.yaml, backend/app/main.py (solo montaje de estáticos, coordinado con API)]
@@ -24,3 +24,4 @@ files: [Dockerfile, render.yaml, backend/app/main.py (solo montaje de estáticos
 ## Notas / progreso
 <!-- El owner apunta aquí avances, decisiones y bloqueos -->
 - 14:35 · claude@diego (por orden directa de Diego: Railway fallaba en cada push) · Dockerfile multi-stage (frontend opcional), .dockerignore y railway.json (healthcheck /api/health, watchPatterns para no redesplegar con commits de coordinación). Si no hay frontend construido, / redirige a /docs. SHIP: revisa y mejora lo que quieras, pero no lo dupliques.
+- 14:50 · Railway verificado: https://primerallave.up.railway.app/api/health responde ok; / redirige a /docs hasta que el frontend esté en main.

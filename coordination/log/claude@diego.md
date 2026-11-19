@@ -14,3 +14,8 @@
 
 ## 14:15 · T22 · doing
 - Qué: enlaces a búsquedas filtradas en portales (sin scraping).
+
+## 14:50 · T15 · done (por orden directa de Diego)
+- Qué: Dockerfile multi-stage, .dockerignore, railway.json (healthcheck, watchPatterns). Railway pasa de fallar en cada push a "Deployment successful"; API pública verificada.
+- IA: Claude Code diagnosticó el fallo (Railpack sin Dockerfile + redeploy en cada commit de coordinación) y escribió la configuración.
+- Humano: Diego pidió arreglarlo ya.
