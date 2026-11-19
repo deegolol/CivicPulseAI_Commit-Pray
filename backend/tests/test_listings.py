@@ -8,9 +8,18 @@ def test_slugify_handles_accents_spaces_and_dashes():
     assert slugify("Moncloa-Aravaca") == "moncloa-aravaca"
 
 
-def test_portal_overrides_for_salamanca_and_san_blas():
+def test_portal_specific_slugs():
     assert district_slug("Salamanca") == "barrio-de-salamanca"
     assert district_slug("San Blas - Canillejas") == "san-blas"
+    assert district_slug("Moncloa - Aravaca") == "moncloa-aravaca"  # Fotocasa (verified)
+    assert district_slug("Moncloa - Aravaca", "idealista") == "moncloa"
+    assert district_slug("Fuencarral - El Pardo", "idealista") == "fuencarral"
+
+
+def test_fotocasa_first_and_idealista_uses_its_own_slugs():
+    links = build_listing_links("Moncloa - Aravaca", 500, "room")
+    assert links[0].label == "Fotocasa" and "/moncloa-aravaca/" in links[0].url
+    assert links[1].url == "https://www.idealista.com/alquiler-habitacion/madrid/moncloa/con-precio-hasta_500/"
 
 
 def test_room_links_use_room_searches_and_budget():
@@ -26,7 +35,7 @@ def test_flat_links_without_budget_and_without_district():
     assert links["Fotocasa"].endswith("/alquiler/viviendas/madrid-capital/arganzuela/l")
     assert "Badi" not in links
     fallback = build_listing_links("", 700.9, "studio")
-    assert fallback and fallback[1].url.endswith("/madrid-capital/todas-las-zonas/l?maxPrice=700")
+    assert fallback and fallback[0].url.endswith("/madrid-capital/todas-las-zonas/l?maxPrice=700")
 
 
 def test_score_endpoint_returns_links(client=None):

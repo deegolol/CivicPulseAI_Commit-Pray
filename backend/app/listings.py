@@ -18,10 +18,16 @@ import unicodedata
 
 from .models import ListingLink
 
-# Portal slugs that differ from the plain slugified district name.
-DISTRICT_SLUG_OVERRIDES = {
+# Portal slugs that differ from the plain slugified district name (each portal names some districts differently).
+FOTOCASA_SLUG_OVERRIDES = {  # verified by hand: HTTP 200 for the 21 districts
     "salamanca": "barrio-de-salamanca",
     "san-blas-canillejas": "san-blas",
+}
+IDEALISTA_SLUG_OVERRIDES = {  # from Idealista's public URLs (reported by codex@techgallo); it blocks automated checks
+    "salamanca": "barrio-de-salamanca",
+    "san-blas-canillejas": "san-blas",
+    "moncloa-aravaca": "moncloa",
+    "fuencarral-el-pardo": "fuencarral",
 }
 FOTOCASA_ALL_MADRID = "todas-las-zonas"
 
@@ -32,27 +38,28 @@ def slugify(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", ascii_text.lower()).strip("-")
 
 
-def district_slug(district: str) -> str:
+def district_slug(district: str, portal: str = "fotocasa") -> str:
     slug = slugify(district)
-    return DISTRICT_SLUG_OVERRIDES.get(slug, slug)
+    overrides = IDEALISTA_SLUG_OVERRIDES if portal == "idealista" else FOTOCASA_SLUG_OVERRIDES
+    return overrides.get(slug, slug)
 
 
 def build_listing_links(district: str, budget_eur_month: float | None, housing_type: str) -> list[ListingLink]:
-    """Search links for this district, capped at the user's budget when there is one. Always ≥ 1 link."""
-    slug = district_slug(district) if district else ""
+    """Search links for this district, capped at the user's budget when there is one. Always ≥ 1 link.
+    Fotocasa goes first because its URLs are verified; Idealista may show its own bot check to some users."""
     price = int(budget_eur_month) if budget_eur_month else None
     is_room = housing_type == "room"
     links: list[ListingLink] = []
 
-    # Idealista
-    kind = "alquiler-habitacion" if is_room else "alquiler-viviendas"
-    zone = f"madrid/{slug}" if slug else "madrid-madrid"
-    links.append(ListingLink(label="Idealista", url=f"https://www.idealista.com/{kind}/{zone}/" + (f"con-precio-hasta_{price}/" if price else "")))
-
-    # Fotocasa
+    # Fotocasa (verified)
     kind = "compartir/viviendas" if is_room else "alquiler/viviendas"
-    zone = slug or FOTOCASA_ALL_MADRID
+    zone = district_slug(district, "fotocasa") if district else FOTOCASA_ALL_MADRID
     links.append(ListingLink(label="Fotocasa", url=f"https://www.fotocasa.es/es/{kind}/madrid-capital/{zone}/l" + (f"?maxPrice={price}" if price else "")))
+
+    # Idealista (public URL format; studios/flats use the generic rental search + price cap)
+    kind = "alquiler-habitacion" if is_room else "alquiler-viviendas"
+    zone = f"madrid/{district_slug(district, 'idealista')}" if district else "madrid-madrid"
+    links.append(ListingLink(label="Idealista", url=f"https://www.idealista.com/{kind}/{zone}/" + (f"con-precio-hasta_{price}/" if price else "")))
 
     # Badi (shared flats only, city level)
     if is_room:
