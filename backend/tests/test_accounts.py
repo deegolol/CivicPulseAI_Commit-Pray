@@ -9,6 +9,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app import account_google, account_mail, accounts
+from app.data import get_dataset
 from app.main import app
 
 PREFIX = "/api/account"
@@ -86,6 +87,29 @@ def test_unavailable_favorite_requires_confirmation(accounts_db, monkeypatch, tm
         assert workspace["listings"][0]["available"] is False
         assert [notice["kind"] for notice in workspace["notifications"]] == ["unavailable"]
     assert client.get(f"{PREFIX}/offers?district=Centro&housing_type=room").json() == []
+
+
+def test_search_bookmark_subscribes_to_matching_catalog_offers(accounts_db, monkeypatch, tmp_path):
+    area = get_dataset().areas[0]
+    path = tmp_path / "catalog.json"
+    monkeypatch.setenv("ACCOUNTS_CATALOG_PATH", str(path))
+    match = {"id": "match", "title": "Habitación", "url": "https://example.com/room",
+             "district": area.district, "housing_type": "room", "price_eur_month": 550}
+    path.write_text(json.dumps({"offers": [
+        match, {**match, "id": "above-budget", "url": "https://example.com/expensive", "price_eur_month": 800},
+    ]}), encoding="utf-8")
+    client = TestClient(app)
+    search = {"area_id": area.id, "housing_type": "room", "budget_eur_month": 600}
+    assert client.post(f"{PREFIX}/searches", json=search).status_code == 401
+    assert client.post(f"{PREFIX}/register", json=CREDS).status_code == 201
+    for _ in range(2):
+        response = client.post(f"{PREFIX}/searches", json=search)
+        assert response.status_code == 200
+        saved = response.json()
+        assert len(saved["listings"]) == 1
+        assert saved["listings"][0]["search_district"] == area.district
+        assert saved["listings"][0]["search_budget"] == 600
+        assert [notice["url"] for notice in saved["notifications"]] == [match["url"]]
 
 
 def test_register_logout_login_and_expiring_cookie(accounts_db):

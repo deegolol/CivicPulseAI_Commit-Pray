@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Bell, Bookmark, Check, ExternalLink, Trash2, X } from 'lucide-react';
-import { accountApi, isOfferNotice, type AccountSession, type AccountWorkspace, type CatalogOffer, type WatchInput } from '../api/account';
+import { accountApi, isOfferNotice, saveFavorite, type AccountSession, type AccountWorkspace, type FavoriteTarget, type WatchInput } from '../api/account';
 import { HOUSING_TYPE_LABELS } from '../config';
 import { formatEuro } from '../utils/format';
 
@@ -9,13 +9,14 @@ const primaryClass = `${actionClass} bg-brand text-bg hover:bg-brand-hover`;
 const secondaryClass = `${actionClass} border border-border bg-bg text-ink hover:bg-surface`;
 const inputClass = 'mt-1 w-full rounded-[8px] border border-border bg-bg px-3 py-2 text-sm focus:border-ink focus:outline-none';
 const money = (value: number) => `${formatEuro(value)} /mes`;
+const googleButtonClass = 'flex min-h-11 w-full items-center justify-center gap-3 rounded-full border border-border px-4 py-2 text-sm font-semibold hover:bg-surface disabled:opacity-55';
 
 export type PendingWatch = WatchInput & { area_name: string };
 
 export interface AccountDialogProps {
   open: boolean;
   pendingWatch: PendingWatch | null;
-  pendingFavorite: CatalogOffer | true | null;
+  pendingFavorite: FavoriteTarget | null;
   onClose: () => void;
   onWatchSaved: () => void;
   onFavoriteSaved: () => void;
@@ -41,15 +42,11 @@ export function AccountDialog({ open, pendingWatch, pendingFavorite, onClose, on
   }, [resetToken]);
 
   useEffect(() => {
-    if (open && pendingFavorite) {
-      setTab('saved');
-      setManual(pendingFavorite === true);
-    }
     if (!open) {
       setManual(false);
       setConfirmAction(null);
     }
-  }, [open, pendingFavorite]);
+  }, [open]);
 
   useEffect(() => {
     const element = dialog.current;
@@ -69,7 +66,20 @@ export function AccountDialog({ open, pendingWatch, pendingFavorite, onClose, on
     accountApi.session().then(async (nextSession) => {
       if (!current) return;
       setSession(nextSession);
-      const entries = nextSession.username ? await accountApi.workspace() : null;
+      let entries = null;
+      if (nextSession.username) {
+        if (pendingFavorite && outcome === 'google') {
+          try {
+            entries = await saveFavorite(pendingFavorite);
+            onFavoriteSaved();
+            setFeedback('Guardado. Recibirás avisos cuando haya novedades del catálogo.');
+          } finally {
+            window.sessionStorage.removeItem('primerallave-favorite');
+          }
+        } else {
+          entries = await accountApi.workspace();
+        }
+      }
       if (current) {
         setWorkspace(entries);
         if (outcome) {
@@ -115,6 +125,7 @@ export function AccountDialog({ open, pendingWatch, pendingFavorite, onClose, on
     const form = new FormData(event.currentTarget);
     void perform(async () => {
       if (mode === 'forgot') {
+        if (!session?.recovery_enabled) return;
         await accountApi.forgotPassword(String(form.get('email')));
         setFeedback('Si hay una cuenta con ese correo, recibirás un enlace para restablecer la contraseña.');
         return;
@@ -122,7 +133,13 @@ export function AccountDialog({ open, pendingWatch, pendingFavorite, onClose, on
       const nextSession = await accountApi.authenticate(mode, String(form.get('email')), String(form.get('password')));
       setSession(nextSession);
       setTab('saved');
-      setWorkspace(await accountApi.workspace());
+      if (pendingFavorite) {
+        setWorkspace(await saveFavorite(pendingFavorite));
+        onFavoriteSaved();
+        setFeedback('Guardado. Recibirás avisos cuando haya novedades del catálogo.');
+      } else {
+        setWorkspace(await accountApi.workspace());
+      }
     });
   }
 
@@ -138,7 +155,7 @@ export function AccountDialog({ open, pendingWatch, pendingFavorite, onClose, on
       listingForm.current?.reset();
       setManual(false);
       onFavoriteSaved();
-      setFeedback('Vivienda guardada.');
+      setFeedback('Vivienda guardada. Si el catálogo sigue este anuncio, recibirás avisos de cambios.');
     });
   }
 
@@ -152,17 +169,24 @@ export function AccountDialog({ open, pendingWatch, pendingFavorite, onClose, on
 
   const notices = workspace?.notifications.filter(isOfferNotice) ?? [];
   const unread = notices.filter((notice) => !notice.read).length;
+  const guest = session?.enabled && !session.username && !resetToken;
+  const heading = mode === 'forgot' ? 'Recupera tu contraseña' : 'Entra en PrimeraLlave';
 
   return (
     <dialog ref={dialog} onClose={onClose} aria-labelledby="account-title"
-      className="m-auto max-h-[min(90dvh,52rem)] w-[calc(100%-2rem)] max-w-xl overflow-y-auto rounded-[10px] border border-border bg-bg p-0 text-ink shadow-popover backdrop:bg-ink/40">
-      <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-bg px-5 py-3.5">
-        <h2 id="account-title" className="font-display text-xl font-bold">Mi cuenta</h2>
+      className={`m-auto max-h-[min(90dvh,52rem)] w-[calc(100%-2rem)] overflow-y-auto border border-border bg-bg p-0 text-ink shadow-popover backdrop:bg-black/60 ${guest
+        ? 'max-w-md rounded-[18px] [color-scheme:dark] [--color-bg:#191c20] [--color-surface:#252a31] [--color-border:#444b56] [--color-ink:#f7f5f2] [--color-muted:#c5c9d1] [--color-brand:#f19991] [--color-brand-hover:#ffc0b9] [--color-fit:#a1e5bf]'
+        : 'max-w-xl rounded-[10px]'}`}>
+      <div className={`sticky top-0 z-10 flex items-start justify-between gap-3 bg-bg px-6 ${guest ? 'pt-6' : 'border-b border-border py-3.5'}`}>
+        <div>
+          {guest && <p className="mb-2 text-xs font-bold uppercase tracking-widest text-brand">Tu cuenta</p>}
+          <h2 id="account-title" className={`font-display font-bold ${guest ? 'text-2xl' : 'text-xl'}`}>{guest ? heading : 'Mi cuenta'}</h2>
+        </div>
         <button type="button" onClick={onClose} aria-label="Cerrar mi cuenta" className={secondaryClass}>
           <X size={18} aria-hidden="true" />
         </button>
       </div>
-      <div className="space-y-5 p-5">
+      <div className={`space-y-5 ${guest ? 'px-6 pb-6 pt-3' : 'p-5'}`}>
         {error && <p role="alert" className="rounded-[8px] border border-border bg-surface px-3 py-2 text-sm">{error}</p>}
         {feedback && <p role="status" className="text-sm text-fit">{feedback}</p>}
         {!session && !error && <p role="status" className="text-sm text-muted">Cargando tu cuenta…</p>}
@@ -188,10 +212,31 @@ export function AccountDialog({ open, pendingWatch, pendingFavorite, onClose, on
             <button type="button" className={secondaryClass} onClick={() => { setResetToken(null); setMode('forgot'); setError(''); }}>Volver</button>
           </form>
         )}
-        {session?.enabled && !session.username && !resetToken && (
+        {guest && (
           <form onSubmit={authenticate} className="space-y-4">
-            {pendingWatch && <p className="text-sm text-muted">Entra para guardar un aviso de {pendingWatch.area_name}.</p>}
-            {pendingFavorite && <p className="text-sm text-muted">Entra para guardar la vivienda en tus favoritos.</p>}
+            <p className="text-sm leading-relaxed text-muted">
+              {mode === 'forgot'
+                ? 'Escribe el correo de tu cuenta y te enviaremos un enlace para elegir una nueva contraseña.'
+                : pendingFavorite ? 'El favorito se guardará en cuanto entres en tu cuenta.'
+                  : pendingWatch ? `Entra para guardar un aviso de ${pendingWatch.area_name}.`
+                    : 'Guarda tus búsquedas y viviendas para recibir avisos cuando haya cambios.'}
+            </p>
+            {mode !== 'forgot' && (
+              <>
+                {session.google_enabled ? (
+                  <a className={googleButtonClass} href="/api/account/google/start" onClick={() => {
+                    if (pendingFavorite) window.sessionStorage.setItem('primerallave-favorite', JSON.stringify(pendingFavorite));
+                    else window.sessionStorage.removeItem('primerallave-favorite');
+                  }}><GoogleMark /> Continuar con Google</a>
+                ) : (
+                  <div className="space-y-1.5">
+                    <button type="button" className={googleButtonClass} disabled><GoogleMark /> Continuar con Google</button>
+                    <p className="text-center text-xs text-muted">Google está pendiente de configuración.</p>
+                  </div>
+                )}
+                <div className="flex items-center gap-3 text-xs text-muted before:h-px before:flex-1 before:bg-border after:h-px after:flex-1 after:bg-border">o con tu correo</div>
+              </>
+            )}
             <div className="flex flex-wrap gap-2">
               <button type="button" aria-pressed={mode === 'login'} onClick={() => setMode('login')} className={mode === 'login' ? primaryClass : secondaryClass}>Iniciar sesión</button>
               <button type="button" aria-pressed={mode === 'register'} onClick={() => setMode('register')} className={mode === 'register' ? primaryClass : secondaryClass}>Crear cuenta</button>
@@ -199,17 +244,20 @@ export function AccountDialog({ open, pendingWatch, pendingFavorite, onClose, on
             <label className="block text-sm font-medium">
               Correo electrónico
               <input name="email" type={mode === 'login' ? 'text' : 'email'} inputMode="email"
-                autoComplete={mode === 'forgot' ? 'email' : 'username'} required maxLength={254} className={inputClass} />
+                placeholder="tu@correo.com" autoComplete={mode === 'forgot' ? 'email' : 'username'} required maxLength={254} className={inputClass} />
             </label>
             {mode !== 'forgot' && <label className="block text-sm font-medium">
               Contraseña
               <input name="password" type="password" autoComplete={mode === 'register' ? 'new-password' : 'current-password'} required minLength={mode === 'register' ? 8 : undefined} maxLength={128} className={inputClass} />
             </label>}
             {mode === 'register' && <p className="text-xs text-muted">Usa al menos 8 caracteres.</p>}
+            {mode === 'forgot' && !session.recovery_enabled &&
+              <p className="rounded-[8px] border border-border bg-surface p-3 text-sm text-muted">
+                Este entorno aún necesita un servicio de correo para enviar enlaces de recuperación.
+              </p>}
             <div className="flex flex-wrap items-center gap-2">
-              <button type="submit" disabled={busy} className={primaryClass}>{mode === 'register' ? 'Registrarme' : mode === 'forgot' ? 'Enviar enlace' : 'Entrar'}</button>
+              <button type="submit" disabled={busy || (mode === 'forgot' && !session.recovery_enabled)} className={`${primaryClass} w-full`}>{mode === 'register' ? 'Registrarme' : mode === 'forgot' ? 'Enviar enlace' : 'Entrar'}</button>
               {mode === 'login' && <button type="button" className={secondaryClass} onClick={() => { setMode('forgot'); setError(''); setFeedback(''); }}>¿Has olvidado tu contraseña?</button>}
-              {mode !== 'forgot' && session.google_enabled && <a className={secondaryClass} href="/api/account/google/start">Continuar con Google</a>}
             </div>
           </form>
         )}
@@ -262,16 +310,6 @@ export function AccountDialog({ open, pendingWatch, pendingFavorite, onClose, on
             {tab === 'saved' && (
               <div className="space-y-5">
                 {workspace && workspace.listings.length === 0 && <p className="text-sm text-muted">Todavía no tienes favoritos.</p>}
-                {pendingFavorite && pendingFavorite !== true && (
-                  <div className="flex flex-wrap items-center justify-between gap-2 rounded-[8px] border border-border p-3">
-                    <p className="text-sm">{pendingFavorite.title}</p>
-                    <button type="button" className={primaryClass} disabled={busy} onClick={() => void perform(async () => {
-                      setWorkspace(await accountApi.saveListing({ title: pendingFavorite.title, url: pendingFavorite.url, remind_on: null }));
-                      onFavoriteSaved();
-                      setFeedback('Vivienda guardada.');
-                    })}>Guardar en favoritos</button>
-                  </div>
-                )}
                 {!manual && <button type="button" className={secondaryClass} onClick={() => setManual(true)}>
                   <Bookmark size={16} aria-hidden="true" /> Añadir favorito
                 </button>}
@@ -290,6 +328,9 @@ export function AccountDialog({ open, pendingWatch, pendingFavorite, onClose, on
                           <span className="break-words">{listing.title}</span><ExternalLink size={14} className="shrink-0" aria-hidden="true" />
                         </a>
                         {listing.price_eur_month !== undefined && <p className="mt-1 text-xs text-muted">{money(listing.price_eur_month)}</p>}
+                        {listing.search_type && listing.search_budget &&
+                          <p className="mt-1 text-xs text-muted">{HOUSING_TYPE_LABELS[listing.search_type]} · Hasta {money(listing.search_budget)}</p>}
+                        <p className="mt-1 text-xs text-muted">Avisos automáticos del catálogo</p>
                         {listing.available === false && <p className="mt-1 text-xs text-muted">Ya no disponible</p>}
                       </div>
                       <button type="button" disabled={busy} aria-label={`Quitar ${listing.title}`} className={secondaryClass} onClick={() => void perform(async () => setWorkspace(await accountApi.removeListing(listing.id)))}>
@@ -394,4 +435,8 @@ export function AccountDialog({ open, pendingWatch, pendingFavorite, onClose, on
       </div>
     </dialog>
   );
+}
+
+function GoogleMark() {
+  return <span aria-hidden="true" className="bg-[conic-gradient(#4285f4_0_28%,#34a853_28%_50%,#fbbc05_50%_67%,#ea4335_67%_100%)] bg-clip-text text-lg font-black text-transparent">G</span>;
 }

@@ -23,7 +23,7 @@ GOOGLE_CLIENT_SECRET=
 GOOGLE_REDIRECT_URI=http://localhost:5173/api/account/google/callback
 ```
 
-El secreto se configura en el servidor. Desde una cuenta existente, usa **Vincular Google** e inicia sesión con el mismo correo. La vinculación requiere una sesión activa de PrimeraLlave y una identidad de Google con correo verificado. El [flujo de Google](https://developers.google.com/identity/openid-connect/reference) usa código de autorización, PKCE, estado de un solo uso y validación del token.
+El secreto se configura en el servidor. En la vista local del puerto 8081 usa `http://localhost:8081/api/account/google/callback` tanto en Google Cloud como en `.env` y reinicia el backend. Desde una cuenta existente, usa **Vincular Google** e inicia sesión con el mismo correo. La vinculación requiere una sesión activa de PrimeraLlave y una identidad de Google con correo verificado. El [flujo de Google](https://developers.google.com/identity/openid-connect/reference) usa código de autorización, PKCE, estado de un solo uso y validación del token.
 
 ## Recuperación de contraseña
 
@@ -63,3 +63,5 @@ Configura `ACCOUNTS_CATALOG_PATH` con la ruta a un fichero JSON que actualice un
 Publica el fichero completo mediante reemplazo atómico. `housing_type` admite `room`, `studio` y `flat`. Las URLs deben ser HTTPS y los importes enteros en €/mes. Conserva el ID y la URL al actualizar el precio o marcar el anuncio con `available: false`. PrimeraLlave avisa cuando un favorito observado baja de precio o cuando el proveedor confirma que ya no está disponible. Una oferta ausente del archivo no confirma su retirada. También sugiere viviendas del mismo distrito y tipo. Los favoritos manuales se pueden guardar sin un catálogo configurado.
 
 La bandeja se actualiza al usar la cuenta y se comprueba aproximadamente cada minuto mientras la app está abierta. Muestra enlaces a los anuncios y permite marcar cada aviso como leído.
+
+El perfil de un barrio permite **Guardar búsqueda** con el distrito, presupuesto y tipo de vivienda actuales. Los anuncios concretos del catálogo tienen su propio botón **Añadir favorito**. Ambos se guardan en el acto o tras iniciar sesión si todavía no has entrado. Los favoritos de viviendas reciben avisos de precio y disponibilidad si el catálogo identifica el mismo enlace. Las búsquedas guardadas reciben avisos de anuncios del distrito que encajan en los filtros.

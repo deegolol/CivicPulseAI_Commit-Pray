@@ -46,6 +46,10 @@ CREATE TABLE IF NOT EXISTS offer_observations (
     listing_id INTEGER PRIMARY KEY REFERENCES listings(id) ON DELETE CASCADE,
     offer_id TEXT NOT NULL, price INTEGER NOT NULL
 );
+CREATE TABLE IF NOT EXISTS saved_searches (
+    listing_id INTEGER PRIMARY KEY REFERENCES listings(id) ON DELETE CASCADE,
+    district TEXT NOT NULL, housing_type TEXT NOT NULL, budget INTEGER NOT NULL
+);
 CREATE TABLE IF NOT EXISTS watches (
     id INTEGER PRIMARY KEY, account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
     area_id TEXT NOT NULL, housing_type TEXT NOT NULL, budget_eur_month INTEGER NOT NULL,
@@ -161,7 +165,8 @@ def allow_attempt(conn: sqlite3.Connection, host: str) -> bool:
 def save_listing(conn: sqlite3.Connection, account: int, title: str, url: str, remind_on: date | None) -> None:
     conn.execute(
         "INSERT INTO listings(account_id, title, url, remind_on) VALUES (?, ?, ?, ?) "
-        "ON CONFLICT(account_id, url) DO UPDATE SET title = excluded.title, remind_on = excluded.remind_on",
+        "ON CONFLICT(account_id, url) DO UPDATE SET title = excluded.title, "
+        "remind_on = COALESCE(excluded.remind_on, listings.remind_on)",
         (account, title, url, remind_on.isoformat() if remind_on else None),
     )
 
@@ -187,7 +192,9 @@ def workspace(conn: sqlite3.Connection, account: int) -> dict:
     listings = [
         dict(row)
         for row in conn.execute(
-            "SELECT id, title, url, remind_on FROM listings WHERE account_id = ? ORDER BY id DESC",
+            "SELECT id, title, url, remind_on, district AS search_district, housing_type AS search_type, "
+            "budget AS search_budget FROM listings LEFT JOIN saved_searches ON listing_id = id "
+            "WHERE account_id = ? ORDER BY id DESC",
             (account,),
         )
     ]

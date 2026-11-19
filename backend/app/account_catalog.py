@@ -95,6 +95,8 @@ def record_alerts(conn: sqlite3.Connection, account: int, listings: list[dict], 
         except (ValidationError, ValueError):
             continue
         saved_urls.add(url)
+        if listing["search_district"]:
+            continue
         offer = by_url.get(url)
         if not offer:
             continue
@@ -134,5 +136,27 @@ def record_alerts(conn: sqlite3.Connection, account: int, listings: list[dict], 
         offer = relevant[0]
         notify(conn, account, f"Por tus favoritos, podría interesarte {offer.title} en {offer.district}, por {offer.price_eur_month} €/mes.",
                f"suggestion:{offer_url(offer.url)}", kind="suggestion", url=offer_url(offer.url))
+    searches = [listing for listing in listings if listing["search_district"]]
+    sent = set()
+    if searches:
+        sent = {
+            row["reminder_key"] for row in conn.execute(
+                "SELECT reminder_key FROM notifications WHERE account_id = ? AND reminder_key LIKE 'suggestion:%'",
+                (account,),
+            )
+        }
+    for listing in searches:
+        matching = [
+            (url, offer) for url, offer in by_url.items()
+            if offer.available and url not in saved_urls and f"suggestion:{url}" not in sent
+            and offer.district.casefold() == listing["search_district"].casefold()
+            and offer.housing_type == listing["search_type"]
+            and offer.price_eur_month <= listing["search_budget"]
+        ]
+        for url, offer in sorted(matching, key=lambda item: (item[1].price_eur_month, item[1].id))[:3]:
+            key = f"suggestion:{url}"
+            notify(conn, account, f"{offer.title} encaja en tu búsqueda guardada por {offer.price_eur_month} €/mes.",
+                   key, kind="suggestion", url=url)
+            sent.add(key)
     ranked_urls = saved_urls | {offer_url(offer.url) for offer in relevant}
     return (relevant + [offer for url, offer in by_url.items() if offer.available and url not in ranked_urls])[:12]

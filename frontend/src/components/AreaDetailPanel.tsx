@@ -133,7 +133,7 @@ export function AreaDetailPanel({
         </button>
 
         <div className="flex flex-wrap items-center justify-end gap-1.5">
-          <FavoriteButton />
+          <FavoriteButton target={{ area_id: area.id, housing_type: housingType, budget_eur_month: budget }} />
           <button
             type="button"
             onClick={() => onToggleCompare(area.id)}

@@ -1,10 +1,10 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { Bell, Bookmark, CircleUserRound } from 'lucide-react';
-import { accountApi, isOfferNotice, type CatalogOffer } from '../api/account';
+import { accountApi, isOfferNotice, saveFavorite, type CatalogOffer, type FavoriteTarget } from '../api/account';
 import type { HousingType } from '../api/types';
 import { AccountDialog, type PendingWatch } from './AccountDialog';
 
-type AccountControls = { show: (watch?: PendingWatch, favorite?: CatalogOffer | true) => void; unread: number };
+type AccountControls = { show: (watch?: PendingWatch, favorite?: FavoriteTarget) => void; unread: number };
 const AccountContext = createContext<AccountControls | null>(null);
 const buttonClass = 'inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-[8px] border border-border bg-bg px-2.5 py-1 text-xs font-medium text-ink hover:bg-surface';
 
@@ -13,7 +13,14 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(() => new URLSearchParams(window.location.search).has('cuenta') ||
     new URLSearchParams(window.location.hash.slice(1)).has('restablecer'));
   const [pendingWatch, setPendingWatch] = useState<PendingWatch | null>(null);
-  const [pendingFavorite, setPendingFavorite] = useState<CatalogOffer | true | null>(null);
+  const [pendingFavorite, setPendingFavorite] = useState<FavoriteTarget | null>(() => {
+    if (new URLSearchParams(window.location.search).get('cuenta') !== 'google') return null;
+    try {
+      return JSON.parse(window.sessionStorage.getItem('primerallave-favorite') ?? 'null') as FavoriteTarget | null;
+    } catch {
+      return null;
+    }
+  });
   const [unread, setUnread] = useState(0);
 
   useEffect(() => {
@@ -46,7 +53,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     return () => { active = false; window.clearInterval(timer); };
   }, [open]);
 
-  function show(watch?: PendingWatch, favorite?: CatalogOffer | true) {
+  function show(watch?: PendingWatch, favorite?: FavoriteTarget) {
     setPendingWatch(watch ?? null);
     setPendingFavorite(favorite ?? null);
     setOpen(true);
@@ -62,28 +69,35 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function FavoriteButton({ offer }: { offer?: CatalogOffer }) {
+export function FavoriteButton({ target }: { target: FavoriteTarget }) {
   const controls = useContext(AccountContext);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
   if (!controls) return null;
   async function save() {
     setSaving(true);
+    setError('');
     try {
-      if (!offer || !(await accountApi.session()).username) {
-        controls?.show(undefined, offer ?? true);
+      if (!(await accountApi.session()).username) {
+        controls?.show(undefined, target);
         return;
       }
-      await accountApi.saveListing({ title: offer.title, url: offer.url, remind_on: null });
+      await saveFavorite(target);
       controls?.show();
+    } catch (failure) {
+      setError(failure instanceof Error ? failure.message : 'No se pudo guardar el favorito.');
     } finally {
       setSaving(false);
     }
   }
   return (
-    <button type="button" onClick={() => void save().catch(() => controls.show(undefined, offer ?? true))}
-      className={buttonClass} disabled={saving}>
-      <Bookmark size={15} aria-hidden="true" /> {saving ? 'Guardando…' : 'Añadir favorito'}
-    </button>
+    <>
+      <button type="button" onClick={() => void save()} className={buttonClass} disabled={saving}>
+        <Bookmark size={15} aria-hidden="true" />
+        {saving ? 'Guardando…' : 'area_id' in target ? 'Guardar búsqueda' : 'Añadir favorito'}
+      </button>
+      {error && <span role="alert" className="text-xs text-ink">{error}</span>}
+    </>
   );
 }
 
@@ -109,7 +123,7 @@ export function DistrictOffers({ district, housingType }: { district: string; ho
             <a href={offer.url} target="_blank" rel="noopener noreferrer" className="font-medium underline">{offer.title}</a>
             <p className="text-muted">{offer.price_eur_month} €/mes</p>
           </div>
-          <FavoriteButton offer={offer} />
+          <FavoriteButton target={offer} />
         </div>
       ))}
     </section>

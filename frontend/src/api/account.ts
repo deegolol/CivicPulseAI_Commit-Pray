@@ -4,7 +4,10 @@ import type { HousingType } from './types';
 export type AccountSession = { enabled: boolean; username: string | null; email?: string | null; google_enabled?: boolean; google_linked?: boolean; recovery_enabled?: boolean };
 export type ListingInput = { title: string; url: string; remind_on: string | null };
 export type WatchInput = { area_id: string; housing_type: HousingType; budget_eur_month: number };
-export type SavedListing = ListingInput & { id: number; price_eur_month?: number; available?: boolean };
+export type SavedListing = ListingInput & {
+  id: number; price_eur_month?: number; available?: boolean;
+  search_district?: string | null; search_type?: HousingType | null; search_budget?: number | null;
+};
 export type SavedWatch = WatchInput & {
   id: number;
   area_name: string;
@@ -55,6 +58,7 @@ export const accountApi = {
   workspace: () => accountRequest<AccountWorkspace>('/workspace'),
   saveListing: (listing: ListingInput) =>
     accountRequest<AccountWorkspace>('/listings', 'POST', listing),
+  saveSearch: (search: WatchInput) => accountRequest<AccountWorkspace>('/searches', 'POST', search),
   removeListing: (id: number) => accountRequest<AccountWorkspace>(`/listings/${id}`, 'DELETE'),
   clearListings: () => accountRequest<AccountWorkspace>('/listings', 'DELETE'),
   offers: (district: string, housing_type: HousingType) =>
@@ -63,3 +67,8 @@ export const accountApi = {
   removeWatch: (id: number) => accountRequest<AccountWorkspace>(`/watches/${id}`, 'DELETE'),
   markRead: (id: number) => accountRequest<AccountWorkspace>(`/notifications/${id}/read`, 'POST'),
 };
+
+export type FavoriteTarget = CatalogOffer | WatchInput;
+export const saveFavorite = (target: FavoriteTarget) => 'area_id' in target
+  ? accountApi.saveSearch(target)
+  : accountApi.saveListing({ title: target.title, url: target.url, remind_on: null });

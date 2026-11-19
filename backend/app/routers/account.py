@@ -18,6 +18,7 @@ from pydantic import AliasChoices, BaseModel, EmailStr, Field, HttpUrl, StringCo
 
 from .. import account_catalog, account_google, account_mail, accounts
 from ..data import get_dataset
+from ..listings import build_listing_links
 from ..models import HousingType
 from ..net import client_ip
 
@@ -343,6 +344,22 @@ def add_listing(listing: ListingInput, request: Request):
     with authenticated(request) as (conn, account):
         url = account_catalog.offer_url(listing.url)
         accounts.save_listing(conn, account, listing.title, url, listing.remind_on)
+        return accounts.workspace(conn, account)
+
+
+@router.post("/searches", dependencies=[Depends(require_json)])
+def add_search(search: WatchInput, request: Request):
+    with authenticated(request) as (conn, account):
+        area = get_dataset().area(search.area_id)
+        if area is None:
+            raise HTTPException(404, "Esa zona no está disponible.")
+        url = build_listing_links(area.district, search.budget_eur_month, search.housing_type)[0].url
+        # Fotocasa uses the same URL for studios and flats, so keep those searches distinct.
+        url = f"{url}#tipo={search.housing_type}"
+        accounts.save_listing(conn, account, f"Búsqueda en {area.district}", url, None)
+        row = conn.execute("SELECT id FROM listings WHERE account_id = ? AND url = ?", (account, url)).fetchone()
+        conn.execute("INSERT OR IGNORE INTO saved_searches VALUES (?, ?, ?, ?)",
+                     (row["id"], area.district, search.housing_type, search.budget_eur_month))
         return accounts.workspace(conn, account)
 
 
