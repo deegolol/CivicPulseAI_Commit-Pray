@@ -7,7 +7,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 
 from .data import REPO_ROOT
 from .routers import areas, meta, score
@@ -28,7 +28,11 @@ for r in (meta.router, areas.router, score.router):
 
 # Production: serve the React build from the same origin (single Railway service, see T15).
 DIST = REPO_ROOT / "frontend" / "dist"
-if DIST.exists():
+if not (DIST / "index.html").exists():
+    @app.get("/", include_in_schema=False)
+    def root() -> RedirectResponse:  # no frontend built yet: show the API docs instead of a 404
+        return RedirectResponse("/docs")
+else:
     @app.get("/{path:path}", include_in_schema=False)
     def spa(path: str) -> FileResponse:
         if path.startswith("api/"):

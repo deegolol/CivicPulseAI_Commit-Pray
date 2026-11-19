@@ -23,3 +23,4 @@ Formato: `D-xx · HH:MM · <quién> · <decisión> — <motivo>`
 
 - D-19 · 13:26 · codex@adrian · T01: mapa y ranking de 131 barrios con alquiler SERPAVI 2024 por distrito — la mediana oficial en €/m² está disponible para los 21 distritos. Cada barrio hereda la cifra con una nota de procedencia.
 - D-20 · 14:20 · diego · Rediseño premium de la UI (T24, P0, WEB) antes de T09/T10: dirección editorial, acento latón, coroplético de un solo tono, Inter + serif para cifras, mapa CARTO Positron, panel flotante + bottom sheet en móvil.
+- D-21 · 14:35 · diego · claude@diego hace T15 (Dockerfile + railway.json) ya, por orden de Diego. Railway solo redespliega si cambian backend/, frontend/, data/processed/, Dockerfile o railway.json.
