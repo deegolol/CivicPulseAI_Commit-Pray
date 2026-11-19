@@ -19,10 +19,10 @@
 1. **Escribe como Lucía**: pulsa el chip *"Estudio en la ETSISI, tengo 500 euros y quiero una zona tranquila con aire limpio"* (o escríbelo).
    > "Lucía no rellena un formulario: escribe como habla. Entendemos su campus, su presupuesto, que busca habitación y que le importa el aire."
 2. **Aparecen sus resultados**: lista de zonas ordenada y, al lado, el mapa con solo las zonas que encajan en azul y su campus en rojo.
-   > "Esto es su Madrid: las zonas que encajan con ella, con lo que le costaría vivir allí y a cuánto queda su campus." *(Leed en voz alta el n.º 1 con su precio y distancia; ver "Cifras", abajo.)*
+   > "Esto es su Madrid: **Palomeras Bajas, Palomeras Sureste y Pavones**, a 1–3 km de Campus Sur y por **unos 290 € al mes** una habitación. En el mapa, solo las zonas que encajan, alrededor de su campus."
 3. **"Leer explicación"**: el resumen en lenguaje natural.
    > "Y se lo explicamos en lenguaje natural… pero solo con cifras reales que hemos calculado nosotros. La IA no inventa ni un número."
-4. **Abre una zona** → detalle con el precio estimado grande.
+4. **Abre Palomeras Bajas** → detalle con el precio estimado grande.
    > "Es la **mediana oficial del alquiler del Ministerio de Vivienda** por m², por los m² de una habitación: **encaja**. Aire, metro, distancia… y cada cifra lleva su fuente."
 5. **"Ver pisos"** → el portal (Fotocasa/Idealista/Badi) abierto con el distrito y el precio máximo ya filtrados.
    > "Y de la zona, al piso: te llevamos a los anuncios ya filtrados por zona y presupuesto."
@@ -54,7 +54,7 @@
 | Internet en la sala | `make dev` en local (datos versionados): todo funciona sin red. Los 3 chips de la demo usan **respuestas cacheadas**, así que la IA "funciona" también offline. |
 | OpenAI lento o caído | La app pasa sola al **modo sin IA** (etiqueta discreta). Seguir sin comentarlo; si preguntan, es un punto a favor: "está diseñado para no depender de la IA". |
 | Railway caído | Plan B local. |
-| Todo | **[GIF de respaldo de 60 s](demo.gif)** (preparado por codex@techgallo: mapa, búsqueda, ranking, detalle, fuentes, comparador y móvil) y capturas en `docs/screenshots/`. ⚠️ Muestra el diseño anterior: regenerarlo tras el rediseño v2 (T25). |
+| Todo | **[GIF de respaldo de 60 s](demo.gif)** (preparado por codex@techgallo) y capturas en `docs/screenshots/`. ⚠️ Si aún muestra el diseño anterior, codex@techgallo lo regraba con el v2. |
 
 ## Preguntas difíciles (todos deberíais saber responderlas)
 | Pregunta | Respuesta corta |
@@ -73,10 +73,9 @@
 | ¿Cómo habéis usado la IA para programar? | 3 personas y 5 agentes (Claude Code, Codex, Antigravity) en el mismo repo, coordinados con AGENTS.md, tareas con dueño, contratos fijos y un buzón de mensajes. Revisión cruzada: un agente de DATA encontró un bug en la API y se arregló con test de regresión. Detalle en AI_USAGE.md. |
 | ¿Existe ya algo así? | Madriwa recomienda barrios con datos abiertos, pero no usa presupuesto ni está pensada para estudiantes ni lleva a pisos. Los portales tienen pisos, pero no te dicen qué zona te conviene. Nosotros unimos las dos cosas. |
 
-## Cifras para no equivocarse (comprobadas en la demo publicada)
+## Cifras para no equivocarse (comprobadas en la demo publicada tras el rediseño v2)
 - 131 barrios · 21 distritos · 5 fuentes oficiales (9 ficheros) · 2 campus UPM.
-- ⚠️ **Tras el rediseño v2 (T25) hay que volver a apuntar estas cifras** pulsando los chips en la demo publicada.
-- Frase 1 (ETSISI, 500 €, aire limpio), tal como salía antes del rediseño v2: **Pueblo Nuevo (Ciudad Lineal) 4,1 km ~332 €** · **Palomeras Bajas 2,7 km ~287 €** · **Media Legua 3,5 km ~293 €** por habitación.
-- ⚠️ El ranking que se ve depende de cómo la web traduce las prioridades; **repasad estas cifras el viernes a las 11:15** pulsando los chips en la demo publicada.
-- Frase 2 (Montegancedo, estudio < 750 €): **Campamento 3,8 km**, ~404 €/mes por un estudio.
-- Frase 3 (barato, metro, ≤ 6 km de Campus Sur): **40 de 131 zonas** quedan dentro; n.º 1 **Media Legua**, 3,5 km, ~293 €/mes.
+- **Frase 1** (ETSISI, 500 €, aire limpio): **#1 Palomeras Bajas** (Puente de Vallecas) ~287 €/mes · 2,7 km · **#2 Palomeras Sureste** ~287 € · 0,9 km · **#3 Pavones** (Moratalaz) ~293 € · 1,1 km.
+- **Frase 2** (Montegancedo, estudio < 750 €): **#1 Campamento** (Latina) ~404 €/mes · **#2 Águilas** · **#3 Aluche**.
+- **Frase 3** (barato, metro, ≤ 6 km de Campus Sur): **#1 Media Legua** (Moratalaz) ~293 €/mes · 3,5 km · **#2 Palomeras Bajas** · **#3 Palomeras Sureste**, con el radio de 6 km dibujado en el mapa.
+- Repasadlas igualmente el viernes a las 11:15 pulsando los chips en la demo.
