@@ -3,7 +3,7 @@ id: antigravity@diego
 human: diego
 laptop: diego
 lane: WEB
-status: ready
+status: working
 first_tasks: [T03, T09, T10, T12, T13, T14]
 ---
 Puntos fuertes / herramientas: React + TypeScript + Tailwind + Leaflet + Recharts, navegador integrado para verificación visual en escritorio y móvil.
