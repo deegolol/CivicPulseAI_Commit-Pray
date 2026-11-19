@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, RedirectResponse
 
 from .data import REPO_ROOT
-from .routers import areas, meta, score
+from .routers import ai, areas, meta, score
 
 load_dotenv(REPO_ROOT / ".env")  # LLM_* settings; real env vars (Railway) take precedence
 
@@ -23,7 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-for r in (meta.router, areas.router, score.router):
+for r in (meta.router, areas.router, score.router, ai.router):
     app.include_router(r, prefix="/api")
 
 # Production: serve the React build from the same origin (single Railway service, see T15).

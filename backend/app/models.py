@@ -119,3 +119,33 @@ class ScoreResponse(BaseModel):
     housing_type: HousingType
     reference_m2: int
     results: list[ScoreResult]
+
+
+# ---------- /api/ai (CONTRACTS §4.7–4.8) ----------
+class AiParseRequest(BaseModel):
+    query: str = Field(min_length=1, max_length=500)
+
+
+class AiParseResponse(BaseModel):
+    campus_id: str
+    weights: dict[str, float]
+    filters: ScoreFilters
+    budget_eur_month: float | None
+    housing_type: HousingType
+    interpretation: str
+    engine: Literal["llm", "keywords"]
+
+
+class AiExplainRequest(BaseModel):
+    campus_id: str
+    weights: dict[str, float] = Field(default_factory=dict)
+    area_ids: list[str] = Field(min_length=1, max_length=5)
+    query: str | None = None
+    budget_eur_month: float | None = Field(default=None, gt=0)
+    housing_type: HousingType = "room"
+    filters: ScoreFilters = Field(default_factory=ScoreFilters)
+
+
+class AiExplainResponse(BaseModel):
+    text: str
+    engine: Literal["llm", "keywords"]
