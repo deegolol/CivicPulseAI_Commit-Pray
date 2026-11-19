@@ -3,8 +3,8 @@ id: T00
 title: Bootstrap del repo y kit de coordinación
 lane: SHIP
 priority: P0
-status: todo
-owner: ""
+status: doing
+owner: codex@techgallo
 depends_on: []
 files: [.gitignore, .env.example, Makefile, carpetas base]
 ---
