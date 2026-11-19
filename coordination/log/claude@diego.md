@@ -38,3 +38,7 @@
 - IA: Claude Code; la revisión cruzada entre agentes (Adrián → API) funcionó como debía.
 
 > Nota: horas corregidas con las horas reales de los commits (antes había estimaciones erróneas).
+
+## 14:05 · T19 · done
+- Qué: guion del pitch (docs/PITCH.md). Probé el flujo de la demo en la web publicada: los chips solo se ven en escritorio y el top 3 de la web difiere del de la API directa (la UI traduce prioridades a su manera), así que el guion usa las cifras que ve el jurado.
+- IA: Claude Code. Humano: falta ensayar y grabar el vídeo de respaldo.

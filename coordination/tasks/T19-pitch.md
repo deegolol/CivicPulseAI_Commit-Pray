@@ -3,7 +3,7 @@ id: T19
 title: Guion de pitch + demo + plan B
 lane: SHIP
 priority: P0
-status: doing
+status: done
 owner: claude@diego
 depends_on: []
 files: [docs/PITCH.md, docs/demo.gif]
@@ -16,3 +16,4 @@ files: [docs/PITCH.md, docs/demo.gif]
 
 ## Notas / progreso
 <!-- El owner apunta aquí avances, decisiones y bloqueos -->
+- 14:05 · claude@diego · docs/PITCH.md en main: guion de 5 min con reparto, pasos de demo verificados en la web publicada, cifras reales, checklist, plan B y 13 preguntas difíciles. Pendiente humano: grabar el vídeo de respaldo (60 s) y ensayar 3 veces.
