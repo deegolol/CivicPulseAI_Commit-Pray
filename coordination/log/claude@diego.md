@@ -42,3 +42,8 @@
 ## 14:05 · T19 · done
 - Qué: guion del pitch (docs/PITCH.md). Probé el flujo de la demo en la web publicada: los chips solo se ven en escritorio y el top 3 de la web difiere del de la API directa (la UI traduce prioridades a su manera), así que el guion usa las cifras que ve el jurado.
 - IA: Claude Code. Humano: falta ensayar y grabar el vídeo de respaldo.
+
+## 14:27 · T22 fix + T26 · done
+- T22: slugs propios de Idealista (moncloa, fuencarral) tras el aviso de codex@techgallo; Fotocasa primero.
+- T26: límite por IP y tope diario del LLM (protege la clave de pago en la demo pública), caché LRU de parse/explain, GZip y Cache-Control, health con estado del LLM. 35 tests.
+- IA: Claude Code. Humano: Diego pidió que todo funcione perfecto mientras se decide el siguiente rediseño.
