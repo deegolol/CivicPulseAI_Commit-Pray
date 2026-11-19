@@ -22,9 +22,9 @@
 
 ## WEB
 
-- `frontend/src/App.tsx` orquesta los criterios, el ranking y el flujo IA `parse → score → explain`. El cliente tipado en `src/api/` comparte el formato de las peticiones y Vite reenvía `/api` a FastAPI en local.
-- `PriorityPanel.tsx` recibe presupuesto, campus, tipo de vivienda y prioridades en unidades reales. El ranking se recalcula tras una espera de 250 ms al cambiar los controles.
-- `MadridMap.tsx` dibuja los 131 polígonos en Leaflet y actualiza sus estilos en la capa existente al cambiar el ranking. Los datos de Metro llevan la atribución Powered by CRTM.
-- `TopZonesRail.tsx` muestra las tres primeras recomendaciones. `AreaDetailPanel.tsx` explica alquiler e indicadores con su procedencia y enlaces. `CompareModal.tsx` compara dos o tres zonas con radar y tabla.
-- `index.css` concentra los estilos. En escritorio hay paneles junto al mapa y en móvil un panel inferior con tres alturas.
-- El mapa base, las fuentes tipográficas remotas y los portales dependen de sus servicios. El GeoJSON y el cálculo del ranking pueden servirse desde la copia local.
+- `frontend/src/App.tsx` mantiene los filtros y el flujo `parse → score → explain`. Vite reenvía `/api` a FastAPI en local y el cliente tipado centraliza las peticiones.
+- `OnboardingScreen.tsx` ofrece una frase o un formulario de campus, presupuesto y tipo de vivienda. Una URL con filtros abre los resultados directamente.
+- `TopFilterBar.tsx` permite editar la búsqueda desde los resultados. `ZoneList.tsx` presenta las estimaciones, el encaje y los enlaces a portales en una lista.
+- `MadridMap.tsx` dibuja los 131 polígonos con Leaflet, destaca las diez mejores zonas en azul y conserva la atribución Powered by CRTM para Metro.
+- `AreaDetailPanel.tsx` presenta el coste, los indicadores y las fuentes. `CompareModal.tsx` compara dos o tres zonas con un radar y una tabla.
+- `index.css` concentra los estilos. Móvil abre la lista y ofrece un botón para alternar con el mapa. Las teselas del mapa base y los portales requieren conexión. La copia local conserva el GeoJSON y el ranking.
