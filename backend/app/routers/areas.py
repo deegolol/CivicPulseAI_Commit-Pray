@@ -1,5 +1,5 @@
 """GET /api/areas, /api/areas/{id} and /api/geo: the areas (barrios) with their indicator values and shapes."""
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Response
 
 from ..data import get_dataset
 from ..models import AreaDetail, AreasResponse
@@ -22,5 +22,6 @@ def area_detail(area_id: str) -> AreaDetail:
 
 
 @router.get("/geo")
-def geo() -> dict:
+def geo(response: Response) -> dict:
+    response.headers["Cache-Control"] = "public, max-age=3600"  # shapes only change with a new deploy
     return get_dataset().geojson

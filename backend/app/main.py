@@ -7,6 +7,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse, RedirectResponse
 
 from .data import REPO_ROOT
@@ -16,6 +17,7 @@ load_dotenv(REPO_ROOT / ".env")  # LLM_* settings; real env vars (Railway) take 
 
 app = FastAPI(title="PrimeraLlave API", version="0.1.0", description="Dónde buscar piso en Madrid para estudiantes, con datos abiertos.")
 
+app.add_middleware(GZipMiddleware, minimum_size=1000)  # GeoJSON and score responses shrink ~5-10x
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],

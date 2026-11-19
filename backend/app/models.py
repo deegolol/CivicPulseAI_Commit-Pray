@@ -66,6 +66,8 @@ class AreasResponse(BaseModel):
 class Health(BaseModel):
     status: str
     data: str  # "processed" | "mock"
+    llm: bool = False  # AI layer configured
+    llm_calls_today: int = 0
 
 
 # ---------- POST /api/score (CONTRACTS §4.6) ----------

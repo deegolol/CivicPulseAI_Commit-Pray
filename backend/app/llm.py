@@ -10,7 +10,10 @@ from __future__ import annotations
 import json
 import os
 import re
+import threading
 import unicodedata
+from collections import OrderedDict
+from datetime import date
 from pathlib import Path
 
 import httpx
@@ -22,6 +25,54 @@ from .prompts import EXPLAIN_INSTRUCTIONS, PARSE_INSTRUCTIONS
 OPENAI_URL = "https://api.openai.com/v1/responses"
 DEMO_CACHE_FILE = Path(__file__).resolve().parent / "demo_cache.json"
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")  # real env vars (Railway) take precedence
+
+# ---------------------------------------------------------------- cost & speed guards (T26)
+# The demo is public and uses the team's paid key: cap LLM calls per day and cache identical requests.
+_lock = threading.Lock()
+_usage = {"day": date.today().isoformat(), "calls": 0}
+_CACHE_MAX = 256
+_parse_cache: OrderedDict[str, dict] = OrderedDict()
+_explain_cache: OrderedDict[str, str] = OrderedDict()
+
+
+def _take_llm_budget() -> bool:
+    """True if we may call the LLM now (and counts the call). Resets every day."""
+    limit = int(os.getenv("LLM_DAILY_LIMIT", "1500"))
+    with _lock:
+        today = date.today().isoformat()
+        if _usage["day"] != today:
+            _usage.update(day=today, calls=0)
+        if _usage["calls"] >= limit:
+            return False
+        _usage["calls"] += 1
+        return True
+
+
+def llm_status() -> dict:
+    return {"llm": llm_enabled(), "llm_calls_today": _usage["calls"] if _usage["day"] == date.today().isoformat() else 0}
+
+
+def _cache_get(cache: OrderedDict, key: str):
+    with _lock:
+        if key in cache:
+            cache.move_to_end(key)
+            return cache[key]
+    return None
+
+
+def _cache_put(cache: OrderedDict, key: str, value) -> None:
+    with _lock:
+        cache[key] = value
+        cache.move_to_end(key)
+        while len(cache) > _CACHE_MAX:
+            cache.popitem(last=False)
+
+
+def reset_guards() -> None:  # used by tests
+    with _lock:
+        _usage.update(day=date.today().isoformat(), calls=0)
+        _parse_cache.clear()
+        _explain_cache.clear()
 DISTANCE_KEY = "distance_km"
 HOUSING_TYPES = ("room", "studio", "flat")
 
@@ -51,6 +102,8 @@ def llm_enabled() -> bool:
 
 def _call_openai(instructions: str, user_input: str, schema: dict | None = None, timeout_env: str = "LLM_TIMEOUT_S", timeout_default: str = "8") -> str:
     """One Responses API call. Raises on any HTTP/timeout/format problem (callers fall back)."""
+    if not _take_llm_budget():
+        raise RuntimeError("límite diario de llamadas al LLM alcanzado")
     body: dict = {"model": os.getenv("LLM_MODEL", "gpt-5.6-luna"), "instructions": instructions, "input": user_input,
                   "reasoning": {"effort": os.getenv("LLM_REASONING_EFFORT", "low")}}
     if schema:
@@ -148,12 +201,18 @@ def parse_query(query: str, campuses: list[Campus], indicators: list[Indicator],
     cached = _demo_cache().get(_norm(query))
     if cached:
         return _finish(cached, campuses, keys, default_campus, "llm")
+    cache_key = json.dumps([_norm(query), keys, [c.id for c in campuses], default_campus])
+    hit = _cache_get(_parse_cache, cache_key)
+    if hit:
+        return dict(hit)
     if llm_enabled():
         try:
             campus_list = "; ".join(f"{c.id} = {c.name}" for c in campuses)
             text = _call_openai(PARSE_INSTRUCTIONS + f"\nCampus disponibles: {campus_list}\nCriterios: {', '.join(keys)}",
                                 query, parse_schema(campuses, keys))
-            return _finish(json.loads(text), campuses, keys, default_campus, "llm")
+            result = _finish(json.loads(text), campuses, keys, default_campus, "llm")
+            _cache_put(_parse_cache, cache_key, result)
+            return dict(result)
         except Exception:  # noqa: BLE001 — any failure means "use the fallback", the demo must not break
             pass
     return _finish(keyword_parse(query, campuses, keys), campuses, keys, default_campus, "keywords")
@@ -192,8 +251,13 @@ def explain_areas(items: list[dict], housing_type: str, query: str | None) -> tu
     if llm_enabled():
         try:
             payload = json.dumps({"busqueda": query or "", "tipo_vivienda": housing_type, "zonas": items}, ensure_ascii=False)
+            hit = _cache_get(_explain_cache, payload)
+            if hit:
+                return hit, "llm"
             # Longer budget than parse: the UI shows results first and the explanation loads after.
-            return _call_openai(EXPLAIN_INSTRUCTIONS, payload, timeout_env="LLM_EXPLAIN_TIMEOUT_S", timeout_default="12"), "llm"
+            text = _call_openai(EXPLAIN_INSTRUCTIONS, payload, timeout_env="LLM_EXPLAIN_TIMEOUT_S", timeout_default="12")
+            _cache_put(_explain_cache, payload, text)
+            return text, "llm"
         except Exception:  # noqa: BLE001
             pass
     return template_explain(items, housing_type), "keywords"

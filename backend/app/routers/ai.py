@@ -1,5 +1,10 @@
 """POST /api/ai/parse and /api/ai/explain: natural-language search and grounded explanations (T11)."""
-from fastapi import APIRouter
+import os
+import threading
+import time
+from collections import defaultdict, deque
+
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from ..data import get_dataset
 from ..llm import explain_areas, parse_query
@@ -7,7 +12,30 @@ from ..models import AiExplainRequest, AiExplainResponse, AiParseRequest, AiPars
 from ..scoring import score_areas
 from .score import resolve
 
-router = APIRouter(prefix="/ai", tags=["ai"])
+_hits: dict[str, deque] = defaultdict(deque)
+_hits_lock = threading.Lock()
+
+
+def rate_limit(request: Request) -> None:
+    """Per-IP sliding window (default 30 requests/min) so nobody can burn the team's OpenAI credit."""
+    limit = int(os.getenv("AI_RATE_PER_MIN", "30"))
+    ip = (request.headers.get("x-forwarded-for") or "").split(",")[0].strip() or (request.client.host if request.client else "?")
+    now = time.monotonic()
+    with _hits_lock:
+        q = _hits[ip]
+        while q and now - q[0] > 60:
+            q.popleft()
+        if len(q) >= limit:
+            raise HTTPException(status_code=429, detail="Demasiadas búsquedas seguidas. Espera un minuto y vuelve a probar.")
+        q.append(now)
+
+
+def reset_rate_limit() -> None:  # used by tests
+    with _hits_lock:
+        _hits.clear()
+
+
+router = APIRouter(prefix="/ai", tags=["ai"], dependencies=[Depends(rate_limit)])
 
 
 @router.post("/parse", response_model=AiParseResponse)
