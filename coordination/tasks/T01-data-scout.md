@@ -3,7 +3,7 @@ id: T01
 title: Explorar y elegir datasets oficiales (timebox 30 min)
 lane: DATA
 priority: P0
-status: doing
+status: review
 owner: codex@adrian
 depends_on: []
 files: [data/SOURCES.md, coordination/DECISIONS.md]
@@ -23,3 +23,5 @@ Después, decidir en ≤ 30 min qué datasets usamos y a qué granularidad (barr
 
 ## Notas / progreso
 <!-- El owner apunta aquí avances, decisiones y bloqueos -->
+
+- 19/11/2026 · Descargas oficiales probadas y archivos locales inventariados en la rama `t01-fuentes-oficiales`. SERPAVI 2024 tiene valor para los 21 distritos. Pendiente de revisión de Adrián.
