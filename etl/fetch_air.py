@@ -118,13 +118,22 @@ def source_file(catalog: str, resource: str, first_field: str) -> Path:
     """Usa el CSV en data/raw o lo descarga del catálogo municipal."""
     filename = f"{resource}.csv"
     path = RAW_DIR / filename
-    if not path.is_file():
-        with urlopen(f"{catalog}/resource/{resource}/download/{filename}", timeout=45) as response:
-            content = response.read()
-        header = content.split(b"\n", 1)[0].decode("utf-8-sig")
-        if header.split(";", 1)[0].strip('"') != first_field:
-            raise ValueError(f"Cabecera inesperada en la descarga municipal {filename}.")
-        write_atomic(path, content)
+    if path.is_file():
+        return path
+
+    url = f"{catalog}/resource/{resource}/download/{filename}"
+    for attempt in range(3):
+        try:
+            with urlopen(url, timeout=20) as response:
+                content = response.read()
+            break
+        except OSError:
+            if attempt == 2:
+                raise
+    header = content.split(b"\n", 1)[0].decode("utf-8-sig")
+    if header.split(";", 1)[0].strip('"') != first_field:
+        raise ValueError(f"Cabecera inesperada en la descarga municipal {filename}.")
+    write_atomic(path, content)
     return path
 
 
