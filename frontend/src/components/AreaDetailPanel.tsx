@@ -4,6 +4,7 @@
  * Big Bricolage Grotesque price, Madrid red primary CTA "Ver pisos en Idealista",
  * thin comparison bars vs Madrid median, per-indicator source links, and CRTM attribution.
  */
+import { WatchZoneButton } from './AccountProvider';
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Check, ExternalLink, Scale, X } from 'lucide-react';
 import { getAreaDetail } from '../api/client';
@@ -216,6 +217,15 @@ export function AreaDetailPanel({
           <p className="mt-1 text-[11px] text-muted">
             Estimación con datos oficiales (referencia de {m2Used} m²).
           </p>
+
+          <div className="mt-3">
+            <WatchZoneButton watch={{
+              area_id: area.id,
+              area_name: area.name,
+              housing_type: housingType,
+              budget_eur_month: Math.round(budget),
+            }} />
+          </div>
 
           {/* Primary Madrid Red CTA */}
           {primaryLink && (

@@ -3,6 +3,7 @@
  * Chips: Campus · Budget €/mes · Housing type · Max km · Más filtros (air, transit, budget-only, priorities, search).
  * Zero percentages anywhere; crisp 1px borders and subtle popover shadow only.
  */
+import { AccountButton } from './AccountProvider';
 import { useEffect, useRef, useState } from 'react';
 import { ChevronDown, KeyRound, Scale, Search, SlidersHorizontal, X } from 'lucide-react';
 import type { Campus, HousingType } from '../api/types';
@@ -121,6 +122,7 @@ export function TopFilterBar({
             {APP_NAME}
           </span>
         </button>
+        <AccountButton />
 
         <span className="hidden h-5 w-px shrink-0 bg-border sm:block" />
 

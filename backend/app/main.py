@@ -11,7 +11,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse, RedirectResponse
 
 from .data import REPO_ROOT
-from .routers import ai, areas, meta, score
+from .routers import account, ai, areas, meta, score
 
 load_dotenv(REPO_ROOT / ".env")  # LLM_* settings; real env vars (Railway) take precedence
 
@@ -24,6 +24,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(account.router, prefix="/api")
 
 for r in (meta.router, areas.router, score.router, ai.router):
     app.include_router(r, prefix="/api")

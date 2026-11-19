@@ -3,6 +3,7 @@
  * Two ways to start: natural language search (+ 3 cached pitch chips) OR campus/budget/type selector.
  * Clean urban utility aesthetic: pure white, Madrid red CTA (#D7262E), Bricolage Grotesque + Instrument Sans.
  */
+import { AccountButton } from './AccountProvider';
 import { ArrowRight, KeyRound, Search } from 'lucide-react';
 import type { Campus, HousingType } from '../api/types';
 import { APP_NAME, HOUSING_TYPE_LABELS } from '../config';
@@ -64,6 +65,7 @@ export function OnboardingScreen({
             {APP_NAME}
           </span>
         </div>
+        <AccountButton />
       </header>
 
       {/* Centered main content */}
