@@ -3,8 +3,8 @@ id: T04
 title: ETL geometría de barrios + campus
 lane: DATA
 priority: P0
-status: todo
-owner: ""
+status: doing
+owner: codex@adrian
 depends_on: [T01]
 files: [etl/fetch_geometry.py, etl/build_indicators.py, etl/run_all.py, data/processed/barrios.geojson, data/processed/campuses.json]
 ---
