@@ -3,8 +3,8 @@ id: T25
 title: Rediseño v2 — que NO parezca hecho por IA + flujo "primero preguntas, luego mapa" (Diego)
 lane: WEB
 priority: P0
-status: todo
-owner: ""
+status: doing
+owner: antigravity@diego
 depends_on: [T24]
 files: [frontend/src/**, frontend/index.html]
 ---

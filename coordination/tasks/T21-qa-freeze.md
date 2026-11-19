@@ -3,8 +3,8 @@ id: T21
 title: QA final, freeze y tags
 lane: SHIP
 priority: P0
-status: doing
-owner: antigravity@diego
+status: todo
+owner: ""
 depends_on: [T09,T10]
 files: [-]
 ---
