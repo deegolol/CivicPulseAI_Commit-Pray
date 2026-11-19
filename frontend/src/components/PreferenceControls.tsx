@@ -4,27 +4,32 @@ import { priorityOptions } from '../constants/filters';
 
 const LEVELS = [[0, 'Indiferente'], [0.35, 'Algo'], [1, 'Mucho']] as const;
 
-export function PreferenceControls({ availableKeys, weights, onChange, compact = false }: {
+export function PreferenceControls({ availableKeys, weights, onChange, tiles = false }: {
   availableKeys: Set<string>;
   weights: Record<string, number>;
   onChange: (key: string, weight: number) => void;
-  compact?: boolean;
+  tiles?: boolean;
 }) {
   const id = useId();
   const activeCount = Object.values(weights).filter((weight) => weight > 0).length;
 
   return (
-    <fieldset className="min-w-0">
-      <legend className="text-sm font-bold">Qué te importa en el barrio</legend>
+    <div role="group" aria-labelledby={id + '-title'}
+      className={tiles ? 'min-w-0 rounded-2xl bg-surface p-3.5 sm:p-4' : 'min-w-0'}>
+      <h2 id={id + '-title'} className={tiles ? 'font-display text-lg font-bold' : 'text-sm font-bold'}>
+        Qué te importa en el barrio
+      </h2>
       <p className="mt-1 text-xs text-muted">Indiferente deja ese criterio fuera de la valoración.</p>
-      <div className="mt-3 divide-y divide-border rounded-xl border border-border bg-bg">
+      <div className={tiles
+        ? 'mt-2.5 grid gap-2 min-[520px]:grid-cols-2'
+        : 'mt-3 divide-y divide-border rounded-xl border border-border bg-bg'}>
         {priorityOptions(availableKeys).map(({ key, label }) => {
           const weight = weights[key] ?? 0;
           const level = weight === 0 ? 0 : weight < 0.5 ? 0.35 : 1;
           return (
-            <div key={key} className={`grid gap-1.5 p-2.5 min-[420px]:grid-cols-[minmax(0,1fr)_192px] min-[420px]:items-center ${
-              compact ? 'md:py-1.5' : ''
-            }`}>
+            <div key={key} className={tiles
+              ? 'grid min-w-0 gap-1 rounded-xl border border-border bg-bg px-2 py-1.5'
+              : 'grid gap-1.5 p-2.5 min-[420px]:grid-cols-[minmax(0,1fr)_192px] min-[420px]:items-center'}>
               <span id={id + key} className="px-1 text-xs font-semibold">{label}</span>
               <div role="group" aria-labelledby={id + key} className="grid grid-cols-[1.5fr_1fr_1fr] rounded-lg bg-surface p-0.5">
                 {LEVELS.map(([value, name]) => (
@@ -36,7 +41,7 @@ export function PreferenceControls({ availableKeys, weights, onChange, compact =
                     title={!value && weight > 0 && activeCount === 1 ? 'Mantén al menos un criterio activo' : undefined}
                     onClick={() => onChange(key, value)}
                     className={'min-h-8 rounded-md px-1 text-[11px] font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand ' +
-                      (level === value ? 'bg-bg text-ink shadow-sm ring-1 ring-ink/5' : 'text-muted hover:text-ink disabled:opacity-45')}
+                      (level === value ? (tiles ? 'bg-ink text-bg' : 'bg-bg text-ink shadow-sm ring-1 ring-ink/5') : 'text-muted hover:text-ink disabled:opacity-45')}
                   >{name}</button>
                 ))}
               </div>
@@ -44,6 +49,6 @@ export function PreferenceControls({ availableKeys, weights, onChange, compact =
           );
         })}
       </div>
-    </fieldset>
+    </div>
   );
 }

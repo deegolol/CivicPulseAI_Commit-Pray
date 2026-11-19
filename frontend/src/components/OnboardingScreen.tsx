@@ -1,7 +1,7 @@
 /** Starts a search with natural language or a focused manual form. */
 import { useLayoutEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
-import { ArrowRight, ChevronDown, CircleHelp, CornerDownLeft, Search, X } from 'lucide-react';
+import { ArrowRight, ChevronDown, Search, X } from 'lucide-react';
 import type { Campus, HousingType } from '../api/types';
 import { HOUSING_TYPE_LABELS } from '../config';
 import {
@@ -81,13 +81,17 @@ export function OnboardingScreen({
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }, [mode]);
 
-  function changeMode(update: () => void) {
+  function changeMode(update: () => void, direction: 'forward' | 'back' = 'forward') {
     const change = () => {
       setFormError(null);
       update();
     };
     if (supportsViewTransition && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      document.startViewTransition(() => flushSync(change));
+      const root = document.documentElement;
+      root.dataset.searchSlide = direction;
+      const transition = document.startViewTransition(() => flushSync(change));
+      const clearDirection = () => { delete root.dataset.searchSlide; };
+      void transition.finished.then(clearDirection, clearDirection);
     } else {
       change();
     }
@@ -101,30 +105,29 @@ export function OnboardingScreen({
   return (
     <div className="relative isolate flex min-h-dvh flex-col overflow-clip bg-bg text-ink">
       {showIntro && <img src="/plano-portada.png" alt="" className="onboarding-map" />}
-      <header className="flex w-full items-center justify-between gap-3 px-4 py-4 sm:px-6">
+      <header className="flex w-full items-center justify-between gap-2 px-3 py-4 max-[359px]:[&>span>span]:text-base sm:px-6">
         <BrandLogo />
-        <nav aria-label="Ayuda y cuenta" className="flex items-center gap-2">
+        <nav aria-label="Ayuda y cuenta" className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           <button type="button" onClick={() => openInfo('help')}
-            className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-border bg-bg px-2.5 text-xs font-medium hover:bg-surface">
-            <CircleHelp size={16} aria-hidden="true" />
-            <span className="sr-only sm:not-sr-only">Cómo funciona</span>
+            className="inline-flex min-h-10 items-center whitespace-nowrap rounded-full px-2 text-xs font-semibold text-ink hover:bg-surface sm:px-3">
+            Cómo funciona
           </button>
-          <AccountButton compact onUnavailable={() => openInfo('account')} />
+          <AccountButton onUnavailable={() => openInfo('account')} />
         </nav>
       </header>
 
-      <main key={mode} className={`mx-auto w-full flex-1 px-4 sm:px-6 ${
+      <main key={mode} data-search-mode={mode} className={`onboarding-flow mx-auto w-full flex-1 px-4 sm:px-6 ${
         showIntro ? 'flex max-w-6xl flex-col justify-center py-8 sm:py-12' : 'onboarding-form-screen max-w-6xl pt-5 pb-8 sm:pt-7'
       } ${!supportsViewTransition ? 'onboarding-enter' : ''}`}>
         <div className={`mx-auto w-full ${wideForm ? 'max-w-2xl md:max-w-none' : 'max-w-[39rem]'}`}>
           <h1 ref={heading} tabIndex={-1}
-            className={`text-center font-display text-3xl leading-[1.08] font-bold tracking-tight outline-none ${
-              showIntro ? 'sm:text-5xl' : 'sm:text-4xl'
+            className={`font-display leading-[1.08] font-bold tracking-tight outline-none ${
+              showIntro ? 'text-center text-3xl sm:text-5xl' : 'text-[1.65rem] sm:text-3xl'
             }`}>
-            {review ? 'Completa tu búsqueda' : manualOpen ? 'Configura tu búsqueda' : '¿Dónde vas a vivir este curso?'}
+            {review ? 'Completa tu búsqueda' : manualOpen ? 'Tu búsqueda' : '¿Dónde vas a vivir este curso?'}
           </h1>
           {(showIntro || (review && interpretation)) && (
-            <p className="mx-auto mt-3 max-w-[39rem] text-center text-sm text-muted sm:text-base">
+            <p className={`mt-3 max-w-[39rem] text-sm text-muted sm:text-base ${showIntro ? 'mx-auto text-center' : ''}`}>
               {showIntro ? 'Encuentra barrios de Madrid según tu campus, tu presupuesto y lo que te importa.' : interpretation}
             </p>
           )}
@@ -164,7 +167,7 @@ export function OnboardingScreen({
                   </button>
                 </div>
               </form>
-              <div className="mt-3 flex gap-2 overflow-x-auto pb-1 sm:justify-center">
+              <div className="mt-3 grid w-full grid-cols-3 gap-1.5 sm:gap-2.5">
                 {EXAMPLE_QUERIES.map((example, index) => (
                   <button
                     key={example}
@@ -174,9 +177,8 @@ export function OnboardingScreen({
                       onQueryChange(example);
                       onSearchSubmit(example);
                     }}
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-bg px-3 py-1.5 text-left text-xs font-medium text-muted hover:border-ink/40 hover:text-ink disabled:opacity-60"
+                    className="min-h-12 min-w-0 rounded-2xl border border-border bg-bg px-1.5 py-2 text-center text-xs leading-tight font-medium text-ink break-words hover:border-ink/40 hover:bg-surface disabled:opacity-60 sm:px-3 sm:text-sm"
                   >
-                    <CornerDownLeft size={12} aria-hidden="true" />
                     {exampleLabels[index] ?? example}
                   </button>
                 ))}
@@ -187,8 +189,8 @@ export function OnboardingScreen({
 
           {!showIntro && (
             <form
-              className={`onboarding-form mt-5 grid items-start gap-4 rounded-2xl border border-border bg-bg p-4 shadow-[0_12px_36px_#2637250d] sm:p-5 ${
-                wideForm ? 'md:grid-cols-2 md:gap-x-7' : ''
+              className={`onboarding-form mt-4 grid items-start gap-3 md:gap-x-6 ${
+                wideForm ? 'md:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)]' : ''
               }`}
               onSubmit={(event) => {
                 event.preventDefault();
@@ -205,8 +207,9 @@ export function OnboardingScreen({
               }}
             >
               {hasSearchFields && (
-                <fieldset className="min-w-0 space-y-3">
-                  <legend className="mb-2 text-sm font-bold">Datos de la búsqueda</legend>
+                <div role="group" aria-labelledby="search-fields-title"
+                  className="min-w-0 space-y-2.5 rounded-2xl border border-border bg-bg p-3.5 sm:p-4">
+                  <h2 id="search-fields-title" className="font-display text-lg font-bold">Campus y presupuesto</h2>
                   {needs('campus') && (
                     <CampusPicker campuses={campuses.length ? campuses : DEFAULT_CAMPUSES} campusId={campusId} onChange={onCampusChange} />
                   )}
@@ -270,14 +273,14 @@ export function OnboardingScreen({
                         : 'El radio se mide en línea recta. Los trayectos reales pueden variar.'}
                     </p>
                   )}
-                </fieldset>
+                </div>
               )}
 
-              <PreferenceControls availableKeys={availableKeys} weights={priorityWeights} onChange={onPriorityChange} compact />
+              <PreferenceControls availableKeys={availableKeys} weights={priorityWeights} onChange={onPriorityChange} tiles />
 
               {formError && <p role="alert" className="col-span-full text-sm text-over">{formError}</p>}
-              <div className="col-span-full flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
-                <button type="button" onClick={() => changeMode(review ? onBack : () => setManualOpen(false))} className="text-sm font-medium text-muted hover:text-ink">
+              <div className="col-span-full flex flex-wrap items-center justify-between gap-3 pt-1.5">
+                <button type="button" onClick={() => changeMode(review ? onBack : () => setManualOpen(false), 'back')} className="text-sm font-medium text-muted hover:text-ink">
                   {review ? 'Editar mi frase' : 'Buscar con una frase'}
                 </button>
                 <button type="submit" className={buttonClass + ' ml-auto'}>
