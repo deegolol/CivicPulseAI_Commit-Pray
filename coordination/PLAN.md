@@ -1,7 +1,9 @@
 # PLAN MAESTRO — Commit & Pray @ CivicPulse AI
 
-> Nombre de trabajo: **BarrioMatch** (se puede renombrar; anotar en `DECISIONS.md`).
-> Una frase: *"Dinos tu campus, tu presupuesto y lo que te importa, y te decimos en qué barrios de Madrid te conviene vivir, con datos oficiales y explicado en lenguaje natural."*
+>  Nombre: **pendiente** (ver `DECISIONS.md`). En código se usa SOLO la constante `APP_NAME` (`frontend/src/config.ts`) para poder renombrar en 1 minuto. En docs: "la app".
+> Una frase: *"Dinos dónde vas a estudiar, cuánto puedes pagar y qué necesitas, y te decimos dónde buscar piso en Madrid: qué zonas encajan, cuánto te costará allí una habitación o estudio, y te llevamos directo a los anuncios — con datos oficiales y explicado en lenguaje natural."*
+
+**Enfoque: presupuesto primero.** El estudiante no busca "un barrio bonito": busca **el mejor sitio que se puede permitir** cerca de su campus.
 
 ---
 
@@ -13,7 +15,14 @@
 | **Cruce de datasets** (20 pts) | Una sola pregunta ("¿dónde vivo?") obliga a cruzar alquiler + aire + transporte + servicios + geografía. No es un cruce forzado: es la esencia del producto. |
 | **Recomendación, no tabla** | Ranking personalizado con pesos → cumple de sobra el "valor añadido". |
 | **IA con sentido** ("CivicPulse **AI**") | El usuario escribe en lenguaje natural; el LLM lo traduce a parámetros (JSON validado) y luego **explica** el resultado con los números reales. La IA no inventa datos → defendible ante preguntas técnicas. |
-| **Demo espectacular en 5 min** | Escribes una frase → el mapa se colorea → top 3 → clic en barrio → desglose. Visual e inmediato. |
+| **Demo espectacular en 5 min** | Escribes una frase → el mapa se colorea → top 3 → clic en barrio → "con tu presupuesto aquí pagas ~X €/mes" → botón "ver pisos". Visual e inmediato. |
+
+### ¿Existe ya? (investigado 19/11)
+- **Madriwa** (Taniwa, publicada en datos.gob.es en 2026): recomienda **barrios** de Madrid con datos abiertos según perfil y lugares importantes. **No** usa presupuesto, **no** es específica para estudiantes, **no** lleva a pisos concretos. El jurado puede conocerla → **mencionarla en el pitch y diferenciarnos**.
+- Portales (Uniplaces, Spotahome, Badi, Amber, Idealista): tienen anuncios y filtros de precio, pero **no** te dicen qué zona te conviene ni cruzan datos públicos (aire, transporte, servicios, distancia real al campus).
+- **Nuestro hueco:** *presupuesto + campus + necesidades → zonas recomendadas + coste estimado con datos oficiales + salto directo a anuncios filtrados.* Lo que hacen los portales y lo que hace Madriwa, unidos y pensado para estudiantes.
+
+**Coste estimado (transparente):** `alquiler €/m² oficial × m² de referencia` (habitación en piso compartido ≈ 25 m² de reparto, estudio ≈ 35 m², piso ≈ 60 m²). Es una estimación con datos oficiales, y la UI lo dice. Los precios exactos están en los anuncios a los que enlazamos.
 
 **Persona del pitch:** *Lucía, 18 años, viene de fuera de Madrid, empieza 1.º en la ETSISI (Campus Sur, Vallecas). Presupuesto ~500 €/mes. Quiere estar a menos de 40 min, zona tranquila y con aire limpio porque sale a correr.*
 
@@ -28,8 +37,9 @@ El sistema de coordinación (`AGENTS.md`, tareas, contratos) vale igual; solo ca
 
 **MUST (MVP que se presenta sí o sí)**
 1. Mapa de Madrid por **barrios** (fallback: distritos) coloreado por puntuación.
-2. Selector de campus + presupuesto + 4–6 sliders de prioridades → ranking recalculado en vivo.
-3. Panel de detalle de un barrio: puntuación, desglose por indicador, valores reales, enlace a la fuente.
+2. Selector de campus + **presupuesto €/mes + tipo (habitación / estudio / piso)** + sliders de prioridades → ranking recalculado en vivo. Zonas fuera de presupuesto en gris.
+3. Panel de detalle de un barrio: puntuación, **"con tu presupuesto aquí: ~X €/mes, te da para ~Y m²"**, desglose por indicador, valores reales, enlace a la fuente.
+3b. Botón **"Ver pisos en esta zona"** → abre búsquedas ya filtradas (zona + precio máx.) en portales de anuncios. Solo enlaces: **nada de scraping**.
 4. Mínimo **3 datasets oficiales cruzados** (geometría + alquiler + ≥1 de aire/transporte/servicios).
 5. README + AI_USAGE + fuentes enlazadas.
 
@@ -41,6 +51,7 @@ El sistema de coordinación (`AGENTS.md`, tareas, contratos) vale igual; solo ca
 10. Deploy público con URL.
 
 **COULD**
+10b. **Residencias universitarias / colegios mayores** como puntos en el mapa (si hay dataset oficial con ubicaciones).
 11. CI en GitHub Actions (tests + build) con badge en README.
 12. Compartir búsqueda por URL (estado en querystring).
 13. Más campus / universidades de Madrid.
@@ -61,6 +72,7 @@ Granularidad objetivo: **barrio** (131 en Madrid). Si algún indicador solo exis
 | Calidad del aire | datos.madrid.es "Calidad del aire. Datos en tiempo real / horarios" + ubicación de estaciones → estación más cercana | Media anual por estación |
 | Transporte | CRTM datos abiertos (estaciones Metro/Cercanías/EMT, GeoJSON) → nº de paradas por barrio + distancia a la más cercana | Solo Metro |
 | Servicios | datos.madrid.es: bibliotecas, instalaciones deportivas, centros culturales… (JSON con coordenadas) → recuento por barrio | 1–2 tipos |
+| Residencias universitarias (COULD) | Comunidad de Madrid / datos.madrid.es (verificar si existe listado con coordenadas) | Omitir |
 | Distancia al campus | Calculada (haversine centroide→campus). Coordenadas de campus en `data/processed/campuses.json` | — |
 | (Opcional) Ruido, renta media, población | Panel de indicadores de distritos y barrios (Ayto. Madrid) | — |
 
@@ -98,14 +110,15 @@ Regla: **todo dataset usado se documenta en `data/SOURCES.md`** con nombre, orga
 
 ## 5. Equipo y carriles
 
-| Carril | Humano | Agentes | Arranca con |
+| Carril | Humano | Agente(s) | Arranca con |
 |---|---|---|---|
-| `DATA` | (persona) | 1 agente | T01 → T04 → T05 |
-| `API`  | (persona) | 1 agente | T02 → T08 → T11 |
-| `WEB`  | (persona) | 1–2 agentes (mapa / paneles) | T03 → T09 / T10 |
-| `SHIP` | (persona, también "integrador") | 1 agente | T00 → T15 → T17–T21 |
+| `API`  | diego | `claude@diego` | T02 → T08 → T22 → T11 |
+| `WEB`  | diego | `antigravity@diego` | T03 → T09 → T10 → T12–T14 |
+| `DATA` | diego | `codex@diego` (aire, transporte, servicios) | T06 → T07 → T23 |
+| `DATA` | amigo1 | IA de amigo1 (scout, geometría, alquiler, merge) | T01 → T04 → T05 |
+| `SHIP` | amigo2 (**integrador humano**) | IA de amigo2 | T00 → T15 → T16 → T17–T21 |
 
-Si sois 3: `SHIP` lo absorbe quien lleve `API` a partir de las 15:00.
+Diego supervisa 3 agentes: que revise diffs antes de cada push y delegue la integración en amigo2.
 **Integrador (SHIP):** cada 30 min hace `git pull`, levanta la app (`make dev`) y comprueba que `main` funciona. Si `main` se rompe, avisa por inbox `to: all` y nadie pushea hasta arreglarlo.
 
 **Mocks primero:** WEB no espera a API y API no espera a DATA. Todos trabajan contra los ejemplos de `CONTRACTS.md` desde el minuto 1 (`frontend/src/mocks/`, `backend/app/mock_data/`).
@@ -144,7 +157,7 @@ Si sois 3: `SHIP` lo absorbe quien lleve `API` a partir de las 15:00.
 | 0:00–0:30 | **Gancho**: "Lucía empieza en la ETSISI la semana que viene. Tiene 500 € y no conoce Madrid. ¿Dónde busca piso?" |
 | 0:30–3:15 | **Demo en vivo**: escribe la frase de Lucía → el mapa se colorea → top 3 con explicación → clic en un barrio → desglose y fuentes → mueve el slider "aire limpio" y el ranking cambia → compara 2 barrios → (10 s) se ve en el móvil. |
 | 3:15–4:15 | **Cómo funciona**: 1 diagrama (arquitectura §4). Cruce de N datasets oficiales. "La IA no inventa datos: traduce tu intención a parámetros validados y explica cifras reales. Sin IA, la app sigue funcionando." Tests + CI. |
-| 4:15–4:45 | **Impacto y siguiente paso**: cualquier ciudad con portal abierto; más campus; alertas. |
+| 4:15–4:45 | **Impacto y siguiente paso**: "Madriwa recomienda barrios; los portales enseñan anuncios; nosotros unimos ambos para estudiantes." Futuro real: acuerdos con portales/residencias para anuncios dentro de la app, todas las universidades de España, alertas de precio. |
 | 4:45–5:00 | Cierre con el nombre y la URL. |
 
 **Plan B de demo**: app en local + datos precalculados + respuestas de IA cacheadas para las 3 frases de demo + vídeo/GIF de 60 s en `docs/` por si todo falla.

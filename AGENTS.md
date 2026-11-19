@@ -14,18 +14,38 @@ Entrega: **viernes 20/11, 12:00** (repo final). Presentación: 5 min, demo en vi
 2. `coordination/BRIEF.md` — reglas del hackathon y rúbrica (qué puntúa)
 3. `coordination/PLAN.md` — qué construimos, por qué, y en qué orden
 4. `coordination/CONTRACTS.md` — **contratos de datos y API** (no se rompen sin acuerdo)
-5. `sh coordination/board.sh` — estado de las tareas
+5. `sh coordination/board.sh` — agentes registrados y estado de las tareas
 6. Mensajes recientes en `coordination/inbox/` dirigidos a ti, a tu carril o a `all`
 7. `coordination/DECISIONS.md` — decisiones ya tomadas (no las reabras sin motivo)
 
 ---
 
-## 1. Identidad
+## 1. Identidad y arranque (handshake)
 
-Cada agente se identifica como `<herramienta>@<persona>`, p. ej. `claude@persona1`, `codex@persona1`, `gemini@persona2`.
+Cada agente se identifica como `<herramienta>@<persona>`, p. ej. `claude@diego`, `codex@diego`, `antigravity@diego`.
 Usa siempre el mismo ID en tareas, commits, logs y mensajes.
 
+**Reparto inicial** (D-08 en `DECISIONS.md`):
+
+| Agente | Carril | Primeras tareas |
+|---|---|---|
+| `claude@diego` | API | T02 → T08 → T22 → T11 |
+| `antigravity@diego` | WEB | T03 → T09 → T10 → T12 → T13 → T14 |
+| `codex@diego` | DATA (aire, transporte, servicios) | T06 → T07 → T23 |
+| IA de amigo1 | DATA (scout, geometría, alquiler, merge) | T01 → T04 → T05 |
+| IA de amigo2 | SHIP (integración, deploy, docs, pitch) | T00 → T15 → T16 → T17… |
+
+**Protocolo de arranque (todos igual):**
+1. Lee los documentos del §0.
+2. Crea tu ficha `coordination/agents/<tu-id>.md` (plantilla en `coordination/agents/README.md`) con `status: ready`.
+3. `git pull --rebase origin main && git add coordination/agents/<tu-id>.md && git commit -m "chore(agents): register <tu-id>" && git push origin HEAD:main`
+4. Responde a tu humano: **"LISTO: <tu-id>, carril <X>, empezaré por <Txx> así: …"** y **espera**.
+5. Cuando tu humano escriba **GO**: `sh coordination/board.sh` (verás el roster de agentes), lee el inbox, reclama tu tarea y empieza.
+   Pon `status: working` en tu ficha. Al acabar la sesión o si te quedas sin trabajo: `status: idle` y pregunta qué hacer.
+
 ## 2. Carriles (ownership de carpetas)
+
+Dos agentes pueden compartir carril (p. ej. DATA): entonces cada uno toca **solo** los `files:` de sus tareas.
 
 | Carril | Carpeta(s) que posee | Responsabilidad |
 |---|---|---|

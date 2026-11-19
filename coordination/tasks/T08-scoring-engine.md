@@ -14,6 +14,7 @@ Corazón del producto. Función pura `score(areas, campus, weights, filters) -> 
 - [ ] Normalización min-max por indicador, invertida si `higher_is_better=false`; `null` → mediana.
 - [ ] `distance_km` haversine centroide→campus.
 - [ ] Pesos renormalizados; filtros marcan `excluded`.
+- [ ] `budget_eur_month` + `housing_type` → `est_rent_eur_month`, `affordable_m2`, `fits_budget`; filtro `only_within_budget`.
 - [ ] `breakdown` con `value`, `normalized`, `weight`, `contribution`.
 - [ ] ≥ 5 tests: pesos que suman ≠1, indicador invertido, nulls, filtros, orden del ranking.
 

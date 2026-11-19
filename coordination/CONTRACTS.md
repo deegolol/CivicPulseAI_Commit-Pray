@@ -13,6 +13,7 @@
 ├─ data/
 │  ├─ raw/                 # descargas crudas (gitignored)
 │  ├─ processed/           # salida del ETL (VERSIONADA): barrios.geojson, indicators.json, campuses.json
+│  │  └─ parts/            # una pieza por fuente: rent.json, air.json, transit.json, services.json (cada script ETL escribe SOLO la suya)
 │  └─ SOURCES.md           # fuentes oficiales: nombre, organismo, URL, licencia, fecha, transformación
 ├─ etl/                    # Python: fetch_*.py, build_*.py, run_all.py, requirements.txt
 ├─ backend/
@@ -28,6 +29,7 @@
 │  └─ requirements.txt
 ├─ frontend/
 │  ├─ src/
+│  │  ├─ config.ts         # APP_NAME y textos de marca (el nombre se cambia SOLO aquí)
 │  │  ├─ api/              # client.ts (fetch tipado) + types.ts (= este contrato)
 │  │  ├─ components/       # Map, PriorityPanel, AiSearch, AreaDetail, TopCards, Compare…
 │  │  ├─ mocks/            # mismos JSON que backend/app/mock_data
@@ -58,6 +60,15 @@ FeatureCollection (WGS84 / EPSG:4326, simplificada a < 2 MB). Cada feature:
   "geometry": { "type": "MultiPolygon", "coordinates": [] } }
 ```
 `id` es string y es la clave de unión con `indicators.json`. Si trabajamos a nivel distrito: mismos campos, `district_id == id`.
+
+### 3.1b `data/processed/parts/<fuente>.json` (evita conflictos entre agentes de DATA)
+Cada script `etl/fetch_<fuente>.py` escribe **solo** su pieza; `etl/build_indicators.py` las fusiona en `indicators.json`.
+```json
+{ "source":    { "id": "alquiler", "name": "...", "publisher": "...", "url": "...", "license": "...", "retrieved": "2026-11-19", "granularity": "distrito" },
+  "indicator": { "key": "rent_eur_m2", "label": "Alquiler", "unit": "€/m²", "higher_is_better": false, "source": "alquiler" },
+  "values":    { "021": 17.3, "022": null },
+  "notes":     { "021": "valor del distrito" } }
+```
 
 ### 3.2 `data/processed/indicators.json`
 ```json
@@ -115,9 +126,13 @@ Request:
 ```json
 { "campus_id": "etsisi",
   "weights": { "rent_eur_m2": 0.4, "distance_km": 0.3, "air_no2": 0.1, "transit_stops": 0.1, "services_count": 0.1 },
-  "filters": { "max_rent_eur_m2": 18, "max_distance_km": 12 },
+  "filters": { "max_rent_eur_m2": 18, "max_distance_km": 12, "only_within_budget": false },
+  "budget_eur_month": 500,
+  "housing_type": "room",
   "limit": 131 }
 ```
+- `housing_type`: `"room"` (habitación en piso compartido, 25 m² de referencia) | `"studio"` (35 m²) | `"flat"` (60 m²). Por defecto `"room"`. Los m² de referencia viven en `backend/app/scoring.py` como constantes documentadas.
+- `budget_eur_month` opcional. Si viene: se calcula `est_rent_eur_month` y `fits_budget`; con `only_within_budget: true` las que no encajan salen `excluded`.
 - `weights`: 0..1, se renormalizan para sumar 1. Claves desconocidas → 422.
 - `filters`: opcionales. Áreas que no los cumplen salen con `"excluded": true` y `score: 0` (la UI las pinta en gris).
 
@@ -127,12 +142,17 @@ Response:
   "results": [
     { "id": "021", "name": "Palos de Moguer", "district": "Arganzuela", "rank": 1, "score": 87.4, "excluded": false,
       "distance_km": 6.2,
+      "est_rent_eur_month": 433, "fits_budget": true, "affordable_m2": 28.9,
+      "listing_links": [ { "label": "Idealista", "url": "https://..." }, { "label": "Fotocasa", "url": "https://..." }, { "label": "Badi", "url": "https://..." } ],
       "breakdown": {
         "rent_eur_m2": { "value": 17.3, "normalized": 0.71, "weight": 0.4, "contribution": 28.4 },
         "distance_km": { "value": 6.2,  "normalized": 0.82, "weight": 0.3, "contribution": 24.6 }
       } }
   ] }
 ```
+- `est_rent_eur_month = rent_eur_m2 × m² de referencia` (redondeado). `affordable_m2 = budget / rent_eur_m2`. Ambos `null` si falta el dato de alquiler.
+- `listing_links`: URLs de **búsqueda** en portales (zona + precio máx. = presupuesto). Las genera `backend/app/listings.py`. Solo enlaces, sin scraping. Si no se puede construir la URL de un barrio, se usa la del distrito o la de Madrid.
+
 `results` ordenado por `score` desc. `score` 0–100. `normalized` 0–1 (1 = mejor). `contribution = normalized × weight × 100`.
 
 ### 4.7 `POST /api/ai/parse`
@@ -143,6 +163,7 @@ Response:
   "weights": { "rent_eur_m2": 0.4, "distance_km": 0.25, "air_no2": 0.25, "transit_stops": 0.05, "services_count": 0.05 },
   "filters": { "max_rent_eur_m2": null, "max_distance_km": null },
   "budget_eur_month": 500,
+  "housing_type": "room",
   "interpretation": "Priorizo precio, cercanía a Campus Sur y aire limpio.",
   "engine": "llm" }
 ```
