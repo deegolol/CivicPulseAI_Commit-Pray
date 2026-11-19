@@ -140,6 +140,7 @@ export function App() {
   };
 
   const [meta, setMeta] = useState<MetaResponse | null>(null);
+  const metaRequest = useRef<Promise<MetaResponse> | null>(null);
   const [geoData, setGeoData] = useState<BarriosGeoJSON | null>(null);
   const [centroidsById, setCentroidsById] = useState<Record<string, [number, number]>>({});
   const [rawResults, setRawResults] = useState<ScoreResultItem[]>([]);
@@ -198,7 +199,7 @@ export function App() {
     async function bootstrap() {
       try {
         setLoading(true);
-        const metaRes = await getMeta();
+        const metaRes = await (metaRequest.current ??= getMeta());
         if (cancelled) return;
         setMeta(metaRes);
         setCampusId((current) => metaRes.campuses.some((campus) => campus.id === current)
@@ -466,10 +467,14 @@ export function App() {
     setRateLimitNotice(null);
 
     try {
-      const parsed = await postAiParse({ query: queryText });
+      const [parsed, searchMeta] = await Promise.all([
+        postAiParse({ query: queryText }),
+        (metaRequest.current ??= getMeta()).catch(() => null),
+      ]);
       if (window.location.pathname !== fromPath) return false;
-      const campus = meta?.campuses.find((item) => item.id === parsed.campus_id);
-      const inferred = searchPreferences(queryText, parsed, availableKeys, campus);
+      const campus = searchMeta?.campuses.find((item) => item.id === parsed.campus_id);
+      const indicatorKeys = searchMeta?.indicators.map(({ key }) => key) ?? Object.keys(parsed.weights);
+      const inferred = searchPreferences(queryText, parsed, new Set([...DEFAULT_PRIORITIES, ...indicatorKeys]), campus);
       if (inferred.inferredFields.has('campus')) setCampusId(parsed.campus_id);
       if (inferred.inferredFields.has('housing')) setHousingType(parsed.housing_type);
       if (inferred.budget !== null) {
