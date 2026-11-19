@@ -31,11 +31,11 @@ La búsqueda en lenguaje natural traduce la consulta en campus, presupuesto, tip
 
 La implementación usa la API Responses de OpenAI con proveedor y modelo configurables. [Los prompts](backend/app/prompts.py) piden a OpenAI una salida ajustada al esquema JSON para interpretar la consulta y una explicación que use las cifras facilitadas por la API. El backend ajusta los parámetros a los campus e indicadores disponibles y valida la respuesta pública con Pydantic.
 
-Con el proveedor desactivado, o ante error o timeout, se usa un parser por palabras clave y una plantilla con los resultados reales. Con `DEMO_CACHE=true`, [la caché](backend/app/demo_cache.json) resuelve la interpretación de tres consultas de demo. La pantalla distingue «IA» y «Modo sin IA».
+Con `DEMO_CACHE=true`, se comprueba primero [la caché](backend/app/demo_cache.json) de tres consultas de demo para interpretar la frase. Cuando OpenAI está desactivado, devuelve un error o supera el tiempo de espera, la búsqueda usa palabras clave y la explicación recurre a una plantilla con los resultados reales. La pantalla distingue «IA» y «Modo sin IA».
 
 ## 5. Límites y errores detectados
 
 - **Datos y estimaciones.** El alquiler refleja contratos declarados de vivienda colectiva y se publica a escala de distrito. La estimación de una habitación aplica los m² de referencia. El NO₂ de cada barrio se aproxima con su estación válida más cercana. La procedencia viaja con el indicador y se muestra en el detalle.
 - **Interpretación y ranking.** En T11, la consulta «Estudio en la ETSISI» se interpretaba como petición de un estudio. Claude Code ajustó esa regla y añadió un peso base de distancia para que el ranking reflejara la cercanía al campus.
 - **Validación del código generado.** Claude Code corrigió un test de puntuación mal planteado en T08. Antigravity ajustó la superposición de la leyenda móvil tras comprobarla en el navegador. El equipo detectó los redespliegues por commits de coordinación y limitó los patrones de Railway a cambios relevantes para la app.
-- **Datos simulados.** Los mocks permitieron trabajar con el contrato mientras se construían API y ETL. Las pruebas de integración de DATA confirmaron que las cuatro métricas de producción y sus notas coinciden con las piezas oficiales para los 131 barrios.
+- **Datos simulados.** Los mocks permitieron trabajar con el contrato mientras se construían API y ETL. Codex detectó que un fallo del endpoint de explicación podía mostrar cifras simuladas en producción. Antigravity corrigió esa ruta para generar el resumen con los resultados reales de `/api/score`. Las pruebas de integración de DATA confirmaron que las cuatro métricas de producción y sus notas coinciden con las piezas oficiales para los 131 barrios.
