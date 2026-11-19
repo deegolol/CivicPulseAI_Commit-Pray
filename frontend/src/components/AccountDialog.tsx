@@ -9,7 +9,7 @@ const primaryClass = `${actionClass} bg-brand text-bg hover:bg-brand-hover`;
 const secondaryClass = `${actionClass} border border-border bg-bg text-ink hover:bg-surface`;
 const inputClass = 'mt-1 w-full rounded-[8px] border border-border bg-bg px-3 py-2 text-sm focus:border-ink focus:outline-none';
 const money = (value: number) => `${formatEuro(value)} /mes`;
-const googleButtonClass = 'flex min-h-11 w-full items-center justify-center gap-3 rounded-full border border-border px-4 py-2 text-sm font-semibold hover:bg-surface disabled:opacity-55';
+const googleButtonClass = 'flex min-h-11 w-full items-center justify-center gap-3 rounded-full border border-border bg-bg px-4 py-2 text-sm font-semibold text-ink hover:bg-surface disabled:cursor-not-allowed disabled:bg-surface disabled:text-muted';
 
 export type PendingWatch = WatchInput & { area_name: string };
 
@@ -174,8 +174,8 @@ export function AccountDialog({ open, pendingWatch, pendingFavorite, onClose, on
 
   return (
     <dialog ref={dialog} onClose={onClose} aria-labelledby="account-title"
-      className={`m-auto max-h-[min(90dvh,52rem)] w-[calc(100%-2rem)] overflow-y-auto border border-border bg-bg p-0 text-ink shadow-popover backdrop:bg-black/60 ${guest
-        ? 'max-w-md rounded-[18px] [color-scheme:dark] [--color-bg:#191c20] [--color-surface:#252a31] [--color-border:#444b56] [--color-ink:#f7f5f2] [--color-muted:#c5c9d1] [--color-brand:#f19991] [--color-brand-hover:#ffc0b9] [--color-fit:#a1e5bf]'
+      className={`m-auto max-h-[min(90dvh,52rem)] w-[calc(100%-2rem)] overflow-y-auto border border-border bg-bg p-0 text-ink shadow-popover backdrop:bg-ink/40 ${guest
+        ? 'max-w-md rounded-[18px]'
         : 'max-w-xl rounded-[10px]'}`}>
       <div className={`sticky top-0 z-10 flex items-start justify-between gap-3 bg-bg px-6 ${guest ? 'pt-6' : 'border-b border-border py-3.5'}`}>
         <div>
@@ -231,7 +231,7 @@ export function AccountDialog({ open, pendingWatch, pendingFavorite, onClose, on
                 ) : (
                   <div className="space-y-1.5">
                     <button type="button" className={googleButtonClass} disabled><GoogleMark /> Continuar con Google</button>
-                    <p className="text-center text-xs text-muted">Google está pendiente de configuración.</p>
+                    <p className="text-center text-xs text-muted">Esta instalación todavía necesita un cliente de Google OAuth.</p>
                   </div>
                 )}
                 <div className="flex items-center gap-3 text-xs text-muted before:h-px before:flex-1 before:bg-border after:h-px after:flex-1 after:bg-border">o con tu correo</div>

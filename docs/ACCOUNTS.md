@@ -15,15 +15,15 @@ Ejecuta `make dev` y abre [PrimeraLlave](http://localhost:5173). La base SQLite 
 
 ## Iniciar sesión con Google
 
-Crea un cliente OAuth de tipo **Aplicación web** en Google Cloud y añade esta URI de redirección autorizada. Para producción usa el dominio HTTPS del despliegue con la misma ruta.
+En Google Cloud, configura la pantalla de consentimiento y crea un cliente OAuth de tipo **Aplicación web**. Si la aplicación sigue en modo de pruebas, añade tu correo en la lista de usuarios de prueba. Para la vista local actual, registra exactamente `http://localhost:8081/api/account/google/callback` en **URI de redirección autorizados**.
 
 ```dotenv
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
-GOOGLE_REDIRECT_URI=http://localhost:5173/api/account/google/callback
+GOOGLE_REDIRECT_URI=http://localhost:8081/api/account/google/callback
 ```
 
-El secreto se configura en el servidor. En la vista local del puerto 8081 usa `http://localhost:8081/api/account/google/callback` tanto en Google Cloud como en `.env` y reinicia el backend. Desde una cuenta existente, usa **Vincular Google** e inicia sesión con el mismo correo. La vinculación requiere una sesión activa de PrimeraLlave y una identidad de Google con correo verificado. El [flujo de Google](https://developers.google.com/identity/openid-connect/reference) usa código de autorización, PKCE, estado de un solo uso y validación del token.
+Copia el ID y el secreto del cliente en el fichero local `.env` y reinicia el backend. Si usas `make dev`, cambia el puerto a 5173 en Google Cloud y en `.env`. Para producción usa el dominio HTTPS del despliegue con la misma ruta. Desde una cuenta existente, usa **Vincular Google** e inicia sesión con el mismo correo. La vinculación requiere una sesión activa de PrimeraLlave y una identidad de Google con correo verificado. El [flujo de Google](https://developers.google.com/identity/openid-connect/reference) usa código de autorización, PKCE, estado de un solo uso y validación del token.
 
 ## Recuperación de contraseña
 
