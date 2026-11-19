@@ -1,0 +1,1991 @@
+{
+  "generated_at": "2026-11-19T12:43:05Z",
+  "level": "barrio",
+  "sources": [
+    {
+      "id": "alquiler",
+      "name": "SERPAVI 2024 · Mediana del alquiler de vivienda colectiva",
+      "publisher": "Ministerio de Vivienda y Agenda Urbana (MIVAU)",
+      "url": "https://cdn.mivau.gob.es/portal-web-mivau/vivienda/serpavi/2026-03_09_bd_SERPAVI_2011-2024%20-%20DEFINITIVO%20WEB_v2.xlsx",
+      "license": "Régimen general de reutilización estatal (Real Decreto 1495/2011)",
+      "retrieved": "2026-11-19",
+      "granularity": "distrito"
+    }
+  ],
+  "indicators": [
+    {
+      "key": "rent_eur_m2",
+      "label": "Alquiler",
+      "unit": "€/m²",
+      "higher_is_better": false,
+      "source": "alquiler"
+    }
+  ],
+  "areas": [
+    {
+      "id": "011",
+      "name": "Palacio",
+      "district": "Centro",
+      "centroid": [
+        -3.714072,
+        40.415417
+      ],
+      "values": {
+        "rent_eur_m2": 17.7
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "012",
+      "name": "Embajadores",
+      "district": "Centro",
+      "centroid": [
+        -3.702464,
+        40.409239
+      ],
+      "values": {
+        "rent_eur_m2": 17.7
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "013",
+      "name": "Cortes",
+      "district": "Centro",
+      "centroid": [
+        -3.696828,
+        40.414844
+      ],
+      "values": {
+        "rent_eur_m2": 17.7
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "014",
+      "name": "Justicia",
+      "district": "Centro",
+      "centroid": [
+        -3.696678,
+        40.423661
+      ],
+      "values": {
+        "rent_eur_m2": 17.7
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "015",
+      "name": "Universidad",
+      "district": "Centro",
+      "centroid": [
+        -3.707071,
+        40.425672
+      ],
+      "values": {
+        "rent_eur_m2": 17.7
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "016",
+      "name": "Sol",
+      "district": "Centro",
+      "centroid": [
+        -3.704555,
+        40.41731
+      ],
+      "values": {
+        "rent_eur_m2": 17.7
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "021",
+      "name": "Imperial",
+      "district": "Arganzuela",
+      "centroid": [
+        -3.718361,
+        40.40619
+      ],
+      "values": {
+        "rent_eur_m2": 15.97
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "022",
+      "name": "Acacias",
+      "district": "Arganzuela",
+      "centroid": [
+        -3.707261,
+        40.401068
+      ],
+      "values": {
+        "rent_eur_m2": 15.97
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "023",
+      "name": "Chopera",
+      "district": "Arganzuela",
+      "centroid": [
+        -3.699071,
+        40.39477
+      ],
+      "values": {
+        "rent_eur_m2": 15.97
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "024",
+      "name": "Legazpi",
+      "district": "Arganzuela",
+      "centroid": [
+        -3.687104,
+        40.388919
+      ],
+      "values": {
+        "rent_eur_m2": 15.97
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "025",
+      "name": "Delicias",
+      "district": "Arganzuela",
+      "centroid": [
+        -3.689887,
+        40.396799
+      ],
+      "values": {
+        "rent_eur_m2": 15.97
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "026",
+      "name": "Palos de la Frontera",
+      "district": "Arganzuela",
+      "centroid": [
+        -3.694621,
+        40.403494
+      ],
+      "values": {
+        "rent_eur_m2": 15.97
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "027",
+      "name": "Atocha",
+      "district": "Arganzuela",
+      "centroid": [
+        -3.68193,
+        40.399774
+      ],
+      "values": {
+        "rent_eur_m2": 15.97
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "031",
+      "name": "Pacífico",
+      "district": "Retiro",
+      "centroid": [
+        -3.678721,
+        40.404353
+      ],
+      "values": {
+        "rent_eur_m2": 16.04
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "032",
+      "name": "Adelfas",
+      "district": "Retiro",
+      "centroid": [
+        -3.670973,
+        40.401115
+      ],
+      "values": {
+        "rent_eur_m2": 16.04
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "033",
+      "name": "Estrella",
+      "district": "Retiro",
+      "centroid": [
+        -3.665532,
+        40.414086
+      ],
+      "values": {
+        "rent_eur_m2": 16.04
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "034",
+      "name": "Ibiza",
+      "district": "Retiro",
+      "centroid": [
+        -3.674337,
+        40.418884
+      ],
+      "values": {
+        "rent_eur_m2": 16.04
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "035",
+      "name": "Los Jerónimos",
+      "district": "Retiro",
+      "centroid": [
+        -3.685143,
+        40.413744
+      ],
+      "values": {
+        "rent_eur_m2": 16.04
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "036",
+      "name": "Niño Jesús",
+      "district": "Retiro",
+      "centroid": [
+        -3.673426,
+        40.411607
+      ],
+      "values": {
+        "rent_eur_m2": 16.04
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "041",
+      "name": "Recoletos",
+      "district": "Salamanca",
+      "centroid": [
+        -3.68584,
+        40.424593
+      ],
+      "values": {
+        "rent_eur_m2": 18.31
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "042",
+      "name": "Goya",
+      "district": "Salamanca",
+      "centroid": [
+        -3.674421,
+        40.42505
+      ],
+      "values": {
+        "rent_eur_m2": 18.31
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "043",
+      "name": "Fuente del Berro",
+      "district": "Salamanca",
+      "centroid": [
+        -3.663794,
+        40.424776
+      ],
+      "values": {
+        "rent_eur_m2": 18.31
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "044",
+      "name": "Guindalera",
+      "district": "Salamanca",
+      "centroid": [
+        -3.666592,
+        40.436342
+      ],
+      "values": {
+        "rent_eur_m2": 18.31
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "045",
+      "name": "Lista",
+      "district": "Salamanca",
+      "centroid": [
+        -3.675826,
+        40.432013
+      ],
+      "values": {
+        "rent_eur_m2": 18.31
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "046",
+      "name": "Castellana",
+      "district": "Salamanca",
+      "centroid": [
+        -3.684295,
+        40.433557
+      ],
+      "values": {
+        "rent_eur_m2": 18.31
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "051",
+      "name": "El Viso",
+      "district": "Chamartín",
+      "centroid": [
+        -3.684789,
+        40.444875
+      ],
+      "values": {
+        "rent_eur_m2": 17.07
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "052",
+      "name": "Prosperidad",
+      "district": "Chamartín",
+      "centroid": [
+        -3.669288,
+        40.444233
+      ],
+      "values": {
+        "rent_eur_m2": 17.07
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "053",
+      "name": "Ciudad Jardín",
+      "district": "Chamartín",
+      "centroid": [
+        -3.673001,
+        40.448298
+      ],
+      "values": {
+        "rent_eur_m2": 17.07
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "054",
+      "name": "Hispanoamérica",
+      "district": "Chamartín",
+      "centroid": [
+        -3.677146,
+        40.455367
+      ],
+      "values": {
+        "rent_eur_m2": 17.07
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "055",
+      "name": "Nueva España",
+      "district": "Chamartín",
+      "centroid": [
+        -3.678138,
+        40.462764
+      ],
+      "values": {
+        "rent_eur_m2": 17.07
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "056",
+      "name": "Castilla",
+      "district": "Chamartín",
+      "centroid": [
+        -3.679723,
+        40.474316
+      ],
+      "values": {
+        "rent_eur_m2": 17.07
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "061",
+      "name": "Bellas Vistas",
+      "district": "Tetuán",
+      "centroid": [
+        -3.707638,
+        40.452455
+      ],
+      "values": {
+        "rent_eur_m2": 16.08
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "062",
+      "name": "Cuatro Caminos",
+      "district": "Tetuán",
+      "centroid": [
+        -3.697045,
+        40.451532
+      ],
+      "values": {
+        "rent_eur_m2": 16.08
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "063",
+      "name": "Castillejos",
+      "district": "Tetuán",
+      "centroid": [
+        -3.694154,
+        40.460418
+      ],
+      "values": {
+        "rent_eur_m2": 16.08
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "064",
+      "name": "Almenara",
+      "district": "Tetuán",
+      "centroid": [
+        -3.69431,
+        40.470659
+      ],
+      "values": {
+        "rent_eur_m2": 16.08
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "065",
+      "name": "Valdeacederas",
+      "district": "Tetuán",
+      "centroid": [
+        -3.704157,
+        40.46702
+      ],
+      "values": {
+        "rent_eur_m2": 16.08
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "066",
+      "name": "Berruguete",
+      "district": "Tetuán",
+      "centroid": [
+        -3.704955,
+        40.459623
+      ],
+      "values": {
+        "rent_eur_m2": 16.08
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "071",
+      "name": "Gaztambide",
+      "district": "Chamberí",
+      "centroid": [
+        -3.714608,
+        40.434988
+      ],
+      "values": {
+        "rent_eur_m2": 18.55
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "072",
+      "name": "Arapiles",
+      "district": "Chamberí",
+      "centroid": [
+        -3.708026,
+        40.434406
+      ],
+      "values": {
+        "rent_eur_m2": 18.55
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "073",
+      "name": "Trafalgar",
+      "district": "Chamberí",
+      "centroid": [
+        -3.701133,
+        40.43285
+      ],
+      "values": {
+        "rent_eur_m2": 18.55
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "074",
+      "name": "Almagro",
+      "district": "Chamberí",
+      "centroid": [
+        -3.693541,
+        40.432853
+      ],
+      "values": {
+        "rent_eur_m2": 18.55
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "075",
+      "name": "Ríos Rosas",
+      "district": "Chamberí",
+      "centroid": [
+        -3.697746,
+        40.442419
+      ],
+      "values": {
+        "rent_eur_m2": 18.55
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "076",
+      "name": "Vallehermoso",
+      "district": "Chamberí",
+      "centroid": [
+        -3.711244,
+        40.442893
+      ],
+      "values": {
+        "rent_eur_m2": 18.55
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "081",
+      "name": "El Pardo",
+      "district": "Fuencarral - El Pardo",
+      "centroid": [
+        -3.767487,
+        40.552899
+      ],
+      "values": {
+        "rent_eur_m2": 13.77
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "082",
+      "name": "Fuentelarreina",
+      "district": "Fuencarral - El Pardo",
+      "centroid": [
+        -3.741786,
+        40.481106
+      ],
+      "values": {
+        "rent_eur_m2": 13.77
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "083",
+      "name": "Peñagrande",
+      "district": "Fuencarral - El Pardo",
+      "centroid": [
+        -3.725802,
+        40.478784
+      ],
+      "values": {
+        "rent_eur_m2": 13.77
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "084",
+      "name": "Pilar",
+      "district": "Fuencarral - El Pardo",
+      "centroid": [
+        -3.709591,
+        40.477139
+      ],
+      "values": {
+        "rent_eur_m2": 13.77
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "085",
+      "name": "La Paz",
+      "district": "Fuencarral - El Pardo",
+      "centroid": [
+        -3.696598,
+        40.481144
+      ],
+      "values": {
+        "rent_eur_m2": 13.77
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "086",
+      "name": "Valverde",
+      "district": "Fuencarral - El Pardo",
+      "centroid": [
+        -3.678788,
+        40.500226
+      ],
+      "values": {
+        "rent_eur_m2": 13.77
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "087",
+      "name": "Mirasierra",
+      "district": "Fuencarral - El Pardo",
+      "centroid": [
+        -3.719571,
+        40.496313
+      ],
+      "values": {
+        "rent_eur_m2": 13.77
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "088",
+      "name": "El Goloso",
+      "district": "Fuencarral - El Pardo",
+      "centroid": [
+        -3.700004,
+        40.534389
+      ],
+      "values": {
+        "rent_eur_m2": 13.77
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "091",
+      "name": "Casa de Campo",
+      "district": "Moncloa - Aravaca",
+      "centroid": [
+        -3.75305,
+        40.423633
+      ],
+      "values": {
+        "rent_eur_m2": 15.5
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "092",
+      "name": "Argüelles",
+      "district": "Moncloa - Aravaca",
+      "centroid": [
+        -3.717847,
+        40.428208
+      ],
+      "values": {
+        "rent_eur_m2": 15.5
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "093",
+      "name": "Ciudad Universitaria",
+      "district": "Moncloa - Aravaca",
+      "centroid": [
+        -3.738398,
+        40.45595
+      ],
+      "values": {
+        "rent_eur_m2": 15.5
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "094",
+      "name": "Valdezarza",
+      "district": "Moncloa - Aravaca",
+      "centroid": [
+        -3.717301,
+        40.465253
+      ],
+      "values": {
+        "rent_eur_m2": 15.5
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "095",
+      "name": "Valdemarín",
+      "district": "Moncloa - Aravaca",
+      "centroid": [
+        -3.778916,
+        40.468135
+      ],
+      "values": {
+        "rent_eur_m2": 15.5
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "096",
+      "name": "El Plantío",
+      "district": "Moncloa - Aravaca",
+      "centroid": [
+        -3.820909,
+        40.46974
+      ],
+      "values": {
+        "rent_eur_m2": 15.5
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "097",
+      "name": "Aravaca",
+      "district": "Moncloa - Aravaca",
+      "centroid": [
+        -3.779097,
+        40.454686
+      ],
+      "values": {
+        "rent_eur_m2": 15.5
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "101",
+      "name": "Los Cármenes",
+      "district": "Latina",
+      "centroid": [
+        -3.73593,
+        40.401486
+      ],
+      "values": {
+        "rent_eur_m2": 11.54
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "102",
+      "name": "Puerta del Ángel",
+      "district": "Latina",
+      "centroid": [
+        -3.731804,
+        40.409688
+      ],
+      "values": {
+        "rent_eur_m2": 11.54
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "103",
+      "name": "Lucero",
+      "district": "Latina",
+      "centroid": [
+        -3.750344,
+        40.402293
+      ],
+      "values": {
+        "rent_eur_m2": 11.54
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "104",
+      "name": "Aluche",
+      "district": "Latina",
+      "centroid": [
+        -3.756692,
+        40.391912
+      ],
+      "values": {
+        "rent_eur_m2": 11.54
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "105",
+      "name": "Campamento",
+      "district": "Latina",
+      "centroid": [
+        -3.803673,
+        40.38516
+      ],
+      "values": {
+        "rent_eur_m2": 11.54
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "106",
+      "name": "Cuatro Vientos",
+      "district": "Latina",
+      "centroid": [
+        -3.784051,
+        40.368682
+      ],
+      "values": {
+        "rent_eur_m2": 11.54
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "107",
+      "name": "Águilas",
+      "district": "Latina",
+      "centroid": [
+        -3.771087,
+        40.3818
+      ],
+      "values": {
+        "rent_eur_m2": 11.54
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "111",
+      "name": "Comillas",
+      "district": "Carabanchel",
+      "centroid": [
+        -3.711963,
+        40.393503
+      ],
+      "values": {
+        "rent_eur_m2": 11.76
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "112",
+      "name": "Opañel",
+      "district": "Carabanchel",
+      "centroid": [
+        -3.721776,
+        40.390229
+      ],
+      "values": {
+        "rent_eur_m2": 11.76
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "113",
+      "name": "San Isidro",
+      "district": "Carabanchel",
+      "centroid": [
+        -3.728336,
+        40.396597
+      ],
+      "values": {
+        "rent_eur_m2": 11.76
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "114",
+      "name": "Vista Alegre",
+      "district": "Carabanchel",
+      "centroid": [
+        -3.745754,
+        40.38432
+      ],
+      "values": {
+        "rent_eur_m2": 11.76
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "115",
+      "name": "Puerta Bonita",
+      "district": "Carabanchel",
+      "centroid": [
+        -3.739085,
+        40.379664
+      ],
+      "values": {
+        "rent_eur_m2": 11.76
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "116",
+      "name": "Buenavista",
+      "district": "Carabanchel",
+      "centroid": [
+        -3.74608,
+        40.367095
+      ],
+      "values": {
+        "rent_eur_m2": 11.76
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "117",
+      "name": "Abrantes",
+      "district": "Carabanchel",
+      "centroid": [
+        -3.726166,
+        40.378976
+      ],
+      "values": {
+        "rent_eur_m2": 11.76
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "121",
+      "name": "Orcasitas",
+      "district": "Usera",
+      "centroid": [
+        -3.712419,
+        40.368629
+      ],
+      "values": {
+        "rent_eur_m2": 11.18
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "122",
+      "name": "Orcasur",
+      "district": "Usera",
+      "centroid": [
+        -3.698121,
+        40.37222
+      ],
+      "values": {
+        "rent_eur_m2": 11.18
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "123",
+      "name": "San Fermín",
+      "district": "Usera",
+      "centroid": [
+        -3.689071,
+        40.370613
+      ],
+      "values": {
+        "rent_eur_m2": 11.18
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "124",
+      "name": "Almendrales",
+      "district": "Usera",
+      "centroid": [
+        -3.699264,
+        40.383665
+      ],
+      "values": {
+        "rent_eur_m2": 11.18
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "125",
+      "name": "Moscardó",
+      "district": "Usera",
+      "centroid": [
+        -3.706817,
+        40.388998
+      ],
+      "values": {
+        "rent_eur_m2": 11.18
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "126",
+      "name": "Zofío",
+      "district": "Usera",
+      "centroid": [
+        -3.715316,
+        40.37937
+      ],
+      "values": {
+        "rent_eur_m2": 11.18
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "127",
+      "name": "Pradolongo",
+      "district": "Usera",
+      "centroid": [
+        -3.707121,
+        40.378143
+      ],
+      "values": {
+        "rent_eur_m2": 11.18
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "131",
+      "name": "Entrevías",
+      "district": "Puente de Vallecas",
+      "centroid": [
+        -3.673112,
+        40.374793
+      ],
+      "values": {
+        "rent_eur_m2": 11.48
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "132",
+      "name": "San Diego",
+      "district": "Puente de Vallecas",
+      "centroid": [
+        -3.667868,
+        40.390031
+      ],
+      "values": {
+        "rent_eur_m2": 11.48
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "133",
+      "name": "Palomeras Bajas",
+      "district": "Puente de Vallecas",
+      "centroid": [
+        -3.658881,
+        40.384758
+      ],
+      "values": {
+        "rent_eur_m2": 11.48
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "134",
+      "name": "Palomeras Sureste",
+      "district": "Puente de Vallecas",
+      "centroid": [
+        -3.637294,
+        40.385215
+      ],
+      "values": {
+        "rent_eur_m2": 11.48
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "135",
+      "name": "Portazgo",
+      "district": "Puente de Vallecas",
+      "centroid": [
+        -3.648241,
+        40.390613
+      ],
+      "values": {
+        "rent_eur_m2": 11.48
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "136",
+      "name": "Numancia",
+      "district": "Puente de Vallecas",
+      "centroid": [
+        -3.65853,
+        40.399496
+      ],
+      "values": {
+        "rent_eur_m2": 11.48
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "141",
+      "name": "Pavones",
+      "district": "Moratalaz",
+      "centroid": [
+        -3.632167,
+        40.398529
+      ],
+      "values": {
+        "rent_eur_m2": 11.73
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "142",
+      "name": "Horcajo",
+      "district": "Moratalaz",
+      "centroid": [
+        -3.626946,
+        40.408576
+      ],
+      "values": {
+        "rent_eur_m2": 11.73
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "143",
+      "name": "Marroquina",
+      "district": "Moratalaz",
+      "centroid": [
+        -3.640612,
+        40.410736
+      ],
+      "values": {
+        "rent_eur_m2": 11.73
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "144",
+      "name": "Media Legua",
+      "district": "Moratalaz",
+      "centroid": [
+        -3.656822,
+        40.411895
+      ],
+      "values": {
+        "rent_eur_m2": 11.73
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "145",
+      "name": "Fontarrón",
+      "district": "Moratalaz",
+      "centroid": [
+        -3.646774,
+        40.401415
+      ],
+      "values": {
+        "rent_eur_m2": 11.73
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "146",
+      "name": "Vinateros",
+      "district": "Moratalaz",
+      "centroid": [
+        -3.642488,
+        40.405254
+      ],
+      "values": {
+        "rent_eur_m2": 11.73
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "151",
+      "name": "Ventas",
+      "district": "Ciudad Lineal",
+      "centroid": [
+        -3.647407,
+        40.422477
+      ],
+      "values": {
+        "rent_eur_m2": 13.28
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "152",
+      "name": "Pueblo Nuevo",
+      "district": "Ciudad Lineal",
+      "centroid": [
+        -3.635465,
+        40.426292
+      ],
+      "values": {
+        "rent_eur_m2": 13.28
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "153",
+      "name": "Quintana",
+      "district": "Ciudad Lineal",
+      "centroid": [
+        -3.645065,
+        40.437015
+      ],
+      "values": {
+        "rent_eur_m2": 13.28
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "154",
+      "name": "La Concepción",
+      "district": "Ciudad Lineal",
+      "centroid": [
+        -3.649279,
+        40.439319
+      ],
+      "values": {
+        "rent_eur_m2": 13.28
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "155",
+      "name": "San Pascual",
+      "district": "Ciudad Lineal",
+      "centroid": [
+        -3.653466,
+        40.442862
+      ],
+      "values": {
+        "rent_eur_m2": 13.28
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "156",
+      "name": "San Juan Bautista",
+      "district": "Ciudad Lineal",
+      "centroid": [
+        -3.656361,
+        40.450692
+      ],
+      "values": {
+        "rent_eur_m2": 13.28
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "157",
+      "name": "Colina",
+      "district": "Ciudad Lineal",
+      "centroid": [
+        -3.66031,
+        40.458047
+      ],
+      "values": {
+        "rent_eur_m2": 13.28
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "158",
+      "name": "Atalaya",
+      "district": "Ciudad Lineal",
+      "centroid": [
+        -3.664942,
+        40.464271
+      ],
+      "values": {
+        "rent_eur_m2": 13.28
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "159",
+      "name": "Costillares",
+      "district": "Ciudad Lineal",
+      "centroid": [
+        -3.668517,
+        40.476654
+      ],
+      "values": {
+        "rent_eur_m2": 13.28
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "161",
+      "name": "Palomas",
+      "district": "Hortaleza",
+      "centroid": [
+        -3.616143,
+        40.452603
+      ],
+      "values": {
+        "rent_eur_m2": 13.66
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "162",
+      "name": "Piovera",
+      "district": "Hortaleza",
+      "centroid": [
+        -3.635083,
+        40.455711
+      ],
+      "values": {
+        "rent_eur_m2": 13.66
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "163",
+      "name": "Canillas",
+      "district": "Hortaleza",
+      "centroid": [
+        -3.643713,
+        40.463781
+      ],
+      "values": {
+        "rent_eur_m2": 13.66
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "164",
+      "name": "Pinar del Rey",
+      "district": "Hortaleza",
+      "centroid": [
+        -3.647031,
+        40.472488
+      ],
+      "values": {
+        "rent_eur_m2": 13.66
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "165",
+      "name": "Apóstol Santiago",
+      "district": "Hortaleza",
+      "centroid": [
+        -3.659417,
+        40.476404
+      ],
+      "values": {
+        "rent_eur_m2": 13.66
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "166",
+      "name": "Valdefuentes",
+      "district": "Hortaleza",
+      "centroid": [
+        -3.635149,
+        40.493735
+      ],
+      "values": {
+        "rent_eur_m2": 13.66
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "171",
+      "name": "Villaverde Alto - Casco Histórico de Villaverde",
+      "district": "Villaverde",
+      "centroid": [
+        -3.708946,
+        40.341445
+      ],
+      "values": {
+        "rent_eur_m2": 10.26
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "172",
+      "name": "San Cristóbal",
+      "district": "Villaverde",
+      "centroid": [
+        -3.688372,
+        40.34089
+      ],
+      "values": {
+        "rent_eur_m2": 10.26
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "173",
+      "name": "Butarque",
+      "district": "Villaverde",
+      "centroid": [
+        -3.676263,
+        40.3371
+      ],
+      "values": {
+        "rent_eur_m2": 10.26
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "174",
+      "name": "Los Rosales",
+      "district": "Villaverde",
+      "centroid": [
+        -3.68849,
+        40.355698
+      ],
+      "values": {
+        "rent_eur_m2": 10.26
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "175",
+      "name": "Ángeles",
+      "district": "Villaverde",
+      "centroid": [
+        -3.699137,
+        40.35579
+      ],
+      "values": {
+        "rent_eur_m2": 10.26
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "181",
+      "name": "Casco Histórico de Vallecas",
+      "district": "Villa de Vallecas",
+      "centroid": [
+        -3.618276,
+        40.345888
+      ],
+      "values": {
+        "rent_eur_m2": 11.87
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "182",
+      "name": "Santa Eugenia",
+      "district": "Villa de Vallecas",
+      "centroid": [
+        -3.611327,
+        40.383425
+      ],
+      "values": {
+        "rent_eur_m2": 11.87
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "183",
+      "name": "Ensanche de Vallecas",
+      "district": "Villa de Vallecas",
+      "centroid": [
+        -3.602444,
+        40.366415
+      ],
+      "values": {
+        "rent_eur_m2": 11.87
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "191",
+      "name": "Casco Histórico de Vicálvaro",
+      "district": "Vicálvaro",
+      "centroid": [
+        -3.579939,
+        40.38916
+      ],
+      "values": {
+        "rent_eur_m2": 11.01
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "192",
+      "name": "Valdebernardo",
+      "district": "Vicálvaro",
+      "centroid": [
+        -3.617628,
+        40.396602
+      ],
+      "values": {
+        "rent_eur_m2": 11.01
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "193",
+      "name": "Valderrivas",
+      "district": "Vicálvaro",
+      "centroid": [
+        -3.602637,
+        40.398787
+      ],
+      "values": {
+        "rent_eur_m2": 11.01
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "194",
+      "name": "El Cañaveral",
+      "district": "Vicálvaro",
+      "centroid": [
+        -3.545795,
+        40.40364
+      ],
+      "values": {
+        "rent_eur_m2": 11.01
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "201",
+      "name": "Simancas",
+      "district": "San Blas - Canillejas",
+      "centroid": [
+        -3.625103,
+        40.435326
+      ],
+      "values": {
+        "rent_eur_m2": 12.69
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "202",
+      "name": "Hellín",
+      "district": "San Blas - Canillejas",
+      "centroid": [
+        -3.616824,
+        40.430948
+      ],
+      "values": {
+        "rent_eur_m2": 12.69
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "203",
+      "name": "Amposta",
+      "district": "San Blas - Canillejas",
+      "centroid": [
+        -3.622037,
+        40.426135
+      ],
+      "values": {
+        "rent_eur_m2": 12.69
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "204",
+      "name": "Arcos",
+      "district": "San Blas - Canillejas",
+      "centroid": [
+        -3.617596,
+        40.421222
+      ],
+      "values": {
+        "rent_eur_m2": 12.69
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "205",
+      "name": "Rosas",
+      "district": "San Blas - Canillejas",
+      "centroid": [
+        -3.594287,
+        40.427666
+      ],
+      "values": {
+        "rent_eur_m2": 12.69
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "206",
+      "name": "Rejas",
+      "district": "San Blas - Canillejas",
+      "centroid": [
+        -3.570163,
+        40.445101
+      ],
+      "values": {
+        "rent_eur_m2": 12.69
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "207",
+      "name": "Canillejas",
+      "district": "San Blas - Canillejas",
+      "centroid": [
+        -3.610527,
+        40.443261
+      ],
+      "values": {
+        "rent_eur_m2": 12.69
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "208",
+      "name": "El Salvador",
+      "district": "San Blas - Canillejas",
+      "centroid": [
+        -3.630972,
+        40.445289
+      ],
+      "values": {
+        "rent_eur_m2": 12.69
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "211",
+      "name": "Alameda de Osuna",
+      "district": "Barajas",
+      "centroid": [
+        -3.591844,
+        40.456383
+      ],
+      "values": {
+        "rent_eur_m2": 13.1
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "212",
+      "name": "Aeropuerto",
+      "district": "Barajas",
+      "centroid": [
+        -3.563491,
+        40.478576
+      ],
+      "values": {
+        "rent_eur_m2": 13.1
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "213",
+      "name": "Casco Histórico de Barajas",
+      "district": "Barajas",
+      "centroid": [
+        -3.578867,
+        40.474006
+      ],
+      "values": {
+        "rent_eur_m2": 13.1
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "214",
+      "name": "Timón",
+      "district": "Barajas",
+      "centroid": [
+        -3.603532,
+        40.476405
+      ],
+      "values": {
+        "rent_eur_m2": 13.1
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    },
+    {
+      "id": "215",
+      "name": "Corralejos",
+      "district": "Barajas",
+      "centroid": [
+        -3.607139,
+        40.464195
+      ],
+      "values": {
+        "rent_eur_m2": 13.1
+      },
+      "notes": {
+        "rent_eur_m2": "valor del distrito"
+      }
+    }
+  ]
+}
