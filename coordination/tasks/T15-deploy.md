@@ -8,6 +8,13 @@ owner: ""
 depends_on: [T02,T03]
 files: [Dockerfile, render.yaml, backend/app/main.py (solo montaje de estáticos, coordinado con API)]
 ---
+## Ya configurado por diego (19/11, 13:45)
+- Proyecto Railway **`primerallave`** (separado de cualquier otro proyecto de la cuenta: NO tocar otros proyectos).
+- Servicio enlazado a `deegolol/CivicPulseAI_Commit-Pray`, rama `main`: **cada push a main redespliega solo**.
+- URL pública: **https://primerallave.up.railway.app** → puerto destino **8080**. El contenedor debe escuchar en `0.0.0.0:${PORT:-8080}`.
+- Variables `LLM_PROVIDER`, `LLM_MODEL`, `LLM_TIMEOUT_S`, `DEMO_CACHE` y `LLM_API_KEY` puestas en Railway por diego.
+- Hasta que exista el `Dockerfile` en la raíz, los builds fallan (es normal).
+
 ## Criterios de aceptación
 - [ ] Dockerfile multi-stage: build del frontend → FastAPI sirve `frontend/dist` y `/api`.
 - [ ] `railway.json` (o `railway.toml`) que use el Dockerfile; puerto desde `$PORT`; healthcheck en `/api/health`.
