@@ -11,6 +11,7 @@ import {
   getFitLabel,
   getFitLevel,
 } from '../utils/format';
+import { AiExplanation } from './AiExplanation';
 
 interface TopZonesRailProps {
   topResults: ScoreResultItem[];
@@ -19,6 +20,12 @@ interface TopZonesRailProps {
   compareIds: string[];
   onToggleCompare: (areaId: string) => void;
   onOpenCompare: () => void;
+  aiInterpretation: string | null;
+  aiExplanation: string | null;
+  aiEngine: 'llm' | 'keywords' | null;
+  aiLoading: boolean;
+  aiError: string | null;
+  onDismissAi: () => void;
   loading: boolean;
 }
 
@@ -49,6 +56,12 @@ export function TopZonesRail({
   compareIds,
   onToggleCompare,
   onOpenCompare,
+  aiInterpretation,
+  aiExplanation,
+  aiEngine,
+  aiLoading,
+  aiError,
+  onDismissAi,
   loading,
 }: TopZonesRailProps) {
   if (loading) {
@@ -76,6 +89,15 @@ export function TopZonesRail({
           </h2>
           <span className="text-[11px] text-muted">Haz clic para explorar</span>
         </div>
+
+        <AiExplanation
+          interpretation={aiInterpretation}
+          explanationText={aiExplanation}
+          engine={aiEngine}
+          loading={aiLoading}
+          error={aiError}
+          onDismiss={onDismissAi}
+        />
 
         {topResults.length === 0 ? (
           <div className="rounded-2xl border border-border bg-surface p-5 text-center">

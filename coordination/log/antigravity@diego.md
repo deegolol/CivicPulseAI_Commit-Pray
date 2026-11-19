@@ -30,3 +30,8 @@
 - Qué: tarjetas Top 3 enriquecidas con 1 punto fuerte automático, centrado `flyTo` al hacer clic, botón "Comparar" (2–3 barrios desde Top 3 o desde cualquier detalle) y modal editorial `CompareModal.tsx` con radar superpuesto Recharts + tabla comparativa en unidades reales (sin `%`).
 - Verificación: `cd frontend && npm run build` en verde.
 - Siguiente: SYNC + T12 (buscador lenguaje natural + explicación IA del Top 3).
+
+## 13:56 · T12 · done
+- Qué: flujo completo de búsqueda en lenguaje natural (`POST /api/ai/parse` → actualización inmediata de controles → `POST /api/score` → `POST /api/ai/explain` del Top 3), componente editorial `AiExplanation.tsx` con `interpretation`, explicación con cifras reales, etiqueta `"IA"` / `"Modo sin IA"`, skeleton de carga, 3 chips de ejemplo (incluyendo el caso de Lucía) y fallback offline en `client.ts`.
+- Verificación: `cd frontend && npm run build` en verde.
+- Siguiente: T14 (favicon SVG, pulido final responsive móvil/escritorio y QA completo en navegador integrado).

@@ -68,16 +68,25 @@ export async function postScore(payload: ScoreRequest): Promise<ScoreResponse> {
 
 export async function postAiParse(payload: AiParseRequest): Promise<AiParseResponse> {
   if (USE_MOCKS) return mockAiParse(payload);
-  return fetchJson<AiParseResponse>('/api/ai/parse', {
-    method: 'POST',
-    body: JSON.stringify(payload),
-  });
+  try {
+    return await fetchJson<AiParseResponse>('/api/ai/parse', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    // Offline/fallback safety: never break natural-language search during live demo
+    return mockAiParse(payload);
+  }
 }
 
 export async function postAiExplain(payload: AiExplainRequest): Promise<AiExplainResponse> {
   if (USE_MOCKS) return mockAiExplain(payload);
-  return fetchJson<AiExplainResponse>('/api/ai/explain', {
-    method: 'POST',
-    body: JSON.stringify(payload),
-  });
+  try {
+    return await fetchJson<AiExplainResponse>('/api/ai/explain', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    return mockAiExplain(payload);
+  }
 }

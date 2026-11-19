@@ -6,7 +6,15 @@
  */
 import { useEffect, useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, KeyRound, Search, SlidersHorizontal, X } from 'lucide-react';
-import { getAreas, getGeo, getMeta, postAiParse, postScore, USE_MOCKS } from './api/client';
+import {
+  getAreas,
+  getGeo,
+  getMeta,
+  postAiExplain,
+  postAiParse,
+  postScore,
+  USE_MOCKS,
+} from './api/client';
 import type {
   BarriosGeoJSON,
   HousingType,
@@ -61,6 +69,13 @@ export function App() {
     'rent_eur_m2',
     'distance_km',
   ]);
+
+  // AI parse & explanation state (T12)
+  const [aiInterpretation, setAiInterpretation] = useState<string | null>(null);
+  const [aiExplanation, setAiExplanation] = useState<string | null>(null);
+  const [aiEngine, setAiEngine] = useState<'llm' | 'keywords' | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
 
   // Selection, comparison & responsive UI state
   const [selectedAreaId, setSelectedAreaId] = useState<string | null>(null);
@@ -236,25 +251,84 @@ export function App() {
   };
 
   const handleQuerySubmit = async (queryText: string) => {
+    setAiLoading(true);
+    setAiError(null);
+    setSelectedAreaId(null);
+    setMobileFiltersOpen(false);
+    setMobileSheet('half');
+
     try {
+      // 1. Parse natural language query into structured parameters
       const parsed = await postAiParse({ query: queryText });
-      if (parsed.campus_id) setCampusId(parsed.campus_id);
-      if (parsed.budget_eur_month) setBudget(parsed.budget_eur_month);
-      if (parsed.housing_type) setHousingType(parsed.housing_type);
-      if (parsed.filters?.max_distance_km != null) {
-        setMaxDistanceKm(parsed.filters.max_distance_km);
-      }
-      // Translate top returned weights to active chips without showing any %
+      const nextCampus = parsed.campus_id || campusId;
+      const nextBudget = parsed.budget_eur_month ?? budget;
+      const nextHousing = parsed.housing_type ?? housingType;
+      const nextMaxDist =
+        parsed.filters?.max_distance_km !== undefined
+          ? parsed.filters.max_distance_km
+          : maxDistanceKm;
+
+      setCampusId(nextCampus);
+      setBudget(nextBudget);
+      setHousingType(nextHousing);
+      setMaxDistanceKm(nextMaxDist);
+      setAiInterpretation(parsed.interpretation);
+      setAiEngine(parsed.engine);
+
+      // Translate top returned weights to active priority chips (never showing %)
       const topKeys = Object.entries(parsed.weights)
-        .filter(([, w]) => w >= 0.2)
+        .filter(([k, w]) => availableKeys.has(k) && w >= 0.2)
         .map(([k]) => k);
-      if (topKeys.length > 0) {
-        setSelectedPriorities(topKeys);
+      const nextPriorities = topKeys.length > 0 ? topKeys : selectedPriorities;
+      setSelectedPriorities(nextPriorities);
+
+      // 2. Score immediately with parsed parameters to get Top 3 IDs for explanation
+      const nextWeights = prioritiesToWeights(nextPriorities, availableKeys);
+      const scored = await postScore({
+        campus_id: nextCampus,
+        weights: nextWeights,
+        filters: {
+          max_distance_km: nextMaxDist,
+          only_within_budget: onlyWithinBudget,
+        },
+        budget_eur_month: nextBudget,
+        housing_type: nextHousing,
+      });
+      setRawResults(scored.results);
+      setReferenceM2(scored.reference_m2);
+
+      // 3. Explain the Top 3 with real numbers
+      const top3Ids = scored.results
+        .filter((r) => !r.excluded)
+        .slice(0, 3)
+        .map((r) => r.id);
+
+      if (top3Ids.length > 0) {
+        const explained = await postAiExplain({
+          campus_id: nextCampus,
+          weights: nextWeights,
+          area_ids: top3Ids,
+          query: queryText,
+        });
+        setAiExplanation(explained.text);
+        setAiEngine(explained.engine);
+      } else {
+        setAiExplanation(
+          'No hemos encontrado zonas dentro de filtros tan estrictos. Prueba a ampliar la distancia máxima.',
+        );
       }
-      setMobileFiltersOpen(false);
     } catch {
-      // Fallback: ignore parse errors silently in preview mode
+      setAiError('No pudimos interpretar la búsqueda ahora mismo. Puedes ajustar los filtros manualmente.');
+    } finally {
+      setAiLoading(false);
     }
+  };
+
+  const handleDismissAi = () => {
+    setAiInterpretation(null);
+    setAiExplanation(null);
+    setAiEngine(null);
+    setAiError(null);
   };
 
   const cycleMobileSheet = () => {
@@ -348,6 +422,12 @@ export function App() {
             compareIds={compareIds}
             onToggleCompare={handleToggleCompare}
             onOpenCompare={() => setCompareOpen(true)}
+            aiInterpretation={aiInterpretation}
+            aiExplanation={aiExplanation}
+            aiEngine={aiEngine}
+            aiLoading={aiLoading}
+            aiError={aiError}
+            onDismissAi={handleDismissAi}
             loading={loading}
           />
         )}
@@ -524,6 +604,12 @@ export function App() {
               compareIds={compareIds}
               onToggleCompare={handleToggleCompare}
               onOpenCompare={() => setCompareOpen(true)}
+              aiInterpretation={aiInterpretation}
+              aiExplanation={aiExplanation}
+              aiEngine={aiEngine}
+              aiLoading={aiLoading}
+              aiError={aiError}
+              onDismissAi={handleDismissAi}
               loading={loading}
             />
           ) : selectedArea ? (
@@ -550,6 +636,12 @@ export function App() {
               compareIds={compareIds}
               onToggleCompare={handleToggleCompare}
               onOpenCompare={() => setCompareOpen(true)}
+              aiInterpretation={aiInterpretation}
+              aiExplanation={aiExplanation}
+              aiEngine={aiEngine}
+              aiLoading={aiLoading}
+              aiError={aiError}
+              onDismissAi={handleDismissAi}
               loading={loading}
             />
           )}
