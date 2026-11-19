@@ -122,11 +122,22 @@ export interface ScoreResultItem {
   breakdown: Record<string, BreakdownItem>;
 }
 
+export interface Recommendation {
+  area_id: string;
+  name: string;
+  district: string;
+  headline: string;
+  reasons: string[];
+  caveats: string[];
+}
+
 export interface ScoreResponse {
   campus_id: string;
   housing_type?: HousingType;
   reference_m2?: number;
   results: ScoreResultItem[];
+  recommendation?: Recommendation | null;
+  highlights?: Record<string, string>;
 }
 
 export interface AiParseRequest {

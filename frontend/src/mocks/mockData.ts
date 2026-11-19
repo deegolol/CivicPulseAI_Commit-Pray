@@ -342,9 +342,49 @@ export function computeMockScore(req: ScoreRequest): ScoreResponse {
     item.rank = idx + 1;
   });
 
+  const eligible = results.filter((r) => !r.excluded);
+  const top = eligible[0] ?? null;
+  const highlights: Record<string, string> = {};
+  if (eligible.length > 0) {
+    const byRent = [...eligible].filter((r) => r.est_rent_eur_month != null).sort((a, b) => (a.est_rent_eur_month ?? 9999) - (b.est_rent_eur_month ?? 9999));
+    if (byRent[0]) highlights.cheapest = byRent[0].id;
+    const byDist = [...eligible].sort((a, b) => a.distance_km - b.distance_km);
+    if (byDist[0]) highlights.closest = byDist[0].id;
+    const byAir = [...eligible].filter((r) => r.breakdown.air_no2?.value != null).sort((a, b) => (a.breakdown.air_no2?.value ?? 999) - (b.breakdown.air_no2?.value ?? 999));
+    if (byAir[0]) highlights.cleanest_air = byAir[0].id;
+    const byTransit = [...eligible].filter((r) => r.breakdown.transit_stops?.value != null).sort((a, b) => (b.breakdown.transit_stops?.value ?? 0) - (a.breakdown.transit_stops?.value ?? 0));
+    if (byTransit[0]) highlights.best_transit = byTransit[0].id;
+  }
+
+  const recommendation = top
+    ? {
+        area_id: top.id,
+        name: top.name,
+        district: top.district,
+        headline: `Mejor equilibrio entre precio y cercanía a ${campus.name.split(' · ')[0]}`,
+        reasons: [
+          top.est_rent_eur_month != null
+            ? `Alquiler estimado de ~${top.est_rent_eur_month} €/mes (${top.fits_budget ? 'encaja en tu presupuesto' : 'opción más ajustada'})`
+            : 'Referencia de alquiler disponible en detalle',
+          `A solo ${top.distance_km} km de tu campus`,
+          top.breakdown.air_no2?.value != null
+            ? `Calidad del aire de ${top.breakdown.air_no2.value} µg/m³ NO₂`
+            : 'Buena puntuación global',
+        ],
+        caveats:
+          top.fits_budget === false && req.budget_eur_month && top.est_rent_eur_month
+            ? [`Supera tu presupuesto en ~${top.est_rent_eur_month - req.budget_eur_month} €/mes`]
+            : [],
+      }
+    : null;
+
   return {
     campus_id: campus.id,
+    housing_type: housingType,
+    reference_m2: refM2,
     results: req.limit ? results.slice(0, req.limit) : results,
+    recommendation,
+    highlights,
   };
 }
 

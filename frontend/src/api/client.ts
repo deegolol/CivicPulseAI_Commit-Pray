@@ -26,14 +26,35 @@ import {
 
 export const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === 'true';
 
+export class ApiError extends Error {
+  status: number;
+  detail: string;
+
+  constructor(status: number, detail: string) {
+    super(detail);
+    this.name = 'ApiError';
+    this.status = status;
+    this.detail = detail;
+  }
+}
+
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, {
     headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
     ...init,
   });
   if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`API ${res.status}: ${body || res.statusText}`);
+    let detail = res.statusText || `Error ${res.status}`;
+    try {
+      const data = (await res.json()) as { detail?: string };
+      if (typeof data?.detail === 'string' && data.detail.trim()) {
+        detail = data.detail;
+      }
+    } catch {
+      const text = await res.text().catch(() => '');
+      if (text) detail = text;
+    }
+    throw new ApiError(res.status, detail);
   }
   return res.json() as Promise<T>;
 }
@@ -73,7 +94,11 @@ export async function postAiParse(payload: AiParseRequest): Promise<AiParseRespo
       method: 'POST',
       body: JSON.stringify(payload),
     });
-  } catch {
+  } catch (err) {
+    // Re-throw 429 rate-limit errors so UI can display the friendly message from backend (T26)
+    if (err instanceof ApiError && err.status === 429) {
+      throw err;
+    }
     // Offline/fallback safety: never break natural-language search during live demo
     return mockAiParse(payload);
   }
