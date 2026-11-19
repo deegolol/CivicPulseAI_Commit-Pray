@@ -4,14 +4,16 @@ import csv
 import json
 from collections import defaultdict
 from datetime import datetime
-from math import cos, isfinite, radians, sin
+from math import isfinite
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import TextIO
 from urllib.request import urlopen
 from zoneinfo import ZoneInfo
 
-from shapely.geometry import shape
+from pyproj import Transformer
+from shapely import transform
+from shapely.geometry import Point, shape
 
 NO2_MAGNITUDE = 8
 HOURS = tuple(f"{hour:02d}" for hour in range(1, 25))
@@ -24,6 +26,7 @@ MAIN_CATALOG = "https://datos.madrid.es/dataset/201200-0-calidad-aire-horario"
 STATION_CATALOG = "https://datos.madrid.es/dataset/212629-0-estaciones-control-aire"
 HOURLY_RESOURCE = "201200-1-calidad-aire-horario-csv"
 STATION_RESOURCE = "212629-0-estaciones-control-aire-csv"
+TO_UTM = Transformer.from_crs("EPSG:4326", "EPSG:25830", always_xy=True)
 
 
 def mean_no2(file: TextIO, year: int) -> dict[int, float]:
@@ -57,15 +60,6 @@ def station_locations(file: TextIO) -> dict[int, tuple[str, float, float]]:
     }
 
 
-def distance_key(lon: float, lat: float, other_lon: float, other_lat: float) -> float:
-    """Devuelve el término de Haversine que basta para ordenar por distancia."""
-    return (
-        sin(radians(other_lat - lat) / 2) ** 2
-        + cos(radians(lat)) * cos(radians(other_lat))
-        * sin(radians(other_lon - lon) / 2) ** 2
-    )
-
-
 def build_part(
     features: list[dict],
     means: dict[int, float],
@@ -77,18 +71,18 @@ def build_part(
     available = sorted(means.keys() & stations.keys())
     if not available:
         raise ValueError("No hay estaciones con coordenadas y mediciones válidas de NO₂.")
+    points = {
+        station_id: Point(TO_UTM.transform(*stations[station_id][1:]))
+        for station_id in available
+    }
 
     values = {}
     notes = {}
     for feature in features:
         area_id = feature["properties"]["id"]
-        centroid = shape(feature["geometry"]).centroid
-        station = min(
-            available,
-            key=lambda station_id: distance_key(
-                centroid.x, centroid.y, *stations[station_id][1:]
-            ),
-        )
+        polygon = transform(shape(feature["geometry"]), TO_UTM.transform, interleaved=False)
+        centroid = polygon.centroid
+        station = min(available, key=lambda station_id: centroid.distance(points[station_id]))
         values[area_id] = round(means[station], 1)
         name = stations[station][0]
         notes[area_id] = f"Media de {year} medida en {name}, la estación más cercana al centroide."
