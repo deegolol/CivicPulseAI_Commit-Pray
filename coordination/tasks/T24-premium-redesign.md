@@ -3,8 +3,8 @@ id: T24
 title: Rediseño premium de la interfaz (petición de Diego)
 lane: WEB
 priority: P0
-status: todo
-owner: ""
+status: doing
+owner: antigravity@diego
 depends_on: [T03]
 files: [frontend/src/**, frontend/index.html, frontend/tailwind.config.*, frontend/src/index.css]
 ---

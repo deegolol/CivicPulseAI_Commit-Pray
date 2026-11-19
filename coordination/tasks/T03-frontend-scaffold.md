@@ -3,7 +3,7 @@ id: T03
 title: Esqueleto React + Vite + TS + Tailwind + mapa
 lane: WEB
 priority: P0
-status: review
+status: done
 owner: antigravity@diego
 depends_on: []
 files: [frontend/**]
