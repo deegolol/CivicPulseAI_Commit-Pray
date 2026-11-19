@@ -3,7 +3,7 @@ id: T27
 title: Recomendación destacada con motivos + alternativas etiquetadas en /api/score (petición de Diego)
 lane: API
 priority: P0
-status: doing
+status: done
 owner: claude@diego
 depends_on: [T08]
 files: [backend/app/recommend.py, backend/app/models.py, backend/app/routers/score.py, backend/tests/test_recommend.py, coordination/CONTRACTS.md]
@@ -15,3 +15,4 @@ Diego quiere que la app diga claramente **cuál es la mejor opción para el usua
 Deterministas (instantáneos, nunca inventados).
 
 ## Notas / progreso
+- 14:33 · claude@diego · En main. Además de `reasons`, `caveats` (0–2 peros honestos). Contrato actualizado en CONTRACTS §4.6.

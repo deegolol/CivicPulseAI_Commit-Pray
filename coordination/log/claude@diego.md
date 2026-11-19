@@ -47,3 +47,8 @@
 - T22: slugs propios de Idealista (moncloa, fuencarral) tras el aviso de codex@techgallo; Fotocasa primero.
 - T26: límite por IP y tope diario del LLM (protege la clave de pago en la demo pública), caché LRU de parse/explain, GZip y Cache-Control, health con estado del LLM. 35 tests.
 - IA: Claude Code. Humano: Diego pidió que todo funcione perfecto mientras se decide el siguiente rediseño.
+
+## 14:33 · T27 · done
+- Qué: recomendación destacada con motivos y peros, y alternativas etiquetadas, en /api/score. 40 tests.
+- IA: Claude Code; detectó que con 'aire limpio' el n.º 1 cerca de Campus Sur tiene aire mediocre y lo convirtió en un aviso honesto en vez de ocultarlo.
+- Humano: idea de Diego.
