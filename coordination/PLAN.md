@@ -1,6 +1,6 @@
 # PLAN MAESTRO — Commit & Pray @ CivicPulse AI
 
->  Nombre: **pendiente** (ver `DECISIONS.md`). En código se usa SOLO la constante `APP_NAME` (`frontend/src/config.ts`) para poder renombrar en 1 minuto. En docs: "la app".
+> Nombre: **PrimeraLlave** — *"tu primera llave en Madrid"* (primerallave.com y primerallave.app estaban libres el 19/11). En código se usa SOLO la constante `APP_NAME = "PrimeraLlave"` (`frontend/src/config.ts`).
 > Una frase: *"Dinos dónde vas a estudiar, cuánto puedes pagar y qué necesitas, y te decimos dónde buscar piso en Madrid: qué zonas encajan, cuánto te costará allí una habitación o estudio, y te llevamos directo a los anuncios — con datos oficiales y explicado en lenguaje natural."*
 
 **Enfoque: presupuesto primero.** El estudiante no busca "un barrio bonito": busca **el mejor sitio que se puede permitir** cerca de su campus.

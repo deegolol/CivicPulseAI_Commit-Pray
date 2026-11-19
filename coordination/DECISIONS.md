@@ -14,3 +14,5 @@ Formato: `D-xx · HH:MM · <quién> · <decisión> — <motivo>`
 - D-10 · 12:45 · diego · LLM dentro de la app: **Gemini** (clave gratis de Google AI Studio) — rápido y sin coste; fallback sin IA siempre activo.
 - D-11 · 12:45 · diego · **Ningún agente inicia sesión en servicios externos ni maneja claves.** Las cuentas y las claves son cosa de humanos (ver `coordination/ACCOUNTS.md`).
 - D-12 · 13:00 · diego · **Sustituye a D-10**: el LLM de la app es **OpenAI** (API ya pagada por diego). Modelo en `LLM_MODEL`, elegido por diego. Fallback sin IA igual.
+- D-13 · 13:20 · diego · **Sustituye a D-06**: el producto se llama **PrimeraLlave** ("tu primera llave en Madrid"). Constante `APP_NAME` en `frontend/src/config.ts`.
+- D-14 · 13:20 · diego · Modelo LLM: **`gpt-5.6-luna`** vía API Responses de OpenAI (2,0 s frente a 5–6 s de gpt-6-luna y gpt-5.4-mini en la misma prueba). La clave solo está en `.env` locales y en Railway.

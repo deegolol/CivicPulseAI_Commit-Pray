@@ -29,7 +29,7 @@
 │  └─ requirements.txt
 ├─ frontend/
 │  ├─ src/
-│  │  ├─ config.ts         # APP_NAME y textos de marca (el nombre se cambia SOLO aquí)
+│  │  ├─ config.ts         # APP_NAME = "PrimeraLlave" y textos de marca (el nombre se cambia SOLO aquí)
 │  │  ├─ api/              # client.ts (fetch tipado) + types.ts (= este contrato)
 │  │  ├─ components/       # Map, PriorityPanel, AiSearch, AreaDetail, TopCards, Compare…
 │  │  ├─ mocks/            # mismos JSON que backend/app/mock_data
@@ -178,7 +178,7 @@ El prompt solo recibe los números del `breakdown`; el texto debe citar cifras r
 ```
 LLM_PROVIDER=openai          # openai (decidido, D-12) | none = modo sin IA
 LLM_API_KEY=                 # clave de la API de OpenAI (cuenta de diego). Se pasa en privado, NUNCA en git
-LLM_MODEL=                   # modelo de OpenAI que elija diego (nombre exacto del panel de OpenAI); preferir uno rápido
+LLM_MODEL=gpt-5.6-luna       # el más rápido en nuestra prueba (~2 s); API Responses de OpenAI
 LLM_TIMEOUT_S=8
 DEMO_CACHE=true              # usa respuestas cacheadas para las frases de demo
 ```

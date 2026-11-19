@@ -33,8 +33,8 @@ No escribas código de producto hasta que yo te diga GO.
 
 Cuando diga GO: tu carril es WEB (solo frontend/). Empiezas por T03 y sigues con T09, T10, T12, T13, T14.
 Trabaja contra los mocks de CONTRACTS.md sin esperar al backend. Usa tu navegador integrado para comprobar
-la UI (desktop y móvil). El nombre del producto aún no está decidido: usa solo la constante APP_NAME en
-frontend/src/config.ts.
+la UI (desktop y móvil). El producto se llama PrimeraLlave: defínelo solo en la constante APP_NAME de
+frontend/src/config.ts y úsala en toda la UI.
 ```
 
 ## Mensaje para ChatGPT Codex (portátil de Diego) — carril DATA (aire, transporte, servicios)
