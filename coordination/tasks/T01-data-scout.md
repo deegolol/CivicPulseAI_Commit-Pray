@@ -3,8 +3,8 @@ id: T01
 title: Explorar y elegir datasets oficiales (timebox 30 min)
 lane: DATA
 priority: P0
-status: todo
-owner: ""
+status: doing
+owner: codex@adrian
 depends_on: []
 files: [data/SOURCES.md, coordination/DECISIONS.md]
 ---
