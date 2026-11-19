@@ -3,8 +3,8 @@ id: T12
 title: Buscador en lenguaje natural + explicación
 lane: WEB
 priority: P1
-status: todo
-owner: ""
+status: doing
+owner: antigravity@diego
 depends_on: [T09,T11]
 files: [frontend/src/components/AiSearch.tsx, frontend/src/components/AiExplanation.tsx]
 ---
