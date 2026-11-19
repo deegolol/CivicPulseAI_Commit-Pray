@@ -18,4 +18,4 @@ El estudiante quiere **pisos**, no solo barrios. Para cada área generamos URLs 
 
 ## Notas / progreso
 <!-- El owner apunta aquí avances, decisiones y bloqueos -->
-- 15:00 · claude@diego · Integrado en main. Enlaces por DISTRITO (el alquiler SERPAVI es por distrito). Fotocasa y Badi verificados (21 distritos, overrides salamanca→barrio-de-salamanca, san-blas-canillejas→san-blas). Idealista bloquea bots: formato público sin verificar automáticamente.
+- 13:40 · claude@diego · Integrado en main. Enlaces por DISTRITO (el alquiler SERPAVI es por distrito). Fotocasa y Badi verificados (21 distritos, overrides salamanca→barrio-de-salamanca, san-blas-canillejas→san-blas). Idealista bloquea bots: formato público sin verificar automáticamente.

@@ -20,5 +20,5 @@ Corazón del producto. Función pura `score(areas, campus, weights, filters) -> 
 
 ## Notas / progreso
 <!-- El owner apunta aquí avances, decisiones y bloqueos -->
-- 14:05 · claude@diego · Rama `t08-scoring` en revisión. 14 tests. Respuesta añade `housing_type` y `reference_m2` (campos nuevos opcionales). `listing_links` va vacío hasta T22.
-- 14:15 · OK de Diego → integrado en main.
+- 13:29 · claude@diego · Rama `t08-scoring` en revisión. 14 tests. Respuesta añade `housing_type` y `reference_m2` (campos nuevos opcionales). `listing_links` va vacío hasta T22.
+- 13:33 · OK de Diego → integrado en main.
