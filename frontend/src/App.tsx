@@ -83,18 +83,18 @@ function readInitialUrlParams() {
 
 export function App() {
   const reduced = useReducedMotion();
-  const viewMotion = {
-    initial: reduced ? false as const : { opacity: 0 },
-    animate: { opacity: 1 },
-    exit: { opacity: reduced ? 1 : 0, transition: { duration: reduced ? 0 : 0.10 } },
-    transition: { duration: reduced ? 0 : 0.20 },
-  };
   const initial = useMemo(() => readInitialUrlParams(), []);
 
   // Screen A (onboarding) vs Screen B (results)
   const [screen, setScreen] = useState<'onboarding' | 'results'>(
     initial.hasParams ? 'results' : 'onboarding',
   );
+  const viewMotion = {
+    initial: reduced ? false as const : { opacity: 0 },
+    animate: { opacity: 1 },
+    exit: { opacity: reduced ? 1 : 0, transition: { duration: reduced ? 0 : 0.12 } },
+    transition: { duration: reduced ? 0 : screen === 'results' ? 0.32 : 0.20, ease: 'easeOut' as const },
+  };
 
   const [meta, setMeta] = useState<MetaResponse | null>(null);
   const [geoData, setGeoData] = useState<BarriosGeoJSON | null>(null);
@@ -635,7 +635,11 @@ export function App() {
     </m.div>
   );
 
-  return <AnimatePresence initial={false} mode="wait">{screenView}</AnimatePresence>;
+  return (
+    <AnimatePresence initial={false} mode="wait" onExitComplete={() => window.scrollTo(0, 0)}>
+      {screenView}
+    </AnimatePresence>
+  );
 }
 
 export default App;

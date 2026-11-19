@@ -1,6 +1,6 @@
 /** Starts a search with natural language or a focused manual form. */
-import { AnimatePresence, m, useReducedMotion } from 'motion/react';
-import { useState } from 'react';
+import { AnimatePresence, m, useIsPresent, useReducedMotion, type HTMLMotionProps } from 'motion/react';
+import { forwardRef, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
 import { ArrowRight, ChevronDown, CornerDownLeft, Search } from 'lucide-react';
 import type { Campus, HousingType } from '../api/types';
 import { HOUSING_TYPE_LABELS } from '../config';
@@ -55,6 +55,16 @@ const selectClass = inputClass + ' appearance-none pr-9';
 const exampleLabels = ['Habitación y aire limpio', 'Un estudio en Montegancedo', 'Cerca del metro'];
 const buttonClass = 'inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-brand px-5 text-sm font-semibold text-bg transition hover:bg-brand-hover focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-60';
 
+const SearchStage = forwardRef<HTMLDivElement, HTMLMotionProps<'div'>>(function SearchStage(props, ref) {
+  const present = useIsPresent();
+  const stage = useRef<HTMLDivElement>(null);
+  useImperativeHandle(ref, () => stage.current!, []);
+  useLayoutEffect(() => {
+    if (stage.current) stage.current.inert = !present;
+  }, [present]);
+  return <m.div {...props} ref={stage} aria-hidden={!present || undefined} />;
+});
+
 export function OnboardingScreen({
   query, onQueryChange, onSearchSubmit, searching, searchError, review, onBack, interpretation,
   campuses, campusId, onCampusChange, budget, minBudget, onBudgetChange, onMinBudgetChange,
@@ -62,15 +72,43 @@ export function OnboardingScreen({
   onTransportModeChange, availableKeys, priorityWeights, onPriorityChange, onStart,
 }: OnboardingScreenProps) {
   const [manualOpen, setManualOpen] = useState(false);
-  const reduced = useReducedMotion();
-  const stageMotion = {
-    initial: reduced ? false as const : { opacity: 0, y: 7 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: reduced ? 1 : 0, y: reduced ? 0 : -4, transition: { duration: reduced ? 0 : 0.12 } },
-    transition: { duration: reduced ? 0 : 0.22 },
-  };
+  const [starting, setStarting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [stageHeight, setStageHeight] = useState<number>();
+  const composerRef = useRef<HTMLDivElement>(null);
+  const criteriaRef = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
+  const composerOpen = !review && !manualOpen;
+
+  useLayoutEffect(() => {
+    const stage = (composerOpen ? composerRef : criteriaRef).current;
+    if (!stage || reduced) return;
+    const measure = () => setStageHeight(stage.offsetHeight);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(stage);
+    return () => observer.disconnect();
+  }, [composerOpen, reduced]);
+
+  const stageMotion = {
+    initial: reduced ? false as const : { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: reduced ? 1 : 0, y: reduced ? 0 : -5, transition: { duration: reduced ? 0 : 0.18 } },
+    transition: { duration: reduced ? 0 : 0.30, ease: 'easeOut' as const },
+  };
   const needs = (field: string) => !review?.inferredFields.has(field);
+  const heading = (
+    <>
+      <h1 className="relative z-10 text-center font-display text-3xl leading-[1.08] font-bold tracking-tight sm:text-5xl">
+        {review ? 'Completa tu búsqueda' : manualOpen ? 'Configura tu búsqueda' : '¿Dónde vas a vivir este curso?'}
+      </h1>
+      <p className="relative z-10 mt-3 text-center text-sm text-muted sm:text-base">
+        {review && interpretation
+          ? interpretation
+          : 'Encuentra barrios de Madrid según tu campus, tu presupuesto y lo que te importa.'}
+      </p>
+    </>
+  );
 
   return (
     <div className="flex min-h-dvh flex-col overflow-x-clip bg-bg text-ink">
@@ -80,169 +118,173 @@ export function OnboardingScreen({
       </header>
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-5 pt-9 pb-16 sm:px-9 lg:pt-20">
-        <div className="mx-auto max-w-[39rem]">
-          <h1 className="relative z-10 text-center font-display text-3xl leading-[1.08] font-bold tracking-tight sm:text-5xl">
-            {review ? 'Completa tu búsqueda' : manualOpen ? 'Configura tu búsqueda' : '¿Dónde vas a vivir este curso?'}
-          </h1>
-          <p className="relative z-10 mt-3 text-center text-sm text-muted sm:text-base">
-            {review && interpretation
-              ? interpretation
-              : 'Encuentra barrios de Madrid según tu campus, tu presupuesto y lo que te importa.'}
-          </p>
-
-          <AnimatePresence initial={false} mode="wait">
-          {!review && !manualOpen ? (
-            <m.div key="composer" data-ui-motion="search-stage" {...stageMotion} className="relative isolate mt-7">
-              <img src="/madrid-ilustracion.png" alt="" width="1300" height="667"
-                className="pointer-events-none absolute top-3/5 left-1/2 -z-10 h-auto w-[110%] max-w-none -translate-x-1/2 -translate-y-1/2 opacity-70 select-none sm:top-4/5 sm:w-[140%] sm:opacity-85" />
-              <form
-                className="overflow-hidden rounded-2xl border border-border bg-bg shadow-[0_12px_36px_#2637250d] focus-within:border-ink"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  if (query.trim()) onSearchSubmit(query.trim());
-                }}
-              >
-                <label htmlFor="onboarding-search" className="sr-only">Cuéntanos qué buscas</label>
-                <textarea
-                  id="onboarding-search"
-                  rows={4}
-                  maxLength={500}
-                  required
-                  value={query}
-                  onChange={(event) => onQueryChange(event.target.value)}
-                  placeholder="Busco habitación cerca de Montegancedo, entre 350 y 600 € al mes, y quiero poder ir al gimnasio…"
-                  className="block min-h-32 w-full resize-y px-4 pt-4 pb-2 text-base leading-relaxed outline-none placeholder:text-muted/80 sm:px-5"
-                />
-                <div className="flex flex-wrap items-center justify-between gap-3 px-4 pt-2 pb-4 sm:px-5">
-                  <button
-                    type="button"
-                    onClick={() => setManualOpen(true)}
-                    className="inline-flex min-h-9 items-center gap-1.5 text-sm font-medium text-muted hover:text-ink"
-                  >
-                    Rellenar a mano
-                    <ChevronDown size={15} aria-hidden="true" />
-                  </button>
-                  <button type="submit" disabled={searching || !query.trim()} className={buttonClass}>
-                    <Search size={16} aria-hidden="true" />
-                    {searching ? 'Leyendo búsqueda…' : 'Buscar'}
-                  </button>
-                </div>
-              </form>
-              <div className="mt-3 flex gap-2 overflow-x-auto pb-1 sm:justify-center">
-                {EXAMPLE_QUERIES.map((example, index) => (
-                  <button
-                    key={example}
-                    type="button"
-                    disabled={searching}
-                    onClick={() => {
-                      onQueryChange(example);
-                      onSearchSubmit(example);
+        <m.div
+          className="relative mx-auto max-w-[39rem]"
+          initial={false}
+          animate={{ height: reduced ? 'auto' : stageHeight ?? 'auto' }}
+          transition={{ duration: reduced ? 0 : 0.32, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <AnimatePresence initial={false} mode="popLayout">
+            {composerOpen ? (
+              <SearchStage key="composer" ref={composerRef} data-ui-motion="search-stage" {...stageMotion} className="relative flow-root w-full">
+                {heading}
+                <div className="relative isolate mt-7">
+                  <img src="/madrid-ilustracion.png" alt="" width="1300" height="667"
+                    className="pointer-events-none absolute top-3/5 left-1/2 -z-10 h-auto w-[110%] max-w-none -translate-x-1/2 -translate-y-1/2 opacity-70 select-none sm:top-4/5 sm:w-[140%] sm:opacity-85" />
+                  <form
+                    className="overflow-hidden rounded-2xl border border-border bg-bg shadow-[0_12px_36px_#2637250d] focus-within:border-ink"
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      if (query.trim()) onSearchSubmit(query.trim());
                     }}
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-bg px-3 py-1.5 text-left text-xs font-medium text-muted hover:border-ink/40 hover:text-ink disabled:opacity-60"
                   >
-                    <CornerDownLeft size={12} aria-hidden="true" />
-                    {exampleLabels[index] ?? example}
-                  </button>
-                ))}
-              </div>
-              {searchError && <p role="alert" className="mt-3 text-sm text-over">{searchError}</p>}
-            </m.div>
-          ) : (
-            <m.form key="criteria" data-ui-motion="search-stage" {...stageMotion}
-              className="mt-6 space-y-5 rounded-2xl border border-border bg-bg p-4 shadow-[0_12px_36px_#2637250d] sm:p-6"
-              onSubmit={(event) => {
-                event.preventDefault();
-                if (!campusId) {
-                  setFormError('Elige un campus de las sugerencias.');
-                  return;
-                }
-                if (budget <= 0 || (minBudget !== null && minBudget > budget)) {
-                  setFormError('El máximo debe ser positivo y al menos igual al mínimo.');
-                  return;
-                }
-                setFormError(null);
-                onStart();
-              }}
-            >
-              {needs('campus') && (
-                <CampusPicker campuses={campuses.length ? campuses : DEFAULT_CAMPUSES} campusId={campusId} onChange={onCampusChange} />
-              )}
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                {needs('budget') && (
-                  <fieldset className="space-y-1.5 sm:col-span-2">
-                    <legend className="text-sm font-semibold">Presupuesto mensual (€)</legend>
-                    <div className="grid grid-cols-2 gap-2">
-                      <label className="text-xs text-muted">
-                        Desde
-                        <input type="number" min="0" step="1" inputMode="numeric" placeholder="Sin mínimo"
-                          value={minBudget ?? ''} onChange={(event) => onMinBudgetChange(event.target.value ? Number(event.target.value) : null)}
-                          className={inputClass + ' mt-1 text-ink'} />
-                      </label>
-                      <label className="text-xs text-muted">
-                        Hasta
-                        <input type="number" min="1" step="1" required inputMode="numeric"
-                          value={budget || ''} onChange={(event) => onBudgetChange(Number(event.target.value))}
-                          className={inputClass + ' mt-1 text-ink'} />
-                      </label>
+                    <label htmlFor="onboarding-search" className="sr-only">Cuéntanos qué buscas</label>
+                    <textarea
+                      id="onboarding-search"
+                      rows={4}
+                      maxLength={500}
+                      required
+                      value={query}
+                      onChange={(event) => onQueryChange(event.target.value)}
+                      placeholder="Busco habitación cerca de Montegancedo, entre 350 y 600 € al mes, y quiero poder ir al gimnasio…"
+                      className="block min-h-32 w-full resize-y px-4 pt-4 pb-2 text-base leading-relaxed outline-none placeholder:text-muted/80 sm:px-5"
+                    />
+                    <div className="flex flex-wrap items-center justify-between gap-3 px-4 pt-2 pb-4 sm:px-5">
+                      <button
+                        type="button"
+                        onClick={() => setManualOpen(true)}
+                        className="inline-flex min-h-9 items-center gap-1.5 text-sm font-medium text-muted hover:text-ink"
+                      >
+                        Rellenar a mano
+                        <ChevronDown size={15} aria-hidden="true" />
+                      </button>
+                      <button type="submit" disabled={searching || !query.trim()} className={buttonClass}>
+                        <Search size={16} aria-hidden="true" />
+                        {searching ? 'Leyendo búsqueda…' : 'Buscar'}
+                      </button>
                     </div>
-                  </fieldset>
-                )}
-                {needs('housing') && (
-                  <label className="space-y-1.5 text-sm font-semibold">
-                    <span>Tipo de vivienda</span>
-                    <span className="relative block">
-                      <select value={housingType} onChange={(event) => onHousingTypeChange(event.target.value as HousingType)} className={selectClass}>
-                        {Object.entries(HOUSING_TYPE_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-                      </select>
-                      <ChevronDown size={16} className="pointer-events-none absolute top-3.5 right-3 text-muted" aria-hidden="true" />
-                    </span>
-                  </label>
-                )}
-                {needs('distance') && (
-                  <label className="space-y-1.5 text-sm font-semibold">
-                    <span>Radio máximo (km)</span>
-                    <input type="number" min="0.5" max="60" step="any" inputMode="decimal" placeholder="Sin límite"
-                      value={maxDistanceKm ?? ''}
-                      onChange={(event) => onMaxDistanceChange(event.target.value ? Number(event.target.value) : null)}
-                      className={inputClass} />
-                  </label>
-                )}
-                {needs('transport') && (
-                  <label className="space-y-1.5 text-sm font-semibold">
-                    <span>Cómo te desplazas</span>
-                    <span className="relative block">
-                      <select value={transportMode} onChange={(event) => onTransportModeChange(event.target.value as TransportMode)} className={selectClass}>
-                        {Object.entries(TRANSPORT_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-                      </select>
-                      <ChevronDown size={16} className="pointer-events-none absolute top-3.5 right-3 text-muted" aria-hidden="true" />
-                    </span>
-                  </label>
-                )}
-              </div>
-              {transportMode !== 'any' && (
-                <p className="text-xs text-muted">
-                  {transportMode === 'metro'
-                    ? 'Para Metro usamos la densidad de estaciones.'
-                    : 'El radio se mide en línea recta. Los trayectos reales pueden variar.'}
-                </p>
-              )}
+                  </form>
+                  <div className="mt-3 flex gap-2 overflow-x-auto pb-1 sm:justify-center">
+                    {EXAMPLE_QUERIES.map((example, index) => (
+                      <button
+                        key={example}
+                        type="button"
+                        disabled={searching}
+                        onClick={() => {
+                          onQueryChange(example);
+                          onSearchSubmit(example);
+                        }}
+                        className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-bg px-3 py-1.5 text-left text-xs font-medium text-muted hover:border-ink/40 hover:text-ink disabled:opacity-60"
+                      >
+                        <CornerDownLeft size={12} aria-hidden="true" />
+                        {exampleLabels[index] ?? example}
+                      </button>
+                    ))}
+                  </div>
+                  {searchError && <p role="alert" className="mt-3 text-sm text-over">{searchError}</p>}
+                </div>
+              </SearchStage>
+            ) : (
+              <SearchStage key="criteria" ref={criteriaRef} data-ui-motion="search-stage" {...stageMotion} className="relative flow-root w-full">
+                {heading}
+                <form
+                  className="mt-6 space-y-5 rounded-2xl border border-border bg-bg p-4 shadow-[0_12px_36px_#2637250d] sm:p-6"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    if (starting) return;
+                    if (!campusId) {
+                      setFormError('Elige un campus de las sugerencias.');
+                      return;
+                    }
+                    if (budget <= 0 || (minBudget !== null && minBudget > budget)) {
+                      setFormError('El máximo debe ser positivo y al menos igual al mínimo.');
+                      return;
+                    }
+                    setFormError(null);
+                    setStarting(true);
+                    onStart();
+                  }}
+                >
+                  {needs('campus') && (
+                    <CampusPicker campuses={campuses.length ? campuses : DEFAULT_CAMPUSES} campusId={campusId} onChange={onCampusChange} />
+                  )}
 
-              <PreferenceControls availableKeys={availableKeys} weights={priorityWeights} onChange={onPriorityChange} />
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {needs('budget') && (
+                      <fieldset className="space-y-1.5 sm:col-span-2">
+                        <legend className="text-sm font-semibold">Presupuesto mensual (€)</legend>
+                        <div className="grid grid-cols-2 gap-2">
+                          <label className="text-xs text-muted">
+                            Desde
+                            <input type="number" min="0" step="1" inputMode="numeric" placeholder="Sin mínimo"
+                              value={minBudget ?? ''} onChange={(event) => onMinBudgetChange(event.target.value ? Number(event.target.value) : null)}
+                              className={inputClass + ' mt-1 text-ink'} />
+                          </label>
+                          <label className="text-xs text-muted">
+                            Hasta
+                            <input type="number" min="1" step="1" required inputMode="numeric"
+                              value={budget || ''} onChange={(event) => onBudgetChange(Number(event.target.value))}
+                              className={inputClass + ' mt-1 text-ink'} />
+                          </label>
+                        </div>
+                      </fieldset>
+                    )}
+                    {needs('housing') && (
+                      <label className="space-y-1.5 text-sm font-semibold">
+                        <span>Tipo de vivienda</span>
+                        <span className="relative block">
+                          <select value={housingType} onChange={(event) => onHousingTypeChange(event.target.value as HousingType)} className={selectClass}>
+                            {Object.entries(HOUSING_TYPE_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                          </select>
+                          <ChevronDown size={16} className="pointer-events-none absolute top-3.5 right-3 text-muted" aria-hidden="true" />
+                        </span>
+                      </label>
+                    )}
+                    {needs('distance') && (
+                      <label className="space-y-1.5 text-sm font-semibold">
+                        <span>Radio máximo (km)</span>
+                        <input type="number" min="0.5" max="60" step="any" inputMode="decimal" placeholder="Sin límite"
+                          value={maxDistanceKm ?? ''}
+                          onChange={(event) => onMaxDistanceChange(event.target.value ? Number(event.target.value) : null)}
+                          className={inputClass} />
+                      </label>
+                    )}
+                    {needs('transport') && (
+                      <label className="space-y-1.5 text-sm font-semibold">
+                        <span>Cómo te desplazas</span>
+                        <span className="relative block">
+                          <select value={transportMode} onChange={(event) => onTransportModeChange(event.target.value as TransportMode)} className={selectClass}>
+                            {Object.entries(TRANSPORT_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                          </select>
+                          <ChevronDown size={16} className="pointer-events-none absolute top-3.5 right-3 text-muted" aria-hidden="true" />
+                        </span>
+                      </label>
+                    )}
+                  </div>
+                  {transportMode !== 'any' && (
+                    <p className="text-xs text-muted">
+                      {transportMode === 'metro'
+                        ? 'Para Metro usamos la densidad de estaciones.'
+                        : 'El radio se mide en línea recta. Los trayectos reales pueden variar.'}
+                    </p>
+                  )}
 
-              {formError && <p role="alert" className="text-sm text-over">{formError}</p>}
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <button type="button" onClick={review ? onBack : () => setManualOpen(false)} className="text-sm font-medium text-muted hover:text-ink">
-                  {review ? 'Editar mi frase' : 'Buscar con una frase'}
-                </button>
-                <button type="submit" className={buttonClass + ' ml-auto'}>
-                  Ver zonas <ArrowRight size={17} aria-hidden="true" />
-                </button>
-              </div>
-            </m.form>
-          )}
+                  <PreferenceControls availableKeys={availableKeys} weights={priorityWeights} onChange={onPriorityChange} />
+
+                  {formError && <p role="alert" className="text-sm text-over">{formError}</p>}
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <button type="button" onClick={review ? onBack : () => setManualOpen(false)} className="text-sm font-medium text-muted hover:text-ink">
+                      {review ? 'Editar mi frase' : 'Buscar con una frase'}
+                    </button>
+                    <button type="submit" disabled={starting} className={buttonClass + ' ml-auto'}>
+                      {starting ? 'Buscando zonas…' : 'Ver zonas'} <ArrowRight size={17} aria-hidden="true" />
+                    </button>
+                  </div>
+                </form>
+              </SearchStage>
+            )}
           </AnimatePresence>
-        </div>
+        </m.div>
       </main>
     </div>
   );
