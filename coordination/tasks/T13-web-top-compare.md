@@ -3,8 +3,8 @@ id: T13
 title: Top 3 en tarjetas + comparador
 lane: WEB
 priority: P1
-status: todo
-owner: ""
+status: doing
+owner: antigravity@diego
 depends_on: [T09,T10]
 files: [frontend/src/components/TopCards.tsx, frontend/src/components/Compare.tsx]
 ---
