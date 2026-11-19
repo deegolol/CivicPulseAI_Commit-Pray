@@ -204,3 +204,37 @@ input[type="range"].clean-range::-webkit-slider-thumb:hover {
     transform: translate(-50%, -50%) rotate(90deg);
   }
 }
+
+/* Results scroll in their own list, independent of the onboarding page. */
+.results-page,
+.results-page body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .onboarding-enter {
+    animation: onboarding-enter 200ms ease-out both;
+  }
+
+  ::view-transition-group(root) {
+    animation-duration: 220ms;
+  }
+
+  @keyframes onboarding-enter {
+    from { opacity: 0.6; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+@media (min-width: 768px) and (max-height: 700px) {
+  .onboarding-form-screen {
+    padding-block: 4px 8px;
+  }
+
+  .onboarding-form {
+    margin-top: 8px;
+    padding-block: 12px;
+    row-gap: 12px;
+  }
+}

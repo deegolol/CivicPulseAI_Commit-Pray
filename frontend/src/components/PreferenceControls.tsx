@@ -4,10 +4,11 @@ import { priorityOptions } from '../constants/filters';
 
 const LEVELS = [[0, 'Indiferente'], [0.35, 'Algo'], [1, 'Mucho']] as const;
 
-export function PreferenceControls({ availableKeys, weights, onChange }: {
+export function PreferenceControls({ availableKeys, weights, onChange, compact = false }: {
   availableKeys: Set<string>;
   weights: Record<string, number>;
   onChange: (key: string, weight: number) => void;
+  compact?: boolean;
 }) {
   const id = useId();
   const activeCount = Object.values(weights).filter((weight) => weight > 0).length;
@@ -21,7 +22,9 @@ export function PreferenceControls({ availableKeys, weights, onChange }: {
           const weight = weights[key] ?? 0;
           const level = weight === 0 ? 0 : weight < 0.5 ? 0.35 : 1;
           return (
-            <div key={key} className="grid gap-1.5 p-2.5 min-[420px]:grid-cols-[minmax(0,1fr)_192px] min-[420px]:items-center">
+            <div key={key} className={`grid gap-1.5 p-2.5 min-[420px]:grid-cols-[minmax(0,1fr)_192px] min-[420px]:items-center ${
+              compact ? 'md:py-1.5' : ''
+            }`}>
               <span id={id + key} className="px-1 text-xs font-semibold">{label}</span>
               <div role="group" aria-labelledby={id + key} className="grid grid-cols-[1.5fr_1fr_1fr] rounded-lg bg-surface p-0.5">
                 {LEVELS.map(([value, name]) => (

@@ -1,6 +1,7 @@
 /** Starts a search with natural language or a focused manual form. */
-import { useState } from 'react';
-import { ArrowRight, ChevronDown, CornerDownLeft, Search } from 'lucide-react';
+import { useLayoutEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
+import { ArrowRight, ChevronDown, CircleHelp, CornerDownLeft, Search, X } from 'lucide-react';
 import type { Campus, HousingType } from '../api/types';
 import { HOUSING_TYPE_LABELS } from '../config';
 import {
@@ -63,28 +64,70 @@ export function OnboardingScreen({
   const [manualOpen, setManualOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const needs = (field: string) => !review?.inferredFields.has(field);
-  const showIntro = !review && !manualOpen;
+  const mode = review ? 'review' : manualOpen ? 'manual' : 'intro';
+  const showIntro = mode === 'intro';
+  const hasSearchFields = ['campus', 'budget', 'housing', 'distance', 'transport'].some(needs);
+  const wideForm = !showIntro && hasSearchFields;
+  const [infoTopic, setInfoTopic] = useState<'help' | 'account'>('help');
+  const infoDialog = useRef<HTMLDialogElement>(null);
+  const heading = useRef<HTMLHeadingElement>(null);
+  const previousMode = useRef(mode);
+  const supportsViewTransition = typeof document.startViewTransition === 'function';
+
+  useLayoutEffect(() => {
+    if (previousMode.current === mode) return;
+    previousMode.current = mode;
+    heading.current?.focus({ preventScroll: true });
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [mode]);
+
+  function changeMode(update: () => void) {
+    const change = () => {
+      setFormError(null);
+      update();
+    };
+    if (supportsViewTransition && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.startViewTransition(() => flushSync(change));
+    } else {
+      change();
+    }
+  }
+
+  function openInfo(topic: 'help' | 'account') {
+    setInfoTopic(topic);
+    infoDialog.current?.showModal();
+  }
 
   return (
     <div className="relative isolate flex min-h-dvh flex-col overflow-clip bg-bg text-ink">
       {showIntro && <img src="/plano-portada.png" alt="" className="onboarding-map" />}
-      <header className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-5 py-6 sm:px-9">
+      <header className="flex w-full items-center justify-between gap-3 px-4 py-4 sm:px-6">
         <BrandLogo />
-        <AccountButton />
+        <nav aria-label="Ayuda y cuenta" className="flex items-center gap-2">
+          <button type="button" onClick={() => openInfo('help')}
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-border bg-bg px-2.5 text-xs font-medium hover:bg-surface">
+            <CircleHelp size={16} aria-hidden="true" />
+            <span className="sr-only sm:not-sr-only">Cómo funciona</span>
+          </button>
+          <AccountButton compact onUnavailable={() => openInfo('account')} />
+        </nav>
       </header>
 
-      <main className={`mx-auto w-full max-w-6xl flex-1 px-5 sm:px-9 ${
-        showIntro ? 'flex flex-col justify-center py-8 sm:py-12' : 'pt-9 pb-16 lg:pt-20'
-      }`}>
-        <div className="mx-auto w-full max-w-[39rem]">
-          <h1 className="text-center font-display text-3xl leading-[1.08] font-bold tracking-tight sm:text-5xl">
+      <main key={mode} className={`mx-auto w-full flex-1 px-4 sm:px-6 ${
+        showIntro ? 'flex max-w-6xl flex-col justify-center py-8 sm:py-12' : 'onboarding-form-screen max-w-6xl pt-5 pb-8 sm:pt-7'
+      } ${!supportsViewTransition ? 'onboarding-enter' : ''}`}>
+        <div className={`mx-auto w-full ${wideForm ? 'max-w-2xl md:max-w-none' : 'max-w-[39rem]'}`}>
+          <h1 ref={heading} tabIndex={-1}
+            className={`text-center font-display text-3xl leading-[1.08] font-bold tracking-tight outline-none ${
+              showIntro ? 'sm:text-5xl' : 'sm:text-4xl'
+            }`}>
             {review ? 'Completa tu búsqueda' : manualOpen ? 'Configura tu búsqueda' : '¿Dónde vas a vivir este curso?'}
           </h1>
-          <p className="mt-3 text-center text-sm text-muted sm:text-base">
-            {review && interpretation
-              ? interpretation
-              : 'Encuentra barrios de Madrid según tu campus, tu presupuesto y lo que te importa.'}
-          </p>
+          {(showIntro || (review && interpretation)) && (
+            <p className="mx-auto mt-3 max-w-[39rem] text-center text-sm text-muted sm:text-base">
+              {showIntro ? 'Encuentra barrios de Madrid según tu campus, tu presupuesto y lo que te importa.' : interpretation}
+            </p>
+          )}
 
           {showIntro && (
             <div className="mt-7">
@@ -109,7 +152,7 @@ export function OnboardingScreen({
                 <div className="flex flex-wrap items-center justify-between gap-3 px-4 pt-2 pb-4 sm:px-5">
                   <button
                     type="button"
-                    onClick={() => setManualOpen(true)}
+                    onClick={() => changeMode(() => setManualOpen(true))}
                     className="inline-flex min-h-9 items-center gap-1.5 text-sm font-medium text-muted hover:text-ink"
                   >
                     Rellenar a mano
@@ -142,9 +185,11 @@ export function OnboardingScreen({
           )}
           {searchError && <p role="alert" className="mt-3 text-sm text-over">{searchError}</p>}
 
-          {(manualOpen || review) && (
+          {!showIntro && (
             <form
-              className="mt-6 space-y-5 rounded-2xl border border-border bg-bg p-4 shadow-[0_12px_36px_#2637250d] sm:p-6"
+              className={`onboarding-form mt-5 grid items-start gap-4 rounded-2xl border border-border bg-bg p-4 shadow-[0_12px_36px_#2637250d] sm:p-5 ${
+                wideForm ? 'md:grid-cols-2 md:gap-x-7' : ''
+              }`}
               onSubmit={(event) => {
                 event.preventDefault();
                 if (!campusId) {
@@ -159,75 +204,80 @@ export function OnboardingScreen({
                 onStart();
               }}
             >
-              {needs('campus') && (
-                <CampusPicker campuses={campuses.length ? campuses : DEFAULT_CAMPUSES} campusId={campusId} onChange={onCampusChange} />
+              {hasSearchFields && (
+                <fieldset className="min-w-0 space-y-3">
+                  <legend className="mb-2 text-sm font-bold">Datos de la búsqueda</legend>
+                  {needs('campus') && (
+                    <CampusPicker campuses={campuses.length ? campuses : DEFAULT_CAMPUSES} campusId={campusId} onChange={onCampusChange} />
+                  )}
+
+                  <div className="grid gap-3 min-[480px]:grid-cols-2">
+                    {needs('budget') && (
+                      <fieldset className="space-y-1.5 min-[480px]:col-span-2">
+                        <legend className="text-sm font-semibold">Presupuesto mensual (€)</legend>
+                        <div className="grid grid-cols-2 gap-2">
+                          <label className="text-xs text-muted">
+                            Desde
+                            <input type="number" min="0" step="1" inputMode="numeric" placeholder="Sin mínimo"
+                              value={minBudget ?? ''} onChange={(event) => onMinBudgetChange(event.target.value ? Number(event.target.value) : null)}
+                              className={inputClass + ' mt-1 text-ink'} />
+                          </label>
+                          <label className="text-xs text-muted">
+                            Hasta
+                            <input type="number" min="1" step="1" required inputMode="numeric"
+                              value={budget || ''} onChange={(event) => onBudgetChange(Number(event.target.value))}
+                              className={inputClass + ' mt-1 text-ink'} />
+                          </label>
+                        </div>
+                      </fieldset>
+                    )}
+                    {needs('housing') && (
+                      <label className="space-y-1.5 text-sm font-semibold">
+                        <span>Tipo de vivienda</span>
+                        <span className="relative block">
+                          <select value={housingType} onChange={(event) => onHousingTypeChange(event.target.value as HousingType)} className={selectClass}>
+                            {Object.entries(HOUSING_TYPE_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                          </select>
+                          <ChevronDown size={16} className="pointer-events-none absolute top-3.5 right-3 text-muted" aria-hidden="true" />
+                        </span>
+                      </label>
+                    )}
+                    {needs('distance') && (
+                      <label className="space-y-1.5 text-sm font-semibold">
+                        <span>Radio máximo (km)</span>
+                        <input type="number" min="0.5" max="60" step="any" inputMode="decimal" placeholder="Sin límite"
+                          value={maxDistanceKm ?? ''}
+                          onChange={(event) => onMaxDistanceChange(event.target.value ? Number(event.target.value) : null)}
+                          className={inputClass} />
+                      </label>
+                    )}
+                    {needs('transport') && (
+                      <label className="space-y-1.5 text-sm font-semibold">
+                        <span>Cómo te desplazas</span>
+                        <span className="relative block">
+                          <select value={transportMode} onChange={(event) => onTransportModeChange(event.target.value as TransportMode)} className={selectClass}>
+                            {Object.entries(TRANSPORT_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                          </select>
+                          <ChevronDown size={16} className="pointer-events-none absolute top-3.5 right-3 text-muted" aria-hidden="true" />
+                        </span>
+                      </label>
+                    )}
+                  </div>
+                  {transportMode !== 'any' && (
+                    <p className="text-xs text-muted">
+                      {transportMode === 'metro'
+                        ? 'Para Metro usamos la densidad de estaciones.'
+                        : 'El radio se mide en línea recta. Los trayectos reales pueden variar.'}
+                    </p>
+                  )}
+                </fieldset>
               )}
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                {needs('budget') && (
-                  <fieldset className="space-y-1.5 sm:col-span-2">
-                    <legend className="text-sm font-semibold">Presupuesto mensual (€)</legend>
-                    <div className="grid grid-cols-2 gap-2">
-                      <label className="text-xs text-muted">
-                        Desde
-                        <input type="number" min="0" step="1" inputMode="numeric" placeholder="Sin mínimo"
-                          value={minBudget ?? ''} onChange={(event) => onMinBudgetChange(event.target.value ? Number(event.target.value) : null)}
-                          className={inputClass + ' mt-1 text-ink'} />
-                      </label>
-                      <label className="text-xs text-muted">
-                        Hasta
-                        <input type="number" min="1" step="1" required inputMode="numeric"
-                          value={budget || ''} onChange={(event) => onBudgetChange(Number(event.target.value))}
-                          className={inputClass + ' mt-1 text-ink'} />
-                      </label>
-                    </div>
-                  </fieldset>
-                )}
-                {needs('housing') && (
-                  <label className="space-y-1.5 text-sm font-semibold">
-                    <span>Tipo de vivienda</span>
-                    <span className="relative block">
-                      <select value={housingType} onChange={(event) => onHousingTypeChange(event.target.value as HousingType)} className={selectClass}>
-                        {Object.entries(HOUSING_TYPE_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-                      </select>
-                      <ChevronDown size={16} className="pointer-events-none absolute top-3.5 right-3 text-muted" aria-hidden="true" />
-                    </span>
-                  </label>
-                )}
-                {needs('distance') && (
-                  <label className="space-y-1.5 text-sm font-semibold">
-                    <span>Radio máximo (km)</span>
-                    <input type="number" min="0.5" max="60" step="any" inputMode="decimal" placeholder="Sin límite"
-                      value={maxDistanceKm ?? ''}
-                      onChange={(event) => onMaxDistanceChange(event.target.value ? Number(event.target.value) : null)}
-                      className={inputClass} />
-                  </label>
-                )}
-                {needs('transport') && (
-                  <label className="space-y-1.5 text-sm font-semibold">
-                    <span>Cómo te desplazas</span>
-                    <span className="relative block">
-                      <select value={transportMode} onChange={(event) => onTransportModeChange(event.target.value as TransportMode)} className={selectClass}>
-                        {Object.entries(TRANSPORT_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-                      </select>
-                      <ChevronDown size={16} className="pointer-events-none absolute top-3.5 right-3 text-muted" aria-hidden="true" />
-                    </span>
-                  </label>
-                )}
-              </div>
-              {transportMode !== 'any' && (
-                <p className="text-xs text-muted">
-                  {transportMode === 'metro'
-                    ? 'Para Metro usamos la densidad de estaciones.'
-                    : 'El radio se mide en línea recta. Los trayectos reales pueden variar.'}
-                </p>
-              )}
+              <PreferenceControls availableKeys={availableKeys} weights={priorityWeights} onChange={onPriorityChange} compact />
 
-              <PreferenceControls availableKeys={availableKeys} weights={priorityWeights} onChange={onPriorityChange} />
-
-              {formError && <p role="alert" className="text-sm text-over">{formError}</p>}
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <button type="button" onClick={review ? onBack : () => setManualOpen(false)} className="text-sm font-medium text-muted hover:text-ink">
+              {formError && <p role="alert" className="col-span-full text-sm text-over">{formError}</p>}
+              <div className="col-span-full flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
+                <button type="button" onClick={() => changeMode(review ? onBack : () => setManualOpen(false))} className="text-sm font-medium text-muted hover:text-ink">
                   {review ? 'Editar mi frase' : 'Buscar con una frase'}
                 </button>
                 <button type="submit" className={buttonClass + ' ml-auto'}>
@@ -238,6 +288,29 @@ export function OnboardingScreen({
           )}
         </div>
       </main>
+
+      <dialog ref={infoDialog} aria-labelledby="onboarding-info-title"
+        className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-border bg-bg p-5 text-ink shadow-popover backdrop:bg-ink/25 sm:p-6">
+        <div className="flex items-center justify-between gap-3">
+          <h2 id="onboarding-info-title" className="font-display text-xl font-bold">
+            {infoTopic === 'help' ? 'Cómo funciona' : 'Mi cuenta'}
+          </h2>
+          <form method="dialog">
+            <button type="submit" aria-label="Cerrar" className="grid size-9 place-items-center rounded-lg hover:bg-surface">
+              <X size={18} aria-hidden="true" />
+            </button>
+          </form>
+        </div>
+        {infoTopic === 'help' ? (
+          <ol className="mt-4 list-decimal space-y-2.5 pl-5 text-sm text-muted">
+            <li>Describe qué buscas o elige tu campus, presupuesto y tipo de vivienda a mano.</li>
+            <li>Marca lo que te importa. Los criterios que dejes en Indiferente quedan fuera de la valoración.</li>
+            <li>Compara los barrios y abre los portales de alquiler desde la zona que más te encaje.</li>
+          </ol>
+        ) : (
+          <p className="mt-3 text-sm text-muted">Las cuentas aún no están disponibles. Puedes buscar y comparar barrios desde la portada.</p>
+        )}
+      </dialog>
     </div>
   );
 }

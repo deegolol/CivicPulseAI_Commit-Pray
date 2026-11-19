@@ -6,7 +6,7 @@
  *   - Screen B (Results): fixed TopFilterBar + list-first ZoneList (left 440px) + blue-scale MadridMap (right)
  *     + inline neighborhood details + CompareModal. On mobile: full-screen list with floating Mapa/Lista toggle.
  */
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { List, Map as MapIcon } from 'lucide-react';
 import {
   ApiError,
@@ -87,6 +87,16 @@ export function App() {
   const [screen, setScreen] = useState<'onboarding' | 'results'>(
     initial.hasParams ? 'results' : 'onboarding',
   );
+  const resultsScreen = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (screen !== 'results') return;
+    const root = document.documentElement;
+    root.classList.add('results-page');
+    resultsScreen.current?.focus({ preventScroll: true });
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    return () => root.classList.remove('results-page');
+  }, [screen]);
 
   const [meta, setMeta] = useState<MetaResponse | null>(null);
   const [geoData, setGeoData] = useState<BarriosGeoJSON | null>(null);
@@ -462,7 +472,8 @@ export function App() {
 
   // Screen B: Results (List first on left, blue-scale Map on right)
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-bg transition-opacity duration-300">
+    <div ref={resultsScreen} role="region" aria-label="Resultados de búsqueda" tabIndex={-1}
+      className="flex h-dvh flex-col overflow-hidden bg-bg outline-none">
       <TopFilterBar
         availableKeys={availableKeys}
         onResetHome={handleResetHome}

@@ -130,15 +130,20 @@ export function DistrictOffers({ district, housingType }: { district: string; ho
   );
 }
 
-export function AccountButton() {
+export function AccountButton({ onUnavailable, compact = false }: {
+  onUnavailable?: () => void;
+  compact?: boolean;
+} = {}) {
   const controls = useContext(AccountContext);
-  if (!controls) return null;
+  if (!controls && !onUnavailable) return null;
+  const unread = controls?.unread ?? 0;
   return (
-    <button type="button" onClick={() => controls.show()} className={buttonClass}>
-      <CircleUserRound size={16} aria-hidden="true" /> Mi cuenta
-      {controls.unread > 0 && (
-        <span aria-label={`${controls.unread} avisos sin leer`} className="rounded-[8px] bg-brand px-1.5 text-xs text-bg">
-          {controls.unread}
+    <button type="button" onClick={controls ? () => controls.show() : onUnavailable} className={buttonClass}>
+      <CircleUserRound size={16} aria-hidden="true" />
+      <span className={compact ? 'sr-only sm:not-sr-only' : undefined}>Mi cuenta</span>
+      {unread > 0 && (
+        <span aria-label={`${unread} avisos sin leer`} className="rounded-[8px] bg-brand px-1.5 text-xs text-bg">
+          {unread}
         </span>
       )}
     </button>
