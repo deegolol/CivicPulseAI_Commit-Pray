@@ -3,8 +3,8 @@ id: T09
 title: Panel de prioridades + mapa coroplético por puntuación
 lane: WEB
 priority: P0
-status: todo
-owner: ""
+status: doing
+owner: antigravity@diego
 depends_on: [T03]
 files: [frontend/src/components/PriorityPanel.tsx, frontend/src/components/Map.tsx, frontend/src/App.tsx]
 ---
