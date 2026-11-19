@@ -3,8 +3,8 @@ id: T14
 title: Responsive móvil + pulido visual
 lane: WEB
 priority: P1
-status: todo
-owner: ""
+status: doing
+owner: antigravity@diego
 depends_on: [T09,T10]
 files: [frontend/src/**]
 ---
