@@ -84,3 +84,24 @@ def test_distance_always_matters_for_students():
     ds = get_dataset()
     out = llm._finish({"priorities": {"distance_km": 0.1, "air_no2": 1}}, ds.campuses, keys(), "etsisi", "llm")
     assert out["weights"]["distance_km"] >= 0.6
+
+
+def test_euro_sign_is_understood_in_keyword_mode():
+    """Regression reported by codex@adrian: '500 €' was dropped by the ASCII normalization."""
+    r = client.post("/api/ai/parse", json={"query": "Estudio en la ETSISI, tengo 500 € y quiero aire limpio"}).json()
+    assert r["engine"] == "keywords" and r["budget_eur_month"] == 500 and r["filters"]["only_within_budget"] is True
+    r = client.post("/api/ai/parse", json={"query": "busco un estudio por menos de 750€"}).json()
+    assert r["budget_eur_month"] == 750 and r["housing_type"] == "studio"
+
+
+PITCH_SENTENCES = [  # must match the example chips in the frontend
+    "Estudio en la ETSISI, tengo 500 euros y quiero una zona tranquila con aire limpio",
+    "Voy a la facultad de informática de Montegancedo, busco un estudio para mí solo por menos de 750€",
+    "Quiero algo barato y bien comunicado en metro cerca del Campus Sur, máximo 6 km",
+]
+
+
+def test_all_pitch_sentences_hit_the_demo_cache(monkeypatch):
+    monkeypatch.setenv("DEMO_CACHE", "true")
+    for q in PITCH_SENTENCES:
+        assert client.post("/api/ai/parse", json={"query": q}).json()["engine"] == "llm", q

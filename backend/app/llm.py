@@ -41,7 +41,8 @@ CAMPUS_ALIASES = {
 
 # ---------------------------------------------------------------- helpers
 def _norm(text: str) -> str:
-    return unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode().lower().strip()
+    text = text.replace("€", " euros ")  # the ASCII step below would silently drop the € sign
+    return re.sub(r"\s+", " ", unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode().lower()).strip()
 
 
 def llm_enabled() -> bool:
