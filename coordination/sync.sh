@@ -20,7 +20,7 @@ sh coordination/board.sh
 echo
 
 # 3) Tareas esperando revisión humana
-echo "== EN REVISIÓN (esperan OK de un humano) =="
+echo "== EN REVISIÓN =="
 grep -l "^status: review" coordination/tasks/T*.md 2>/dev/null | while read -r f; do
   printf "  %s  (owner: %s)\n" "$(basename "$f" .md)" "$(grep '^owner:' "$f" | sed 's/owner: *//; s/"//g')"
 done

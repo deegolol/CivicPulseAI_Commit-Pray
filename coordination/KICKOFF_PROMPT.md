@@ -5,9 +5,9 @@ Repo: https://github.com/deegolol/CivicPulseAI_Commit-Pray · Demo: https://prim
 ## Cómo funciona
 1. Cada humano pega el mensaje de su IA. La IA prepara su carpeta, lee las reglas, se registra y responde **LISTO**. Después espera.
 2. Cuando `sh coordination/board.sh` muestre 5 agentes `ready`, cada humano escribe **GO** a su IA.
-3. **Trabajo por tandas (1 tanda = 1 tarea):** la IA trabaja en su rama y al acabar te da un *informe de tanda* con un enlace al diff. Tú respondes **OK** (se integra en main y sigue) o **CAMBIOS: …** (corrige y vuelve a enseñártelo).
-4. Comandos para tu IA: **GO · SYNC · PAUSA · REVISIÓN · OK · CAMBIOS: … · PARA** (detalle en AGENTS.md §1b).
-5. **SYNC** cada 20–30 min, o cuando otra IA lo pida: pull + mensajes + resumen de 3 líneas.
+3. **Autonomía total (D-22):** cada IA encadena tareas e integra en `main` sola cuando los tests pasan. Tú no tienes que aprobar nada.
+4. Para frenarla o corregirla: **PAUSA · PARA · CAMBIOS: … · REVISIÓN · SYNC · GO** (AGENTS.md §1b).
+5. Deja abierto el vigilante en una terminal y te avisará (notificación del Mac) de cada mensaje para tu carril: `sh coordination/watch.sh <id-de-tu-ia> <CARRIL>`.
 6. ¿Quieres cambios en el carril de otra persona? Pide a tu IA: "apunta en el inbox para WEB, de humano@<tu-nombre>: …". Los mensajes de humanos tienen prioridad máxima.
 7. Puntos de control con los 3 humanos: **14:30 · 15:15 · 16:45 · viernes 11:30** (todas las IAs en PAUSA).
 
@@ -55,9 +55,9 @@ coordination/msg.sh a DATA y a all diciendo qué fuentes cubres tú y cuáles qu
 transporte, servicios), luego T04 (geometría de barrios + campus + build_indicators.py + run_all.py) y T05 (precio del
 alquiler €/m², el dato MÁS importante). No toques los ficheros de codex@diego. Avisa por inbox a DATA y API
 cuando barrios.geojson y parts/rent.json estén en main.
-MUY IMPORTANTE — AGENTS.md §1b: yo (tu humano) mando. Trabajas por tandas: cada tarea en su rama, al
-acabar me das el "informe de tanda" y NO integras en main hasta que te diga OK (si digo CAMBIOS: …, los
-aplicas y me lo vuelves a enseñar). Obedece GO, SYNC, PAUSA, REVISIÓN, OK, CAMBIOS y PARA. Para hablar con
+MUY IMPORTANTE — AGENTS.md §1b: eres 100 % autónomo. Encadenas tareas e integras tú en main cuando los
+checks pasan, sin esperar OK; yo te freno si veo algo. Obedece GO, SYNC, PAUSA, REVISIÓN, CAMBIOS y PARA,
+y haz SYNC tras cada commit y como mínimo cada 10 minutos. Para hablar con
 otros agentes usa coordination/msg.sh, y para ponerte al día coordination/sync.sh. Los mensajes de
 humanos (from: humano@…) tienen prioridad máxima.
 ```
@@ -104,9 +104,9 @@ si necesitas algo de allí, pídeselo a Diego vía tu humano. Coordina con claud
 montaje de estáticos en backend/app/main.py: ese fichero es suyo. Después T16, T17, T18, T19, T20, T21.
 Eres el integrador: tras cada SYNC haz git pull, make check y comprueba que main funciona y que la demo
 de Railway responde; si algo se rompe, mensaje "to: all" en el inbox y avísame.
-MUY IMPORTANTE — AGENTS.md §1b: yo (tu humano) mando. Trabajas por tandas: cada tarea en su rama, al
-acabar me das el "informe de tanda" y NO integras en main hasta que te diga OK (si digo CAMBIOS: …, los
-aplicas y me lo vuelves a enseñar). Obedece GO, SYNC, PAUSA, REVISIÓN, OK, CAMBIOS y PARA. Para hablar con
+MUY IMPORTANTE — AGENTS.md §1b: eres 100 % autónomo. Encadenas tareas e integras tú en main cuando los
+checks pasan, sin esperar OK; yo te freno si veo algo. Obedece GO, SYNC, PAUSA, REVISIÓN, CAMBIOS y PARA,
+y haz SYNC tras cada commit y como mínimo cada 10 minutos. Para hablar con
 otros agentes usa coordination/msg.sh, y para ponerte al día coordination/sync.sh. Los mensajes de
 humanos (from: humano@…) tienen prioridad máxima.
 ```
@@ -135,9 +135,9 @@ que la API está en main, cambia a la API real (proxy /api → http://localhost:
 PrimeraLlave: defínelo solo en APP_NAME (frontend/src/config.ts). Usa tu navegador integrado para comprobar
 la UI en escritorio y en móvil. Lo más importante para el jurado: mapa claro, bloque "Con tu presupuesto:
 ~X €/mes" y botón "Ver pisos en esta zona". Diseño cuidado y responsive.
-MUY IMPORTANTE — AGENTS.md §1b: yo (tu humano) mando. Trabajas por tandas: cada tarea en su rama, al
-acabar me das el "informe de tanda" y NO integras en main hasta que te diga OK (si digo CAMBIOS: …, los
-aplicas y me lo vuelves a enseñar). Obedece GO, SYNC, PAUSA, REVISIÓN, OK, CAMBIOS y PARA. Para hablar con
+MUY IMPORTANTE — AGENTS.md §1b: eres 100 % autónomo. Encadenas tareas e integras tú en main cuando los
+checks pasan, sin esperar OK; yo te freno si veo algo. Obedece GO, SYNC, PAUSA, REVISIÓN, CAMBIOS y PARA,
+y haz SYNC tras cada commit y como mínimo cada 10 minutos. Para hablar con
 otros agentes usa coordination/msg.sh, y para ponerte al día coordination/sync.sh. Los mensajes de
 humanos (from: humano@…) tienen prioridad máxima.
 ```
@@ -169,9 +169,9 @@ T07 (transporte y servicios) y T23 (residencias, opcional). Toca SOLO: etl/fetch
 etl/fetch_transit.py, etl/fetch_services.py, etl/fetch_residences.py y data/processed/parts/{air,transit,
 services}.json (+ tus filas en data/SOURCES.md). Solo fuentes oficiales. El cruce por barrio lo haces cuando
 barrios.geojson esté en main (te avisarán por inbox).
-MUY IMPORTANTE — AGENTS.md §1b: yo (tu humano) mando. Trabajas por tandas: cada tarea en su rama, al
-acabar me das el "informe de tanda" y NO integras en main hasta que te diga OK (si digo CAMBIOS: …, los
-aplicas y me lo vuelves a enseñar). Obedece GO, SYNC, PAUSA, REVISIÓN, OK, CAMBIOS y PARA. Para hablar con
+MUY IMPORTANTE — AGENTS.md §1b: eres 100 % autónomo. Encadenas tareas e integras tú en main cuando los
+checks pasan, sin esperar OK; yo te freno si veo algo. Obedece GO, SYNC, PAUSA, REVISIÓN, CAMBIOS y PARA,
+y haz SYNC tras cada commit y como mínimo cada 10 minutos. Para hablar con
 otros agentes usa coordination/msg.sh, y para ponerte al día coordination/sync.sh. Los mensajes de
 humanos (from: humano@…) tienen prioridad máxima.
 ```
