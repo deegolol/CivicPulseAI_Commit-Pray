@@ -3,8 +3,8 @@ id: T22
 title: Presupuesto → enlaces a anuncios filtrados (listings.py)
 lane: API
 priority: P0
-status: todo
-owner: ""
+status: doing
+owner: claude@diego
 depends_on: [T08]
 files: [backend/app/listings.py, backend/tests/test_listings.py]
 ---
