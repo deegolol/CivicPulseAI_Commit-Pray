@@ -1,0 +1,18 @@
+[
+  {
+    "id": "etsisi",
+    "name": "ETSISI · Campus Sur UPM",
+    "coords": [
+      -3.62789444,
+      40.3897
+    ]
+  },
+  {
+    "id": "etsiinf",
+    "name": "ETSIINF · Campus Montegancedo UPM",
+    "coords": [
+      -3.839679,
+      40.405474
+    ]
+  }
+]
