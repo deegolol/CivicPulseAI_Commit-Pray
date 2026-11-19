@@ -3,8 +3,8 @@ id: T16
 title: CI con GitHub Actions
 lane: SHIP
 priority: P2
-status: todo
-owner: ""
+status: doing
+owner: codex@techgallo
 depends_on: [T08,T03]
 files: [.github/workflows/ci.yml]
 ---
