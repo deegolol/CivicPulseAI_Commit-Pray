@@ -3,8 +3,8 @@ id: T07
 title: ETL transporte y servicios (point-in-polygon)
 lane: DATA
 priority: P1
-status: todo
-owner: ""
+status: doing
+owner: codex@diego
 depends_on: [T04]
 files: [etl/fetch_transit.py, etl/fetch_services.py, data/processed/parts/transit.json, data/processed/parts/services.json]
 ---
