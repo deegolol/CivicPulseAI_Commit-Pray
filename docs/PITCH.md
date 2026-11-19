@@ -1,0 +1,78 @@
+# Pitch PrimeraLlave — 5 minutos, demo en vivo
+
+> Rúbrica: impacto 25 · técnica 25 · dato abierto 20 · diseño 15 · **presentación y defensa 15** (pitch claro, demo en vivo **sin diapositivas innecesarias**, dominio técnico en preguntas).
+> Regla de oro: **enseñar, no contar.** El 60 % del tiempo es la app funcionando.
+
+**Demo:** https://primerallave.up.railway.app (plan B en local: `make dev` → http://localhost:5173)
+**Reparto propuesto** (cambiadlo si queréis): **TechGallo** abre y cierra · **Diego** lleva el ratón y explica la IA · **Adrián** explica los datos.
+
+---
+
+## Guion (≈ 650 palabras habladas)
+
+### 0:00–0:30 · Gancho — TechGallo (pantalla: la app ya abierta, sin tocar)
+> "Esta es Lucía. Tiene 18 años, viene de fuera y la semana que viene empieza en la ETSISI. Tiene 500 euros al mes y no conoce Madrid. Abre Idealista y ve miles de pisos… pero nadie le dice **en qué zona le conviene buscar**: cuánto se paga allí de verdad, a cuánto queda de su campus o si el aire está limpio. Esa información existe, pero está en datasets públicos que nadie cruza. Por eso hemos hecho **PrimeraLlave**."
+
+### 0:30–3:00 · Demo en vivo — Diego (Adrián le apoya con los datos)
+1. **Escribe como Lucía** — pulsa el chip *"Estudio en la ETSISI, tengo 500 euros y quiero una zona tranquila con aire limpio"*.
+   > "Lucía escribe como habla. La IA entiende campus, presupuesto, que busca habitación y que le importa el aire… y **mirad cómo se mueven solos los controles**."
+2. **El mapa se colorea** (131 barrios) con el campus y su radio.
+   > "Cuanto más intenso el color, mejor encaja con ella. A la derecha, su top 3 —**Pueblo Nuevo, Palomeras Bajas y Media Legua**: a 3–4 km de Campus Sur y entre **287 y 332 € al mes** por una habitación— y arriba el **resumen de la IA**, que explica cada zona solo con cifras reales." 
+3. **Abre una zona del top 3** (p. ej. Palomeras Bajas) → bloque "Con tu presupuesto".
+   > "Aquí no inventamos nada: es la **mediana oficial del alquiler del Ministerio de Vivienda** por m², por los m² de una habitación. **~287 €/mes: encaja.** NO₂ 25 µg/m³, a 2,7 km… y cada cifra lleva su fuente." 
+4. **Pulsa "Ver pisos en esta zona"** → el portal (Fotocasa/Idealista/Badi) abierto con el distrito y el precio máximo ya filtrados.
+   > "Y de la zona, al piso: te llevamos a los anuncios **ya filtrados** por zona y presupuesto."
+5. **Cambia un control en unidades reales** (presupuesto o km máximos) → el ranking cambia al instante.
+6. *(Si sobra tiempo)* **Comparador** de 2 zonas, o el chip de **Montegancedo** con "un estudio por menos de 750 €" → el ranking cambia de campus y de tipo.
+7. **10 segundos en móvil** (DevTools o el móvil real): mapa a pantalla completa y bottom sheet.
+
+### 3:00–4:00 · Cómo funciona — Adrián (datos) + Diego (IA) · *una sola imagen: el diagrama del README*
+- **Adrián:** "Cruzamos **5 fuentes oficiales**: los 131 barrios y la calidad del aire del **Ayuntamiento de Madrid**, el alquiler **SERPAVI 2024 del Ministerio de Vivienda**, las estaciones de **Metro del CRTM** y bibliotecas y polideportivos municipales. Scripts reproducibles: `make data` lo regenera todo desde las fuentes."
+- **Diego:** "El encaje es un motor propio, sencillo y explicable: normalizamos cada indicador, lo ponderamos según lo que importa al estudiante, y lo cubren 29 tests. **La IA no inventa datos**: traduce la frase a parámetros con un JSON Schema estricto que validamos, y redacta la explicación solo con cifras que ya hemos calculado. Si OpenAI cae, la app sigue funcionando sin IA."
+
+### 4:00–4:40 · Impacto — TechGallo
+> "Hay herramientas que recomiendan barrios, como Madriwa, y portales que enseñan anuncios. **PrimeraLlave une las dos cosas para estudiantes**: tu campus, tu presupuesto y tus prioridades, con datos oficiales, y de ahí directo al piso. Funciona con cualquier campus y es trasladable a cualquier ciudad con portal de datos abiertos."
+
+### 4:40–5:00 · Cierre — TechGallo
+> "Encontrar tu primera casa en Madrid no debería ser una lotería. **PrimeraLlave: tu primera llave en Madrid.** Lo tenéis en primerallave.up.railway.app. Gracias."
+
+---
+
+## Antes de salir (checklist)
+- [ ] Portátil de la demo **cargado**, notificaciones **desactivadas** (modo No molestar) y otras apps cerradas.
+- [ ] La demo abierta en **Chrome a pantalla completa**, zoom 100 % (o 110 % si la sala es grande), probada **5 minutos antes**.
+- [ ] Pestañas preparadas: 1) la demo, 2) `/docs` de la API, 3) README en GitHub. Nada más.
+- [ ] Probada la **wifi de la sala**; si falla, conecta el móvil como punto de acceso o usa el plan B.
+- [ ] Ensayado con cronómetro **3 veces** (jueves 17:00, viernes 11:15 y 11:30). Si pasa de 5:00, quita el paso 6.
+
+## Plan B
+| Si falla… | Hacemos… |
+|---|---|
+| Internet en la sala | `make dev` en local (datos versionados): todo funciona sin red. Los 3 chips de la demo usan **respuestas cacheadas**, así que la IA "funciona" también offline. |
+| OpenAI lento o caído | La app pasa sola al **modo sin IA** (etiqueta discreta). Seguir sin comentarlo; si preguntan, es un punto a favor: "está diseñado para no depender de la IA". |
+| Railway caído | Plan B local. |
+| Todo | Capturas de `docs/screenshots/` y un **vídeo de 60 s** (grabadlo el viernes por la mañana con QuickTime → Nueva grabación de pantalla, recorriendo los pasos 1–5). |
+
+## Preguntas difíciles (todos deberíais saber responderlas)
+| Pregunta | Respuesta corta |
+|---|---|
+| ¿De dónde sale el precio? ¿Es real? | Mediana oficial en €/m² de contratos de vivienda colectiva (SERPAVI 2024, Ministerio de Vivienda) **por distrito**, × m² de referencia (habitación 25, estudio 35, piso 60). Es una **estimación con datos oficiales**; el precio exacto está en los anuncios enlazados. |
+| ¿Por qué por distrito y no por barrio? | Es el dato oficial más fino que cubre los 21 distritos. SERPAVI tiene secciones censales, pero combinar medianas de sección en una mediana de barrio no es estadísticamente válido sin microdatos. Lo indicamos en la app. |
+| ¿Cómo calculáis el encaje? | Min–max de cada indicador entre los 131 barrios (1 = mejor; se invierte en alquiler, NO₂ y distancia), un dato que falta cuenta como la mediana, pesos que suman 1 y media ponderada. Los filtros excluyen sin alterar al resto. `backend/app/scoring.py` + tests. |
+| ¿Y si la IA se inventa algo? | No puede: solo devuelve parámetros con un **JSON Schema estricto** que además validamos y recortamos (campus que exista, presupuesto 50–10.000 €, km 0–60, pesos 0–1). La explicación solo recibe cifras ya calculadas por nuestro motor. |
+| ¿Qué pasa si OpenAI no responde? | Timeout de 8 s (12 s la explicación) → intérprete por palabras clave y explicación por plantilla. La app nunca se queda colgada. |
+| ¿Cómo asignáis el aire a un barrio? | Media anual de NO₂ 2025 (horas válidas) de la **estación más cercana** al centroide del barrio (23 estaciones con datos). |
+| ¿Y el transporte? | Estaciones de Metro del CRTM por km² de barrio. Limitación: no incluye EMT ni Cercanías. |
+| ¿La distancia es en tiempo? | Es en línea recta (haversine). El tiempo en transporte público es la mejora natural siguiente (GTFS del CRTM). |
+| ¿Hacéis scraping de Idealista? | No. Solo generamos **enlaces** a sus búsquedas filtradas; el estudiante aterriza en el portal. |
+| ¿Por qué Montegancedo da barrios de Latina? | El campus está en Boadilla/Pozuelo, fuera del municipio, y nuestros datos son de los barrios de Madrid capital: los más cercanos están en Latina y Moncloa. Ampliar a municipios es una mejora siguiente. |
+| ¿Arquitectura? | ETL Python → JSON versionados → FastAPI (scoring, enlaces, IA) → React + Vite + TS + Leaflet. Un único contenedor Docker en Railway que se despliega en cada push a main. |
+| ¿Cómo habéis usado la IA para programar? | 3 personas y 5 agentes (Claude Code, Codex, Antigravity) en el mismo repo, coordinados con AGENTS.md, tareas con dueño, contratos fijos y un buzón de mensajes. Revisión cruzada: un agente de DATA encontró un bug en la API y se arregló con test de regresión. Detalle en AI_USAGE.md. |
+| ¿Existe ya algo así? | Madriwa recomienda barrios con datos abiertos, pero no usa presupuesto ni está pensada para estudiantes ni lleva a pisos. Los portales tienen pisos, pero no te dicen qué zona te conviene. Nosotros unimos las dos cosas. |
+
+## Cifras para no equivocarse (comprobadas en la demo publicada)
+- 131 barrios · 21 distritos · 5 fuentes oficiales (9 ficheros) · 2 campus UPM.
+- Frase 1 (ETSISI, 500 €, aire limpio), **tal como sale en la web**: **Pueblo Nuevo (Ciudad Lineal) 4,1 km ~332 €** · **Palomeras Bajas 2,7 km ~287 €** · **Media Legua 3,5 km ~293 €** por habitación.
+- ⚠️ El ranking que se ve depende de cómo la web traduce las prioridades; **repasad estas cifras el viernes a las 11:15** pulsando los chips en la demo publicada.
+- Frase 2 (Montegancedo, estudio < 750 €): **Campamento 3,8 km**, ~404 €/mes por un estudio.
+- Frase 3 (barato, metro, ≤ 6 km de Campus Sur): **40 de 131 zonas** quedan dentro; n.º 1 **Media Legua**, 3,5 km, ~293 €/mes.
