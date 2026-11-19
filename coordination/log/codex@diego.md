@@ -34,3 +34,7 @@
 ## 14:42 · Cobertura de API (D-28)
 - Revisé los contratos, el backend y el log de Claude.
 - Suite local con `LLM_PROVIDER=none`: 41 tests en verde.
+
+## 14:57 · T27 · texto de recomendación
+- Por feedback de Diego, la tarjeta separa los recuentos oficiales de deporte y bibliotecas, indica el alcance municipal si Servicios pesa mucho y expresa aire y Metro en lenguaje sencillo.
+- Las medidas siguen disponibles en el desglose. Probé el caso ETSIINF con deporte y añadí una prueba de regresión. 42 tests en verde.
