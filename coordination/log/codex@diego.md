@@ -25,3 +25,7 @@
 - Envié el resumen de defensa a TechGallo, y a SHIP el resultado de make check (29 tests y build web) y de make data.
 - Reproduje el error de red del Geoportal y confirmé un espejo municipal. Adrián integró el fallback a7cf5aa. La descarga automática se verificó desde un clon sin caché.
 - Cuatro piezas y campus byte a byte. Agregado idéntico salvo generated_at. Propiedades de los 131 barrios idénticas, distancia máxima de 7,12e-15 grados.
+
+## 14:18 · T21 · compatibilidad del ETL en Windows
+- SHIP reprodujo la falta de la zona Europe/Madrid y un error de salida CP1252. Añadí tzdata y cambié el mensaje de consola a NO2 ASCII, conservando el símbolo del indicador.
+- El pipeline completo pasó en un entorno recién instalado, sin zonas del sistema y con la salida redirigida en CP1252. Piezas de aire, Metro y servicios idénticas. Integrado como d8f2cf8.
