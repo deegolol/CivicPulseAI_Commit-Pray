@@ -3,6 +3,7 @@
  * Chips: Campus · Budget €/mes · Housing type · Max km · Más filtros (air, transit, budget-only, priorities, search).
  * Zero percentages anywhere; crisp 1px borders and subtle popover shadow only.
  */
+import { AnimatePresence, m, useReducedMotion } from 'motion/react';
 import { AccountButton } from './AccountProvider';
 import { useEffect, useRef, useState } from 'react';
 import { ChevronDown, Scale, Search, SlidersHorizontal, X } from 'lucide-react';
@@ -84,16 +85,40 @@ export function TopFilterBar({
 }: TopFilterBarProps) {
   const [openPopover, setOpenPopover] = useState<ActivePopover>(null);
   const [budgetError, setBudgetError] = useState(false);
-  const barRef = useRef<HTMLDivElement | null>(null);
+  const barRef = useRef<HTMLElement>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const reduced = useReducedMotion();
+  const [anchor, setAnchor] = useState({ left: 16, origin: 20 });
+
+  function closePopover(restoreFocus = true) {
+    setOpenPopover(null);
+    if (restoreFocus) triggerRef.current?.focus();
+  }
+
+  function updateAnchor() {
+    const bar = barRef.current?.getBoundingClientRect();
+    const trigger = triggerRef.current?.getBoundingClientRect();
+    if (!bar || !trigger) return;
+    const width = Math.min(bar.width - 32, 28 * parseFloat(getComputedStyle(document.documentElement).fontSize));
+    const left = Math.max(16, Math.min(trigger.left - bar.left, bar.width - width - 16));
+    const origin = Math.max(12, Math.min(trigger.left + trigger.width / 2 - bar.left - left, width - 12));
+    setAnchor({ left, origin });
+  }
+
+  useEffect(() => {
+    if (!openPopover) return;
+    window.addEventListener('resize', updateAnchor);
+    return () => window.removeEventListener('resize', updateAnchor);
+  }, [openPopover]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (barRef.current && !barRef.current.contains(e.target as Node)) {
-        setOpenPopover(null);
+        closePopover(false);
       }
     };
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpenPopover(null);
+      if (e.key === 'Escape' && openPopover) closePopover();
     };
     document.addEventListener('mousedown', handleClickOutside);
     window.addEventListener('keydown', handleKey);
@@ -101,7 +126,7 @@ export function TopFilterBar({
       document.removeEventListener('mousedown', handleClickOutside);
       window.removeEventListener('keydown', handleKey);
     };
-  }, []);
+  }, [openPopover]);
 
   const activeCampus = campuses.find((c) => c.id === campusId);
   const campusName = activeCampus?.name ?? campusId.toUpperCase();
@@ -111,7 +136,9 @@ export function TopFilterBar({
     (wellConnectedOnly ? 1 : 0) +
     (onlyWithinBudget ? 1 : 0);
 
-  const toggle = (name: ActivePopover) => {
+  const toggle = (name: ActivePopover, trigger: HTMLButtonElement) => {
+    triggerRef.current = trigger;
+    updateAnchor();
     setBudgetError(false);
     setOpenPopover((prev) => (prev === name ? null : name));
   };
@@ -121,7 +148,7 @@ export function TopFilterBar({
       ref={barRef}
       className="relative z-40 shrink-0 border-b border-border bg-bg"
     >
-      <div className="flex items-center gap-2 overflow-x-auto px-4 py-2.5">
+      <div onScroll={openPopover ? updateAnchor : undefined} className="flex items-center gap-2 overflow-x-auto px-4 py-2.5">
         {/* Brand button (returns to onboarding Screen A) */}
         <button
           type="button"
@@ -139,7 +166,10 @@ export function TopFilterBar({
         <div className="flex items-center gap-1.5">
           <button
             type="button"
-            onClick={() => toggle('campus')}
+            onClick={(event) => toggle('campus', event.currentTarget)}
+            aria-expanded={openPopover === 'campus'}
+            aria-controls={openPopover === 'campus' ? 'filter-popover-campus' : undefined}
+            data-ui-motion="filter-trigger"
             className={`inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-[8px] border px-3 py-1.5 text-xs font-medium transition ${
               openPopover === 'campus'
                 ? 'border-ink bg-surface text-ink'
@@ -147,12 +177,15 @@ export function TopFilterBar({
             }`}
           >
             <span className="max-w-36 truncate" title={campusName}>{campusName}</span>
-            <ChevronDown className="h-3.5 w-3.5 text-muted" strokeWidth={1.75} />
+            <ChevronDown data-menu-chevron className="h-3.5 w-3.5 text-muted" strokeWidth={1.75} />
           </button>
 
           <button
             type="button"
-            onClick={() => toggle('budget')}
+            onClick={(event) => toggle('budget', event.currentTarget)}
+            aria-expanded={openPopover === 'budget'}
+            aria-controls={openPopover === 'budget' ? 'filter-popover-budget' : undefined}
+            data-ui-motion="filter-trigger"
             className={`inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-[8px] border px-3 py-1.5 text-xs font-medium tabular-nums transition ${
               openPopover === 'budget'
                 ? 'border-ink bg-surface text-ink'
@@ -160,12 +193,15 @@ export function TopFilterBar({
             }`}
           >
             <span>{minBudget !== null ? formatEuro(minBudget) + '–' : ''}{formatEuro(budget)}/mes</span>
-            <ChevronDown className="h-3.5 w-3.5 text-muted" strokeWidth={1.75} />
+            <ChevronDown data-menu-chevron className="h-3.5 w-3.5 text-muted" strokeWidth={1.75} />
           </button>
 
           <button
             type="button"
-            onClick={() => toggle('type')}
+            onClick={(event) => toggle('type', event.currentTarget)}
+            aria-expanded={openPopover === 'type'}
+            aria-controls={openPopover === 'type' ? 'filter-popover-type' : undefined}
+            data-ui-motion="filter-trigger"
             className={`inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-[8px] border px-3 py-1.5 text-xs font-medium transition ${
               openPopover === 'type'
                 ? 'border-ink bg-surface text-ink'
@@ -173,12 +209,15 @@ export function TopFilterBar({
             }`}
           >
             <span>{HOUSING_TYPE_LABELS[housingType]}</span>
-            <ChevronDown className="h-3.5 w-3.5 text-muted" strokeWidth={1.75} />
+            <ChevronDown data-menu-chevron className="h-3.5 w-3.5 text-muted" strokeWidth={1.75} />
           </button>
 
           <button
             type="button"
-            onClick={() => toggle('distance')}
+            onClick={(event) => toggle('distance', event.currentTarget)}
+            aria-expanded={openPopover === 'distance'}
+            aria-controls={openPopover === 'distance' ? 'filter-popover-distance' : undefined}
+            data-ui-motion="filter-trigger"
             className={`inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-[8px] border px-3 py-1.5 text-xs font-medium tabular-nums transition ${
               openPopover === 'distance'
                 ? 'border-ink bg-surface text-ink'
@@ -186,12 +225,15 @@ export function TopFilterBar({
             }`}
           >
             <span>{maxDistanceKm === null ? 'Sin límite km' : `≤ ${formatKm(maxDistanceKm)}`}</span>
-            <ChevronDown className="h-3.5 w-3.5 text-muted" strokeWidth={1.75} />
+            <ChevronDown data-menu-chevron className="h-3.5 w-3.5 text-muted" strokeWidth={1.75} />
           </button>
 
           <button
             type="button"
-            onClick={() => toggle('more')}
+            onClick={(event) => toggle('more', event.currentTarget)}
+            aria-expanded={openPopover === 'more'}
+            aria-controls={openPopover === 'more' ? 'filter-popover-more' : undefined}
+            data-ui-motion="filter-trigger"
             className={`inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-[8px] border px-3 py-1.5 text-xs font-medium transition ${
               openPopover === 'more' || extraFilterCount > 0
                 ? 'border-ink bg-surface text-ink'
@@ -209,7 +251,10 @@ export function TopFilterBar({
 
           <button
             type="button"
-            onClick={() => toggle('search')}
+            onClick={(event) => toggle('search', event.currentTarget)}
+            aria-expanded={openPopover === 'search'}
+            aria-controls={openPopover === 'search' ? 'filter-popover-search' : undefined}
+            data-ui-motion="filter-trigger"
             className={`inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-[8px] border px-3 py-1.5 text-xs font-medium transition ${
               openPopover === 'search'
                 ? 'border-ink bg-surface text-ink'
@@ -235,8 +280,21 @@ export function TopFilterBar({
       </div>
 
       {/* Popovers */}
+      <AnimatePresence initial={false}>
       {openPopover && (
-        <div className="absolute top-full left-4 z-50 mt-2 w-[calc(100vw-2rem)] max-w-md rounded-[10px] border border-border bg-bg p-4 shadow-popover">
+        <m.div
+          key={openPopover}
+          id={`filter-popover-${openPopover}`}
+          data-ui-motion="filter-popover"
+          initial={reduced ? false : { opacity: 0, y: -7, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: reduced ? 1 : 0, y: reduced ? 0 : -4, scale: reduced ? 1 : 0.99, transition: { duration: reduced ? 0 : 0.14 } }}
+          transition={{ duration: reduced ? 0 : 0.21, ease: [0.2, 0.65, 0.25, 1] }}
+          style={{ left: anchor.left, transformOrigin: `${anchor.origin}px top` }}
+          className={`absolute top-full z-50 mt-2 w-[calc(100vw-2rem)] max-w-md rounded-[10px] border border-border bg-bg p-4 shadow-popover ${
+            openPopover === 'campus' ? '' : 'max-h-[min(66dvh,34rem)] overflow-y-auto overscroll-contain'
+          }`}
+        >
           <div className="mb-3 flex items-center justify-between">
             <span className="text-xs font-semibold text-ink">
               {openPopover === 'campus' && 'Elige tu campus'}
@@ -248,7 +306,7 @@ export function TopFilterBar({
             </span>
             <button
               type="button"
-              onClick={() => setOpenPopover(null)}
+              onClick={() => closePopover()}
               aria-label="Cerrar panel"
               className="rounded-[6px] p-1 text-muted hover:bg-surface hover:text-ink"
             >
@@ -260,7 +318,7 @@ export function TopFilterBar({
             <CampusPicker campuses={campuses} campusId={campusId} keepSelection openOnMount
               onChange={(id) => {
                 onCampusChange(id);
-                setOpenPopover(null);
+                closePopover();
               }} />
           )}
 
@@ -277,7 +335,7 @@ export function TopFilterBar({
               onMinBudgetChange(minimum);
               onBudgetChange(maximum);
               onOnlyWithinBudgetChange(true);
-              setOpenPopover(null);
+              closePopover();
             }}>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <label>Desde (€)<input className="mt-1 w-full rounded-lg border border-border p-2" name="minimum" type="number" min="0" defaultValue={minBudget ?? ''} /></label>
@@ -298,7 +356,7 @@ export function TopFilterBar({
                     type="button"
                     onClick={() => {
                       onHousingTypeChange(type);
-                      setOpenPopover(null);
+                      closePopover();
                     }}
                     className={`min-h-[40px] rounded-[8px] border px-3 py-2 text-xs font-medium transition ${
                       active
@@ -318,7 +376,7 @@ export function TopFilterBar({
               event.preventDefault();
               const radius = new FormData(event.currentTarget).get('radius');
               onMaxDistanceChange(radius ? Number(radius) : null);
-              setOpenPopover(null);
+              closePopover();
             }}>
               <label className="flex-1 text-xs">
                 Radio en km
@@ -403,7 +461,7 @@ export function TopFilterBar({
                   e.preventDefault();
                   if (query.trim()) {
                     onSearchSubmit(query.trim());
-                    setOpenPopover(null);
+                    closePopover();
                   }
                 }}
                 className="flex gap-2"
@@ -430,7 +488,7 @@ export function TopFilterBar({
                     onClick={() => {
                       onQueryChange(example);
                       onSearchSubmit(example);
-                      setOpenPopover(null);
+                      closePopover();
                     }}
                     className="rounded-[8px] border border-border bg-surface px-3 py-2 text-left text-xs text-ink transition hover:border-ink/40 hover:bg-bg"
                   >
@@ -440,8 +498,9 @@ export function TopFilterBar({
               </div>
             </div>
           )}
-        </div>
+        </m.div>
       )}
+      </AnimatePresence>
     </header>
   );
 }

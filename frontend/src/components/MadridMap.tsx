@@ -247,7 +247,7 @@ function MapViewportController({
     lastBoundsSig.current = boundsSignature;
     const bounds = L.latLngBounds(boundsPoints);
     if (!bounds.isValid()) return;
-    map.fitBounds(bounds, { padding: [46, 46], maxZoom: 13, animate: true, duration: 0.45 });
+    map.fitBounds(bounds, { padding: [46, 46], maxZoom: 13, animate: !window.matchMedia("(prefers-reduced-motion: reduce)").matches, duration: 0.35 });
   }, [map, boundsPoints, boundsSignature, visible]);
 
   // Smooth pan to selected neighborhood

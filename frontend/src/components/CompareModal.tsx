@@ -3,7 +3,8 @@
  * Shows protagonist ~€/mes price, distance in km, and fractional 0–5 Star Ratings for every dimension,
  * plus an overlaid radar chart and direct "Ver pisos" links. Zero technical unit clutter.
  */
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
+import { m, useReducedMotion } from 'motion/react';
 import { ExternalLink, Scale, X } from 'lucide-react';
 import {
   PolarAngleAxis,
@@ -46,13 +47,18 @@ export function CompareModal({
   onRemove,
   onClose,
 }: CompareModalProps) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const reduced = useReducedMotion();
+
   useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+    const dialog = dialogRef.current;
+    const trigger = document.activeElement;
+    dialog?.showModal();
+    return () => {
+      dialog?.close();
+      if (trigger instanceof HTMLElement && trigger.isConnected) trigger.focus();
     };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [onClose]);
+  }, []);
 
   const allMetrics = useMemo(
     () => [
@@ -77,15 +83,30 @@ export function CompareModal({
   }, [allMetrics, areas]);
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
+    <dialog
+      ref={dialogRef}
       aria-label="Comparador de barrios"
-      className="fixed inset-0 z-[700] flex items-center justify-center p-4"
+      onCancel={(event) => { event.preventDefault(); onClose(); }}
+      className="compare-motion-dialog backdrop:bg-transparent"
     >
-      <div className="fixed inset-0 bg-ink/35" onClick={onClose} />
+      <m.div
+        aria-hidden="true"
+        initial={reduced ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: reduced ? 1 : 0 }}
+        transition={{ duration: reduced ? 0 : 0.17 }}
+        className="fixed inset-0 bg-ink/35"
+        onClick={onClose}
+      />
 
-      <div className="relative z-10 flex max-h-[90dvh] w-full max-w-3xl flex-col overflow-hidden rounded-[10px] border border-border bg-bg shadow-popover">
+      <m.div
+        data-ui-motion="comparison"
+        initial={reduced ? false : { opacity: 0, y: 12, scale: 0.99 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: reduced ? 1 : 0, y: reduced ? 0 : 6, scale: reduced ? 1 : 0.99, transition: { duration: reduced ? 0 : 0.16 } }}
+        transition={{ duration: reduced ? 0 : 0.23 }}
+        className="relative z-10 flex max-h-[90dvh] w-full max-w-3xl flex-col overflow-hidden rounded-[10px] border border-border bg-bg text-ink shadow-popover"
+      >
         {/* Header */}
         <header className="flex items-center justify-between border-b border-border px-6 py-4">
           <div className="flex items-center gap-2.5">
@@ -106,6 +127,7 @@ export function CompareModal({
             type="button"
             onClick={onClose}
             aria-label="Cerrar comparador"
+            autoFocus
             className="flex h-10 w-10 items-center justify-center rounded-[8px] text-muted transition hover:bg-surface hover:text-ink"
           >
             <X className="h-5 w-5" strokeWidth={1.75} />
@@ -271,6 +293,7 @@ export function CompareModal({
                         dataKey={`s${idx}`}
                         stroke={SERIES_COLORS[idx % SERIES_COLORS.length]}
                         strokeWidth={2}
+                        isAnimationActive={!reduced}
                         fill={SERIES_COLORS[idx % SERIES_COLORS.length]}
                         fillOpacity={0.12}
                       />
@@ -281,7 +304,7 @@ export function CompareModal({
             </section>
           )}
         </div>
-      </div>
-    </div>
+      </m.div>
+    </dialog>
   );
 }

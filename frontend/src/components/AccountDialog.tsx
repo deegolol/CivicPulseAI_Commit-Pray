@@ -1,3 +1,4 @@
+import { Expandable } from './Expandable';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Bell, Bookmark, Check, ExternalLink, Trash2, X } from 'lucide-react';
 import { accountApi, isOfferNotice, saveFavorite, type AccountSession, type AccountWorkspace, type FavoriteTarget, type WatchInput } from '../api/account';
@@ -174,7 +175,7 @@ export function AccountDialog({ open, pendingWatch, pendingFavorite, onClose, on
 
   return (
     <dialog ref={dialog} onClose={onClose} aria-labelledby="account-title"
-      className={`m-auto max-h-[min(90dvh,52rem)] w-[calc(100%-2rem)] overflow-y-auto border border-border bg-bg p-0 text-ink shadow-popover backdrop:bg-ink/40 ${guest
+      className={`account-motion m-auto max-h-[min(90dvh,52rem)] w-[calc(100%-2rem)] overflow-y-auto border border-border bg-bg p-0 text-ink shadow-popover backdrop:bg-ink/40 ${guest
         ? 'max-w-md rounded-[18px]'
         : 'max-w-xl rounded-[10px]'}`}>
       <div className={`sticky top-0 z-10 flex items-start justify-between gap-3 bg-bg px-6 ${guest ? 'pt-6' : 'border-b border-border py-3.5'}`}>
@@ -308,18 +309,18 @@ export function AccountDialog({ open, pendingWatch, pendingFavorite, onClose, on
               </button>
             </nav>
             {tab === 'saved' && (
-              <div className="space-y-5">
+              <div className="account-tab-in space-y-5">
                 {workspace && workspace.listings.length === 0 && <p className="text-sm text-muted">Todavía no tienes favoritos.</p>}
                 {!manual && <button type="button" className={secondaryClass} onClick={() => setManual(true)}>
                   <Bookmark size={16} aria-hidden="true" /> Añadir favorito
                 </button>}
-                {manual && <form ref={listingForm} onSubmit={saveListing} className="space-y-3 rounded-[8px] border border-border p-3">
+                <Expandable open={manual}><form ref={listingForm} onSubmit={saveListing} className="space-y-3 rounded-[8px] border border-border p-3">
                   <h3 className="font-display font-semibold">Guardar una vivienda</h3>
                   <label className="block text-sm">Nombre del anuncio<input required name="title" maxLength={120} className={inputClass} /></label>
                   <label className="block text-sm">Enlace del anuncio<input required name="url" type="url" maxLength={2048} placeholder="https://…" className={inputClass} /></label>
                   <button type="submit" disabled={busy} className={secondaryClass}>Guardar vivienda</button>
                   <button type="button" className={secondaryClass} onClick={() => { setManual(false); onFavoriteSaved(); }}>Cancelar</button>
-                </form>}
+                </form></Expandable>
                 <ul className="space-y-2" aria-label="Viviendas guardadas">
                   {workspace?.listings.map((listing) => (
                     <li key={listing.id} className="flex items-center justify-between gap-3 rounded-[8px] border border-border p-3">
@@ -342,7 +343,7 @@ export function AccountDialog({ open, pendingWatch, pendingFavorite, onClose, on
               </div>
             )}
             {tab === 'notices' && (
-              <div className="space-y-4">
+              <div className="account-tab-in space-y-4">
                 {workspace && !notices.length && <p className="text-sm text-muted">Todavía no tienes avisos de viviendas.</p>}
                 <ul className="space-y-2" aria-label="Notificaciones">
                   {notices.map((notice) => (
@@ -365,7 +366,7 @@ export function AccountDialog({ open, pendingWatch, pendingFavorite, onClose, on
               </div>
             )}
             {tab === 'settings' && (
-              <div className="space-y-4">
+              <div className="account-tab-in space-y-4">
                 <form className="space-y-3 rounded-[8px] border border-border p-3" onSubmit={(event) => {
                   event.preventDefault();
                   const target = event.currentTarget;

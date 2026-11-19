@@ -1,4 +1,5 @@
 /** Inline criterion ratings and official source details for a neighborhood card. */
+import { Expandable } from './Expandable';
 import { useEffect, useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
 import { getAreaDetail } from '../api/client';
@@ -150,7 +151,7 @@ export function AreaDetailPanel({
         )}
       </button>
 
-      {showTechData && (
+      <Expandable open={showTechData}>
         <div className="mt-3 space-y-2.5 rounded-[10px] border border-border bg-surface p-3.5 text-[11px]">
           {ratingRows.map((row) => (
             <div key={row.key} className="space-y-0.5">
@@ -178,9 +179,8 @@ export function AreaDetailPanel({
             </div>
           ))}
         </div>
-      )}
 
-      {hasCrtm && showTechData && (
+      {hasCrtm && (
         <p className="mt-3 text-[11px] leading-relaxed text-muted">
           Transporte:{' '}
           <a
@@ -194,6 +194,7 @@ export function AreaDetailPanel({
           . Datos transformados y agregados por barrio.
         </p>
       )}
+      </Expandable>
     </section>
       <div className="flex flex-wrap items-center gap-2 [&:empty]:hidden">
         <FavoriteButton target={{ area_id: area.id, housing_type: housingType, budget_eur_month: budget }} />

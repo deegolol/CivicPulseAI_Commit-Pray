@@ -1,4 +1,5 @@
 /** Searchable picker for the campuses supported by the recommendation engine. */
+import { AnimatePresence, m, useReducedMotion } from 'motion/react';
 import { useEffect, useId, useRef, useState } from 'react';
 import type { Campus } from '../api/types';
 
@@ -10,6 +11,7 @@ export function CampusPicker({
   campuses, campusId, onChange, keepSelection = false, openOnMount = false,
 }: { campuses: Campus[]; campusId: string; onChange: (campusId: string) => void; keepSelection?: boolean; openOnMount?: boolean }) {
   const id = useId();
+  const reduced = useReducedMotion();
   const input = useRef<HTMLInputElement>(null);
   const activeOption = useRef<HTMLLIElement>(null);
   useEffect(() => {
@@ -77,8 +79,16 @@ export function CampusPicker({
         }}
         className="block h-11 w-full rounded-lg border border-border bg-bg px-3 text-sm outline-none focus:border-ink"
       />
+      <AnimatePresence initial={false}>
       {open && (matches.length ? (
-        <ul id={id + '-options'} role="listbox" className="absolute inset-x-0 z-20 mt-1 max-h-56 overflow-auto rounded-lg border border-border bg-bg p-1 shadow-popover">
+        <m.ul
+          key="campuses" data-ui-motion="campus-menu"
+          initial={reduced ? false : { opacity: 0, y: -4, scale: 0.99 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: reduced ? 1 : 0, y: reduced ? 0 : -3 }}
+          transition={{ duration: reduced ? 0 : 0.16 }}
+          style={{ transformOrigin: 'top center' }}
+          id={id + '-options'} role="listbox" className="absolute inset-x-0 z-20 mt-1 max-h-56 overflow-auto rounded-lg border border-border bg-bg p-1 shadow-popover">
           {matches.map((campus, index) => (
             <li
               key={campus.id}
@@ -94,8 +104,9 @@ export function CampusPicker({
               {campus.name}
             </li>
           ))}
-        </ul>
-      ) : <p className="mt-1 text-xs text-muted">No hay campus compatibles con esa búsqueda.</p>)}
+        </m.ul>
+      ) : <m.p key="empty" initial={reduced ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: reduced ? 0 : 0.15 }} className="mt-1 text-xs text-muted">No hay campus compatibles con esa búsqueda.</m.p>)}
+      </AnimatePresence>
     </div>
   );
 }

@@ -6,6 +6,7 @@
  *   - Screen B (Results): fixed TopFilterBar + list-first ZoneList (left 440px) + blue-scale MadridMap (right)
  *     + inline neighborhood details + CompareModal. On mobile: full-screen list with floating Mapa/Lista toggle.
  */
+import { AnimatePresence, m, useReducedMotion } from 'motion/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { List, Map as MapIcon } from 'lucide-react';
 import {
@@ -81,6 +82,13 @@ function readInitialUrlParams() {
 }
 
 export function App() {
+  const reduced = useReducedMotion();
+  const viewMotion = {
+    initial: reduced ? false as const : { opacity: 0 },
+    animate: { opacity: 1 },
+    exit: { opacity: reduced ? 1 : 0, transition: { duration: reduced ? 0 : 0.10 } },
+    transition: { duration: reduced ? 0 : 0.20 },
+  };
   const initial = useMemo(() => readInitialUrlParams(), []);
 
   // Screen A (onboarding) vs Screen B (results)
@@ -425,44 +433,38 @@ export function App() {
     maxDistanceKm !== null ? ` (≤ ${formatKm(maxDistanceKm)})` : ''
   }`;
 
-  // Screen A: Map-free Onboarding
-  if (screen === 'onboarding') {
-    return (
-      <div className="transition-opacity duration-300">
-        <OnboardingScreen
-          query={query}
-          onQueryChange={setQuery}
-          onSearchSubmit={handleSearchSubmit}
-          searching={searching}
-          searchError={searchError}
-          review={searchReview}
-          onBack={() => setSearchReview(null)}
-          interpretation={aiInterpretation}
-          campuses={meta?.campuses ?? []}
-          campusId={campusId}
-          onCampusChange={setCampusId}
-          budget={budget}
-          minBudget={minBudget}
-          onBudgetChange={setBudget}
-          onMinBudgetChange={setMinBudget}
-          housingType={housingType}
-          onHousingTypeChange={setHousingType}
-          maxDistanceKm={maxDistanceKm}
-          onMaxDistanceChange={setMaxDistanceKm}
-          transportMode={transportMode}
-          onTransportModeChange={handleTransportModeChange}
-          availableKeys={availableKeys}
-          priorityWeights={computedWeights}
-          onPriorityChange={handlePriorityChange}
-          onStart={handleStart}
-        />
-      </div>
-    );
-  }
-
-  // Screen B: Results (List first on left, blue-scale Map on right)
-  return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-bg transition-opacity duration-300">
+  const screenView = screen === 'onboarding' ? (
+    <m.div key="onboarding" data-ui-motion="screen" {...viewMotion}>
+      <OnboardingScreen
+        query={query}
+        onQueryChange={setQuery}
+        onSearchSubmit={handleSearchSubmit}
+        searching={searching}
+        searchError={searchError}
+        review={searchReview}
+        onBack={() => setSearchReview(null)}
+        interpretation={aiInterpretation}
+        campuses={meta?.campuses ?? []}
+        campusId={campusId}
+        onCampusChange={setCampusId}
+        budget={budget}
+        minBudget={minBudget}
+        onBudgetChange={setBudget}
+        onMinBudgetChange={setMinBudget}
+        housingType={housingType}
+        onHousingTypeChange={setHousingType}
+        maxDistanceKm={maxDistanceKm}
+        onMaxDistanceChange={setMaxDistanceKm}
+        transportMode={transportMode}
+        onTransportModeChange={handleTransportModeChange}
+        availableKeys={availableKeys}
+        priorityWeights={computedWeights}
+        onPriorityChange={handlePriorityChange}
+        onStart={handleStart}
+      />
+    </m.div>
+    ) : (
+    <m.div key="results" data-ui-motion="screen" {...viewMotion} className="flex h-dvh flex-col overflow-hidden bg-bg">
       <TopFilterBar
         availableKeys={availableKeys}
         onResetHome={handleResetHome}
@@ -531,6 +533,7 @@ export function App() {
         {/* Left Column: Ordered Zone List (440px desktop, full-screen on mobile when mobileView='list') */}
         <section
           aria-label="Lista de zonas recomendadas"
+          data-mobile-active={mobileView === 'list'}
           className={`${
             mobileView === 'list' ? 'flex' : 'hidden lg:flex'
           } h-full w-full shrink-0 flex-col border-r border-border lg:w-[440px]`}
@@ -559,6 +562,7 @@ export function App() {
 
         {/* Right Column: Support Map (desktop flex-1, mobile full-screen when mobileView='map') */}
         <main
+          data-mobile-active={mobileView === 'map'}
           className={`${
             mobileView === 'map' ? 'block' : 'hidden lg:block'
           } relative z-0 min-w-0 flex-1`}
@@ -607,17 +611,20 @@ export function App() {
       </div>
 
       {/* Comparison Modal */}
-      {compareOpen && comparedAreas.length >= 2 && (
-        <CompareModal
-          areas={comparedAreas}
-          indicators={meta?.indicators ?? []}
-          activeCriteria={activeCriteria}
-          housingType={housingType}
-          budget={budget}
-          onRemove={handleToggleCompare}
-          onClose={() => setCompareOpen(false)}
-        />
-      )}
+      <AnimatePresence initial={false}>
+        {compareOpen && comparedAreas.length >= 2 && (
+          <CompareModal
+            key="comparison"
+            areas={comparedAreas}
+            indicators={meta?.indicators ?? []}
+            activeCriteria={activeCriteria}
+            housingType={housingType}
+            budget={budget}
+            onRemove={handleToggleCompare}
+            onClose={() => setCompareOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Ultra-discreet mock indicator only when running in mock mode (top-right inside map, zero attribution overlap) */}
       {(USE_MOCKS || meta?.is_mock) && (
@@ -625,8 +632,10 @@ export function App() {
           Modo demostración
         </div>
       )}
-    </div>
+    </m.div>
   );
+
+  return <AnimatePresence initial={false} mode="wait">{screenView}</AnimatePresence>;
 }
 
 export default App;

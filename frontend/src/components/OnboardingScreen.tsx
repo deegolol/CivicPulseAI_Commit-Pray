@@ -1,4 +1,5 @@
 /** Starts a search with natural language or a focused manual form. */
+import { AnimatePresence, m, useReducedMotion } from 'motion/react';
 import { useState } from 'react';
 import { ArrowRight, ChevronDown, CornerDownLeft, Search } from 'lucide-react';
 import type { Campus, HousingType } from '../api/types';
@@ -61,6 +62,13 @@ export function OnboardingScreen({
   onTransportModeChange, availableKeys, priorityWeights, onPriorityChange, onStart,
 }: OnboardingScreenProps) {
   const [manualOpen, setManualOpen] = useState(false);
+  const reduced = useReducedMotion();
+  const stageMotion = {
+    initial: reduced ? false as const : { opacity: 0, y: 7 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: reduced ? 1 : 0, y: reduced ? 0 : -4, transition: { duration: reduced ? 0 : 0.12 } },
+    transition: { duration: reduced ? 0 : 0.22 },
+  };
   const [formError, setFormError] = useState<string | null>(null);
   const needs = (field: string) => !review?.inferredFields.has(field);
 
@@ -82,8 +90,9 @@ export function OnboardingScreen({
               : 'Encuentra barrios de Madrid según tu campus, tu presupuesto y lo que te importa.'}
           </p>
 
-          {!review && !manualOpen && (
-            <div className="relative isolate mt-7">
+          <AnimatePresence initial={false} mode="wait">
+          {!review && !manualOpen ? (
+            <m.div key="composer" data-ui-motion="search-stage" {...stageMotion} className="relative isolate mt-7">
               <img src="/madrid-ilustracion.png" alt="" width="1300" height="667"
                 className="pointer-events-none absolute top-3/5 left-1/2 -z-10 h-auto w-[110%] max-w-none -translate-x-1/2 -translate-y-1/2 opacity-70 select-none sm:top-4/5 sm:w-[140%] sm:opacity-85" />
               <form
@@ -136,12 +145,10 @@ export function OnboardingScreen({
                   </button>
                 ))}
               </div>
-            </div>
-          )}
-          {searchError && <p role="alert" className="mt-3 text-sm text-over">{searchError}</p>}
-
-          {(manualOpen || review) && (
-            <form
+              {searchError && <p role="alert" className="mt-3 text-sm text-over">{searchError}</p>}
+            </m.div>
+          ) : (
+            <m.form key="criteria" data-ui-motion="search-stage" {...stageMotion}
               className="mt-6 space-y-5 rounded-2xl border border-border bg-bg p-4 shadow-[0_12px_36px_#2637250d] sm:p-6"
               onSubmit={(event) => {
                 event.preventDefault();
@@ -232,8 +239,9 @@ export function OnboardingScreen({
                   Ver zonas <ArrowRight size={17} aria-hidden="true" />
                 </button>
               </div>
-            </form>
+            </m.form>
           )}
+          </AnimatePresence>
         </div>
       </main>
     </div>

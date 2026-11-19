@@ -5,6 +5,8 @@
  * - Below: clean ordered list with discreet highlight tags ("Más barata", "Más cerca", "Mejor aire", "Mejor comunicada").
  * - Bidirectional hover sync with MadridMap. No sparkles, no AI badges, no gradients, zero %.
  */
+import { useReducedMotion } from 'motion/react';
+import { Expandable } from './Expandable';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Check, ChevronDown, ChevronUp, ExternalLink, Scale, X } from 'lucide-react';
 import type { Recommendation, ScoreResultItem } from '../api/types';
@@ -57,6 +59,7 @@ export function ZoneList({
   onCompareTop3,
   loading,
 }: ZoneListProps) {
+  const reduced = useReducedMotion();
   const [explanationOpen, setExplanationOpen] = useState(false);
 
   const scrollArea = useRef<HTMLDivElement>(null);
@@ -70,8 +73,10 @@ export function ZoneList({
   useEffect(() => {
     if (!selectedAreaId || loading) return;
     const card = scrollArea.current?.querySelector('[data-expanded="true"]');
-    card?.querySelector('[aria-expanded="true"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-  }, [selectedAreaId, loading]);
+    card?.querySelector('[aria-expanded="true"]')?.scrollIntoView({
+      block: 'nearest', inline: 'nearest', behavior: reduced ? 'auto' : 'smooth',
+    });
+  }, [selectedAreaId, loading, reduced]);
 
   // Match the featured recommendation to its live ScoreResultItem (only if not excluded)
   const recommendedArea = useMemo(() => {
@@ -130,6 +135,7 @@ export function ZoneList({
             <button
               type="button"
               onClick={() => setExplanationOpen((v) => !v)}
+              aria-expanded={explanationOpen}
               className="inline-flex shrink-0 items-center gap-1 rounded-[6px] px-2 py-1 text-xs font-medium text-ink underline decoration-border underline-offset-2 hover:bg-bg"
             >
               <span>
@@ -149,7 +155,7 @@ export function ZoneList({
           )}
         </div>
 
-        {explanationOpen && (
+        <Expandable open={explanationOpen}>
           <div className="mt-2.5 border-t border-border pt-2.5 text-xs leading-relaxed text-muted">
             {explanationLoading ? (
               <div className="space-y-1.5">
@@ -160,7 +166,7 @@ export function ZoneList({
               explanationText
             )}
           </div>
-        )}
+        </Expandable>
       </div>
 
       {/* Main scrollable list body */}
@@ -290,7 +296,7 @@ export function ZoneList({
                     <Scale size={16} aria-hidden="true" />
                   </button>
                 </div>
-                {selectedAreaId === recommendedArea.id && renderDetails(recommendedArea)}
+                <Expandable open={selectedAreaId === recommendedArea.id}>{renderDetails(recommendedArea)}</Expandable>
               </article>
             )}
 
@@ -443,7 +449,7 @@ export function ZoneList({
                         )}
                       </button>
                     </div>
-                    {isSelected && renderDetails(area)}
+                    <Expandable open={isSelected}>{renderDetails(area)}</Expandable>
                   </article>
                 );
               })}
@@ -453,7 +459,7 @@ export function ZoneList({
       </div>
 
       {/* Sticky Compare Dock at bottom of list whenever >= 1 zone is picked */}
-      {compareIds.length > 0 && (
+      <Expandable open={compareIds.length > 0}>
         <div className="sticky bottom-0 z-20 shrink-0 border-t border-border bg-bg px-4 py-3 shadow-popover">
           <div className="flex flex-wrap items-center gap-1.5 pb-2">
             {compareIds.map((id) => {
@@ -491,7 +497,7 @@ export function ZoneList({
             </span>
           </button>
         </div>
-      )}
+      </Expandable>
     </div>
   );
 }
