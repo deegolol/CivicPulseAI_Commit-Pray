@@ -3,8 +3,8 @@ id: T18
 title: AI_USAGE.md a partir de los logs
 lane: SHIP
 priority: P0
-status: todo
-owner: ""
+status: doing
+owner: codex@adrian
 depends_on: []
 files: [AI_USAGE.md]
 ---
