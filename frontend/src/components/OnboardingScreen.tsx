@@ -5,14 +5,15 @@
  */
 import { useState } from 'react';
 import {
-  ArrowRight, BookOpen, Check, CornerDownLeft, Dumbbell, Euro, MapPin, Search, SlidersHorizontal, TrainFront, Wind,
+  ArrowRight, BookOpen, Check, Dumbbell, Euro, MapPin, Search, SlidersHorizontal, TrainFront, Wind,
   type LucideIcon,
 } from 'lucide-react';
 import type { Campus, HousingType, SourceInfo } from '../api/types';
-import { HOUSING_TYPE_LABELS } from '../config';
+import { HOUSING_REFERENCE_M2, HOUSING_TYPE_LABELS } from '../config';
 import { EXAMPLE_QUERIES, priorityOptions, type TransportMode } from '../constants/filters';
 import { CampusPicker } from './CampusPicker';
 import { SiteHeader } from './SiteHeader';
+import { StudentBackdrop } from './StudentBackdrop';
 
 export type SearchReview = {
   query: string;
@@ -49,6 +50,8 @@ interface OnboardingScreenProps {
   onPriorityChange: (key: string, weight: number) => void;
   onStart: () => void;
   sources: SourceInfo[];
+  /** Cheapest and most expensive official rent in €/m² across Madrid (from /api/areas). */
+  rentRange: [number, number] | null;
 }
 
 const DEFAULT_CAMPUSES: Campus[] = [
@@ -65,29 +68,41 @@ const PRIORITY_META: Record<string, { icon: LucideIcon; hint: string }> = {
   sports_count: { icon: Dumbbell, hint: 'Polideportivos cerca' },
   services_count: { icon: BookOpen, hint: 'Bibliotecas y deporte' },
 };
-const BUDGET_MIN = 200;
-const BUDGET_MAX = 1500;
-const KM_MAX = 20; // the slider's last step means "sin límite"
+// Distance: from 5 km (there are always neighbourhoods that close to every campus) up to 40 km; the last stop = no limit.
+const KM_MIN = 5;
+const KM_MAX = 40;
+const KM_UNLIMITED = KM_MAX + 1;
+
+/** Budget slider bounds for this housing type: from the cheapest neighbourhood's estimated rent to 1.5× the
+ * most expensive one (room for generous budgets), using the official €/m² data we already have (no extra API calls). */
+function budgetBounds(rentRange: [number, number] | null, housingType: HousingType): [number, number] {
+  const m2 = HOUSING_REFERENCE_M2[housingType];
+  if (!rentRange) return housingType === 'room' ? [200, 700] : housingType === 'studio' ? [300, 1000] : [500, 1700];
+  return [Math.floor((rentRange[0] * m2) / 10) * 10, Math.ceil((rentRange[1] * m2 * 1.5) / 50) * 50];
+}
 const primaryButton = 'inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-brand px-6 text-base font-semibold text-bg transition hover:bg-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-60';
 const labelClass = 'text-sm font-semibold text-ink';
 
 export function OnboardingScreen({
   query, onQueryChange, onSearchSubmit, searching, searchError, review, view, onOpenForm, onBack, onHome, interpretation,
   campuses, campusId, onCampusChange, budget, onBudgetChange, housingType, onHousingTypeChange,
-  maxDistanceKm, onMaxDistanceChange, availableKeys, priorityWeights, onPriorityChange, onStart, sources,
+  maxDistanceKm, onMaxDistanceChange, availableKeys, priorityWeights, onPriorityChange, onStart, sources, rentRange,
 }: OnboardingScreenProps) {
   const [formError, setFormError] = useState<string | null>(null);
   const showForm = view === 'form';
   const needs = (field: string) => !review?.inferredFields.has(field);
   const options = priorityOptions(availableKeys);
   const activeCount = options.filter(({ key }) => (priorityWeights[key] ?? 0) > 0).length;
-  const kmValue = maxDistanceKm === null ? KM_MAX : Math.min(KM_MAX - 1, Math.round(maxDistanceKm));
+  const kmValue = maxDistanceKm === null ? KM_UNLIMITED : Math.min(KM_MAX, Math.max(KM_MIN, maxDistanceKm));
+  const [budgetMin, budgetMax] = budgetBounds(rentRange, housingType);
+  const budgetValue = Math.min(budgetMax, Math.max(budgetMin, budget));
 
   const goBack = () => { setFormError(null); onBack(); };
   const goHome = () => { setFormError(null); onHome(); };
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg text-ink">
+    <div className="relative isolate flex min-h-dvh flex-col text-ink">
+      <StudentBackdrop />
       <SiteHeader onBack={showForm ? goBack : undefined} onHome={goHome} sources={sources} />
 
       {!showForm ? (
@@ -100,8 +115,6 @@ export function OnboardingScreen({
           </p>
 
           <div className="relative isolate mt-8">
-            <img src="/madrid-ilustracion.png" alt="" width="1300" height="667"
-              className="pointer-events-none absolute top-[72%] left-1/2 -z-10 h-auto w-[115%] max-w-none -translate-x-1/2 -translate-y-1/2 opacity-60 select-none sm:top-[95%] sm:w-[130%] sm:opacity-80" />
             <form
               className="mx-auto max-w-3xl rounded-2xl border border-border bg-bg shadow-[0_16px_40px_-12px_rgb(13_17_23/0.18)] transition focus-within:border-ink"
               onSubmit={(event) => {
@@ -149,9 +162,8 @@ export function OnboardingScreen({
                   disabled={searching}
                   title={example}
                   onClick={() => { onQueryChange(example); onSearchSubmit(example); }}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-border bg-bg/90 px-3.5 py-1.5 text-sm text-muted transition hover:border-ink/40 hover:text-ink disabled:opacity-60"
+                  className="rounded-full border border-border bg-bg/95 px-4 py-1.5 text-sm text-muted shadow-sm transition hover:border-ink/40 hover:text-ink disabled:opacity-60"
                 >
-                  <CornerDownLeft size={13} aria-hidden="true" />
                   {EXAMPLE_LABELS[index] ?? example}
                 </button>
               ))}
@@ -185,20 +197,6 @@ export function OnboardingScreen({
                 <CampusPicker campuses={campuses.length ? campuses : DEFAULT_CAMPUSES} campusId={campusId} onChange={onCampusChange} label="¿Dónde estudias?" />
               )}
 
-              {needs('budget') && (
-                <div>
-                  <div className="flex items-baseline justify-between">
-                    <label htmlFor="budget-range" className={labelClass}>Presupuesto al mes</label>
-                    <span className="font-display text-2xl font-bold tabular-nums">{budget.toLocaleString('es-ES')} €</span>
-                  </div>
-                  <input id="budget-range" type="range" min={BUDGET_MIN} max={BUDGET_MAX} step={25}
-                    value={Math.min(BUDGET_MAX, Math.max(BUDGET_MIN, budget))}
-                    onChange={(event) => onBudgetChange(Number(event.target.value))}
-                    className="clean-range mt-3 w-full" />
-                  <div className="mt-1 flex justify-between text-xs text-muted"><span>{BUDGET_MIN} €</span><span>{BUDGET_MAX.toLocaleString('es-ES')} €</span></div>
-                </div>
-              )}
-
               {needs('housing') && (
                 <div>
                   <span className={labelClass}>Qué buscas</span>
@@ -215,19 +213,33 @@ export function OnboardingScreen({
                 </div>
               )}
 
+              {needs('budget') && (
+                <div>
+                  <div className="flex items-baseline justify-between">
+                    <label htmlFor="budget-range" className={labelClass}>Presupuesto al mes</label>
+                    <span className="font-display text-2xl font-bold tabular-nums">{budgetValue.toLocaleString('es-ES')} €</span>
+                  </div>
+                  <input id="budget-range" type="range" min={budgetMin} max={budgetMax} step={1}
+                    value={budgetValue}
+                    onChange={(event) => onBudgetChange(Number(event.target.value))}
+                    className="clean-range mt-3 w-full" />
+                  <div className="mt-1 flex justify-between text-xs text-muted"><span>{budgetMin.toLocaleString('es-ES')} €</span><span>{budgetMax.toLocaleString('es-ES')} €+</span></div>
+                </div>
+              )}
+
               {needs('distance') && (
                 <div>
                   <div className="flex items-baseline justify-between">
                     <label htmlFor="km-range" className={labelClass}>Distancia máxima al campus</label>
-                    <span className="text-sm font-semibold tabular-nums">{maxDistanceKm === null ? 'Sin límite' : `${kmValue} km`}</span>
+                    <span className="text-sm font-semibold tabular-nums">{maxDistanceKm === null ? 'Sin límite' : `${kmValue.toLocaleString('es-ES', { maximumFractionDigits: 1 })} km`}</span>
                   </div>
-                  <input id="km-range" type="range" min={1} max={KM_MAX} step={1} value={kmValue}
+                  <input id="km-range" type="range" min={KM_MIN} max={KM_UNLIMITED} step={0.5} value={kmValue}
                     onChange={(event) => {
                       const value = Number(event.target.value);
-                      onMaxDistanceChange(value >= KM_MAX ? null : value);
+                      onMaxDistanceChange(value > KM_MAX ? null : value);
                     }}
                     className="clean-range mt-3 w-full" />
-                  <div className="mt-1 flex justify-between text-xs text-muted"><span>1 km</span><span>Sin límite</span></div>
+                  <div className="mt-1 flex justify-between text-xs text-muted"><span>{KM_MIN} km</span><span>{KM_MAX} km · Sin límite</span></div>
                 </div>
               )}
             </div>

@@ -243,6 +243,17 @@ export function App() {
     };
   }, [screen, route]);
 
+  // Official €/m² range across Madrid, used to give the budget slider realistic bounds (T30).
+  const [rentRange, setRentRange] = useState<[number, number] | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    getAreas().then((response) => {
+      const rents = response.areas.map((area) => area.values.rent_eur_m2).filter((v): v is number => typeof v === 'number');
+      if (!cancelled && rents.length) setRentRange([Math.min(...rents), Math.max(...rents)]);
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
   const availableKeys = useMemo(() => {
     const keys = new Set<string>(DEFAULT_PRIORITIES);
     for (const ind of meta?.indicators ?? []) {
@@ -549,6 +560,7 @@ export function App() {
         onPriorityChange={handlePriorityChange}
         onStart={handleStart}
         sources={meta?.sources ?? []}
+        rentRange={rentRange}
       />
     </m.div>
     ) : (

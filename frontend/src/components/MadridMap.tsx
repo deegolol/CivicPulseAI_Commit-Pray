@@ -31,12 +31,13 @@ import type {
 } from '../api/types';
 import { MADRID_CENTER, MADRID_DEFAULT_ZOOM } from '../config';
 import { formatEuro, formatKm } from '../utils/format';
-import { StudentPlaces, StudentPlacesKey, type PlaceCategory } from './StudentPlaces';
+import { DEFAULT_LAYERS, MapLayersOverlay, MapLayersPanel, type LayerId } from './MapLayers';
 
 // Includes mainland Spain, the Balearic Islands and the Canary Islands.
 const SPAIN_BOUNDS = L.latLngBounds([27.4, -18.3], [44.1, 4.8]);
 const CAMPUS_STYLE = { color: '#FFFFFF', weight: 2.5, fillColor: '#D7262E', fillOpacity: 1 };
-const RADIUS_STYLE = { color: '#789098', weight: 1, dashArray: '5 5', fillOpacity: 0 };
+const RADIUS_STYLE = { color: '#7A6A58', weight: 1.2, dashArray: '6 6', fillOpacity: 0 };
+const BASEMAP_ATTRIBUTION = '&copy; <a href="https://www.ign.es/">IGN</a> · <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · <a href="https://datos.madrid.es/">Ayuntamiento de Madrid</a> · CRTM';
 
 interface MadridMapProps {
   geoData: BarriosGeoJSON | null;
@@ -285,17 +286,12 @@ export function MadridMap({
   isScoring = false,
   isVisible = true,
 }: MadridMapProps) {
-  const [hiddenPlaces, setHiddenPlaces] = useState<ReadonlySet<PlaceCategory>>(() => new Set());
-
-  function togglePlaceCategory(category: PlaceCategory) {
-    setHiddenPlaces((current) => {
-      const next = new Set(current);
-      if (next.has(category)) next.delete(category);
-      else next.add(category);
-      return next;
-    });
-  }
-
+  const [layers, setLayers] = useState<Set<LayerId>>(() => new Set(DEFAULT_LAYERS));
+  const toggleLayer = useCallback((id: LayerId) => setLayers((current) => {
+    const next = new Set(current);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return next;
+  }), []);
   const campusLatLng = useMemo<[number, number] | null>(() =>
     activeCampus ? [activeCampus.coords[1], activeCampus.coords[0]] : null, [activeCampus]);
   const geoJsonRef = useRef<LeafletGeoJSON | null>(null);
@@ -347,19 +343,19 @@ export function MadridMap({
     }
     if (rank) {
       return {
-        fillColor: '#638293',
-        fillOpacity: isHovered ? 0.17 : 0.08,
-        color: isHovered ? '#466675' : '#6a8794',
-        weight: isHovered ? 2 : 1.25,
-        opacity: isHovered ? 1 : 0.65,
+        fillColor: '#3F6FD8',
+        fillOpacity: isHovered ? 0.24 : 0.13,
+        color: isHovered ? '#2C55B5' : '#4B74C9',
+        weight: isHovered ? 2.2 : 1.3,
+        opacity: isHovered ? 1 : 0.7,
       };
     }
     return {
-      fillColor: '#94A3B8',
-      fillOpacity: isHovered ? 0.14 : 0.02,
-      color: isHovered ? '#5D6673' : '#CBD5E1',
+      fillColor: '#7A6A58',
+      fillOpacity: isHovered ? 0.12 : 0,
+      color: isHovered ? '#5D6673' : '#9C8F80',
       weight: isHovered ? 1.2 : 0.5,
-      opacity: isHovered ? 0.7 : 0.35,
+      opacity: isHovered ? 0.7 : 0.3,
     };
   }, []);
 
@@ -463,15 +459,23 @@ export function MadridMap({
         maxBoundsViscosity={1}
         maxZoom={19}
         scrollWheelZoom
-        className="h-full w-full"
+        preferCanvas
+        zoomSnap={0.25}
+        zoomDelta={0.5}
+        wheelPxPerZoomLevel={90}
+        className="watercolor-map h-full w-full"
       >
+        {/* Official IGN colour basemap (Instituto Geográfico Nacional) with a soft watercolour treatment (CSS) */}
         <TileLayer
-          attribution='&copy; <a href="https://www.ign.es/">IGN</a> · <a href="https://datos.madrid.es/">Ayuntamiento de Madrid</a> · <a href="https://www.esmadrid.com/">Madrid Destino</a>'
-          url="https://tms-ign-base.idee.es/1.0.0/IGNBaseGris/{z}/{x}/{-y}.jpeg"
+          attribution={BASEMAP_ATTRIBUTION}
+          url="https://tms-ign-base.idee.es/1.0.0/IGNBaseTodo/{z}/{x}/{-y}.jpeg"
           maxNativeZoom={17}
-          className="madrid-basemap"
+          className="watercolor-basemap"
+          updateWhenZooming={false}
+          keepBuffer={4}
           noWrap
         />
+        <MapLayersOverlay enabled={layers} />
 
         <MapViewportController
           boundsPoints={boundsPoints}
@@ -498,7 +502,6 @@ export function MadridMap({
           />
         )}
 
-        <StudentPlaces hidden={hiddenPlaces} />
 
         {/* Floating price pills */}
         {pricePills.map((pill) => (
@@ -521,13 +524,18 @@ export function MadridMap({
       </MapContainer>
 
       {isScoring && (
-        <div className="pointer-events-none absolute right-3 bottom-20 z-[400] rounded-[8px] lg:top-3 lg:bottom-auto border border-border bg-bg px-3 py-1.5 text-xs text-muted">
+        <div className="pointer-events-none absolute top-3 left-1/2 z-[400] -translate-x-1/2 rounded-full border border-border bg-bg px-3 py-1.5 text-xs text-muted shadow-popover">
           Actualizando…
         </div>
       )}
 
+      {/* Layer toggles: supermarkets, Metro, parks, libraries, gyms, sports, malls, roads */}
+      <div className="pointer-events-none absolute top-3 right-3 z-[500]">
+        <MapLayersPanel enabled={layers} onToggle={toggleLayer} />
+      </div>
+
       {/* Clean minimal map key */}
-      <div className="pointer-events-none absolute top-3 right-3 z-[400] flex max-w-[calc(100%-64px)] flex-wrap items-center gap-x-3 gap-y-1 rounded-[8px] border border-border bg-bg px-2 py-1.5 sm:px-3 text-[11px] text-muted lg:top-auto lg:right-auto lg:bottom-6 lg:left-4">
+      <div className="pointer-events-none absolute bottom-20 left-3 z-[400] flex flex-wrap items-center gap-x-3 gap-y-1 rounded-full border border-border bg-bg/95 px-3 py-1.5 text-[11px] text-muted lg:bottom-6 lg:left-4">
         <span className="inline-flex items-center gap-1.5 font-medium text-ink">
           <span className="h-2.5 w-2.5 rounded-full bg-brand" />
           Recomendada
@@ -536,7 +544,6 @@ export function MadridMap({
           <span className="h-2.5 w-2.5 rounded-full border border-ink/40 bg-bg" />
           Alquiler estimado
         </span>
-        <StudentPlacesKey hidden={hiddenPlaces} onToggle={togglePlaceCategory} />
       </div>
     </div>
   );
