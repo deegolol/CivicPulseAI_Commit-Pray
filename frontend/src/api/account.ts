@@ -1,10 +1,10 @@
 /** API de la cuenta y sus datos privados. */
 import type { HousingType } from './types';
 
-export type AccountSession = { enabled: boolean; username: string | null; email?: string | null; google_enabled?: boolean; google_linked?: boolean };
+export type AccountSession = { enabled: boolean; username: string | null; email?: string | null; google_enabled?: boolean; google_linked?: boolean; recovery_enabled?: boolean };
 export type ListingInput = { title: string; url: string; remind_on: string | null };
 export type WatchInput = { area_id: string; housing_type: HousingType; budget_eur_month: number };
-export type SavedListing = ListingInput & { id: number; price_eur_month?: number };
+export type SavedListing = ListingInput & { id: number; price_eur_month?: number; available?: boolean };
 export type SavedWatch = WatchInput & {
   id: number;
   area_name: string;
@@ -12,8 +12,9 @@ export type SavedWatch = WatchInput & {
 };
 export type AccountNotice = {
   id: number; message: string; created_at: string; read: boolean; url: string | null;
-  kind: 'price_drop' | 'suggestion' | 'reminder' | 'budget' | 'general';
+  kind: 'price_drop' | 'unavailable' | 'suggestion' | 'reminder' | 'budget' | 'general';
 };
+export const isOfferNotice = (notice: AccountNotice) => ['price_drop', 'unavailable', 'suggestion'].includes(notice.kind);
 export type CatalogOffer = {
   id: string; title: string; url: string; district: string; housing_type: HousingType; price_eur_month: number;
 };
@@ -47,10 +48,17 @@ export const accountApi = {
     accountRequest<AccountSession>(`/${mode}`, 'POST', { email, password }),
   addEmail: (email: string) => accountRequest<AccountSession>('/email', 'POST', { email }),
   logout: () => accountRequest<void>('/logout', 'POST'),
+  forgotPassword: (email: string) => accountRequest('/password/forgot', 'POST', { email }),
+  resetPassword: (token: string, new_password: string) => accountRequest<void>('/password/reset', 'POST', { token, new_password }),
+  changePassword: (password: string, new_password: string) => accountRequest<void>('/password/change', 'POST', { password, new_password }),
+  deleteAccount: (password: string) => accountRequest<void>('/profile', 'DELETE', { password }),
   workspace: () => accountRequest<AccountWorkspace>('/workspace'),
   saveListing: (listing: ListingInput) =>
     accountRequest<AccountWorkspace>('/listings', 'POST', listing),
   removeListing: (id: number) => accountRequest<AccountWorkspace>(`/listings/${id}`, 'DELETE'),
+  clearListings: () => accountRequest<AccountWorkspace>('/listings', 'DELETE'),
+  offers: (district: string, housing_type: HousingType) =>
+    accountRequest<CatalogOffer[]>(`/offers?${new URLSearchParams({ district, housing_type })}`),
   saveWatch: (watch: WatchInput) => accountRequest<AccountWorkspace>('/watches', 'POST', watch),
   removeWatch: (id: number) => accountRequest<AccountWorkspace>(`/watches/${id}`, 'DELETE'),
   markRead: (id: number) => accountRequest<AccountWorkspace>(`/notifications/${id}/read`, 'POST'),

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Bell, Bookmark, Check, ExternalLink, Trash2, X } from 'lucide-react';
-import { accountApi, type AccountSession, type AccountWorkspace, type WatchInput } from '../api/account';
+import { accountApi, isOfferNotice, type AccountSession, type AccountWorkspace, type CatalogOffer, type WatchInput } from '../api/account';
 import { HOUSING_TYPE_LABELS } from '../config';
 import { formatEuro } from '../utils/format';
 
@@ -15,21 +15,41 @@ export type PendingWatch = WatchInput & { area_name: string };
 export interface AccountDialogProps {
   open: boolean;
   pendingWatch: PendingWatch | null;
+  pendingFavorite: CatalogOffer | true | null;
   onClose: () => void;
   onWatchSaved: () => void;
+  onFavoriteSaved: () => void;
 }
 
-export function AccountDialog({ open, pendingWatch, onClose, onWatchSaved }: AccountDialogProps) {
+export function AccountDialog({ open, pendingWatch, pendingFavorite, onClose, onWatchSaved, onFavoriteSaved }: AccountDialogProps) {
   const dialog = useRef<HTMLDialogElement>(null);
   const googleReturn = useRef(new URLSearchParams(window.location.search).get('cuenta'));
   const listingForm = useRef<HTMLFormElement>(null);
+  const [resetToken, setResetToken] = useState(() => new URLSearchParams(window.location.hash.slice(1)).get('restablecer'));
   const [session, setSession] = useState<AccountSession | null>(null);
   const [workspace, setWorkspace] = useState<AccountWorkspace | null>(null);
-  const [mode, setMode] = useState<'login' | 'register'>('login');
-  const [tab, setTab] = useState<'saved' | 'notices'>('saved');
+  const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login');
+  const [tab, setTab] = useState<'saved' | 'notices' | 'settings'>('saved');
+  const [manual, setManual] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<'clear' | 'delete' | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [feedback, setFeedback] = useState('');
+
+  useEffect(() => {
+    if (resetToken) window.history.replaceState(null, '', window.location.pathname + window.location.search);
+  }, [resetToken]);
+
+  useEffect(() => {
+    if (open && pendingFavorite) {
+      setTab('saved');
+      setManual(pendingFavorite === true);
+    }
+    if (!open) {
+      setManual(false);
+      setConfirmAction(null);
+    }
+  }, [open, pendingFavorite]);
 
   useEffect(() => {
     const element = dialog.current;
@@ -42,6 +62,7 @@ export function AccountDialog({ open, pendingWatch, onClose, onWatchSaved }: Acc
     let current = true;
     setSession(null);
     setWorkspace(null);
+    setTab('saved');
     const outcome = googleReturn.current;
     setError(outcome === 'google_error' ? 'No se pudo continuar con Google. Si ya tienes una cuenta con ese correo, entra con tu contraseña y vincula Google.' : '');
     setFeedback(outcome === 'google' ? 'Sesión de Google iniciada.' : '');
@@ -93,6 +114,11 @@ export function AccountDialog({ open, pendingWatch, onClose, onWatchSaved }: Acc
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     void perform(async () => {
+      if (mode === 'forgot') {
+        await accountApi.forgotPassword(String(form.get('email')));
+        setFeedback('Si hay una cuenta con ese correo, recibirás un enlace para restablecer la contraseña.');
+        return;
+      }
       const nextSession = await accountApi.authenticate(mode, String(form.get('email')), String(form.get('password')));
       setSession(nextSession);
       setTab('saved');
@@ -107,14 +133,25 @@ export function AccountDialog({ open, pendingWatch, onClose, onWatchSaved }: Acc
       setWorkspace(await accountApi.saveListing({
         title: String(form.get('title')).trim(),
         url: String(form.get('url')).trim(),
-        remind_on: String(form.get('remind_on')) || null,
+        remind_on: null,
       }));
       listingForm.current?.reset();
+      setManual(false);
+      onFavoriteSaved();
       setFeedback('Vivienda guardada.');
     });
   }
 
-  const unread = workspace?.notifications.filter((notice) => !notice.read).length ?? 0;
+  function signedOut() {
+    setSession((current) => current && { ...current, username: null, email: null, google_linked: false });
+    setMode('login');
+    setWorkspace(null);
+    setConfirmAction(null);
+    setTab('saved');
+  }
+
+  const notices = workspace?.notifications.filter(isOfferNotice) ?? [];
+  const unread = notices.filter((notice) => !notice.read).length;
 
   return (
     <dialog ref={dialog} onClose={onClose} aria-labelledby="account-title"
@@ -132,36 +169,57 @@ export function AccountDialog({ open, pendingWatch, onClose, onWatchSaved }: Acc
         {session && !session.enabled && (
           <p className="text-sm text-muted">Las cuentas todavía no están habilitadas en este despliegue.</p>
         )}
-        {session?.enabled && !session.username && (
+        {session?.enabled && resetToken && (
+          <form className="space-y-3" onSubmit={(event) => {
+            event.preventDefault();
+            const password = String(new FormData(event.currentTarget).get('new_password'));
+            void perform(async () => {
+              await accountApi.resetPassword(resetToken, password);
+              setResetToken(null);
+              signedOut();
+              setFeedback('Contraseña restablecida. Ya puedes iniciar sesión.');
+            });
+          }}>
+            <h3 className="font-display font-semibold">Elige una nueva contraseña</h3>
+            <label className="block text-sm">Nueva contraseña
+              <input name="new_password" type="password" autoComplete="new-password" required minLength={8} maxLength={128} className={inputClass} />
+            </label>
+            <button type="submit" className={primaryClass} disabled={busy}>Restablecer contraseña</button>
+            <button type="button" className={secondaryClass} onClick={() => { setResetToken(null); setMode('forgot'); setError(''); }}>Volver</button>
+          </form>
+        )}
+        {session?.enabled && !session.username && !resetToken && (
           <form onSubmit={authenticate} className="space-y-4">
             {pendingWatch && <p className="text-sm text-muted">Entra para guardar un aviso de {pendingWatch.area_name}.</p>}
+            {pendingFavorite && <p className="text-sm text-muted">Entra para guardar la vivienda en tus favoritos.</p>}
             <div className="flex flex-wrap gap-2">
               <button type="button" aria-pressed={mode === 'login'} onClick={() => setMode('login')} className={mode === 'login' ? primaryClass : secondaryClass}>Iniciar sesión</button>
               <button type="button" aria-pressed={mode === 'register'} onClick={() => setMode('register')} className={mode === 'register' ? primaryClass : secondaryClass}>Crear cuenta</button>
             </div>
             <label className="block text-sm font-medium">
               Correo electrónico
-              <input name="email" type={mode === 'register' ? 'email' : 'text'} inputMode="email"
-                autoComplete="username" required maxLength={254} className={inputClass} />
+              <input name="email" type={mode === 'login' ? 'text' : 'email'} inputMode="email"
+                autoComplete={mode === 'forgot' ? 'email' : 'username'} required maxLength={254} className={inputClass} />
             </label>
-            <label className="block text-sm font-medium">
+            {mode !== 'forgot' && <label className="block text-sm font-medium">
               Contraseña
               <input name="password" type="password" autoComplete={mode === 'register' ? 'new-password' : 'current-password'} required minLength={mode === 'register' ? 8 : undefined} maxLength={128} className={inputClass} />
-            </label>
+            </label>}
             {mode === 'register' && <p className="text-xs text-muted">Usa al menos 8 caracteres.</p>}
-            <button type="submit" disabled={busy} className={primaryClass}>{mode === 'register' ? 'Registrarme' : 'Entrar'}</button>
-            {session.google_enabled && <a className={secondaryClass} href="/api/account/google/start">Continuar con Google</a>}
+            <div className="flex flex-wrap items-center gap-2">
+              <button type="submit" disabled={busy} className={primaryClass}>{mode === 'register' ? 'Registrarme' : mode === 'forgot' ? 'Enviar enlace' : 'Entrar'}</button>
+              {mode === 'login' && <button type="button" className={secondaryClass} onClick={() => { setMode('forgot'); setError(''); setFeedback(''); }}>¿Has olvidado tu contraseña?</button>}
+              {mode !== 'forgot' && session.google_enabled && <a className={secondaryClass} href="/api/account/google/start">Continuar con Google</a>}
+            </div>
           </form>
         )}
-        {session?.username && (
+        {session?.username && !resetToken && (
           <>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-sm font-medium">{session.username}</p>
               <button type="button" className={secondaryClass} disabled={busy} onClick={() => void perform(async () => {
                 await accountApi.logout();
-                setSession({ ...session, username: null, email: null, google_linked: false });
-                setMode('login');
-                setWorkspace(null);
+                signedOut();
               })}>Cerrar sesión</button>
             </div>
             {!session.email && (
@@ -186,45 +244,44 @@ export function AccountDialog({ open, pendingWatch, onClose, onWatchSaved }: Acc
                   setWorkspace(await accountApi.saveWatch({ area_id, housing_type, budget_eur_month }));
                   onWatchSaved();
                   setFeedback('Aviso de zona guardado.');
-                  setTab('notices');
+                  setTab('settings');
                 })}>Guardar aviso</button>
               </div>
             )}
-            <nav aria-label="Secciones de mi cuenta" className="flex gap-2">
+            <nav aria-label="Secciones de mi cuenta" className="flex flex-wrap gap-2">
               <button type="button" aria-pressed={tab === 'saved'} onClick={() => setTab('saved')} className={tab === 'saved' ? primaryClass : secondaryClass}>
                 <Bookmark size={16} aria-hidden="true" /> Guardados
               </button>
               <button type="button" aria-pressed={tab === 'notices'} onClick={() => setTab('notices')} className={tab === 'notices' ? primaryClass : secondaryClass}>
                 <Bell size={16} aria-hidden="true" /> Avisos{unread ? ` (${unread})` : ''}
               </button>
+              <button type="button" aria-pressed={tab === 'settings'} onClick={() => setTab('settings')} className={tab === 'settings' ? primaryClass : secondaryClass}>
+                Gestionar cuenta
+              </button>
             </nav>
             {tab === 'saved' && (
               <div className="space-y-5">
-                {!!workspace?.offers?.length && (
-                  <section aria-label="Ofertas disponibles" className="space-y-2">
-                    <h3 className="font-display font-semibold">Ofertas disponibles</h3>
-                    {workspace.offers.map((offer) => (
-                      <div key={offer.url} className="flex items-center justify-between gap-2 rounded-[8px] border border-border p-3 text-sm">
-                        <div className="min-w-0">
-                          <a className="break-words font-medium underline" href={offer.url} target="_blank" rel="noopener noreferrer">{offer.title}</a>
-                          <p className="text-muted">{offer.district} · {money(offer.price_eur_month)}</p>
-                        </div>
-                        <button type="button" className={secondaryClass} disabled={busy} aria-label={"Guardar " + offer.title}
-                          onClick={() => void perform(async () => {
-                            setWorkspace(await accountApi.saveListing({ title: offer.title, url: offer.url, remind_on: null }));
-                            setFeedback('Vivienda guardada.');
-                          })}>Guardar</button>
-                      </div>
-                    ))}
-                  </section>
+                {workspace && workspace.listings.length === 0 && <p className="text-sm text-muted">Todavía no tienes favoritos.</p>}
+                {pendingFavorite && pendingFavorite !== true && (
+                  <div className="flex flex-wrap items-center justify-between gap-2 rounded-[8px] border border-border p-3">
+                    <p className="text-sm">{pendingFavorite.title}</p>
+                    <button type="button" className={primaryClass} disabled={busy} onClick={() => void perform(async () => {
+                      setWorkspace(await accountApi.saveListing({ title: pendingFavorite.title, url: pendingFavorite.url, remind_on: null }));
+                      onFavoriteSaved();
+                      setFeedback('Vivienda guardada.');
+                    })}>Guardar en favoritos</button>
+                  </div>
                 )}
-                <form ref={listingForm} onSubmit={saveListing} className="space-y-3 rounded-[8px] border border-border p-3">
+                {!manual && <button type="button" className={secondaryClass} onClick={() => setManual(true)}>
+                  <Bookmark size={16} aria-hidden="true" /> Añadir favorito
+                </button>}
+                {manual && <form ref={listingForm} onSubmit={saveListing} className="space-y-3 rounded-[8px] border border-border p-3">
                   <h3 className="font-display font-semibold">Guardar una vivienda</h3>
                   <label className="block text-sm">Nombre del anuncio<input required name="title" maxLength={120} className={inputClass} /></label>
                   <label className="block text-sm">Enlace del anuncio<input required name="url" type="url" maxLength={2048} placeholder="https://…" className={inputClass} /></label>
-                  <label className="block text-sm">Recordar el día (opcional)<input name="remind_on" type="date" className={inputClass} /></label>
                   <button type="submit" disabled={busy} className={secondaryClass}>Guardar vivienda</button>
-                </form>
+                  <button type="button" className={secondaryClass} onClick={() => { setManual(false); onFavoriteSaved(); }}>Cancelar</button>
+                </form>}
                 <ul className="space-y-2" aria-label="Viviendas guardadas">
                   {workspace?.listings.map((listing) => (
                     <li key={listing.id} className="flex items-center justify-between gap-3 rounded-[8px] border border-border p-3">
@@ -233,7 +290,7 @@ export function AccountDialog({ open, pendingWatch, onClose, onWatchSaved }: Acc
                           <span className="break-words">{listing.title}</span><ExternalLink size={14} className="shrink-0" aria-hidden="true" />
                         </a>
                         {listing.price_eur_month !== undefined && <p className="mt-1 text-xs text-muted">{money(listing.price_eur_month)}</p>}
-                        {listing.remind_on && <p className="mt-1 text-xs text-muted">Recordatorio: {listing.remind_on.split('-').reverse().join('/')}</p>}
+                        {listing.available === false && <p className="mt-1 text-xs text-muted">Ya no disponible</p>}
                       </div>
                       <button type="button" disabled={busy} aria-label={`Quitar ${listing.title}`} className={secondaryClass} onClick={() => void perform(async () => setWorkspace(await accountApi.removeListing(listing.id)))}>
                         <Trash2 size={16} aria-hidden="true" />
@@ -245,9 +302,9 @@ export function AccountDialog({ open, pendingWatch, onClose, onWatchSaved }: Acc
             )}
             {tab === 'notices' && (
               <div className="space-y-4">
-                <p className="text-sm text-muted">Consulta bajadas de precio, sugerencias, recordatorios y avisos de presupuesto.</p>
+                {workspace && !notices.length && <p className="text-sm text-muted">Todavía no tienes avisos de viviendas.</p>}
                 <ul className="space-y-2" aria-label="Notificaciones">
-                  {workspace?.notifications.map((notice) => (
+                  {notices.map((notice) => (
                     <li key={notice.id} className="flex items-start justify-between gap-3 rounded-[8px] border border-border p-3 text-sm">
                       <div>
                         <p className={notice.read ? 'text-muted' : 'font-medium'}>{notice.message}</p>
@@ -264,6 +321,56 @@ export function AccountDialog({ open, pendingWatch, onClose, onWatchSaved }: Acc
                     </li>
                   ))}
                 </ul>
+              </div>
+            )}
+            {tab === 'settings' && (
+              <div className="space-y-4">
+                <form className="space-y-3 rounded-[8px] border border-border p-3" onSubmit={(event) => {
+                  event.preventDefault();
+                  const target = event.currentTarget;
+                  const form = new FormData(target);
+                  void perform(async () => {
+                    await accountApi.changePassword(String(form.get('password')), String(form.get('new_password')));
+                    target.reset();
+                    setFeedback('Contraseña actualizada. Se han cerrado las demás sesiones.');
+                  });
+                }}>
+                  <h3 className="font-display font-semibold">Cambiar contraseña</h3>
+                  <label className="block text-sm">Contraseña actual<input name="password" type="password" autoComplete="current-password" required maxLength={128} className={inputClass} /></label>
+                  <label className="block text-sm">Nueva contraseña<input name="new_password" type="password" autoComplete="new-password" required minLength={8} maxLength={128} className={inputClass} /></label>
+                  <button type="submit" disabled={busy} className={secondaryClass}>Cambiar contraseña</button>
+                </form>
+                {confirmAction === 'clear' ? (
+                  <div className="space-y-2 rounded-[8px] border border-border p-3">
+                    <p className="text-sm">Se borrarán todas las viviendas guardadas.</p>
+                    <button type="button" disabled={busy} className={primaryClass} onClick={() => void perform(async () => {
+                      setWorkspace(await accountApi.clearListings());
+                      setConfirmAction(null);
+                      setFeedback('Favoritos borrados.');
+                    })}>Confirmar borrado de favoritos</button>
+                    <button type="button" disabled={busy} className={secondaryClass} onClick={() => setConfirmAction(null)}>Cancelar</button>
+                  </div>
+                ) : (
+                  <button type="button" disabled={busy || !workspace?.listings.length} className={secondaryClass} onClick={() => setConfirmAction('clear')}>Borrar todos los favoritos</button>
+                )}
+                {confirmAction === 'delete' ? (
+                  <form className="space-y-3 rounded-[8px] border border-border p-3" onSubmit={(event) => {
+                    event.preventDefault();
+                    const password = String(new FormData(event.currentTarget).get('delete_password'));
+                    void perform(async () => {
+                      await accountApi.deleteAccount(password);
+                      signedOut();
+                      setFeedback('Tu cuenta se ha eliminado.');
+                    });
+                  }}>
+                    <p className="text-sm">Se eliminarán de forma permanente tu cuenta, tus favoritos y tus avisos. Si te registraste con Google, usa primero el enlace de recuperación para establecer una contraseña.</p>
+                    <label className="block text-sm">Confirma tu contraseña<input name="delete_password" type="password" autoComplete="current-password" required maxLength={128} className={inputClass} /></label>
+                    <button type="submit" disabled={busy} className={primaryClass}>Eliminar cuenta definitivamente</button>
+                    <button type="button" disabled={busy} className={secondaryClass} onClick={() => setConfirmAction(null)}>Cancelar</button>
+                  </form>
+                ) : (
+                  <button type="button" disabled={busy} className={secondaryClass} onClick={() => setConfirmAction('delete')}>Eliminar cuenta</button>
+                )}
                 <h3 className="font-display font-semibold">Zonas con aviso</h3>
                 {!workspace?.watches.length && <p className="text-sm text-muted">Abre el detalle de una zona para guardar un aviso.</p>}
                 <ul className="space-y-2">

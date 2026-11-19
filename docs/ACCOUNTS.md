@@ -1,6 +1,6 @@
 # Cuenta, favoritos y notificaciones
 
-Las recomendaciones de barrios están disponibles sin cuenta. Desde **Mi cuenta** puedes registrarte con correo y contraseña, guardar el enlace de una vivienda y fijar un recordatorio. Los usuarios del prototipo anterior pueden entrar con su nombre de usuario y añadir un correo desde la misma cuenta para conservar sus guardados. El registro por contraseña aún carece de confirmación por correo y recuperación de contraseña.
+Las recomendaciones de barrios están disponibles sin cuenta. Desde **Mi cuenta** puedes registrarte con correo y contraseña, guardar viviendas, ver avisos y gestionar tu cuenta. Los usuarios del prototipo anterior pueden entrar con su nombre de usuario y añadir un correo para conservar sus guardados. El registro inicial por contraseña todavía no exige verificar el correo.
 
 ## Probar en local
 
@@ -25,6 +25,21 @@ GOOGLE_REDIRECT_URI=http://localhost:5173/api/account/google/callback
 
 El secreto se configura en el servidor. Desde una cuenta existente, usa **Vincular Google** e inicia sesión con el mismo correo. La vinculación requiere una sesión activa de PrimeraLlave y una identidad de Google con correo verificado. El [flujo de Google](https://developers.google.com/identity/openid-connect/reference) usa código de autorización, PKCE, estado de un solo uso y validación del token.
 
+## Recuperación de contraseña
+
+Configura un remitente autorizado y un servidor SMTP con TLS. En el puerto 465 se usa TLS directo. En el resto se exige STARTTLS. Usa la URL del servicio que abre la persona usuaria.
+
+```dotenv
+ACCOUNTS_PUBLIC_URL=http://localhost:8081
+ACCOUNTS_SMTP_HOST=
+ACCOUNTS_SMTP_PORT=587
+ACCOUNTS_SMTP_FROM=
+ACCOUNTS_SMTP_USER=
+ACCOUNTS_SMTP_PASSWORD=
+```
+
+**¿Has olvidado tu contraseña?** envía un enlace que acredita acceso al buzón y permite elegir una clave nueva. Caduca en 30 minutos, se usa una sola vez e invalida las sesiones abiertas. **Gestionar cuenta** admite cambiar la contraseña, borrar todos los favoritos y eliminar la cuenta confirmando la contraseña. Si abriste la cuenta solo con Google, establece primero una contraseña desde el correo de recuperación.
+
 ## Catálogo autorizado
 
 Configura `ACCOUNTS_CATALOG_PATH` con la ruta a un fichero JSON que actualice un proveedor autorizado o un importador bajo su licencia. Formato:
@@ -38,12 +53,13 @@ Configura `ACCOUNTS_CATALOG_PATH` con la ruta a un fichero JSON que actualice un
       "url": "https://example.org/anuncios/id-estable-del-proveedor",
       "district": "Centro",
       "housing_type": "room",
-      "price_eur_month": 550
+      "price_eur_month": 550,
+      "available": true
     }
   ]
 }
 ```
 
-Publica el fichero completo mediante reemplazo atómico. `housing_type` admite `room`, `studio` y `flat`. Las URLs deben ser HTTPS y los importes enteros en €/mes. Conserva el ID y la URL cuando actualices el precio. PrimeraLlave registra el primer precio observado y avisa cuando el precio baja respecto al último registro. Sugiere viviendas del mismo distrito y tipo, con un precio dentro del rango de referencia de tus favoritos. El catálogo queda vacío sin una fuente configurada. Los favoritos por enlace, los recordatorios y los avisos de presupuesto de zonas siguen disponibles.
+Publica el fichero completo mediante reemplazo atómico. `housing_type` admite `room`, `studio` y `flat`. Las URLs deben ser HTTPS y los importes enteros en €/mes. Conserva el ID y la URL al actualizar el precio o marcar el anuncio con `available: false`. PrimeraLlave avisa cuando un favorito observado baja de precio o cuando el proveedor confirma que ya no está disponible. Una oferta ausente del archivo no confirma su retirada. También sugiere viviendas del mismo distrito y tipo. Los favoritos manuales se pueden guardar sin un catálogo configurado.
 
 La bandeja se actualiza al usar la cuenta y se comprueba aproximadamente cada minuto mientras la app está abierta. Muestra enlaces a los anuncios y permite marcar cada aviso como leído.

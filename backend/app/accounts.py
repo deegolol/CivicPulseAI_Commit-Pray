@@ -31,6 +31,10 @@ CREATE TABLE IF NOT EXISTS sessions (
     token_hash TEXT PRIMARY KEY, account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
     expires_at INTEGER NOT NULL
 );
+CREATE TABLE IF NOT EXISTS password_resets (
+    token_hash TEXT PRIMARY KEY, account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    expires_at INTEGER NOT NULL
+);
 CREATE TABLE IF NOT EXISTS attempts (
     source TEXT PRIMARY KEY, window INTEGER NOT NULL, count INTEGER NOT NULL
 );
@@ -107,6 +111,14 @@ def verify_account(conn: sqlite3.Connection, username: str, password: str) -> in
 
 def token_digest(token: str) -> str:
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+def replace_password(conn: sqlite3.Connection, account: int, password: str) -> None:
+    salt = secrets.token_bytes(16)
+    conn.execute("UPDATE accounts SET salt = ?, password_hash = ? WHERE id = ?",
+                 (salt, password_hash(password, salt), account))
+    for table in ("sessions", "password_resets", "google_flows"):
+        conn.execute(f"DELETE FROM {table} WHERE account_id = ?", (account,))
 
 
 def current_account(conn: sqlite3.Connection, token: str | None):

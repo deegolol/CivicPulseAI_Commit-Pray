@@ -7,15 +7,16 @@ import hmac
 import re
 import secrets
 import sqlite3
+import time
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.routing import APIRoute
 from fastapi.responses import RedirectResponse
 from pydantic import AliasChoices, BaseModel, EmailStr, Field, HttpUrl, StringConstraints, field_validator
 
-from .. import account_catalog, account_google, accounts
+from .. import account_catalog, account_google, account_mail, accounts
 from ..data import get_dataset
 from ..models import HousingType
 from ..net import client_ip
@@ -65,6 +66,19 @@ class LoginInput(BaseModel):
 
 class EmailInput(BaseModel):
     email: EmailStr
+
+
+class PasswordConfirmation(BaseModel):
+    password: Password
+
+
+class PasswordChange(PasswordConfirmation):
+    new_password: Password
+
+
+class PasswordReset(BaseModel):
+    token: Annotated[str, StringConstraints(pattern=r"^[A-Za-z0-9_-]{43}$")]
+    new_password: Password
 
 
 
@@ -140,6 +154,7 @@ def session_payload(identity) -> dict:
         "email": identity["email"] if identity else None,
         "google_enabled": account_google.configuration() is not None,
         "google_linked": bool(identity and identity["google_subject"]),
+        "recovery_enabled": account_mail.configuration() is not None,
     }
 
 
@@ -164,11 +179,10 @@ def register(credentials: Credentials, request: Request, response: Response):
 def login(credentials: LoginInput, request: Request, response: Response):
     path = enabled_path()
     restrict_attempts(request, path)
-    with accounts.database(path) as conn:
-        account_id = accounts.verify_account(conn, credentials.email, credentials.password) if ("@" in credentials.email or re.fullmatch(r"[a-z0-9_]{3,30}", credentials.email)) else None
-    if account_id is None:
-        raise HTTPException(401, "El usuario o la contraseña son incorrectos.")
     with accounts.database(path, write=True) as conn:
+        account_id = accounts.verify_account(conn, credentials.email, credentials.password) if ("@" in credentials.email or re.fullmatch(r"[a-z0-9_]{3,30}", credentials.email)) else None
+        if account_id is None:
+            raise HTTPException(401, "El usuario o la contraseña son incorrectos.")
         token = accounts.start_session(conn, account_id, request.cookies.get(COOKIE))
     set_session(response, request, token)
     return session_after_login(path, token)
@@ -177,6 +191,67 @@ def login(credentials: LoginInput, request: Request, response: Response):
 def session_after_login(path: Path, token: str) -> dict:
     with accounts.database(path) as conn:
         return session_payload(accounts.current_account(conn, token))
+
+
+@router.post("/password/forgot", status_code=202, dependencies=[Depends(require_json)])
+def forgot_password(data: EmailInput, request: Request, background: BackgroundTasks):
+    path = enabled_path()
+    config = account_mail.configuration()
+    if not config:
+        raise HTTPException(503, "El envío de correos de recuperación todavía no está configurado.")
+    restrict_attempts(request, path)
+    email = data.email.lower()
+    now = int(time.time())
+    with accounts.database(path, write=True) as conn:
+        conn.execute("DELETE FROM password_resets WHERE expires_at <= ?", (now,))
+        row = conn.execute("SELECT account_id FROM account_emails WHERE email = ?", (email,)).fetchone()
+        if row and not conn.execute(
+            "SELECT 1 FROM password_resets WHERE account_id = ? AND expires_at > ?",
+            (row["account_id"], now + 29 * 60),
+        ).fetchone():
+            token = secrets.token_urlsafe(32)
+            conn.execute("INSERT INTO password_resets VALUES (?, ?, ?)",
+                         (accounts.token_digest(token), row["account_id"], now + 30 * 60))
+            background.add_task(account_mail.send_reset, config, email, token)
+    return {"accepted": True}
+
+
+@router.post("/password/reset", status_code=204, dependencies=[Depends(require_json)])
+def reset_password(data: PasswordReset, request: Request, response: Response):
+    path = enabled_path()
+    restrict_attempts(request, path)
+    with accounts.database(path, write=True) as conn:
+        row = conn.execute("SELECT account_id FROM password_resets WHERE token_hash = ? AND expires_at > ?",
+                           (accounts.token_digest(data.token), int(time.time()))).fetchone()
+        if row is None:
+            raise HTTPException(400, "El enlace ha caducado o ya se ha usado. Solicita uno nuevo.")
+        accounts.replace_password(conn, row["account_id"], data.new_password)
+    clear_session(request, response)
+
+
+def confirm_password(conn: sqlite3.Connection, account: int, password: str) -> None:
+    identity = conn.execute("SELECT username FROM accounts WHERE id = ?", (account,)).fetchone()
+    if accounts.verify_account(conn, identity["username"], password) != account:
+        raise HTTPException(401, "La contraseña actual es incorrecta.")
+
+
+@router.post("/password/change", status_code=204, dependencies=[Depends(require_json)])
+def change_password(data: PasswordChange, request: Request, response: Response):
+    restrict_attempts(request, enabled_path())
+    with authenticated(request) as (conn, account):
+        confirm_password(conn, account, data.password)
+        accounts.replace_password(conn, account, data.new_password)
+        token = accounts.start_session(conn, account, None)
+    set_session(response, request, token)
+
+
+@router.delete("/profile", status_code=204, dependencies=[Depends(require_json)])
+def delete_account(data: PasswordConfirmation, request: Request, response: Response):
+    restrict_attempts(request, enabled_path())
+    with authenticated(request) as (conn, account):
+        confirm_password(conn, account, data.password)
+        conn.execute("DELETE FROM accounts WHERE id = ?", (account,))
+    clear_session(request, response)
 
 
 @router.post("/email", dependencies=[Depends(require_json)])
@@ -250,6 +325,10 @@ def google_callback(request: Request, code: str = "", state: str = ""):
 def logout(request: Request, response: Response):
     with accounts.database(enabled_path(), write=True) as conn:
         accounts.end_session(conn, request.cookies.get(COOKIE))
+    clear_session(request, response)
+
+
+def clear_session(request: Request, response: Response):
     response.delete_cookie(COOKIE, path="/api/account", httponly=True, samesite="lax", secure=request.url.scheme == "https")
 
 
@@ -264,6 +343,22 @@ def add_listing(listing: ListingInput, request: Request):
     with authenticated(request) as (conn, account):
         url = account_catalog.offer_url(listing.url)
         accounts.save_listing(conn, account, listing.title, url, listing.remind_on)
+        return accounts.workspace(conn, account)
+
+
+@router.get("/offers")
+def available_offers(district: str, housing_type: HousingType):
+    enabled_path()
+    return [
+        offer.public() for offer in account_catalog.catalog()
+        if offer.available and offer.district.casefold() == district.casefold() and offer.housing_type == housing_type
+    ][:12]
+
+
+@router.delete("/listings", dependencies=[Depends(require_json)])
+def clear_listings(request: Request):
+    with authenticated(request) as (conn, account):
+        conn.execute("DELETE FROM listings WHERE account_id = ?", (account,))
         return accounts.workspace(conn, account)
 
 

@@ -4,7 +4,7 @@
  * Big Bricolage Grotesque price, Madrid red primary CTA "Ver pisos en Idealista",
  * thin comparison bars vs Madrid median, per-indicator source links, and CRTM attribution.
  */
-import { WatchZoneButton } from './AccountProvider';
+import { DistrictOffers, FavoriteButton, WatchZoneButton } from './AccountProvider';
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Check, ExternalLink, Scale, X } from 'lucide-react';
 import { getAreaDetail } from '../api/client';
@@ -132,7 +132,8 @@ export function AreaDetailPanel({
           <span>Volver a la lista</span>
         </button>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center justify-end gap-1.5">
+          <FavoriteButton />
           <button
             type="button"
             onClick={() => onToggleCompare(area.id)}
@@ -183,6 +184,7 @@ export function AreaDetailPanel({
             {formatKm(area.distance_km)} de tu campus
           </p>
         </div>
+        <DistrictOffers district={area.district} housingType={housingType} />
 
         {/* Hero budget block */}
         <section className="mt-5 rounded-[10px] border border-border bg-surface p-4">

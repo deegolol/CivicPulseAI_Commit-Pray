@@ -8,7 +8,7 @@ from urllib.parse import parse_qs, urlsplit
 import pytest
 from fastapi.testclient import TestClient
 
-from app import account_google, accounts
+from app import account_google, account_mail, accounts
 from app.main import app
 
 PREFIX = "/api/account"
@@ -31,6 +31,61 @@ def test_disabled_accounts_keep_public_service(monkeypatch):
     assert client.get(f"{PREFIX}/session").json() == {"enabled": False, "username": None}
     assert client.post(f"{PREFIX}/register", json=CREDS).status_code == 503
     assert client.get("/api/health").status_code == 200
+
+
+def test_recovery_and_account_management(accounts_db, monkeypatch):
+    monkeypatch.setenv("ACCOUNTS_SMTP_HOST", "smtp.example.com")
+    monkeypatch.setenv("ACCOUNTS_SMTP_FROM", "cuentas@example.com")
+    monkeypatch.setenv("ACCOUNTS_PUBLIC_URL", "https://app.example.com")
+    deliveries = []
+    monkeypatch.setattr(account_mail, "send_reset", lambda config, email, token: deliveries.append((email, token)))
+    client, old_session = TestClient(app), TestClient(app)
+    assert client.post(f"{PREFIX}/register", json=CREDS).status_code == 201
+    assert old_session.post(f"{PREFIX}/login", json=CREDS).status_code == 200
+    assert client.post(f"{PREFIX}/listings", json={"title": "Piso", "url": "https://example.com/piso"}).status_code == 200
+    assert client.request("DELETE", f"{PREFIX}/profile", json={"password": "incorrecta"}).status_code == 401
+    anonymous = client.post(f"{PREFIX}/password/forgot", json={"email": "other@example.com"})
+    recover = client.post(f"{PREFIX}/password/forgot", json={"email": CREDS["email"]})
+    assert recover.status_code == anonymous.status_code == 202
+    assert recover.json() == anonymous.json()
+    [(email, token)] = deliveries
+    assert email == CREDS["email"]
+    with sqlite3.connect(accounts_db) as conn:
+        assert conn.execute("SELECT token_hash FROM password_resets").fetchone()[0] == accounts.token_digest(token)
+    reset = {"token": token, "new_password": "new-password-from-email"}
+    assert client.post(f"{PREFIX}/password/reset", json=reset).status_code == 204
+    assert client.post(f"{PREFIX}/password/reset", json=reset).status_code == 400
+    assert old_session.get(f"{PREFIX}/workspace").status_code == 401
+    assert client.post(f"{PREFIX}/login", json={**CREDS, "password": reset["new_password"]}).status_code == 200
+    assert len(client.get(f"{PREFIX}/workspace").json()["listings"]) == 1
+    assert client.delete(f"{PREFIX}/listings", headers=JSON).json()["listings"] == []
+    assert client.post(f"{PREFIX}/password/change", json={
+        "password": reset["new_password"], "new_password": "changed-in-settings"
+    }).status_code == 204
+    assert client.request("DELETE", f"{PREFIX}/profile", json={"password": "changed-in-settings"}).status_code == 204
+    assert client.get(f"{PREFIX}/workspace").status_code == 401
+    with sqlite3.connect(accounts_db) as conn:
+        assert conn.execute("SELECT COUNT(*) FROM accounts").fetchone()[0] == 0
+
+
+def test_unavailable_favorite_requires_confirmation(accounts_db, monkeypatch, tmp_path):
+    path = tmp_path / "catalog.json"
+    monkeypatch.setenv("ACCOUNTS_CATALOG_PATH", str(path))
+    offer = {"id": "one", "title": "Piso", "url": "https://example.com/piso",
+             "district": "Centro", "housing_type": "room", "price_eur_month": 600}
+    path.write_text(json.dumps({"offers": [offer]}), encoding="utf-8")
+    client = TestClient(app)
+    client.post(f"{PREFIX}/register", json=CREDS)
+    assert len(client.get(f"{PREFIX}/offers?district=Centro&housing_type=room").json()) == 1
+    client.post(f"{PREFIX}/listings", json={"title": offer["title"], "url": offer["url"]})
+    path.write_text('{"offers":[]}', encoding="utf-8")
+    assert client.get(f"{PREFIX}/workspace").json()["notifications"] == []
+    path.write_text(json.dumps({"offers": [{**offer, "available": False}]}), encoding="utf-8")
+    for _ in range(2):
+        workspace = client.get(f"{PREFIX}/workspace").json()
+        assert workspace["listings"][0]["available"] is False
+        assert [notice["kind"] for notice in workspace["notifications"]] == ["unavailable"]
+    assert client.get(f"{PREFIX}/offers?district=Centro&housing_type=room").json() == []
 
 
 def test_register_logout_login_and_expiring_cookie(accounts_db):

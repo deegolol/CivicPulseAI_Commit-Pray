@@ -31,11 +31,12 @@ def offer_url(value: HttpUrl) -> str:
 
 class Offer(BaseModel):
     id: str = Field(min_length=1, max_length=120)
-    title: str = Field(min_length=1, max_length=160)
+    title: str = Field(min_length=1, max_length=120)
     url: HttpUrl
     district: str = Field(min_length=1, max_length=100)
     housing_type: Literal["room", "studio", "flat"]
     price_eur_month: int = Field(strict=True, gt=0, le=100_000)
+    available: bool = True
 
     @field_validator("url")
     @classmethod
@@ -97,6 +98,11 @@ def record_alerts(conn: sqlite3.Connection, account: int, listings: list[dict], 
         offer = by_url.get(url)
         if not offer:
             continue
+        if not offer.available:
+            listing["available"] = False
+            notify(conn, account, f"{listing['title']} ya no está disponible.",
+                   f"unavailable:{listing['id']}:{offer.id}", kind="unavailable")
+            continue
         favorites.append(offer)
         price = offer.price_eur_month
         listing["price_eur_month"] = price
@@ -119,7 +125,8 @@ def record_alerts(conn: sqlite3.Connection, account: int, listings: list[dict], 
         ceilings[key] = max(ceilings.get(key, 0), offer.price_eur_month)
     relevant = [
         offer for url, offer in by_url.items()
-        if url not in saved_urls and offer.price_eur_month <= ceilings.get((offer.district.casefold(), offer.housing_type), 0)
+        if offer.available and url not in saved_urls
+        and offer.price_eur_month <= ceilings.get((offer.district.casefold(), offer.housing_type), 0)
     ]
     relevant.sort(key=lambda offer: (-profiles[(offer.district.casefold(), offer.housing_type)], offer.price_eur_month, offer.id))
     # Seed one recommendation per refresh only when the best matching listing changes.
@@ -128,4 +135,4 @@ def record_alerts(conn: sqlite3.Connection, account: int, listings: list[dict], 
         notify(conn, account, f"Por tus favoritos, podría interesarte {offer.title} en {offer.district}, por {offer.price_eur_month} €/mes.",
                f"suggestion:{offer_url(offer.url)}", kind="suggestion", url=offer_url(offer.url))
     ranked_urls = saved_urls | {offer_url(offer.url) for offer in relevant}
-    return (relevant + [offer for url, offer in by_url.items() if url not in ranked_urls])[:12]
+    return (relevant + [offer for url, offer in by_url.items() if offer.available and url not in ranked_urls])[:12]
