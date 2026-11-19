@@ -15,7 +15,7 @@ import {
 } from 'recharts';
 import type { HousingType, IndicatorMeta, ScoreResultItem } from '../api/types';
 import { HOUSING_TYPE_LABELS } from '../config';
-import { formatEuro, formatKm } from '../utils/format';
+import { formatEuro, formatKm, formatMinutes } from '../utils/format';
 import { normalizedToStars, StarRating } from './StarRating';
 
 interface CompareModalProps {
@@ -32,7 +32,7 @@ const SERIES_COLORS = ['#D7262E', '#1F4FD6', '#12805C'] as const;
 
 const FRIENDLY_LABELS: Record<string, string> = {
   rent_eur_m2: 'Precio',
-  distance_km: 'Cercanía',
+  distance_km: 'Tiempo al campus',
   air_no2: 'Calidad del aire',
   transit_stops: 'Metro',
   services_count: 'Servicios y deporte',
@@ -193,7 +193,7 @@ export function CompareModal({
                 </tr>
 
                 {activeCriteria.has('rent_eur_m2') && <tr>
-                  <td className="px-4 py-3 font-medium text-muted">Precio estimado</td>
+                  <td className="px-4 py-3 font-medium text-muted">Precio oficial (pisos)</td>
                   {areas.map((area) => {
                     const over =
                       area.est_rent_eur_month != null && area.est_rent_eur_month > budget
@@ -203,8 +203,10 @@ export function CompareModal({
                       <td key={area.id} className="px-4 py-3">
                         <div className="font-display text-base font-bold text-ink">
                           {area.est_rent_eur_month != null
-                            ? `~${formatEuro(area.est_rent_eur_month)}/mes`
-                            : 'Sin dato'}
+                            ? `${formatEuro(area.est_rent_eur_month)}/mes`
+                            : area.rent_median_eur_month != null
+                              ? <span className="font-sans text-xs font-normal text-muted">Pisos: {formatEuro(area.rent_median_eur_month)}/mes (mediana oficial)</span>
+                              : 'Sin dato oficial'}
                         </div>
                         {area.est_rent_eur_month != null && (
                           <span
@@ -220,12 +222,14 @@ export function CompareModal({
                   })}
                 </tr>}
 
-                {/* Distancia en km */}
+                {/* Real travel times */}
                 {activeCriteria.has('distance_km') && <tr>
-                  <td className="px-4 py-3 font-medium text-muted">Distancia al campus</td>
+                  <td className="px-4 py-3 font-medium text-muted">Tiempo hasta el campus</td>
                   {areas.map((area) => (
                     <td key={area.id} className="px-4 py-3 font-semibold text-ink">
-                      {formatKm(area.distance_km)}
+                      {area.transit_min != null
+                        ? <>{formatMinutes(area.transit_min)} <span className="font-normal text-muted">transporte</span><br />{formatMinutes(area.car_min)} <span className="font-normal text-muted">coche</span></>
+                        : formatKm(area.distance_km)}
                     </td>
                   ))}
                 </tr>}

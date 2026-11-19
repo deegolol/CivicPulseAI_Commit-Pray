@@ -10,12 +10,7 @@ import type {
   ScoreResultItem,
   SourceInfo,
 } from '../api/types';
-import {
-  formatDecimal,
-  formatEuroPerM2,
-  formatInteger,
-  formatKm,
-} from '../utils/format';
+import { formatDecimal, formatEuroPerM2, formatInteger, formatKm, formatMinutes } from '../utils/format';
 import { DistrictOffers, FavoriteButton, WatchZoneButton } from './AccountProvider';
 import { normalizedToStars, StarRating } from './StarRating';
 
@@ -85,10 +80,14 @@ export function AreaDetailPanel({
       key: 'distance_km',
       label: FRIENDLY_LABELS.distance_km,
       stars: area.breakdown.distance_km ? normalizedToStars(area.breakdown.distance_km.normalized) : null,
-      subtitle: `${formatKm(area.distance_km)} de tu campus`,
-      rawValue: formatRawTechnical('distance_km', area.distance_km, 'km'),
+      subtitle: area.transit_min != null
+        ? `${formatMinutes(area.transit_min)} en transporte público · ${formatMinutes(area.car_min)} en coche`
+        : `${formatKm(area.distance_km)} de tu campus`,
+      rawValue: area.transit_min != null ? `${formatKm(area.distance_km)} por carretera` : formatKm(area.distance_km),
       medianValue: null as string | null,
-      note: 'Distancia en línea recta al centroide del barrio',
+      note: area.transit_min != null
+        ? 'Puerta a puerta en día laborable: horarios oficiales del Consorcio de Transportes (Metro, Cercanías, EMT, interurbanos) y, en coche, red de calles de OpenStreetMap sin tráfico.'
+        : 'Distancia en línea recta al centroide del barrio',
       source: undefined as SourceInfo | undefined,
     },
     ...indicators.map((ind) => {

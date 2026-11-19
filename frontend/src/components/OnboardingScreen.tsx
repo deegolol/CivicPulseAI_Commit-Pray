@@ -3,14 +3,14 @@
  * The manual form is two columns so it fits a laptop screen without scrolling, and switching
  * between both modes animates instead of popping in. A back button sits in the header.
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  ArrowRight, BookOpen, Check, Dumbbell, Euro, MapPin, Search, SlidersHorizontal, TrainFront, Wind,
+  ArrowRight, BookOpen, Car, Check, Dumbbell, Euro, LoaderCircle, MapPin, Search, SlidersHorizontal, TrainFront, Wind,
   type LucideIcon,
 } from 'lucide-react';
 import type { Campus, HousingType, SourceInfo } from '../api/types';
-import { HOUSING_REFERENCE_M2, HOUSING_TYPE_LABELS } from '../config';
-import { EXAMPLE_QUERIES, priorityOptions, type TransportMode } from '../constants/filters';
+import { HOUSING_TYPE_LABELS } from '../config';
+import { DEMO_QUERY, EXAMPLE_QUERIES, TRANSPORT_LABELS, priorityOptions, type TransportMode } from '../constants/filters';
 import { CampusPicker } from './CampusPicker';
 import { SiteHeader } from './SiteHeader';
 import { StudentBackdrop } from './StudentBackdrop';
@@ -34,8 +34,9 @@ interface OnboardingScreenProps {
   onMinBudgetChange: (value: number | null) => void;
   housingType: HousingType;
   onHousingTypeChange: (type: HousingType) => void;
-  maxDistanceKm: number | null;
-  onMaxDistanceChange: (value: number | null) => void;
+  /** Maximum door-to-door minutes to the campus with `transportMode` (null = no limit). */
+  maxTravelMin: number | null;
+  onMaxTravelChange: (value: number | null) => void;
   transportMode: TransportMode;
   onTransportModeChange: (mode: TransportMode) => void;
   availableKeys: Set<string>;
@@ -43,8 +44,6 @@ interface OnboardingScreenProps {
   onPriorityChange: (key: string, weight: number) => void;
   onStart: () => void;
   sources: SourceInfo[];
-  /** Cheapest and most expensive official rent in €/m² across Madrid (from /api/areas). */
-  rentRange: [number, number] | null;
 }
 
 const DEFAULT_CAMPUSES: Campus[] = [
@@ -54,24 +53,42 @@ const DEFAULT_CAMPUSES: Campus[] = [
 const EXAMPLE_LABELS = ['Habitación y aire limpio', 'Un estudio en Montegancedo', 'Barato y cerca del metro'];
 const PRIORITY_META: Record<string, { icon: LucideIcon; hint: string }> = {
   rent_eur_m2: { icon: Euro, hint: 'Alquiler más bajo' },
-  distance_km: { icon: MapPin, hint: 'Cerca de tu campus' },
+  distance_km: { icon: MapPin, hint: 'Menos minutos hasta clase' },
   air_no2: { icon: Wind, hint: 'Menos contaminación' },
   transit_stops: { icon: TrainFront, hint: 'Más estaciones de metro' },
   libraries_count: { icon: BookOpen, hint: 'Bibliotecas cerca' },
   sports_count: { icon: Dumbbell, hint: 'Polideportivos cerca' },
   services_count: { icon: BookOpen, hint: 'Bibliotecas y deporte' },
 };
-// Distance: from 5 km (there are always neighbourhoods that close to every campus) up to 40 km; the last stop = no limit.
-const KM_MIN = 5;
-const KM_MAX = 40;
-const KM_UNLIMITED = KM_MAX + 1;
+// Real door-to-door travel time (CRTM timetables / OSRM): 10 min up to 90 min; the last stop = no limit.
+const MIN_MIN = 10;
+const MIN_MAX = 90;
+const MIN_UNLIMITED = MIN_MAX + 5;
 
-/** Budget slider bounds for this housing type: from the cheapest neighbourhood's estimated rent to 1.5× the
- * most expensive one (room for generous budgets), using the official €/m² data we already have (no extra API calls). */
-function budgetBounds(rentRange: [number, number] | null, housingType: HousingType): [number, number] {
-  const m2 = HOUSING_REFERENCE_M2[housingType];
-  if (!rentRange) return housingType === 'room' ? [200, 700] : housingType === 'studio' ? [300, 1000] : [500, 1700];
-  return [Math.floor((rentRange[0] * m2) / 10) * 10, Math.ceil((rentRange[1] * m2 * 1.5) / 50) * 50];
+/** Budget slider bounds: wide, fixed ranges per housing type. The budget filters the real listings we link to. */
+const BUDGET_BOUNDS: Record<HousingType, [number, number]> = { room: [200, 1000], studio: [400, 1600], flat: [600, 3000] };
+
+/** What really happens while we wait for the AI (shown so the user sees it working, not a magic instant answer). */
+const THINKING_STEPS = ['Comprobando tu frase', 'La IA está leyendo lo que buscas', 'Buscando tu campus, presupuesto y prioridades'];
+
+function ThinkingSteps() {
+  const [step, setStep] = useState(0);
+  useEffect(() => {
+    const timers = [700, 1900].map((ms, i) => window.setTimeout(() => setStep(i + 1), ms));
+    return () => timers.forEach(window.clearTimeout);
+  }, []);
+  return (
+    <ol aria-live="polite" className="mx-auto mt-4 w-fit space-y-1.5 rounded-xl border border-border bg-bg/95 px-4 py-3 text-sm shadow-sm">
+      {THINKING_STEPS.map((label, i) => (
+        <li key={label} className={'flex items-center gap-2 transition-opacity ' + (i > step ? 'opacity-35' : 'opacity-100')}>
+          {i < step ? <Check size={15} className="text-brand" aria-hidden="true" />
+            : i === step ? <LoaderCircle size={15} className="animate-spin text-ink" aria-hidden="true" />
+            : <span className="h-[15px] w-[15px] rounded-full border border-border" aria-hidden="true" />}
+          {label}{i === step ? '…' : ''}
+        </li>
+      ))}
+    </ol>
+  );
 }
 const primaryButton = 'inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-brand px-6 text-base font-semibold text-bg transition hover:bg-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-60';
 const labelClass = 'text-sm font-semibold text-ink';
@@ -79,14 +96,15 @@ const labelClass = 'text-sm font-semibold text-ink';
 export function OnboardingScreen({
   query, onQueryChange, onSearchSubmit, searching, searchError, view, onOpenForm, onBack, onHome,
   campuses, campusId, onCampusChange, budget, onBudgetChange, housingType, onHousingTypeChange,
-  maxDistanceKm, onMaxDistanceChange, availableKeys, priorityWeights, onPriorityChange, onStart, sources, rentRange,
+  maxTravelMin, onMaxTravelChange, transportMode, onTransportModeChange, availableKeys, priorityWeights, onPriorityChange,
+  onStart, sources,
 }: OnboardingScreenProps) {
   const [formError, setFormError] = useState<string | null>(null);
   const showForm = view === 'form';
   const options = priorityOptions(availableKeys);
   const activeCount = options.filter(({ key }) => (priorityWeights[key] ?? 0) > 0).length;
-  const kmValue = maxDistanceKm === null ? KM_UNLIMITED : Math.min(KM_MAX, Math.max(KM_MIN, maxDistanceKm));
-  const [budgetMin, budgetMax] = budgetBounds(rentRange, housingType);
+  const minValue = maxTravelMin === null ? MIN_UNLIMITED : Math.min(MIN_MAX, Math.max(MIN_MIN, maxTravelMin));
+  const [budgetMin, budgetMax] = BUDGET_BOUNDS[housingType];
   const budgetValue = Math.min(budgetMax, Math.max(budgetMin, budget));
 
   const goBack = () => { setFormError(null); onBack(); };
@@ -128,7 +146,7 @@ export function OnboardingScreen({
                     if (query.trim()) onSearchSubmit(query.trim());
                   }
                 }}
-                placeholder="Ej.: estudio en la ETSISI, tengo 500 € al mes y quiero una zona tranquila con aire limpio"
+                placeholder={`Ej.: ${DEMO_QUERY}`}
                 className="block w-full resize-none rounded-t-2xl px-5 pt-5 pb-2 text-base leading-relaxed outline-none placeholder:text-muted/70 sm:text-lg"
               />
               <div className="flex items-center justify-between gap-3 px-4 pt-1 pb-4 sm:px-5">
@@ -160,7 +178,8 @@ export function OnboardingScreen({
                 </button>
               ))}
             </div>
-            {searchError && <p role="alert" className="mt-4 text-center text-sm text-over">{searchError}</p>}
+            {searching && <ThinkingSteps />}
+            {searchError && <p role="alert" className="mx-auto mt-4 max-w-xl rounded-xl border border-over/30 bg-bg/95 px-4 py-3 text-center text-sm text-over">{searchError}</p>}
           </div>
         </main>
       ) : (
@@ -213,19 +232,34 @@ export function OnboardingScreen({
                 <div className="mt-1 flex justify-between text-xs text-muted"><span>{budgetMin.toLocaleString('es-ES')} €</span><span>{budgetMax.toLocaleString('es-ES')} €+</span></div>
               </div>
 
-              <div>
-                <div className="flex items-baseline justify-between">
-                  <label htmlFor="km-range" className={labelClass}>Distancia máxima al campus</label>
-                  <span className="text-sm font-semibold tabular-nums">{maxDistanceKm === null ? 'Sin límite' : `${kmValue.toLocaleString('es-ES', { maximumFractionDigits: 1 })} km`}</span>
+                <div>
+                  <span className={labelClass}>Cómo irás a clase</span>
+                  <div role="radiogroup" aria-label="Cómo irás a clase" className="mt-2 grid grid-cols-2 gap-1 rounded-xl bg-surface p-1">
+                    {(Object.entries(TRANSPORT_LABELS) as [TransportMode, string][]).map(([value, label]) => {
+                      const Icon = value === 'car' ? Car : TrainFront;
+                      return (
+                        <button key={value} type="button" role="radio" aria-checked={transportMode === value}
+                          onClick={() => onTransportModeChange(value)}
+                          className={'inline-flex min-h-10 items-center justify-center gap-2 rounded-lg text-sm font-semibold transition ' +
+                            (transportMode === value ? 'bg-bg text-ink shadow-sm ring-1 ring-ink/5' : 'text-muted hover:text-ink')}>
+                          <Icon size={15} aria-hidden="true" /> {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="mt-4 flex items-baseline justify-between">
+                    <label htmlFor="minutes-range" className={labelClass}>Tiempo máximo hasta el campus</label>
+                    <span className="text-sm font-semibold tabular-nums">{maxTravelMin === null ? 'Sin límite' : `${minValue} min`}</span>
+                  </div>
+                  <input id="minutes-range" type="range" min={MIN_MIN} max={MIN_UNLIMITED} step={5} value={minValue}
+                    onChange={(event) => {
+                      const value = Number(event.target.value);
+                      onMaxTravelChange(value > MIN_MAX ? null : value);
+                    }}
+                    className="clean-range mt-3 w-full" />
+                  <div className="mt-1 flex justify-between text-xs text-muted"><span>{MIN_MIN} min</span><span>{MIN_MAX} min · Sin límite</span></div>
+                  <p className="mt-1.5 text-xs text-muted">Tiempos reales puerta a puerta: horarios del Consorcio de Transportes y red de calles de OpenStreetMap.</p>
                 </div>
-                <input id="km-range" type="range" min={KM_MIN} max={KM_UNLIMITED} step={0.5} value={kmValue}
-                  onChange={(event) => {
-                    const value = Number(event.target.value);
-                    onMaxDistanceChange(value > KM_MAX ? null : value);
-                  }}
-                  className="clean-range mt-3 w-full" />
-                <div className="mt-1 flex justify-between text-xs text-muted"><span>{KM_MIN} km</span><span>{KM_MAX} km · Sin límite</span></div>
-              </div>
             </div>
 
             <div className="flex flex-col">

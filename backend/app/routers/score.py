@@ -25,10 +25,11 @@ def resolve(ds: Dataset, campus_id: str, weights: dict[str, float]) -> tuple[Cam
 def score(req: ScoreRequest) -> ScoreResponse:
     ds = get_dataset()
     campus, req.weights = resolve(ds, req.campus_id, req.weights)
-    results = score_areas(ds.areas, ds.indicators, campus, req)
+    results = score_areas(ds.areas, ds.indicators, campus, req, ds.travel.get(campus.id), ds.rents)
     return ScoreResponse(
         campus_id=campus.id,
         housing_type=req.housing_type,
+        travel_mode=req.travel_mode,
         reference_m2=REFERENCE_M2[req.housing_type],
         results=results,
         recommendation=build_recommendation(results, ds.areas, ds.indicators, req),

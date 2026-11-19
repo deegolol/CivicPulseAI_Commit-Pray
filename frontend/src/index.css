@@ -302,3 +302,8 @@ input[type="range"].clean-range::-webkit-slider-thumb:hover {
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-up { animation: none; }
 }
+
+/* Map layers panel: see-through while the map moves, solid again when it stops (Diego). */
+.map-fade { transition: opacity 180ms ease-out; }
+.map-fade.map-moving { opacity: 0.35; }
+.map-fade.map-moving > * { pointer-events: none; }

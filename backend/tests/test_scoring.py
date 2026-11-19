@@ -63,16 +63,31 @@ def test_distance_is_a_virtual_indicator():
     assert res[0].id == "cheap" and res[0].distance_km < res[-1].distance_km
 
 
-def test_budget_estimates_rent_by_housing_type():
-    room = score_areas(AREAS, IND, CAMPUS, req(weights={"rent_eur_m2": 1}, budget_eur_month=300, housing_type="room"))
-    cheap = next(r for r in room if r.id == "cheap")
-    assert cheap.est_rent_eur_month == 250  # 10 €/m² × 25 m²
-    assert cheap.fits_budget is True
-    assert cheap.affordable_m2 == 30.0
-    pricey = next(r for r in room if r.id == "pricey")
-    assert pricey.est_rent_eur_month == 500 and pricey.fits_budget is False
-    studio = score_areas(AREAS, IND, CAMPUS, req(weights={"rent_eur_m2": 1}, housing_type="studio"))
-    assert studio[0].est_rent_eur_month == 350 and studio[0].fits_budget is None
+RENTS = {"ch": {"median": 900, "p25": 700, "p75": 1100}, "mi": {"median": 1200, "p25": 900, "p75": 1500}}
+TRAVEL = {"cheap": {"transit_min": 40, "car_min": 10, "car_km": 2.0},
+          "mid": {"transit_min": 20, "car_min": 15, "car_km": 6.0},
+          "pricey": {"transit_min": 60, "car_min": 25, "car_km": 12.0}}
+
+
+def test_price_is_only_the_official_figure_never_our_estimate():
+    flat = {r.id: r for r in score_areas(AREAS, IND, CAMPUS, req(weights={"rent_eur_m2": 1}, budget_eur_month=1000, housing_type="flat"), rents=RENTS)}
+    assert flat["cheap"].est_rent_eur_month == 900 and flat["cheap"].fits_budget is True  # SERPAVI median as published
+    assert flat["mid"].est_rent_eur_month == 1200 and flat["mid"].fits_budget is False
+    assert flat["cheap"].rent_p25_eur_month == 700 and flat["cheap"].rent_p75_eur_month == 1100
+    assert flat["pricey"].est_rent_eur_month is None  # no official data → no number
+    room = score_areas(AREAS, IND, CAMPUS, req(weights={"rent_eur_m2": 1}, budget_eur_month=300, housing_type="room"), rents=RENTS)
+    assert all(r.est_rent_eur_month is None and r.fits_budget is None for r in room)  # no official room price exists
+    assert room[0].rent_median_eur_month == 900 and "anuncios" in room[0].rent_basis
+
+
+def test_proximity_uses_real_travel_minutes_of_the_chosen_mode():
+    transit = score_areas(AREAS, IND, CAMPUS, req(weights={"distance_km": 1}), travel=TRAVEL)
+    assert transit[0].id == "mid" and transit[0].travel_min == 20 and transit[0].car_min == 15
+    assert transit[0].distance_km == 6.0  # by road, not straight line
+    car = score_areas(AREAS, IND, CAMPUS, req(weights={"distance_km": 1}, travel_mode="car"), travel=TRAVEL)
+    assert car[0].id == "cheap" and car[0].travel_min == 10
+    limited = {r.id: r for r in score_areas(AREAS, IND, CAMPUS, req(weights={"distance_km": 1}, filters=ScoreFilters(max_travel_min=30)), travel=TRAVEL)}
+    assert limited["cheap"].excluded and not limited["mid"].excluded
 
 
 def test_filters_exclude_without_changing_other_scores():
@@ -121,13 +136,13 @@ def test_optional_services_only_score_when_selected_and_budget_range_filters():
             "campus_id": campus_id,
             "weights": {key: 1},
             "budget_eur_month": 450,
-            "filters": {"min_budget_eur_month": 300, "only_within_budget": True},
+            "filters": {"only_within_budget": True},
         })
         assert response.status_code == 200
         results = response.json()["results"]
         assert all(set(area["breakdown"]) == {key} for area in results)
         included = [area for area in results if not area["excluded"]]
-        assert included and all(300 <= area["est_rent_eur_month"] <= 450 for area in included)
+        assert included  # rooms have no official price: budget filters can't exclude them
         assert included[0]["breakdown"][key]["value"] == max(area["breakdown"][key]["value"] for area in included)
         winners.append(included[0]["id"])
     assert winners[0] != winners[1]

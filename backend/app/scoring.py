@@ -3,10 +3,13 @@
 How a score is built (this is what we explain to the jury):
 1. Every indicator is turned into a percentile across ALL areas (0..1, where 1 is always "best"
    (inverted when lower is better, e.g. rent or NO2). Missing values count as the city median.
-2. `distance_km` is a virtual indicator: straight-line distance (haversine) from the area centroid to the campus.
+2. `distance_km` ("Cercanía") is a virtual indicator: real door-to-door minutes to the campus by public
+   transport (CRTM timetables) or by car (OSRM), whichever the user chose (`travel_mode`). Straight-line
+   distance is only a fallback when the travel-time file hasn't been built.
 3. The user's weights are renormalized to sum 1; score = Σ normalized × weight × 100 (0..100).
-4. Budget: estimated monthly rent = official €/m² × reference m² of the housing type. It is an estimate
-   from official data, not a listing price.
+4. Price: we never invent one. For a whole flat we show the official monthly rent of the district exactly as
+   SERPAVI publishes it (median and 25th–75th percentiles of 2024 contracts). There is no official figure
+   for rooms or studios, so those get no number: the exact price lives in the live listings we link to.
 5. Filters never change other areas' scores: they only mark areas as `excluded` (score 0, ranked last).
 
 Pure functions only: no I/O, no FastAPI, so it is easy to test.
@@ -70,19 +73,40 @@ def normalize_weights(weights: dict[str, float]) -> dict[str, float]:
     return {k: w / total for k, w in clamped.items()}
 
 
-def score_areas(areas: list[Area], indicators: list[Indicator], campus: Campus, req: ScoreRequest) -> list[ScoreResult]:
-    """Rank `areas` for this request. `req.weights` keys must already be validated (indicator keys or distance_km)."""
+def district_id(area: Area) -> str:
+    """Area ids are '<district 2 digits><barrio 1 digit>' (e.g. 011 = Palacio, district 01 Centro)."""
+    return area.id[:2]
+
+
+def official_rent(area: Area, rents: dict, housing_type: str) -> tuple[int | None, str]:
+    """(monthly € you'd pay, how we know it). Only a published official figure, never a calculation of ours."""
+    official = rents.get(district_id(area)) or {}
+    if housing_type == "flat" and official.get("median"):
+        return official["median"], f"Alquiler mensual mediano de pisos en {area.district} (contratos 2024, SERPAVI · Ministerio de Vivienda)"
+    return None, "No hay dato oficial de precio para habitaciones ni estudios: mira el precio exacto en los anuncios"
+
+
+def score_areas(areas: list[Area], indicators: list[Indicator], campus: Campus, req: ScoreRequest,
+                travel: dict | None = None, rents: dict | None = None) -> list[ScoreResult]:
+    """Rank `areas` for this request. `req.weights` keys must already be validated (indicator keys or distance_km).
+    `travel` = travel times for THIS campus {area_id: {transit_min, car_min, car_km}}; `rents` = official rents by district."""
     if not areas:
         return []
-    distances = [haversine_km(a.centroid, campus.coords) for a in areas]
+    travel = travel or {}
+    rents = rents or {}
+    times = [travel.get(a.id) or {} for a in areas]
+    have_times = bool(travel) and all(t.get("transit_min") is not None and t.get("car_min") is not None for t in times)
+    mode_key = "transit_min" if req.travel_mode == "transit" else "car_min"
+    straight = [haversine_km(a.centroid, campus.coords) for a in areas]
+    distances = [t.get("car_km") or d for t, d in zip(times, straight)]  # by road when known
+    proximity = [float(t[mode_key]) for t in times] if have_times else straight
     direction = {i.key: i.higher_is_better for i in indicators} | {DISTANCE_KEY: False}
     weights = normalize_weights(req.weights)
 
     raw: dict[str, list[float | None]] = {
-        key: (distances if key == DISTANCE_KEY else [a.values.get(key) for a in areas]) for key in weights
+        key: (proximity if key == DISTANCE_KEY else [a.values.get(key) for a in areas]) for key in weights
     }
     norm = {key: normalize(vals, direction[key]) for key, vals in raw.items()}
-    ref_m2 = REFERENCE_M2[req.housing_type]
 
     results: list[ScoreResult] = []
     for idx, area in enumerate(areas):
@@ -98,7 +122,9 @@ def score_areas(areas: list[Area], indicators: list[Indicator], campus: Campus, 
         score = round(sum(norm[key][idx] * w for key, w in weights.items()) * 100, 1)
 
         rent = area.values.get(RENT_KEY)
-        est_rent = round(rent * ref_m2) if rent is not None else None
+        est_rent, rent_basis = official_rent(area, rents, req.housing_type)
+        official = rents.get(district_id(area)) or {}
+        travel_min = times[idx].get(mode_key)
         budget = req.budget_eur_month
         fits = (est_rent <= budget) if (budget is not None and est_rent is not None) else None
         affordable = round(budget / rent, 1) if (budget is not None and rent) else None
@@ -109,6 +135,7 @@ def score_areas(areas: list[Area], indicators: list[Indicator], campus: Campus, 
         excluded = (
             (f.max_rent_eur_m2 is not None and rent is not None and rent > f.max_rent_eur_m2)
             or (f.max_distance_km is not None and distances[idx] > f.max_distance_km)
+            or (f.max_travel_min is not None and travel_min is not None and travel_min > f.max_travel_min)
             or (f.only_within_budget and fits is False)
             or (f.min_budget_eur_month is not None and (est_rent is None or est_rent < f.min_budget_eur_month))
             or (f.max_air_no2 is not None and (no2 is None or no2 > f.max_air_no2))
@@ -123,7 +150,14 @@ def score_areas(areas: list[Area], indicators: list[Indicator], campus: Campus, 
                 score=0.0 if excluded else score,
                 excluded=bool(excluded),
                 distance_km=round(distances[idx], 2),
+                transit_min=times[idx].get("transit_min"),
+                car_min=times[idx].get("car_min"),
+                travel_min=travel_min,
                 est_rent_eur_month=est_rent,
+                rent_median_eur_month=official.get("median"),
+                rent_p25_eur_month=official.get("p25"),
+                rent_p75_eur_month=official.get("p75"),
+                rent_basis=rent_basis,
                 fits_budget=fits,
                 affordable_m2=affordable,
                 listing_links=build_listing_links(area.district, budget, req.housing_type),
@@ -131,7 +165,7 @@ def score_areas(areas: list[Area], indicators: list[Indicator], campus: Campus, 
             )
         )
 
-    results.sort(key=lambda r: (r.excluded, -r.score, r.distance_km))
+    results.sort(key=lambda r: (r.excluded, -r.score, r.travel_min if r.travel_min is not None else r.distance_km))
     for rank, r in enumerate(results, start=1):
         r.rank = rank
     return results[: req.limit]

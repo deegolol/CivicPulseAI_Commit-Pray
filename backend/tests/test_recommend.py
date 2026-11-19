@@ -15,17 +15,16 @@ def test_recommendation_is_the_first_non_excluded_result_with_reasons():
     rec, first = r["recommendation"], next(x for x in r["results"] if not x["excluded"])
     assert rec["area_id"] == first["id"] and rec["name"] == first["name"]
     assert 2 <= len(rec["reasons"]) <= 4 and len(rec["caveats"]) <= 2
-    assert "te sobran" in rec["reasons"][0] and "€/mes" in rec["reasons"][0]  # budget reason goes first
-    assert any("km de tu campus" in x for x in rec["reasons"])
+    assert any("min de tu campus en transporte público" in x for x in rec["reasons"])
+    assert not any("~" in x or "estimad" in x for x in rec["reasons"])  # never our own price estimate
 
 
 def test_reasons_quote_the_real_numbers():
-    r = score(budget_eur_month=500)
+    r = score(budget_eur_month=1500, housing_type="flat")
     rec = r["recommendation"]
     first = next(x for x in r["results"] if x["id"] == rec["area_id"])
-    assert f"{first['est_rent_eur_month']} €/mes" in rec["reasons"][0].replace(".", "")
-    dist = f"{first['distance_km']:.1f}".replace(".", ",")
-    assert any(dist in x for x in rec["reasons"])
+    assert f"{first['rent_median_eur_month']} €/mes" in rec["reasons"][0].replace(".", "")
+    assert any(f"A {first['travel_min']} min" in x and f"{first['car_min']} min en coche" in x for x in rec["reasons"])
 
 
 def test_sports_reason_uses_official_count_and_plain_language():
@@ -54,13 +53,13 @@ def test_honest_caveat_when_a_priority_is_weak():
 
 
 def test_no_recommendation_when_everything_is_excluded():
-    r = score(budget_eur_month=100, filters={"only_within_budget": True})
+    r = score(budget_eur_month=100, housing_type="flat", filters={"only_within_budget": True})
     assert r["recommendation"] is None and r["highlights"] == {}
 
 
 def test_highlights_point_to_valid_non_excluded_areas():
-    r = score(budget_eur_month=600, filters={"max_distance_km": 8})
+    r = score(budget_eur_month=600, filters={"max_travel_min": 45})
     ok = {x["id"]: x for x in r["results"] if not x["excluded"]}
     assert set(r["highlights"]) <= {"cheapest", "closest", "cleanest_air", "best_transit"}
-    assert all(v in ok for v in r["highlights"].values())
-    assert ok[r["highlights"]["closest"]]["distance_km"] == min(x["distance_km"] for x in ok.values())
+    assert all(v in ok for v in r["highlights"].values()) and all(x["travel_min"] <= 45 for x in ok.values())
+    assert ok[r["highlights"]["closest"]]["travel_min"] == min(x["travel_min"] for x in ok.values())

@@ -86,6 +86,7 @@ export interface MetaResponse {
 export interface ScoreFilters {
   max_rent_eur_m2?: number | null;
   max_distance_km?: number | null;
+  max_travel_min?: number | null;
   only_within_budget?: boolean;
   min_budget_eur_month?: number | null;
   max_air_no2?: number | null;
@@ -98,8 +99,11 @@ export interface ScoreRequest {
   filters?: ScoreFilters;
   budget_eur_month?: number | null;
   housing_type?: HousingType;
+  travel_mode?: TravelMode;
   limit?: number;
 }
+
+export type TravelMode = 'transit' | 'car';
 
 export interface ListingLink {
   label: string;
@@ -121,7 +125,16 @@ export interface ScoreResultItem {
   score: number;
   excluded: boolean;
   distance_km: number;
+  /** Real door-to-door minutes: public transport (CRTM timetables) and car without traffic (OSRM). */
+  transit_min?: number | null;
+  car_min?: number | null;
+  travel_min?: number | null;
+  /** Only an official published figure (flats: SERPAVI district median), never our estimate. Null for rooms/studios. */
   est_rent_eur_month: number | null;
+  rent_median_eur_month?: number | null;
+  rent_p25_eur_month?: number | null;
+  rent_p75_eur_month?: number | null;
+  rent_basis?: string;
   fits_budget: boolean | null;
   affordable_m2: number | null;
   listing_links: ListingLink[];
@@ -156,10 +169,14 @@ export interface AiParseResponse {
   filters: {
     max_rent_eur_m2: number | null;
     max_distance_km: number | null;
+    max_travel_min?: number | null;
     only_within_budget?: boolean | null;
   };
   budget_eur_month: number | null;
   housing_type: HousingType;
+  travel_mode?: TravelMode;
+  /** false = gibberish or not about finding a place to live: show `interpretation` and don't search. */
+  understood?: boolean;
   interpretation: string;
   engine: 'llm' | 'keywords';
 }
@@ -171,6 +188,7 @@ export interface AiExplainRequest {
   query?: string;
   budget_eur_month?: number | null;
   housing_type?: HousingType;
+  travel_mode?: TravelMode;
   filters?: ScoreFilters;
 }
 

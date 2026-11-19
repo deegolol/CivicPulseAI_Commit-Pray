@@ -3,7 +3,8 @@
 - `parse_query`  : sentence → campus, budget, housing type, distance and priorities (validated, never trusted blindly).
 - `explain_areas`: short Spanish explanation that only uses numbers computed by our scoring engine.
 - Provider: OpenAI Responses API over plain HTTP (httpx), model from LLM_MODEL. Any error/timeout → fallback.
-- DEMO_CACHE=true: the pitch sentences are answered from app/demo_cache.json (instant and offline-proof).
+- The AI is always asked first. app/demo_cache.json (DEMO_CACHE=true) only answers the pitch sentences if the AI fails.
+- Before any AI call, `looks_like_language` drops keyboard mashing; off-topic sentences get understood=false.
 """
 from __future__ import annotations
 
@@ -92,6 +93,42 @@ CAMPUS_ALIASES = {
 }
 
 
+# Words that show the sentence is about finding somewhere to live / study (keyword topic check, no AI).
+TOPIC_WORDS = (
+    "piso", "habitacion", "alquil", "estudio", "apartamento", "casa", "vivienda", "vivir", "residencia", "compart",
+    "barrio", "zona", "campus", "universidad", "facultad", "escuela", "carrera", "estudi", "clase", "upm", "ucm",
+    "uam", "uc3m", "urjc", "ceu", "comillas", "icai", "euros", "presupuesto", "pavos", "mes", "cerca", "metro",
+    "madrid", "dormir", "mudar", "erasmus", "busco", "buscar",
+)
+VOWELS = set("aeiouy")
+
+
+def looks_like_language(query: str) -> bool:
+    """Cheap, deterministic check (no AI) that the text is made of real-looking words, not keyboard mashing.
+
+    Rejects: mostly symbols/digits, a letter repeated 4+ times ("aaaa"), too few different letters,
+    or a majority of 'words' that are impossible in Spanish (no vowel, 5+ consonants in a row, 25+ letters).
+    """
+    q = _norm(query)
+    letters = [c for c in q if c.isalpha()]
+    visible = [c for c in q if not c.isspace()]
+    if len(letters) < 3 or len(letters) < 0.5 * len(visible):
+        return False
+    if re.search(r"([a-z])\1{3,}", q) or len(set(letters)) < min(5, max(3, len(letters) // 3)):
+        return False
+    words = re.findall(r"[a-z]+", q)
+    def plausible(w: str) -> bool:
+        return (len(w) <= 3 or bool(VOWELS & set(w))) and len(w) < 25 and not re.search(r"[^aeiouy]{5,}", w)
+    good = sum(plausible(w) for w in words)
+    return good >= max(1, round(0.7 * len(words)))
+
+
+def on_topic_by_keywords(query: str, campuses: list[Campus]) -> bool:
+    q = _norm(query)
+    names = [_norm(a) for c in campuses for a in (c.id, c.name, *c.aliases)] + [a for v in CAMPUS_ALIASES.values() for a in v]
+    return any(w in q for w in TOPIC_WORDS) or any(n and n in q for n in names) or bool(re.search(r"\d{3,4}", q))
+
+
 # ---------------------------------------------------------------- helpers
 def _norm(text: str) -> str:
     text = text.replace("€", " euros ")  # the ASCII step below would silently drop the € sign
@@ -137,12 +174,16 @@ def parse_schema(campuses: list[Campus], keys: list[str]) -> dict:
     return {
         "type": "object",
         "additionalProperties": False,
-        "required": ["campus_id", "budget_eur_month", "housing_type", "max_distance_km", "priorities", "interpretation"],
+        "required": ["on_topic", "campus_id", "budget_eur_month", "housing_type", "max_distance_km", "max_travel_min",
+                     "travel_mode", "priorities", "interpretation"],
         "properties": {
+            "on_topic": {"type": "boolean"},
             "campus_id": {"type": ["string", "null"], "enum": [c.id for c in campuses] + [None]},
             "budget_eur_month": num_or_null,
             "housing_type": {"type": "string", "enum": list(HOUSING_TYPES)},
             "max_distance_km": num_or_null,
+            "max_travel_min": num_or_null,
+            "travel_mode": {"type": "string", "enum": ["transit", "car"]},
             "priorities": {
                 "type": "object", "additionalProperties": False, "required": keys,
                 "properties": {k: {"type": "number"} for k in keys},
@@ -161,6 +202,9 @@ def _finish(raw: dict, campuses: list[Campus], keys: list[str], default_campus: 
     housing = raw.get("housing_type") if raw.get("housing_type") in HOUSING_TYPES else "room"
     dist = raw.get("max_distance_km")
     dist = float(dist) if isinstance(dist, (int, float)) and 0 < dist <= 60 else None
+    minutes = raw.get("max_travel_min")
+    minutes = float(minutes) if isinstance(minutes, (int, float)) and 5 <= minutes <= 180 else None
+    mode = raw.get("travel_mode") if raw.get("travel_mode") in ("transit", "car") else "transit"
     prio = raw.get("priorities") or {}
     weights = {k: round(min(max(float(prio.get(k, 0.2) or 0), 0.0), 1.0), 2) for k in keys}
     if DISTANCE_KEY in weights:  # students commute daily: distance never drops below 0.6 (product rule, D-24)
@@ -168,7 +212,10 @@ def _finish(raw: dict, campuses: list[Campus], keys: list[str], default_campus: 
     return {
         "campus_id": campus,
         "weights": weights,
-        "filters": {"max_rent_eur_m2": None, "max_distance_km": dist, "only_within_budget": budget is not None},
+        "filters": {"max_rent_eur_m2": None, "max_distance_km": dist, "max_travel_min": minutes,
+                    "only_within_budget": budget is not None},
+        "travel_mode": mode,
+        "understood": raw.get("on_topic", True) is not False,
         "budget_eur_month": budget,
         "housing_type": housing,
         "interpretation": str(raw.get("interpretation") or "")[:300],
@@ -194,38 +241,61 @@ def keyword_parse(query: str, campuses: list[Campus], keys: list[str]) -> dict:
     is_studio = re.search(r"\b(un|el|busco|quiero|alquilar|alquilo)\s+estudio\b|\bestudio\s+(para|individual|solo|propio)", q)
     housing = "studio" if is_studio else "flat" if re.search(r"piso (entero|para mi|solo)|apartamento", q) else "room"
     km = re.search(r"(\d+(?:[.,]\d+)?)\s*km", q)
+    minutes = re.search(r"(\d{1,3})\s*(?:min|minutos)", q)
+    mode = "car" if re.search(r"\b(coche|carro|conduc|en moto)", q) else "transit"
     priorities = {k: (1.0 if any(w in q for w in KEYWORDS.get(k, ())) else 0.2) for k in keys}
     if "rent_eur_m2" in priorities and (budget or priorities["rent_eur_m2"] < 1):
         priorities["rent_eur_m2"] = max(priorities["rent_eur_m2"], 0.6)
     parts = [next((item.name for item in campuses if item.id == campus), None), f"hasta {int(budget)} €/mes" if budget else None,
              {"room": "habitación", "studio": "estudio", "flat": "piso entero"}[housing],
-             f"a menos de {km.group(1)} km" if km else None]
+             f"a menos de {km.group(1)} km" if km else None,
+             f"a menos de {minutes.group(1)} min" + (" en coche" if mode == "car" else " en transporte público") if minutes else None]
     raw = {"campus_id": campus, "budget_eur_month": budget, "housing_type": housing,
            "max_distance_km": float(km.group(1).replace(",", ".")) if km else None, "priorities": priorities,
+           "max_travel_min": float(minutes.group(1)) if minutes else None, "travel_mode": mode,
+           "on_topic": on_topic_by_keywords(query, campuses),
            "interpretation": "He entendido: " + ", ".join(p for p in parts if p) + "."}
     return raw
 
 
+NOT_UNDERSTOOD = {
+    "gibberish": "No he entendido lo que has escrito. Cuéntame con palabras qué buscas, por ejemplo dónde estudias y cuánto puedes pagar.",
+    "off_topic": "Solo puedo ayudarte a encontrar dónde vivir en Madrid. Dime dónde estudias, qué buscas y tu presupuesto.",
+}
+
+
 def parse_query(query: str, campuses: list[Campus], indicators: list[Indicator], default_campus: str) -> dict:
     keys = [i.key for i in indicators] + [DISTANCE_KEY]
-    cached = _demo_cache().get(_norm(query))
-    if cached:
-        return _finish(cached, campuses, keys, default_campus, "llm")
+    if not looks_like_language(query):  # no AI call for keyboard mashing
+        return _not_understood("gibberish", keys, default_campus)
     cache_key = json.dumps([_norm(query), keys, [c.id for c in campuses], default_campus])
     hit = _cache_get(_parse_cache, cache_key)
     if hit:
         return dict(hit)
+    result = None
     if llm_enabled():
         try:
             campus_list = "; ".join(f"{c.id} = {c.name}" for c in campuses)
             text = _call_openai(PARSE_INSTRUCTIONS + f"\nCampus disponibles: {campus_list}\nCriterios: {', '.join(keys)}",
                                 query, parse_schema(campuses, keys))
             result = _finish(json.loads(text), campuses, keys, default_campus, "llm")
-            _cache_put(_parse_cache, cache_key, result)
-            return dict(result)
         except Exception:  # noqa: BLE001 — any failure means "use the fallback", the demo must not break
-            pass
-    return _finish(keyword_parse(query, campuses, keys), campuses, keys, default_campus, "keywords")
+            result = None
+    if result is None:
+        cached = _demo_cache().get(_norm(query))  # pitch sentences still work offline
+        # A cached pitch answer was written by the AI earlier, so it keeps the "llm" label.
+        result = _finish(cached, campuses, keys, default_campus, "llm") if cached else \
+            _finish(keyword_parse(query, campuses, keys), campuses, keys, default_campus, "keywords")
+    if not result["understood"]:
+        result = _not_understood("off_topic", keys, default_campus, result["engine"])
+    _cache_put(_parse_cache, cache_key, result)
+    return dict(result)
+
+
+def _not_understood(reason: str, keys: list[str], default_campus: str, engine: str = "keywords") -> dict:
+    out = _finish({"on_topic": False}, [], keys, default_campus, engine)
+    out.update(understood=False, interpretation=NOT_UNDERSTOOD[reason])
+    return out
 
 
 # ---------------------------------------------------------------- explain
@@ -243,15 +313,15 @@ def template_explain(items: list[dict], housing_type: str) -> str:
     """Deterministic fallback explanation built only from our numbers."""
     lines = []
     for i, it in enumerate(items, 1):
-        txt = f"{i}) {it['name']} ({it['district']}): a {_fmt(it['distance_km'], 1)} km del campus"
-        if it.get("est_rent_eur_month") is not None:
-            txt += f", ~{_fmt(it['est_rent_eur_month'])} €/mes estimados por {HOUSING_ES.get(housing_type, 'una vivienda')}"
+        txt = f"{i}) {it['name']} ({it['district']}): {_fmt(it.get('min_transporte_publico'))} min en transporte público y {_fmt(it.get('min_coche'))} min en coche hasta tu campus"
+        if it.get("alquiler_oficial_piso_mediana") is not None:
+            txt += f"; pisos del distrito: {_fmt(it['alquiler_oficial_piso_mediana'])} €/mes de alquiler mediano oficial (2024)"
         if it.get("fits_budget") is True:
             txt += ", dentro de tu presupuesto"
         elif it.get("fits_budget") is False:
             txt += ", algo por encima de tu presupuesto"
         lines.append(txt + ".")
-    return "\n".join(lines) + "\nPrecios estimados con datos oficiales; mira los anuncios para el precio real."
+    return "\n".join(lines) + "\nEl precio exacto de cada piso está en los anuncios enlazados."
 
 
 def explain_areas(items: list[dict], housing_type: str, query: str | None) -> tuple[str, str]:

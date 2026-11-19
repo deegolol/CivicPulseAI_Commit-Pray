@@ -73,11 +73,13 @@ class Health(BaseModel):
 
 # ---------- POST /api/score (CONTRACTS §4.6) ----------
 HousingType = Literal["room", "studio", "flat"]
+TravelMode = Literal["transit", "car"]
 
 
 class ScoreFilters(BaseModel):
     max_rent_eur_m2: float | None = None
-    max_distance_km: float | None = None
+    max_distance_km: float | None = None  # road km by car (OSRM); straight line only if no travel data
+    max_travel_min: float | None = Field(default=None, gt=0)  # door-to-door minutes with `travel_mode`
     only_within_budget: bool = False
     min_budget_eur_month: float | None = Field(default=None, ge=0)
     max_air_no2: float | None = Field(default=None, ge=0)
@@ -90,6 +92,7 @@ class ScoreRequest(BaseModel):
     filters: ScoreFilters = Field(default_factory=ScoreFilters)
     budget_eur_month: float | None = Field(default=None, gt=0)
     housing_type: HousingType = "room"
+    travel_mode: TravelMode = "transit"  # what "Cercanía" (weight key distance_km) measures
     limit: int = Field(default=500, ge=1, le=500)
 
 
@@ -112,8 +115,15 @@ class ScoreResult(BaseModel):
     rank: int
     score: float  # 0..100
     excluded: bool
-    distance_km: float
-    est_rent_eur_month: int | None
+    distance_km: float  # by road (OSRM); straight line only if no travel data
+    transit_min: int | None = None  # public transport, weekday peak, door to door (CRTM GTFS)
+    car_min: int | None = None  # driving without traffic (OSRM)
+    travel_min: int | None = None  # the one for the chosen travel_mode
+    est_rent_eur_month: int | None  # what YOU would pay per month (see rent_basis)
+    rent_median_eur_month: int | None = None  # real: median monthly rent of flats in the district (SERPAVI)
+    rent_p25_eur_month: int | None = None
+    rent_p75_eur_month: int | None = None
+    rent_basis: str = ""  # how est_rent_eur_month was obtained, in plain Spanish
     fits_budget: bool | None
     affordable_m2: float | None
     listing_links: list[ListingLink] = Field(default_factory=list)
@@ -133,6 +143,7 @@ class Recommendation(BaseModel):
 class ScoreResponse(BaseModel):
     campus_id: str
     housing_type: HousingType
+    travel_mode: TravelMode = "transit"
     reference_m2: int
     results: list[ScoreResult]
     recommendation: Recommendation | None = None  # None when every area is excluded
@@ -150,6 +161,8 @@ class AiParseResponse(BaseModel):
     filters: ScoreFilters
     budget_eur_month: float | None
     housing_type: HousingType
+    travel_mode: TravelMode = "transit"
+    understood: bool = True  # False: gibberish or not about finding a place to live → don't search
     interpretation: str
     engine: Literal["llm", "keywords"]
 
@@ -161,6 +174,7 @@ class AiExplainRequest(BaseModel):
     query: str | None = None
     budget_eur_month: float | None = Field(default=None, gt=0)
     housing_type: HousingType = "room"
+    travel_mode: TravelMode = "transit"
     filters: ScoreFilters = Field(default_factory=ScoreFilters)
 
 

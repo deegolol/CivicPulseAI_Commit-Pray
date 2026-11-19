@@ -36,16 +36,18 @@ export function priorityOptions(availableKeys: Set<string>) {
     && (key !== 'services_count' || (!availableKeys.has('libraries_count') && !availableKeys.has('sports_count'))));
 }
 
+/** How the student gets to class: decides which real travel time "Cercanía" uses. */
 export const TRANSPORT_LABELS = {
-  any: 'Sin preferencia',
-  walk: 'A pie',
-  metro: 'Metro',
+  transit: 'Transporte público',
   car: 'Coche',
 };
 
 export type TransportMode = keyof typeof TRANSPORT_LABELS;
 
-/** Exact 3 demo queries cached on backend DEMO_CACHE for instant response */
+/** The sentence we type in the live demo (also the search box placeholder). */
+export const DEMO_QUERY = 'Estudio en la ETSISI y busco una habitación por menos de 450 € al mes, a menos de 30 minutos en transporte público';
+
+/** Example chips. The backend keeps a saved AI answer for them in case the AI is down during the demo. */
 export const EXAMPLE_QUERIES = [
   'Estudio en la ETSISI, tengo 500 euros y quiero una zona tranquila con aire limpio',
   'Voy a la facultad de informática de Montegancedo, busco un estudio para mí solo por menos de 750€',

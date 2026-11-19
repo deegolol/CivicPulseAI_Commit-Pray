@@ -8,7 +8,6 @@
 import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import type { Feature } from 'geojson';
 import {
-  Circle,
   GeoJSON,
   MapContainer,
   Marker,
@@ -29,8 +28,8 @@ import type {
   ScoreResultItem,
 } from '../api/types';
 import { MADRID_CENTER, MADRID_DEFAULT_ZOOM } from '../config';
-import { formatEuro, formatKm } from '../utils/format';
-import { MapLayersOverlay, MapLayersPanel, MapLayerShortcuts, type LayerId } from './MapLayers';
+import { formatEuro, formatKm, formatMinutes } from '../utils/format';
+import { MapLayersOverlay, MapLayersPanel, MapMoveFade, type LayerId } from './MapLayers';
 
 // Includes mainland Spain, the Balearic Islands and the Canary Islands.
 const SPAIN_BOUNDS = L.latLngBounds([27.4, -18.3], [44.1, 4.8]);
@@ -46,7 +45,6 @@ const CAMPUS_PIN = L.divIcon({
     <path d="M26.5 17.5v5" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/>
   </svg>`,
 });
-const RADIUS_STYLE = { color: '#7A6A58', weight: 1.2, dashArray: '6 6', fillOpacity: 0 };
 const BASEMAP_ATTRIBUTION = '&copy; <a href="https://www.ign.es/">IGN</a> · <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · <a href="https://datos.madrid.es/">Ayuntamiento de Madrid</a> · CRTM';
 
 interface MadridMapProps {
@@ -60,7 +58,6 @@ interface MadridMapProps {
   onSelectArea: (areaId: string) => void;
   onHoverArea: (areaId: string | null) => void;
   activeCampus: Campus | null;
-  maxDistanceKm: number | null;
   budget: number;
   isScoring?: boolean;
   isVisible?: boolean;
@@ -145,11 +142,14 @@ function buildTooltipHtml(
   result: ScoreResultItem | undefined,
   budget: number,
 ): string {
+  // Only real numbers: travel minutes, and the official flat rent exactly as published (never our estimate).
   const rentText =
     result?.est_rent_eur_month != null
-      ? `~${formatEuro(result.est_rent_eur_month)}/mes`
-      : 'Sin dato';
-  const distText = result ? `${formatKm(result.distance_km)} de tu campus` : '';
+      ? `${formatEuro(result.est_rent_eur_month)}/mes`
+      : result?.travel_min != null ? `${formatMinutes(result.travel_min)} a tu campus` : '';
+  const distText = result?.transit_min != null
+    ? `🚇 ${formatMinutes(result.transit_min)} · 🚗 ${formatMinutes(result.car_min)}${result.est_rent_eur_month != null ? ' · mediana oficial de pisos' : ''}`
+    : result ? `${formatKm(result.distance_km)} de tu campus` : '';
   const over =
     result?.est_rent_eur_month != null && result.est_rent_eur_month > budget
       ? Math.round(result.est_rent_eur_month - budget)
@@ -260,7 +260,7 @@ function MapViewportController({
     lastBoundsSig.current = boundsSignature;
     const bounds = L.latLngBounds(boundsPoints);
     if (!bounds.isValid()) return;
-    map.fitBounds(bounds, { padding: [46, 46], maxZoom: 13, animate: !window.matchMedia("(prefers-reduced-motion: reduce)").matches, duration: 0.35 });
+    map.fitBounds(bounds, { padding: [60, 60], maxZoom: 14, animate: !window.matchMedia("(prefers-reduced-motion: reduce)").matches, duration: 0.35 });
   }, [map, boundsPoints, boundsSignature, visible]);
 
   // Smooth pan to selected neighborhood
@@ -273,9 +273,9 @@ function MapViewportController({
 
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReduced) {
-      map.setView(selectedCoords, Math.max(map.getZoom(), 13), { animate: false });
+      map.setView(selectedCoords, Math.max(map.getZoom(), 15), { animate: false });
     } else {
-      map.flyTo(selectedCoords, Math.max(map.getZoom(), 13), { duration: 0.45 });
+      map.flyTo(selectedCoords, Math.max(map.getZoom(), 15), { duration: 0.5 });
     }
   }, [map, selectedCoords, visible]);
 
@@ -293,7 +293,6 @@ function MadridMapImpl({
   onSelectArea,
   onHoverArea,
   activeCampus,
-  maxDistanceKm,
   budget,
   isScoring = false,
   isVisible = true,
@@ -303,6 +302,7 @@ function MadridMapImpl({
   const campusLatLng = useMemo<[number, number] | null>(() =>
     activeCampus ? [activeCampus.coords[1], activeCampus.coords[0]] : null, [activeCampus]);
   const geoJsonRef = useRef<LeafletGeoJSON | null>(null);
+  const layersPanelRef = useRef<HTMLDivElement | null>(null);
   const pathsById = useRef(new Map<string, { path: L.Path; feature: AreaFeature }>());
   const previousInteraction = useRef({ selectedAreaId, hoveredAreaId });
   const scoresRef = useRef(scoresById);
@@ -402,8 +402,10 @@ function MadridMapImpl({
         const centroid = centroidsById[id];
         const area = scoresById[id];
         if (!centroid || !area) return null;
-        const priceLabel =
-          area.est_rent_eur_month != null ? `~${formatEuro(area.est_rent_eur_month)}` : 'Sin dato';
+        // Pills show the real travel time; a price only when it is an official published figure (flats).
+        const priceLabel = area.est_rent_eur_month != null
+          ? formatEuro(area.est_rent_eur_month)
+          : area.travel_min != null ? formatMinutes(area.travel_min) : formatKm(area.distance_km);
         return {
           id,
           rank,
@@ -419,9 +421,9 @@ function MadridMapImpl({
       .sort((a, b) => b.rank - a.rank); // render #1 last so it stays on top
   }, [top10RankById, centroidsById, scoresById, recommendedAreaId]);
 
-  // Bounds points: active campus + Top 10 price pills
+  // Bounds points: active campus + the best 3 zones (a tight view: you can still see the streets)
   const boundsPoints = useMemo<[number, number][]>(() => {
-    const pts: [number, number][] = pricePills.map((p) => p.coords);
+    const pts: [number, number][] = pricePills.filter((p) => p.rank <= 3).map((p) => p.coords);
     if (campusLatLng) pts.push(campusLatLng);
     return pts;
   }, [pricePills, campusLatLng]);
@@ -484,6 +486,7 @@ function MadridMapImpl({
           noWrap
         />
         <MapLayersOverlay enabled={layers} />
+        <MapMoveFade target={layersPanelRef} />
 
         <MapViewportController
           boundsPoints={boundsPoints}
@@ -492,14 +495,6 @@ function MadridMapImpl({
           visible={isVisible}
         />
 
-        {/* Max distance circle around active campus */}
-        {campusLatLng && maxDistanceKm !== null && (
-          <Circle
-            center={campusLatLng}
-            radius={maxDistanceKm * 1000}
-            pathOptions={RADIUS_STYLE}
-          />
-        )}
 
         {geoData && (
           <GeoJSON
@@ -534,7 +529,7 @@ function MadridMapImpl({
       )}
 
       {/* Layer toggles: supermarkets, Metro, parks, libraries, gyms, sports, malls, roads */}
-      <div className="pointer-events-none absolute top-3 right-3 z-[500]">
+      <div ref={layersPanelRef} className="map-fade pointer-events-none absolute top-3 right-3 z-[500]">
         <MapLayersPanel enabled={layers} onToggle={onToggleLayer} />
       </div>
 
@@ -546,9 +541,8 @@ function MadridMapImpl({
         </span>
         <span className="inline-flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-full border border-ink/40 bg-bg" />
-          Alquiler estimado
+          Minutos hasta tu campus
         </span>
-        <MapLayerShortcuts enabled={layers} onToggle={onToggleLayer} />
       </div>
     </div>
   );

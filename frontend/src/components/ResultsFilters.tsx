@@ -2,7 +2,7 @@ import { useId, useMemo, useState } from 'react';
 import type { Campus, HousingType, ScoreResultItem } from '../api/types';
 import { HOUSING_TYPE_LABELS } from '../config';
 import { TRANSPORT_LABELS, type AirLevelOption, type TransportMode } from '../constants/filters';
-import { formatEuro, formatKm } from '../utils/format';
+import { formatEuro } from '../utils/format';
 import { CampusPicker } from './CampusPicker';
 import { PreferenceControls } from './PreferenceControls';
 
@@ -11,7 +11,7 @@ export interface ResultFilters {
   budget: number;
   minBudget: number | null;
   housingType: HousingType;
-  maxDistanceKm: number | null;
+  maxTravelMin: number | null;
   airLevel: AirLevelOption;
   wellConnectedOnly: boolean;
   onlyWithinBudget: boolean;
@@ -72,19 +72,10 @@ export function ResultsFilters({ availableKeys, campuses, areas, filters, onAppl
     }));
   }
 
-  function updateTransport(mode: TransportMode) {
-    const key = mode === 'metro' ? 'transit_stops' : 'distance_km';
-    setDraft((previous) => ({
-      ...previous,
-      transportMode: mode,
-      priorityWeights: mode !== 'any' && availableKeys.has(key) && !previous.priorityWeights[key]
-        ? { ...previous.priorityWeights, [key]: 1 }
-        : previous.priorityWeights,
-    }));
-  }
 
   const budgetCeiling = Math.max(sliderCeiling, draft.budget);
-  const radius = draft.maxDistanceKm ?? filters.maxDistanceKm ?? 10;
+  const minutes = draft.maxTravelMin ?? filters.maxTravelMin ?? 45;
+  const minutesText = draft.maxTravelMin === null ? 'Sin límite' : `${minutes} min`;
 
   return (
     <form className="flex min-h-0 flex-1 flex-col" onSubmit={(event) => {
@@ -151,26 +142,26 @@ export function ResultsFilters({ availableKeys, campuses, areas, filters, onAppl
             </label>
           </section>
 
-          <section aria-label="Cercanía al campus" className="min-w-0 rounded-xl border border-border bg-surface p-3.5">
-            <label htmlFor={distanceId} className="flex flex-wrap items-baseline justify-between gap-1 text-sm font-semibold">
-              Distancia al campus <span className="tabular-nums text-ink">{draft.maxDistanceKm === null ? 'Sin límite' : formatKm(radius)}</span>
-            </label>
-            <input id={distanceId} type="range" min="0.5" max="60" step="any" value={radius}
-              aria-label="Distancia máxima al campus" aria-valuetext={draft.maxDistanceKm === null ? 'Sin límite' : formatKm(radius)}
-              onChange={(event) => update('maxDistanceKm', Math.round(event.target.valueAsNumber * 2) / 2)} className={rangeClass} />
-            <div aria-hidden="true" className="-mt-1 flex justify-between text-xs text-muted">
-              <span>0,5 km</span><span>60 km</span>
-            </div>
-            <label className="mt-2 flex min-h-11 items-center gap-2 text-sm">
-              <input type="checkbox" checked={draft.maxDistanceKm === null} onChange={(event) => update('maxDistanceKm', event.target.checked ? null : radius)}
-                className="size-4 shrink-0 accent-brand" />
-              Sin límite de distancia
-            </label>
-            <label className="mt-2 block text-xs font-semibold">
-              Cómo te desplazas
-              <select value={draft.transportMode} onChange={(event) => updateTransport(event.target.value as TransportMode)} className={fieldClass}>
+          <section aria-label="Tiempo hasta el campus" className="min-w-0 rounded-xl border border-border bg-surface p-3.5">
+            <label className="block text-xs font-semibold">
+              Cómo irás a clase
+              <select value={draft.transportMode} onChange={(event) => update('transportMode', event.target.value as TransportMode)} className={fieldClass}>
                 {Object.entries(TRANSPORT_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
               </select>
+            </label>
+            <label htmlFor={distanceId} className="mt-3 flex flex-wrap items-baseline justify-between gap-1 text-sm font-semibold">
+              Tiempo máximo <span className="tabular-nums text-ink">{minutesText}</span>
+            </label>
+            <input id={distanceId} type="range" min="10" max="120" step="5" value={minutes}
+              aria-label="Tiempo máximo hasta el campus" aria-valuetext={minutesText}
+              onChange={(event) => update('maxTravelMin', event.target.valueAsNumber)} className={rangeClass} />
+            <div aria-hidden="true" className="-mt-1 flex justify-between text-xs text-muted">
+              <span>10 min</span><span>120 min</span>
+            </div>
+            <label className="mt-2 flex min-h-11 items-center gap-2 text-sm">
+              <input type="checkbox" checked={draft.maxTravelMin === null} onChange={(event) => update('maxTravelMin', event.target.checked ? null : minutes)}
+                className="size-4 shrink-0 accent-brand" />
+              Sin límite de tiempo
             </label>
           </section>
         </div>

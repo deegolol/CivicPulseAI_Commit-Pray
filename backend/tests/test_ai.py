@@ -69,7 +69,7 @@ def test_explain_endpoint_template_uses_only_our_numbers():
     assert r.status_code == 200
     body = r.json()
     assert body["engine"] == "keywords"
-    assert s[0]["name"] in body["text"] and "estimad" in body["text"]
+    assert s[0]["name"] in body["text"] and f"{s[0]['transit_min']} min" in body["text"] and "estimad" not in body["text"]
 
 
 def test_parse_schema_is_strict_and_built_from_data():
@@ -105,3 +105,13 @@ def test_all_pitch_sentences_hit_the_demo_cache(monkeypatch):
     monkeypatch.setenv("DEMO_CACHE", "true")
     for q in PITCH_SENTENCES:
         assert client.post("/api/ai/parse", json={"query": q}).json()["engine"] == "llm", q
+
+
+def test_gibberish_and_off_topic_are_not_searched():
+    for query in ("aaaaaaaaaaaa", "asdkjhqwkjehqwkjeh zxcvbnm", "!!!!????", "ffff gggg"):
+        body = client.post("/api/ai/parse", json={"query": query}).json()
+        assert body["understood"] is False and "No he entendido" in body["interpretation"], query
+    body = client.post("/api/ai/parse", json={"query": "dame una receta de tortilla de patatas"}).json()
+    assert body["understood"] is False and "dónde vivir" in body["interpretation"]
+    ok = client.post("/api/ai/parse", json={"query": "busco habitación cerca de la UAM, a menos de 30 minutos en coche"}).json()
+    assert ok["understood"] is True and ok["travel_mode"] == "car" and ok["filters"]["max_travel_min"] == 30

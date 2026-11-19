@@ -27,6 +27,11 @@ export function formatKm(value: number | null | undefined): string {
   return `${decFormatter.format(value)} km`;
 }
 
+export function formatMinutes(value: number | null | undefined): string {
+  if (value == null || Number.isNaN(value)) return 'Sin dato';
+  return `${intFormatter.format(Math.round(value))} min`;
+}
+
 export function formatDecimal(value: number | null | undefined): string {
   if (value == null || Number.isNaN(value)) return 'Sin dato';
   return decFormatter.format(value);

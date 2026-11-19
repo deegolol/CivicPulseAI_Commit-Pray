@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import json
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
 from statistics import mean, median
@@ -39,6 +39,10 @@ class Dataset:
     areas: list[Area]
     campuses: list[Campus]
     geojson: dict
+    # campus id → area id → {"transit_min", "car_min", "car_km"} (etl/fetch_travel_times.py); {} if not built
+    travel: dict = field(default_factory=dict)
+    # district id ("01".."21") → official monthly rents of flats {"median", "p25", "p75", ...} (etl/fetch_rent_monthly.py)
+    rents: dict = field(default_factory=dict)
 
     def area(self, area_id: str) -> Area | None:
         return next((a for a in self.areas if a.id == area_id), None)
@@ -98,4 +102,10 @@ def get_dataset() -> Dataset:
         areas=areas,
         campuses=[Campus(**c) for c in json.loads((folder / "campuses.json").read_text(encoding="utf-8"))],
         geojson=json.loads((folder / "barrios.geojson").read_text(encoding="utf-8")),
+        travel=_optional_json(folder / "travel_times.json").get("campuses", {}),
+        rents=_optional_json(folder / "rent_monthly.json").get("districts", {}),
     )
+
+
+def _optional_json(path: Path) -> dict:
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}

@@ -11,7 +11,8 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { memo as reactMemo } from 'react';
 import { Check, ChevronDown, ChevronUp, ExternalLink, Scale, X } from 'lucide-react';
 import type { Recommendation, ScoreResultItem } from '../api/types';
-import { formatEuro, formatKm } from '../utils/format';
+import { formatEuro } from '../utils/format';
+import { HeroFigure, RealListings, TravelTimes } from './ZoneFacts';
 import { normalizedToStars, StarRating } from './StarRating';
 
 interface ZoneListProps {
@@ -178,7 +179,7 @@ function ZoneListImpl({
               Ninguna zona encaja con estos filtros
             </p>
             <p className="mt-1 text-xs text-muted">
-              Prueba a ampliar la distancia máxima o desactivar algún filtro en «Más filtros».
+              Prueba a ampliar el tiempo máximo hasta el campus o desactivar algún filtro en «Filtros».
             </p>
           </div>
         ) : (
@@ -216,16 +217,10 @@ function ZoneListImpl({
                     <h2 className="font-display truncate text-xl font-bold text-ink">
                       {recommendation.name}
                     </h2>
-                    <p className="text-xs text-muted">
-                      {recommendation.district} · {formatKm(recommendedArea.distance_km)} de tu campus
-                    </p>
+                    <p className="text-xs text-muted">{recommendation.district}</p>
+                    <TravelTimes area={recommendedArea} className="mt-0.5 text-xs text-muted" />
                   </div>
-                  <div className="shrink-0 text-right font-display text-2xl font-bold text-ink tabular-nums">
-                    {recommendedArea.est_rent_eur_month != null
-                      ? `~${formatEuro(recommendedArea.est_rent_eur_month)}`
-                      : 'Sin dato'}
-                    <span className="font-sans text-xs font-normal text-muted">/mes</span>
-                  </div>
+                  <div className="shrink-0"><HeroFigure area={recommendedArea} large /></div>
                 </div>
 
                 <div className="mt-2"><StarRating value={normalizedToStars(recommendedArea.score / 100)} size="md" /></div>
@@ -264,6 +259,8 @@ function ZoneListImpl({
                   </div>
                 )}
 
+                <RealListings areaId={recommendedArea.id} />
+
                 {/* Primary red "Ver pisos" + secondary "Ver detalle" */}
                 <div className="mt-4 flex items-center gap-2">
                   {recPrimaryLink && (
@@ -273,7 +270,7 @@ function ZoneListImpl({
                       rel="noopener noreferrer"
                       className="inline-flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-[8px] bg-brand px-3.5 py-2 text-xs font-medium text-bg transition hover:bg-brand-hover"
                     >
-                      <span>Ver pisos</span>
+                      <span>Ver pisos con precio exacto</span>
                       <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.75} />
                     </a>
                   )}
@@ -391,18 +388,12 @@ function ZoneListImpl({
 
                       <div className="mt-2"><StarRating value={normalizedToStars(area.score / 100)} size="md" /></div>
 
-                      {/* Hero price + distance */}
-                      <div className="mt-3 flex items-baseline justify-between gap-2">
-                        <div className="font-display text-2xl font-bold text-ink tabular-nums">
-                          {area.est_rent_eur_month != null
-                            ? `~${formatEuro(area.est_rent_eur_month)}`
-                            : 'Sin dato'}
-                          <span className="font-sans text-xs font-normal text-muted">/mes</span>
-                        </div>
-                        <span className="text-xs text-muted tabular-nums">
-                          {formatKm(area.distance_km)} de tu campus
-                        </span>
+                      {/* Real travel times + the one honest figure we have */}
+                      <div className="mt-3 flex items-end justify-between gap-2">
+                        <TravelTimes area={area} className="text-xs text-muted" />
+                        <HeroFigure area={area} />
                       </div>
+                      <RealListings areaId={area.id} />
                     </div>
 
                     {/* Footer actions: secondary "Ver pisos" + Compare toggle */}

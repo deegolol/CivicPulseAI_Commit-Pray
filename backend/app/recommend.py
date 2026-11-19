@@ -55,26 +55,34 @@ def build_recommendation(results: list[ScoreResult], areas: list[Area], indicato
     area = next(a for a in areas if a.id == best.id)
     weights = {k: w for k, w in req.weights.items()}
     all_vals = {i.key: [a.values[i.key] for a in areas if a.values.get(i.key) is not None] for i in indicators}
-    distances = [r.distance_km for r in results]
+    timed = best.travel_min is not None
+    distances = [(r.travel_min if timed and r.travel_min is not None else r.distance_km) for r in results]
+    mode_es = "en transporte público" if req.travel_mode == "transit" else "en coche"
     reasons: list[tuple[float, str]] = []  # (priority, text)
     caveats: list[str] = []  # trade-offs for criteria with high priority
 
-    # Price (always first when the user gave a budget)
-    if best.est_rent_eur_month is not None and weights.get("rent_eur_m2", 0) > 0:
-        housing = HOUSING_ES.get(req.housing_type, "una vivienda")
-        if req.budget_eur_month and best.fits_budget:
-            spare = round(req.budget_eur_month - best.est_rent_eur_month)
-            text = f"~{_fmt(best.est_rent_eur_month)} €/mes por {housing}: te sobran ~{_fmt(spare)} € de tu presupuesto"
-            reasons.append((10.0, text))
-        else:
-            rent = area.values.get("rent_eur_m2")
-            pct = _share_better(rent, all_vals.get("rent_eur_m2", []), False) if rent is not None else 0
-            text = f"~{_fmt(best.est_rent_eur_month)} €/mes por {housing}" + (", una opción relativamente económica en Madrid" if pct >= 50 else "")
-            reasons.append((weights.get("rent_eur_m2", 0.3) + 1, text))
+    # Price: only official figures, said exactly as published (never our own estimate)
+    if weights.get("rent_eur_m2", 0) > 0:
+        rent = area.values.get("rent_eur_m2")
+        pct = _share_better(rent, all_vals.get("rent_eur_m2", []), False) if rent is not None else 0
+        if best.rent_median_eur_month is not None and req.housing_type == "flat":
+            text = f"Pisos en {best.district}: alquiler mediano oficial de {_fmt(best.rent_median_eur_month)} €/mes (contratos 2024)"
+            if req.budget_eur_month and best.fits_budget:
+                text += ", dentro de tu presupuesto"
+            reasons.append((10.0 if best.fits_budget else weights.get("rent_eur_m2", 0.3) + 1, text))
+        elif pct >= 50:
+            reasons.append((weights.get("rent_eur_m2", 0.3) + 1,
+                            ("Uno de los barrios con el alquiler más barato de Madrid" if pct >= 75 else "Alquiler más barato que en la mitad de Madrid")
+                            + " (precio oficial por m², contratos 2024)"))
 
     # Distance to campus
-    pos = _rank_among(best.distance_km, distances)
-    text = f"A {_fmt(best.distance_km, 1)} km de tu campus" + (f", entre las {max(5, (pos + 4) // 5 * 5)} zonas más cercanas" if pos <= 20 else "")
+    pos = _rank_among(distances[results.index(best)], distances)
+    if timed:
+        other = f"{_fmt(best.car_min)} min en coche" if req.travel_mode == "transit" else f"{_fmt(best.transit_min)} min en transporte público"
+        text = f"A {_fmt(best.travel_min)} min de tu campus {mode_es} ({other})"
+    else:
+        text = f"A {_fmt(best.distance_km, 1)} km de tu campus"
+    text += f", entre las {max(5, (pos + 4) // 5 * 5)} zonas más cercanas" if pos <= 20 else ""
     if weights.get("distance_km", 0) > 0:
         reasons.append((weights["distance_km"] + (0.25 if pos <= 10 else 0.1 if pos <= 20 else 0), text))
 
@@ -119,10 +127,10 @@ def build_recommendation(results: list[ScoreResult], areas: list[Area], indicato
 
     reasons.sort(key=lambda r: r[0], reverse=True)
     headline = f"{best.name} es la zona que mejor encaja con lo que buscas"
-    if best.distance_km > 8 and weights.get("distance_km", 0) >= 0.6:
-        caveats.append(f"Está a {_fmt(best.distance_km, 1)} km de tu campus: cuenta con el transporte")
-    if area.notes.get("rent_eur_m2") and weights.get("rent_eur_m2", 0) > 0:
-        caveats.append("El precio es una estimación con la mediana oficial de su distrito")
+    if timed and best.travel_min is not None and best.travel_min > 45 and weights.get("distance_km", 0) >= 0.6:
+        caveats.append(f"Son {_fmt(best.travel_min)} min hasta tu campus {mode_es}")
+    if weights.get("rent_eur_m2", 0) > 0:
+        caveats.append("El precio exacto de cada piso está en los anuncios: el dato oficial es de contratos firmados en 2024")
     return Recommendation(area_id=best.id, name=best.name, district=best.district,
                           headline=headline, reasons=[t for _, t in reasons[:4]], caveats=caveats[:2])
 
@@ -137,7 +145,7 @@ def build_highlights(results: list[ScoreResult], areas: list[Area]) -> dict[str,
     priced = [r for r in ok if r.est_rent_eur_month is not None]
     if priced:
         out["cheapest"] = min(priced, key=lambda r: (r.est_rent_eur_month, -r.score)).id
-    out["closest"] = min(ok, key=lambda r: r.distance_km).id
+    out["closest"] = min(ok, key=lambda r: (r.travel_min if r.travel_min is not None else r.distance_km, -r.score)).id
     air = [r for r in ok if values[r.id].get("air_no2") is not None]
     if air:
         out["cleanest_air"] = min(air, key=lambda r: (values[r.id]["air_no2"], -r.score)).id

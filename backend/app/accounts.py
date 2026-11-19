@@ -12,7 +12,7 @@ import time
 
 from . import account_catalog
 from .data import REPO_ROOT, get_dataset
-from .scoring import REFERENCE_M2, RENT_KEY
+from .scoring import official_rent
 
 SESSION_SECONDS = 7 * 24 * 60 * 60
 SCHEMA = """
@@ -209,11 +209,10 @@ def workspace(conn: sqlite3.Connection, account: int) -> dict:
     watches = []
     for row in conn.execute("SELECT * FROM watches WHERE account_id = ? ORDER BY id DESC", (account,)):
         area = dataset.area(row["area_id"])
-        rent = area.values.get(RENT_KEY) if area else None
-        estimate = round(rent * REFERENCE_M2[row["housing_type"]]) if rent is not None else None
+        estimate = official_rent(area, dataset.rents, row["housing_type"])[0] if area else None
         matches = estimate is not None and estimate <= row["budget_eur_month"]
         if matches and not row["last_match"]:
-            emit_notice(conn, account, f"{area.name} encaja en tu presupuesto: {estimate} €/mes de alquiler estimado.", kind="budget")
+            emit_notice(conn, account, f"{area.name} encaja en tu presupuesto: {estimate} €/mes de alquiler mediano oficial de pisos en su distrito.", kind="budget")
         if matches != bool(row["last_match"]):
             conn.execute("UPDATE watches SET last_match = ? WHERE id = ?", (matches, row["id"]))
         watches.append({

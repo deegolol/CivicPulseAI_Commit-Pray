@@ -35,13 +35,11 @@ export function searchPreferences(query: string, parsed: AiParseResponse, availa
     inferredFields.add('budget');
   }
   if (parsed.housing_type !== 'room' || /habitacion|compartid/.test(words)) inferredFields.add('housing');
-  if (parsed.filters.max_distance_km !== null) inferredFields.add('distance');
+  if (parsed.filters.max_travel_min != null) inferredFields.add('distance');
 
-  let transportMode: TransportMode = 'any';
-  if (/\b(en coche|con coche|conduciendo)\b/.test(words)) transportMode = 'car';
-  else if (/\b(a pie|andando|caminando)\b/.test(words)) transportMode = 'walk';
-  else if (/\bmetro\b/.test(words) && !/\bsin metro\b/.test(words)) transportMode = 'metro';
-  if (transportMode !== 'any') inferredFields.add('transport');
+  const transportMode: TransportMode = parsed.travel_mode
+    ?? (/\b(en coche|con coche|conduciendo|en moto)\b/.test(words) ? 'car' : 'transit');
+  inferredFields.add('transport');
 
   for (const { key } of priorityOptions(availableKeys)) {
     const terms = OPTIONAL_TERMS[key];
@@ -50,7 +48,6 @@ export function searchPreferences(query: string, parsed: AiParseResponse, availa
     const mentioned = new RegExp('\\b(?:' + terms + ')\\b').test(words);
     if (rejected || mentioned || (parsed.weights[key] ?? 0) >= 0.75) {
       if (!rejected) priorities.add(key);
-      else if (key === 'transit_stops' && transportMode === 'metro') transportMode = 'any';
     }
   }
 

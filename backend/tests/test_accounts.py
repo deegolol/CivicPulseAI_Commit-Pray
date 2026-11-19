@@ -165,9 +165,9 @@ def test_saved_listing_reminders_and_isolation(accounts_db):
 def test_budget_watch_uses_current_official_estimate(accounts_db):
     client = TestClient(app)
     assert client.post(f"{PREFIX}/register", json=CREDS).status_code == 201
-    result = client.post("/api/score", json={"campus_id": "etsisi", "budget_eur_month": 1000, "housing_type": "room"}).json()
+    result = client.post("/api/score", json={"campus_id": "etsisi", "budget_eur_month": 1000, "housing_type": "flat"}).json()
     area = next(area for area in result["results"] if area["est_rent_eur_month"] is not None)
-    payload = {"area_id": area["id"], "housing_type": "room", "budget_eur_month": area["est_rent_eur_month"]}
+    payload = {"area_id": area["id"], "housing_type": "flat", "budget_eur_month": area["est_rent_eur_month"]}
     response = client.post(f"{PREFIX}/watches", json=payload)
     assert response.status_code == 200
     entries = response.json()

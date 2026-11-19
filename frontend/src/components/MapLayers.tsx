@@ -6,7 +6,7 @@
  * libraries and municipal sports centres.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { BookOpen, Dumbbell, Layers, Trophy, TreePine, X, type LucideIcon } from 'lucide-react';
+import { Layers, X } from 'lucide-react';
 import L from 'leaflet';
 import { useMap } from 'react-leaflet';
 import officialPlaces from '../data/studentPlaces.json';
@@ -48,18 +48,9 @@ export const MAP_LAYERS: { id: LayerId; label: string; color: string; minZoom: n
   { id: 'malls', label: 'Centros comerciales', color: '#CC4A86', minZoom: 12 },
   { id: 'roads', label: 'Carreteras', color: '#E3A13B', minZoom: 0 },
 ];
-const SHORTCUT_ICONS: Partial<Record<LayerId, LucideIcon>> = {
-  parks: TreePine, libraries: BookOpen, gyms: Dumbbell, sports: Trophy,
-};
-const SHORTCUT_LAYERS = MAP_LAYERS.flatMap((layer) => {
-  const Icon = SHORTCUT_ICONS[layer.id];
-  return Icon ? [{ ...layer, Icon }] : [];
-});
-const OTHER_LAYERS = MAP_LAYERS.filter(({ id }) => !SHORTCUT_ICONS[id]);
+// Parks start switched off: with everything on, the city view is too busy (Diego).
+export const DEFAULT_LAYERS: LayerId[] = ['metro', 'supermarkets', 'libraries', 'gyms', 'sports'];
 
-export const DEFAULT_LAYERS: LayerId[] = ['metro', 'supermarkets', ...SHORTCUT_LAYERS.map(({ id }) => id)];
-
-const layerLabelClass = "relative after:absolute after:inset-x-0 after:top-1/2 after:h-px after:origin-left after:scale-x-0 after:bg-current after:transition-transform after:content-[''] data-[hidden=true]:after:scale-x-100 motion-reduce:after:transition-none";
 
 type Point = [number, number, string];
 type LayerData = { kind: 'points'; items: Point[] } | { kind: 'lines'; lines: [number, number][][] };
@@ -184,55 +175,47 @@ export function MapLayersOverlay({ enabled }: { enabled: ReadonlySet<LayerId> })
 
 type LayerControlsProps = { enabled: ReadonlySet<LayerId>; onToggle: (id: LayerId) => void };
 
-export function MapLayerShortcuts({ enabled, onToggle }: LayerControlsProps) {
+/** Small swatch with the same icon the map uses, so the panel doubles as the legend. */
+function LayerSwatch({ id, color }: { id: LayerId; color: string }) {
+  if (id === 'roads') return <span className="h-1 w-5 rounded-full" style={{ background: color }} aria-hidden="true" />;
   return (
-    <div role="group" aria-label="Equipamientos visibles en el mapa" className="flex flex-wrap gap-1">
-      {SHORTCUT_LAYERS.map(({ id, label, color, Icon }) => {
-        const visible = enabled.has(id);
-        return (
-          <button key={id} type="button" aria-pressed={visible} onClick={() => onToggle(id)}
-            className="pointer-events-auto inline-flex min-h-11 items-center gap-1.5 rounded-md border border-border px-2 text-xs font-medium text-ink hover:border-ink/40 hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ink aria-[pressed=false]:bg-surface aria-[pressed=false]:text-muted lg:min-h-8">
-            <Icon size={14} style={{ color }} aria-hidden="true" />
-            <span className={layerLabelClass} data-hidden={!visible}>{label}</span>
-          </button>
-        );
-      })}
-    </div>
+    <span className="flex h-6 w-6 items-center justify-center rounded-full text-white" style={{ background: color }} aria-hidden="true">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round"
+        strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: ICONS[id] }} />
+    </span>
   );
 }
 
-/** Additional layer controls. */
+/** Every map layer with an on/off switch. The wrapper fades while the map is being moved (see MapMoveFade). */
 export function MapLayersPanel({ enabled, onToggle }: LayerControlsProps) {
   const [open, setOpen] = useState(() => window.matchMedia('(min-width: 1024px)').matches);
   if (!open) {
     return (
       <button type="button" onClick={() => setOpen(true)}
         className="pointer-events-auto inline-flex h-10 items-center gap-2 rounded-full border border-border bg-bg px-4 text-sm font-semibold text-ink shadow-popover transition hover:bg-surface">
-        <Layers size={16} aria-hidden="true" /> Más capas
+        <Layers size={16} aria-hidden="true" /> Capas del mapa
       </button>
     );
   }
   return (
-    <div className="pointer-events-auto w-60 rounded-2xl border border-border bg-bg p-3 shadow-popover">
+    <div className="pointer-events-auto w-64 rounded-2xl border border-border bg-bg p-3 shadow-popover">
       <div className="mb-2 flex items-center justify-between">
-        <span className="flex items-center gap-2 text-sm font-semibold"><Layers size={15} aria-hidden="true" /> Más capas</span>
+        <span className="flex items-center gap-2 text-sm font-semibold"><Layers size={15} aria-hidden="true" /> Capas del mapa</span>
         <button type="button" onClick={() => setOpen(false)} aria-label="Ocultar capas" className="rounded-full p-1 text-muted hover:bg-surface hover:text-ink">
           <X size={15} aria-hidden="true" />
         </button>
       </div>
-      <div className="grid grid-cols-1 gap-1">
-        {OTHER_LAYERS.map((layer) => {
+      <div className="grid grid-cols-1 gap-0.5">
+        {MAP_LAYERS.map((layer) => {
           const on = enabled.has(layer.id);
           return (
             <button key={layer.id} type="button" role="switch" aria-checked={on} onClick={() => onToggle(layer.id)}
-              className={'flex items-center justify-between rounded-lg px-2 py-1.5 text-left text-sm transition hover:bg-surface ' + (on ? 'text-ink' : 'text-muted')}>
-              <span className="flex items-center gap-2">
-                {layer.id === 'roads'
-                  ? <span className="h-1 w-3.5 rounded-full" style={{ background: layer.color }} />
-                  : <span className="h-3 w-3 rounded-full border-2 border-bg shadow-[0_0_0_1px_rgba(13,17,23,0.15)]" style={{ background: layer.color }} />}
-                <span className={layerLabelClass} data-hidden={!on}>{layer.label}</span>
+              className="flex items-center justify-between rounded-lg px-2 py-1.5 text-left text-sm text-ink transition hover:bg-surface">
+              <span className="flex items-center gap-2.5">
+                <span className="flex w-6 justify-center"><LayerSwatch id={layer.id} color={layer.color} /></span>
+                {layer.label}
               </span>
-              <span className={'relative h-5 w-9 rounded-full transition ' + (on ? 'bg-ink' : 'bg-border')}>
+              <span className={'relative h-5 w-9 shrink-0 rounded-full transition ' + (on ? 'bg-ink' : 'bg-border')}>
                 <span className={'absolute top-0.5 h-4 w-4 rounded-full bg-bg shadow transition-all ' + (on ? 'left-[18px]' : 'left-0.5')} />
               </span>
             </button>
@@ -243,4 +226,17 @@ export function MapLayersPanel({ enabled, onToggle }: LayerControlsProps) {
       <p className="mt-1 px-2 text-[10px] leading-snug text-muted">OpenStreetMap (ODbL) · CRTM · Ayuntamiento de Madrid</p>
     </div>
   );
+}
+
+/** While the map is dragged or zoomed, make `target` see-through so the map underneath is visible. */
+export function MapMoveFade({ target }: { target: React.RefObject<HTMLElement | null> }) {
+  const map = useMap();
+  useEffect(() => {
+    const start = () => target.current?.classList.add('map-moving');
+    const end = () => target.current?.classList.remove('map-moving');
+    map.on('movestart zoomstart', start);
+    map.on('moveend zoomend', end);
+    return () => { map.off('movestart zoomstart', start); map.off('moveend zoomend', end); };
+  }, [map, target]);
+  return null;
 }

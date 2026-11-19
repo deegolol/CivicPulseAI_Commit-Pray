@@ -1,0 +1,153 @@
+{
+ "source": "SERPAVI 2011–2024 (MIVAU): alquiler mensual de contratos de vivienda colectiva, mediana y percentiles 25/75",
+ "year": 2024,
+ "districts": {
+  "01": {
+   "median": 950,
+   "p25": 750,
+   "p75": 1280,
+   "m2_median": 55,
+   "contracts": 20518
+  },
+  "02": {
+   "median": 950,
+   "p25": 774,
+   "p75": 1211,
+   "m2_median": 63,
+   "contracts": 16437
+  },
+  "03": {
+   "median": 1100,
+   "p25": 850,
+   "p75": 1428,
+   "m2_median": 72,
+   "contracts": 10267
+  },
+  "04": {
+   "median": 1159,
+   "p25": 871,
+   "p75": 1600,
+   "m2_median": 65,
+   "contracts": 17072
+  },
+  "05": {
+   "median": 1126,
+   "p25": 878,
+   "p75": 1472,
+   "m2_median": 68,
+   "contracts": 15758
+  },
+  "06": {
+   "median": 875,
+   "p25": 709,
+   "p75": 1134,
+   "m2_median": 56,
+   "contracts": 20271
+  },
+  "07": {
+   "median": 1175,
+   "p25": 882,
+   "p75": 1587,
+   "m2_median": 64,
+   "contracts": 19653
+  },
+  "08": {
+   "median": 995,
+   "p25": 784,
+   "p75": 1280,
+   "m2_median": 77,
+   "contracts": 20653
+  },
+  "09": {
+   "median": 1050,
+   "p25": 821,
+   "p75": 1428,
+   "m2_median": 69,
+   "contracts": 10848
+  },
+  "10": {
+   "median": 750,
+   "p25": 643,
+   "p75": 881,
+   "m2_median": 66,
+   "contracts": 19942
+  },
+  "11": {
+   "median": 731,
+   "p25": 612,
+   "p75": 850,
+   "m2_median": 63,
+   "contracts": 21978
+  },
+  "12": {
+   "median": 728,
+   "p25": 600,
+   "p75": 859,
+   "m2_median": 66,
+   "contracts": 9408
+  },
+  "13": {
+   "median": 700,
+   "p25": 600,
+   "p75": 805,
+   "m2_median": 60,
+   "contracts": 16332
+  },
+  "14": {
+   "median": 800,
+   "p25": 694,
+   "p75": 950,
+   "m2_median": 70,
+   "contracts": 6250
+  },
+  "15": {
+   "median": 824,
+   "p25": 700,
+   "p75": 1007,
+   "m2_median": 64,
+   "contracts": 22285
+  },
+  "16": {
+   "median": 1000,
+   "p25": 800,
+   "p75": 1288,
+   "m2_median": 81,
+   "contracts": 14435
+  },
+  "17": {
+   "median": 688,
+   "p25": 572,
+   "p75": 800,
+   "m2_median": 66,
+   "contracts": 9599
+  },
+  "18": {
+   "median": 770,
+   "p25": 665,
+   "p75": 900,
+   "m2_median": 72,
+   "contracts": 7904
+  },
+  "19": {
+   "median": 800,
+   "p25": 650,
+   "p75": 954,
+   "m2_median": 76,
+   "contracts": 5348
+  },
+  "20": {
+   "median": 807,
+   "p25": 690,
+   "p75": 977,
+   "m2_median": 67,
+   "contracts": 11435
+  },
+  "21": {
+   "median": 929,
+   "p25": 750,
+   "p75": 1167,
+   "m2_median": 80,
+   "contracts": 4054
+  }
+ }
+}

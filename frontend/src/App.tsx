@@ -45,14 +45,15 @@ import { OnboardingScreen } from './components/OnboardingScreen';
 import { TopFilterBar } from './components/TopFilterBar';
 import type { ResultFilters } from './components/ResultsFilters';
 import { ZoneList } from './components/ZoneList';
-import { formatEuro, formatKm } from './utils/format';
+import { formatEuro, formatMinutes } from './utils/format';
+import { looksLikeLanguage } from './utils/sanity';
 import { searchPreferences } from './utils/searchPreferences';
 
 function readInitialUrlParams() {
   if (typeof window === 'undefined') return { hasParams: false };
   const params = new URLSearchParams(window.location.search);
   const hasParams =
-    params.has('campus') || params.has('budget') || params.has('type') || params.has('km');
+    params.has('campus') || params.has('budget') || params.has('type') || params.has('mins');
   const campus = params.get('campus') || undefined;
   const budgetRaw = Number(params.get('budget'));
   const budget =
@@ -64,12 +65,12 @@ function readInitialUrlParams() {
     typeParam === 'room' || typeParam === 'studio' || typeParam === 'flat'
       ? typeParam
       : undefined;
-  const kmParam = params.get('km');
-  const maxDistanceKm =
-    kmParam === 'any'
+  const minsParam = params.get('mins');
+  const maxTravelMin =
+    minsParam === 'any'
       ? null
-      : kmParam && Number.isFinite(Number(kmParam))
-        ? Math.max(0.5, Math.min(60, Number(kmParam)))
+      : minsParam && Number.isFinite(Number(minsParam))
+        ? Math.max(5, Math.min(180, Number(minsParam)))
         : undefined;
   const min = Number(params.get('min'));
   const minBudget = min > 0 && budget !== undefined && min <= budget ? min : null;
@@ -79,11 +80,11 @@ function readInitialUrlParams() {
     return key && Number.isFinite(weight) && weight > 0 ? [[key, weight] as const] : [];
   });
   const mode = params.get('mode');
-  const transportMode = mode && Object.prototype.hasOwnProperty.call(TRANSPORT_LABELS, mode) ? mode as TransportMode : 'any';
+  const transportMode = mode && Object.prototype.hasOwnProperty.call(TRANSPORT_LABELS, mode) ? mode as TransportMode : 'transit';
   const onlyWithinBudget = params.get('range') === '1' || minBudget !== null;
   const locationParam = params.get('location') ?? '';
   const location = /^(area|district):.+$/.test(locationParam) ? locationParam : '';
-  return { hasParams: hasParams || Boolean(location), campus, budget, housingType, maxDistanceKm, minBudget, preferences, transportMode, onlyWithinBudget, location };
+  return { hasParams: hasParams || Boolean(location), campus, budget, housingType, maxTravelMin, minBudget, preferences, transportMode, onlyWithinBudget, location };
 }
 
 /** T29: every page has its own URL so the browser's back button moves between pages of the app. */
@@ -158,13 +159,13 @@ export function App() {
   const [minBudget, setMinBudget] = useState<number | null>(initial.minBudget ?? null);
   const [location, setLocation] = useState(initial.location ?? '');
   const [housingType, setHousingType] = useState<HousingType>(initial.housingType ?? 'room');
-  const [maxDistanceKm, setMaxDistanceKm] = useState<number | null>(
-    initial.maxDistanceKm !== undefined ? initial.maxDistanceKm : 10,
+  const [maxTravelMin, setMaxTravelMin] = useState<number | null>(
+    initial.maxTravelMin !== undefined ? initial.maxTravelMin : 45,
   );
   const [airLevel, setAirLevel] = useState<AirLevelOption>('any');
   const [wellConnectedOnly, setWellConnectedOnly] = useState(false);
   const [onlyWithinBudget, setOnlyWithinBudget] = useState(initial.onlyWithinBudget ?? false);
-  const [transportMode, setTransportMode] = useState<TransportMode>(initial.transportMode ?? 'any');
+  const [transportMode, setTransportMode] = useState<TransportMode>(initial.transportMode ?? 'transit');
   const [preferenceWeights, setPreferenceWeights] = useState<Record<string, number>>(
     () => Object.fromEntries(initial.preferences?.length ? initial.preferences : DEFAULT_PRIORITIES.map((key) => [key, 1])),
   );
@@ -245,17 +246,6 @@ export function App() {
     };
   }, [screen, route]);
 
-  // Official €/m² range across Madrid, used to give the budget slider realistic bounds (T30).
-  const [rentRange, setRentRange] = useState<[number, number] | null>(null);
-  useEffect(() => {
-    let cancelled = false;
-    getAreas().then((response) => {
-      const rents = response.areas.map((area) => area.values.rent_eur_m2).filter((v): v is number => typeof v === 'number');
-      if (!cancelled && rents.length) setRentRange([Math.min(...rents), Math.max(...rents)]);
-    }).catch(() => {});
-    return () => { cancelled = true; };
-  }, []);
-
   const availableKeys = useMemo(() => {
     const keys = new Set<string>(DEFAULT_PRIORITIES);
     for (const ind of meta?.indicators ?? []) {
@@ -271,12 +261,12 @@ export function App() {
   const activeCriteria = useMemo(() => new Set(Object.keys(computedWeights)), [computedWeights]);
 
   const scoreFilters = useMemo<ScoreFilters>(() => ({
-    max_distance_km: maxDistanceKm,
+    max_travel_min: maxTravelMin,
     only_within_budget: onlyWithinBudget,
     min_budget_eur_month: minBudget,
     max_air_no2: activeCriteria.has('air_no2') ? AIR_LEVEL_THRESHOLDS[airLevel] : null,
     min_transit_stops: activeCriteria.has('transit_stops') && wellConnectedOnly ? WELL_CONNECTED_THRESHOLD : null,
-  }), [maxDistanceKm, onlyWithinBudget, minBudget, activeCriteria, airLevel, wellConnectedOnly]);
+  }), [maxTravelMin, onlyWithinBudget, minBudget, activeCriteria, airLevel, wellConnectedOnly]);
 
   // Sync URL querystring only when on Screen B (so Screen A stays clean at "/")
   useEffect(() => {
@@ -285,18 +275,17 @@ export function App() {
     params.set('campus', campusId);
     params.set('budget', String(budget));
     params.set('type', housingType);
-    params.set('km', maxDistanceKm === null ? 'any' : String(maxDistanceKm));
+    params.set('mins', maxTravelMin === null ? 'any' : String(maxTravelMin));
     if (minBudget !== null) params.set('min', String(minBudget));
     else params.delete('min');
     params.set('criteria', Object.entries(computedWeights).map(([key, weight]) => weight === 1 ? key : key + ':' + weight).join(','));
-    if (transportMode !== 'any') params.set('mode', transportMode);
-    else params.delete('mode');
+    params.set('mode', transportMode);
     if (onlyWithinBudget) params.set('range', '1');
     else params.delete('range');
     if (location) params.set('location', location);
     else params.delete('location');
     window.history.replaceState(window.history.state, '', `${ROUTE_PATHS.results}?${params.toString()}`);
-  }, [screen, campusId, budget, housingType, maxDistanceKm, minBudget, computedWeights, transportMode, onlyWithinBudget, location]);
+  }, [screen, campusId, budget, housingType, maxTravelMin, minBudget, computedWeights, transportMode, onlyWithinBudget, location]);
 
   // Cancel obsolete rankings so a slower response cannot replace a newer search.
   useEffect(() => {
@@ -313,6 +302,7 @@ export function App() {
           filters: scoreFilters,
           budget_eur_month: budget,
           housing_type: housingType,
+          travel_mode: transportMode,
         }, controller.signal);
         if (controller.signal.aborted) return;
         setRawResults(scored.results);
@@ -333,6 +323,7 @@ export function App() {
               query: confirmedQuery,
               budget_eur_month: budget,
               housing_type: housingType,
+              travel_mode: transportMode,
               filters: scoreFilters,
             });
             if (!controller.signal.aborted) setAiExplanation(explained.text);
@@ -340,7 +331,7 @@ export function App() {
             if (controller.signal.aborted) return;
             if (err instanceof ApiError && err.status === 429) setRateLimitNotice(err.detail);
             setAiExplanation(top3.map((item, index) =>
-              `${index + 1}) ${item.name}: ${formatEuro(item.est_rent_eur_month)}/mes a ${formatKm(item.distance_km)}.`,
+              `${index + 1}) ${item.name}: ${formatMinutes(item.transit_min)} en transporte público y ${formatMinutes(item.car_min)} en coche.`,
             ).join(' '));
           }
         }
@@ -356,7 +347,7 @@ export function App() {
     // Small debounce: dragging a slider fires many changes; only score once it settles (keeps clicks snappy).
     const timer = window.setTimeout(updateScore, 180);
     return () => { window.clearTimeout(timer); controller.abort(); };
-  }, [meta, screen, campusId, computedWeights, scoreFilters, budget, housingType]);
+  }, [meta, screen, campusId, computedWeights, scoreFilters, budget, housingType, transportMode]);
 
   const results = useMemo(() => {
     if (location.startsWith('area:')) return rawResults.filter((area) => area.id === location.slice(5));
@@ -411,13 +402,7 @@ export function App() {
     setAiExplanation(null);
   };
 
-  const handleTransportModeChange = (mode: TransportMode) => {
-    setTransportMode(mode);
-    const key = mode === 'metro' ? 'transit_stops' : 'distance_km';
-    if (mode !== 'any' && availableKeys.has(key) && !activeCriteria.has(key)) {
-      setPreferenceWeights((previous) => ({ ...previous, ...computedWeights, [key]: 1 }));
-    }
-  };
+  const handleTransportModeChange = (mode: TransportMode) => setTransportMode(mode);
 
   const handleToggleCompare = useCallback((areaId: string) => {
     setCompareIds((prev) => {
@@ -467,11 +452,19 @@ export function App() {
     setRateLimitNotice(null);
 
     try {
+      if (!looksLikeLanguage(queryText)) {  // instant check, no AI call for keyboard mashing
+        setSearchError('No he entendido lo que has escrito. Cuéntame con palabras qué buscas, por ejemplo dónde estudias y cuánto puedes pagar.');
+        return false;
+      }
       const [parsed, searchMeta] = await Promise.all([
         postAiParse({ query: queryText }),
         (metaRequest.current ??= getMeta()).catch(() => null),
       ]);
       if (window.location.pathname !== fromPath) return false;
+      if (parsed.understood === false) {  // off-topic or nonsense: tell the user, don't search
+        setSearchError(parsed.interpretation);
+        return false;
+      }
       const campus = searchMeta?.campuses.find((item) => item.id === parsed.campus_id);
       const indicatorKeys = searchMeta?.indicators.map(({ key }) => key) ?? Object.keys(parsed.weights);
       const inferred = searchPreferences(queryText, parsed, new Set([...DEFAULT_PRIORITIES, ...indicatorKeys]), campus);
@@ -482,10 +475,10 @@ export function App() {
         setMinBudget(inferred.minBudget);
         setOnlyWithinBudget(inferred.minBudget !== null || (parsed.filters.only_within_budget ?? true));
       }
-      setMaxDistanceKm(parsed.filters.max_distance_km ?? maxDistanceKm);
+      setMaxTravelMin(parsed.filters.max_travel_min ?? maxTravelMin);
       setAirLevel('any');
       setWellConnectedOnly(false);
-      setTransportMode(inferred.transportMode);
+      setTransportMode(parsed.travel_mode ?? inferred.transportMode);
       setPreferenceWeights(Object.fromEntries(inferred.selectedPriorities.map((key) => {
         const weight = parsed.weights[key] ?? 0;
         return [key, weight >= 0.5 ? weight : 1];
@@ -528,7 +521,7 @@ export function App() {
     setBudget(filters.budget);
     setMinBudget(filters.minBudget);
     setHousingType(filters.housingType);
-    setMaxDistanceKm(filters.maxDistanceKm);
+    setMaxTravelMin(filters.maxTravelMin);
     setAirLevel(filters.airLevel);
     setWellConnectedOnly(filters.wellConnectedOnly);
     setOnlyWithinBudget(filters.onlyWithinBudget);
@@ -567,7 +560,7 @@ export function App() {
   const campusName = activeCampus?.name ?? campusId.toUpperCase();
   const budgetRange = minBudget === null ? `hasta ${formatEuro(budget)}` : `${formatEuro(minBudget)}–${formatEuro(budget)}`;
   const summaryLine = `${HOUSING_TYPE_LABELS[housingType]} · ${budgetRange}/mes · ${campusName}${
-    maxDistanceKm !== null ? ` (≤ ${formatKm(maxDistanceKm)})` : ''
+    maxTravelMin !== null ? ` (≤ ${maxTravelMin} min en ${transportMode === 'car' ? 'coche' : 'transporte público'})` : ''
   }${locationLabel ? ' · ' + locationLabel : ''}`;
 
   const screenView = screen === 'onboarding' ? (
@@ -591,8 +584,8 @@ export function App() {
         onMinBudgetChange={setMinBudget}
         housingType={housingType}
         onHousingTypeChange={setHousingType}
-        maxDistanceKm={maxDistanceKm}
-        onMaxDistanceChange={setMaxDistanceKm}
+        maxTravelMin={maxTravelMin}
+        onMaxTravelChange={setMaxTravelMin}
         transportMode={transportMode}
         onTransportModeChange={handleTransportModeChange}
         availableKeys={availableKeys}
@@ -600,7 +593,6 @@ export function App() {
         onPriorityChange={handlePriorityChange}
         onStart={handleStart}
         sources={meta?.sources ?? []}
-        rentRange={rentRange}
       />
     </m.div>
     ) : (
@@ -616,7 +608,7 @@ export function App() {
         campuses={meta?.campuses ?? []}
         areas={rawResults}
         filters={{
-          campusId, budget, minBudget, housingType, maxDistanceKm, airLevel, wellConnectedOnly, onlyWithinBudget,
+          campusId, budget, minBudget, housingType, maxTravelMin, airLevel, wellConnectedOnly, onlyWithinBudget,
           priorityWeights: computedWeights, transportMode, location,
         }}
         onApplyFilters={handleApplyFilters}
@@ -705,7 +697,6 @@ export function App() {
             onSelectArea={handleMapSelect}
             onHoverArea={handleMapHover}
             activeCampus={activeCampus}
-            maxDistanceKm={maxDistanceKm}
             budget={budget}
             isScoring={isScoring}
             isVisible={mapVisible}
