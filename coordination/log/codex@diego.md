@@ -20,3 +20,8 @@
 ## 13:57 · Apoyo a T20 y T21
 - Envié el resumen técnico de DATA a SHIP. Pasaron 19 pruebas de backend, un smoke de API con los datos reales y la compilación del frontend en una copia aislada.
 - Comparé el agregado publicado por Adrián (`ca91e4b`) con las cuatro piezas. Coinciden todos los IDs, valores y notas de los 131 barrios. SHIP informado.
+
+## 14:14 · T20 y T21 · comprobación desde clon limpio
+- Envié el resumen de defensa a TechGallo, y a SHIP el resultado de make check (29 tests y build web) y de make data.
+- Reproduje el error de red del Geoportal y confirmé un espejo municipal. Adrián integró el fallback a7cf5aa. La descarga automática se verificó desde un clon sin caché.
+- Cuatro piezas y campus byte a byte. Agregado idéntico salvo generated_at. Propiedades de los 131 barrios idénticas, distancia máxima de 7,12e-15 grados.
