@@ -3,8 +3,8 @@ id: T20
 title: Cada carril explica su código (defensa técnica)
 lane: SHIP
 priority: P0
-status: todo
-owner: ""
+status: doing
+owner: codex@techgallo
 depends_on: []
 files: [docs/ARCHITECTURE.md]
 ---
