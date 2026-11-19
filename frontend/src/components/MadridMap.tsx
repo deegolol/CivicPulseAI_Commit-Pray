@@ -5,7 +5,7 @@
  * - Soft translucent polygon tints so Madrid streets stay legible.
  * - Auto-fit bounds to the active campus + Top 10 zones when results load or campus changes.
  */
-import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Feature } from 'geojson';
 import {
   Circle,
@@ -31,7 +31,7 @@ import type {
 } from '../api/types';
 import { MADRID_CENTER, MADRID_DEFAULT_ZOOM } from '../config';
 import { formatEuro, formatKm } from '../utils/format';
-import { StudentPlaces, StudentPlacesKey } from './StudentPlaces';
+import { StudentPlaces, StudentPlacesKey, type PlaceCategory } from './StudentPlaces';
 
 // Includes mainland Spain, the Balearic Islands and the Canary Islands.
 const SPAIN_BOUNDS = L.latLngBounds([27.4, -18.3], [44.1, 4.8]);
@@ -285,6 +285,17 @@ export function MadridMap({
   isScoring = false,
   isVisible = true,
 }: MadridMapProps) {
+  const [hiddenPlaces, setHiddenPlaces] = useState<ReadonlySet<PlaceCategory>>(() => new Set());
+
+  function togglePlaceCategory(category: PlaceCategory) {
+    setHiddenPlaces((current) => {
+      const next = new Set(current);
+      if (next.has(category)) next.delete(category);
+      else next.add(category);
+      return next;
+    });
+  }
+
   const campusLatLng = useMemo<[number, number] | null>(() =>
     activeCampus ? [activeCampus.coords[1], activeCampus.coords[0]] : null, [activeCampus]);
   const geoJsonRef = useRef<LeafletGeoJSON | null>(null);
@@ -487,7 +498,7 @@ export function MadridMap({
           />
         )}
 
-        <StudentPlaces />
+        <StudentPlaces hidden={hiddenPlaces} />
 
         {/* Floating price pills */}
         {pricePills.map((pill) => (
@@ -510,13 +521,13 @@ export function MadridMap({
       </MapContainer>
 
       {isScoring && (
-        <div className="pointer-events-none absolute top-3 right-3 z-[400] rounded-[8px] border border-border bg-bg px-3 py-1.5 text-xs text-muted">
+        <div className="pointer-events-none absolute right-3 bottom-20 z-[400] rounded-[8px] lg:top-3 lg:bottom-auto border border-border bg-bg px-3 py-1.5 text-xs text-muted">
           Actualizando…
         </div>
       )}
 
       {/* Clean minimal map key */}
-      <div className="pointer-events-none absolute top-3 right-3 z-[400] flex max-w-[calc(100%-64px)] flex-wrap items-center gap-x-3 gap-y-1 rounded-[8px] border border-border bg-bg px-3 py-1.5 text-[11px] text-muted lg:top-auto lg:right-auto lg:bottom-6 lg:left-4">
+      <div className="pointer-events-none absolute top-3 right-3 z-[400] flex max-w-[calc(100%-64px)] flex-wrap items-center gap-x-3 gap-y-1 rounded-[8px] border border-border bg-bg px-2 py-1.5 sm:px-3 text-[11px] text-muted lg:top-auto lg:right-auto lg:bottom-6 lg:left-4">
         <span className="inline-flex items-center gap-1.5 font-medium text-ink">
           <span className="h-2.5 w-2.5 rounded-full bg-brand" />
           Recomendada
@@ -525,7 +536,7 @@ export function MadridMap({
           <span className="h-2.5 w-2.5 rounded-full border border-ink/40 bg-bg" />
           Alquiler estimado
         </span>
-        <StudentPlacesKey />
+        <StudentPlacesKey hidden={hiddenPlaces} onToggle={togglePlaceCategory} />
       </div>
     </div>
   );

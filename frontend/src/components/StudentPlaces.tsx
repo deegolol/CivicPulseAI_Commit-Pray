@@ -15,6 +15,13 @@ const CATEGORIES = {
 const MIN_ZOOM = 13;
 
 type PlaceKind = keyof typeof CATEGORIES;
+export type PlaceCategory = Exclude<PlaceKind, 'gym'>;
+
+const PLACE_FILTERS = [
+  { category: 'park', label: 'Parques', Icon: TreePine },
+  { category: 'library', label: 'Bibliotecas', Icon: BookOpen },
+  { category: 'sport', label: 'Deporte', Icon: Dumbbell },
+] as const;
 const places = placesData as { kind: PlaceKind; name: string; coords: [number, number] }[];
 const icons = Object.fromEntries(Object.entries(CATEGORIES).map(([kind, { color, icon }]) => [
   kind,
@@ -22,11 +29,11 @@ const icons = Object.fromEntries(Object.entries(CATEGORIES).map(([kind, { color,
     className: 'student-place-pin',
     iconSize: [22, 22],
     iconAnchor: [11, 11],
-    html: `<span style="background:${color}" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icon}</svg></span>`,
+    html: `<span style="background:${color}" aria-hidden="true" data-place-category="${kind === 'gym' ? 'sport' : kind}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icon}</svg></span>`,
   }),
 ]));
 
-export function StudentPlaces() {
+export function StudentPlaces({ hidden }: { hidden: ReadonlySet<PlaceCategory> }) {
   const map = useMap();
   const [visible, setVisible] = useState<typeof places>([]);
 
@@ -39,14 +46,15 @@ export function StudentPlaces() {
     const occupied = new Set<string>();
     const spacing = map.getZoom() < 15 ? 54 : 33;
     setVisible(places.filter((place) => {
-      if (!bounds.contains(place.coords)) return false;
+      const category = place.kind === 'gym' ? 'sport' : place.kind;
+      if (hidden.has(category) || !bounds.contains(place.coords)) return false;
       const point = map.project(place.coords);
       const cell = Math.floor(point.x / spacing) + ':' + Math.floor(point.y / spacing);
       if (occupied.has(cell)) return false;
       occupied.add(cell);
       return true;
     }).slice(0, 85));
-  }, [map]);
+  }, [map, hidden]);
 
   useEffect(() => {
     refresh();
@@ -65,12 +73,25 @@ export function StudentPlaces() {
   ));
 }
 
-export function StudentPlacesKey() {
+export function StudentPlacesKey({ hidden, onToggle }: {
+  hidden: ReadonlySet<PlaceCategory>;
+  onToggle: (category: PlaceCategory) => void;
+}) {
   return (
-    <div className="flex flex-wrap gap-x-3 gap-y-1" title="Acércate en el mapa para ver los equipamientos">
-      <span className="inline-flex items-center gap-1"><TreePine size={13} className="text-[#287350]" />Parques</span>
-      <span className="inline-flex items-center gap-1"><BookOpen size={13} className="text-[#3d5e88]" />Bibliotecas</span>
-      <span className="inline-flex items-center gap-1"><Dumbbell size={13} className="text-[#854c69]" />Deporte</span>
+    <div role="group" aria-label="Equipamientos visibles en el mapa" className="flex flex-wrap gap-1">
+      {PLACE_FILTERS.map(({ category, label, Icon }) => (
+        <button
+          key={category}
+          type="button"
+          aria-pressed={!hidden.has(category)}
+          onClick={() => onToggle(category)}
+          className="pointer-events-auto inline-flex min-h-11 cursor-pointer items-center gap-1.5 rounded-md border border-border px-2 text-xs font-medium text-ink hover:border-ink/40 hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ink aria-[pressed=false]:bg-surface aria-[pressed=false]:text-muted lg:min-h-8"
+        >
+          <Icon size={14} style={{ color: CATEGORIES[category].color }} aria-hidden="true" />
+          <span className="relative after:absolute after:inset-x-0 after:top-1/2 after:h-px after:origin-left after:scale-x-0 data-[layer-hidden=true]:after:scale-x-100 after:bg-current after:transition-transform after:content-[''] motion-reduce:after:transition-none"
+            data-layer-hidden={hidden.has(category)}>{label}</span>
+        </button>
+      ))}
     </div>
   );
 }
