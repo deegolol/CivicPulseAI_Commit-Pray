@@ -57,3 +57,8 @@
 - Qué: rediseño de inicio/formulario/cuenta, rutas con historial, botón Volver, arreglo del bug de scroll. Fusión con los cambios de animación de codex@adrian (resueltos 5 conflictos; un @keyframes partido rompía el build y se corrigió).
 - IA: Claude Code; probado en navegador (escritorio 1440×900/1280×640 y móvil 375), build de producción y rutas servidas por FastAPI.
 - Humano: Diego pidió hacerlo yo (no Codex) y fue ajustando: Volver a la derecha del logo, titular en una línea, quitar 'Datos abiertos' y 'Código'.
+
+## 17:55 · T32 · done
+- Qué: tiempos reales puerta a puerta (GTFS CRTM + OSRM), precios solo oficiales o anuncios reales, filtro de frases sin sentido o fuera de tema (sin IA) y IA siempre primero, panel único de capas que se atenúa al mover, parques apagados, zoom más cercano.
+- IA: Claude generó ETL, backend, frontend y tests (61 en verde); Diego pidió y revisó los cambios.
+- Siguiente: T33 (pendientes para el viernes).
