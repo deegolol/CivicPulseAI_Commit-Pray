@@ -25,3 +25,8 @@
 - Qué: panel de detalle completo (`frontend/src/components/AreaDetailPanel.tsx`) conectado a `GET /api/areas/{id}` con gráfico Radar (Recharts) barrio vs mediana de Madrid, desglose en unidades reales + mediana + notas de procedencia (`valor del distrito`, desglose de servicios), enlace `Fuente` por indicador y atribución visible `Powered by CRTM` + aviso de datos transformados.
 - Verificación: `cd frontend && npm run build` en verde.
 - Siguiente: SYNC + revisar T12 (buscador lenguaje natural + explicación IA) y T13 (Top 3 + comparador).
+
+## 13:54 · T13 · done
+- Qué: tarjetas Top 3 enriquecidas con 1 punto fuerte automático, centrado `flyTo` al hacer clic, botón "Comparar" (2–3 barrios desde Top 3 o desde cualquier detalle) y modal editorial `CompareModal.tsx` con radar superpuesto Recharts + tabla comparativa en unidades reales (sin `%`).
+- Verificación: `cd frontend && npm run build` en verde.
+- Siguiente: SYNC + T12 (buscador lenguaje natural + explicación IA del Top 3).

@@ -6,7 +6,7 @@
  * - Mandatory CRTM attribution ("Powered by CRTM") + transformed-data notice per license
  */
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, ExternalLink, Info, MapPin } from 'lucide-react';
+import { ArrowLeft, Check, ExternalLink, Info, MapPin, Scale } from 'lucide-react';
 import {
   PolarAngleAxis,
   PolarGrid,
@@ -43,6 +43,9 @@ interface AreaDetailPanelProps {
   budget: number;
   housingType: HousingType;
   referenceM2?: number;
+  isCompared?: boolean;
+  canAddCompare?: boolean;
+  onToggleCompare?: (areaId: string) => void;
   onBack: () => void;
 }
 
@@ -80,6 +83,9 @@ export function AreaDetailPanel({
   budget,
   housingType,
   referenceM2,
+  isCompared = false,
+  canAddCompare = true,
+  onToggleCompare,
   onBack,
 }: AreaDetailPanelProps) {
   const [detail, setDetail] = useState<AreaDetailResponse | null>(null);
@@ -220,20 +226,47 @@ export function AreaDetailPanel({
       </div>
 
       {/* Area Title */}
-      <div className="mt-3">
-        <div className="flex items-center gap-2">
-          <span
-            className={`inline-flex h-5 items-center rounded-full px-2 text-[11px] font-semibold tabular-nums ${
-              area.rank === 1 ? 'bg-accent text-surface' : 'bg-surface-subtle text-ink'
+      <div className="mt-3 flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <span
+              className={`inline-flex h-5 items-center rounded-full px-2 text-[11px] font-semibold tabular-nums ${
+                area.rank === 1 ? 'bg-accent text-surface' : 'bg-surface-subtle text-ink'
+              }`}
+            >
+              #{area.rank}
+            </span>
+            <span className="truncate text-xs text-muted">{area.district}</span>
+          </div>
+          <h2 className="font-serif mt-1.5 text-2xl leading-tight font-semibold text-ink">
+            {area.name}
+          </h2>
+        </div>
+
+        {onToggleCompare && (
+          <button
+            type="button"
+            onClick={() => onToggleCompare(area.id)}
+            disabled={!isCompared && !canAddCompare}
+            className={`mt-1 inline-flex shrink-0 items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-[11px] font-medium transition disabled:opacity-40 ${
+              isCompared
+                ? 'border-accent bg-accent-soft text-accent'
+                : 'border-border bg-surface text-muted hover:border-accent-border hover:text-ink'
             }`}
           >
-            #{area.rank}
-          </span>
-          <span className="text-xs text-muted">{area.district}</span>
-        </div>
-        <h2 className="font-serif mt-1.5 text-2xl leading-tight font-semibold text-ink">
-          {area.name}
-        </h2>
+            {isCompared ? (
+              <>
+                <Check className="h-3.5 w-3.5" strokeWidth={1.5} />
+                Comparando
+              </>
+            ) : (
+              <>
+                <Scale className="h-3.5 w-3.5" strokeWidth={1.5} />
+                Comparar
+              </>
+            )}
+          </button>
+        )}
       </div>
 
       {/* Hero Budget Card */}

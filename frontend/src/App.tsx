@@ -15,6 +15,7 @@ import type {
 } from './api/types';
 import { APP_NAME } from './config';
 import { AreaDetailPanel } from './components/AreaDetailPanel';
+import { CompareModal } from './components/CompareModal';
 import { MadridMap } from './components/MadridMap';
 import {
   AIR_LEVEL_THRESHOLDS,
@@ -61,8 +62,10 @@ export function App() {
     'distance_km',
   ]);
 
-  // Selection & responsive UI state
+  // Selection, comparison & responsive UI state
   const [selectedAreaId, setSelectedAreaId] = useState<string | null>(null);
+  const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [compareOpen, setCompareOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [mobileSheet, setMobileSheet] = useState<MobileSheetHeight>('peek');
 
@@ -196,10 +199,29 @@ export function App() {
   );
 
   const selectedArea = selectedAreaId ? (scoresById[selectedAreaId] ?? null) : null;
+  const comparedAreas = useMemo(
+    () =>
+      compareIds
+        .map((id) => scoresById[id])
+        .filter((item): item is ScoreResultItem => Boolean(item)),
+    [compareIds, scoresById],
+  );
   const activeCampus = useMemo(
     () => meta?.campuses.find((c) => c.id === campusId) ?? null,
     [meta, campusId],
   );
+
+  const handleToggleCompare = (areaId: string) => {
+    setCompareIds((prev) => {
+      if (prev.includes(areaId)) {
+        const next = prev.filter((id) => id !== areaId);
+        if (next.length < 2) setCompareOpen(false);
+        return next;
+      }
+      if (prev.length >= 3) return prev;
+      return [...prev, areaId];
+    });
+  };
 
   const handleTogglePriority = (key: string) => {
     setSelectedPriorities((prev) =>
@@ -313,6 +335,9 @@ export function App() {
             budget={budget}
             housingType={housingType}
             referenceM2={referenceM2}
+            isCompared={compareIds.includes(selectedArea.id)}
+            canAddCompare={compareIds.length < 3}
+            onToggleCompare={handleToggleCompare}
             onBack={() => setSelectedAreaId(null)}
           />
         ) : (
@@ -320,6 +345,9 @@ export function App() {
             topResults={topResults}
             selectedAreaId={selectedAreaId}
             onSelectArea={handleSelectArea}
+            compareIds={compareIds}
+            onToggleCompare={handleToggleCompare}
+            onOpenCompare={() => setCompareOpen(true)}
             loading={loading}
           />
         )}
@@ -493,6 +521,9 @@ export function App() {
               topResults={topResults}
               selectedAreaId={selectedAreaId}
               onSelectArea={handleSelectArea}
+              compareIds={compareIds}
+              onToggleCompare={handleToggleCompare}
+              onOpenCompare={() => setCompareOpen(true)}
               loading={loading}
             />
           ) : selectedArea ? (
@@ -503,6 +534,9 @@ export function App() {
               budget={budget}
               housingType={housingType}
               referenceM2={referenceM2}
+              isCompared={compareIds.includes(selectedArea.id)}
+              canAddCompare={compareIds.length < 3}
+              onToggleCompare={handleToggleCompare}
               onBack={() => {
                 setSelectedAreaId(null);
                 setMobileSheet('half');
@@ -513,11 +547,25 @@ export function App() {
               topResults={topResults}
               selectedAreaId={selectedAreaId}
               onSelectArea={handleSelectArea}
+              compareIds={compareIds}
+              onToggleCompare={handleToggleCompare}
+              onOpenCompare={() => setCompareOpen(true)}
               loading={loading}
             />
           )}
         </div>
       </section>
+
+      {/* Side-by-side comparison modal (2–3 neighborhoods) */}
+      {compareOpen && comparedAreas.length >= 2 && (
+        <CompareModal
+          areas={comparedAreas}
+          indicators={meta?.indicators ?? []}
+          housingType={housingType}
+          onRemove={handleToggleCompare}
+          onClose={() => setCompareOpen(false)}
+        />
+      )}
 
       {/* Discreet mock indicator pill (bottom-center-left, never overlaps Leaflet attribution) */}
       {isMockMode && (
