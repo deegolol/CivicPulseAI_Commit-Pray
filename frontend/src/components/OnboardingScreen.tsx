@@ -3,11 +3,12 @@
  * Two ways to start: natural language search (+ 3 cached pitch chips) OR campus/budget/type selector.
  * Clean urban utility aesthetic: pure white, Madrid red CTA (#D7262E), Bricolage Grotesque + Instrument Sans.
  */
-import { ArrowRight, KeyRound, Search } from 'lucide-react';
+import { ArrowRight, Search } from 'lucide-react';
 import type { Campus, HousingType } from '../api/types';
-import { APP_NAME, HOUSING_TYPE_LABELS } from '../config';
+import { HOUSING_TYPE_LABELS } from '../config';
 import { EXAMPLE_QUERIES } from '../constants/filters';
 import { formatEuro } from '../utils/format';
+import { BrandLogo } from './BrandLogo';
 
 interface OnboardingScreenProps {
   query: string;
@@ -56,14 +57,7 @@ export function OnboardingScreen({
     <div className="flex min-h-dvh flex-col bg-bg text-ink">
       {/* Minimal brand header */}
       <header className="mx-auto flex w-full max-w-4xl items-center justify-between px-5 py-6">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-brand text-bg">
-            <KeyRound className="h-4 w-4" strokeWidth={1.75} />
-          </div>
-          <span className="font-display text-lg font-bold tracking-tight text-ink">
-            {APP_NAME}
-          </span>
-        </div>
+        <BrandLogo />
       </header>
 
       {/* Centered main content */}

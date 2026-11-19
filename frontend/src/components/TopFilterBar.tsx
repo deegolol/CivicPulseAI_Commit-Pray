@@ -4,15 +4,16 @@
  * Zero percentages anywhere; crisp 1px borders and subtle popover shadow only.
  */
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, KeyRound, Scale, Search, SlidersHorizontal, X } from 'lucide-react';
+import { ChevronDown, Scale, Search, SlidersHorizontal, X } from 'lucide-react';
 import type { Campus, HousingType } from '../api/types';
-import { APP_NAME, HOUSING_TYPE_LABELS } from '../config';
+import { HOUSING_TYPE_LABELS } from '../config';
 import {
   EXAMPLE_QUERIES,
   PRIORITY_CHIPS,
   type AirLevelOption,
 } from '../constants/filters';
 import { formatEuro, formatKm } from '../utils/format';
+import { BrandLogo } from './BrandLogo';
 
 type ActivePopover = 'campus' | 'budget' | 'type' | 'distance' | 'more' | 'search' | null;
 
@@ -111,15 +112,10 @@ export function TopFilterBar({
         <button
           type="button"
           onClick={onResetHome}
-          title="Volver al inicio"
-          className="mr-1 flex shrink-0 items-center gap-2 rounded-[8px] py-1 pr-2 text-left transition hover:bg-surface"
+          aria-label="Volver al inicio"
+          className="mr-1 flex shrink-0 items-center rounded-[8px] py-1 pr-2 text-left transition hover:bg-surface focus-visible:ring-2 focus-visible:ring-ink focus-visible:outline-none"
         >
-          <span className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-brand text-bg">
-            <KeyRound className="h-3.5 w-3.5" strokeWidth={1.75} />
-          </span>
-          <span className="font-display hidden text-base font-bold tracking-tight text-ink sm:inline">
-            {APP_NAME}
-          </span>
+          <BrandLogo compact />
         </button>
 
         <span className="hidden h-5 w-px shrink-0 bg-border sm:block" />
