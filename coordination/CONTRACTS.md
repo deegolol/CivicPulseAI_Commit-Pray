@@ -153,6 +153,17 @@ Response:
 - `est_rent_eur_month = rent_eur_m2 × m² de referencia` (redondeado). `affordable_m2 = budget / rent_eur_m2`. Ambos `null` si falta el dato de alquiler.
 - `listing_links`: URLs de **búsqueda** en portales (zona + precio máx. = presupuesto). Las genera `backend/app/listings.py`. Solo enlaces, sin scraping. Si no se puede construir la URL de un barrio, se usa la del distrito o la de Madrid.
 
+**Recomendación destacada (T27, campos opcionales nuevos):**
+```json
+"recommendation": { "area_id": "133", "name": "Palomeras Bajas", "district": "Puente de Vallecas",
+  "headline": "Palomeras Bajas es la zona que mejor encaja con lo que buscas",
+  "reasons": ["~287 €/mes por una habitación: te sobran ~213 € de tu presupuesto", "A 2,7 km de tu campus, entre las 15 zonas más cercanas"],
+  "caveats": ["El aire es mejorable: NO₂ 24,6 µg/m³, peor que en el 73 % de los barrios"] },
+"highlights": { "cheapest": "201", "closest": "134", "cleanest_air": "085", "best_transit": "071" }
+```
+- `recommendation` = la primera zona no excluida; `reasons` (2–4) ordenados por los pesos del usuario; `caveats` (0–2) = peros honestos en lo que el usuario dijo que le importa. `null` si todo está excluido. Deterministas, solo cifras reales.
+- `highlights`: id de la zona más barata, más cercana, con mejor aire y mejor comunicada entre las no excluidas.
+
 `results` ordenado por `score` desc. `score` 0–100. `normalized` 0–1 (1 = mejor). `contribution = normalized × weight × 100`.
 
 ### 4.7 `POST /api/ai/parse`

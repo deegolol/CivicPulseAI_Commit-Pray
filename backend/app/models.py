@@ -116,11 +116,23 @@ class ScoreResult(BaseModel):
     breakdown: dict[str, BreakdownItem]
 
 
+class Recommendation(BaseModel):
+    """The single best option for this user and why (T27). Reasons only use real numbers."""
+    area_id: str
+    name: str
+    district: str
+    headline: str
+    reasons: list[str]
+    caveats: list[str] = Field(default_factory=list)  # honest trade-offs ("a tener en cuenta")
+
+
 class ScoreResponse(BaseModel):
     campus_id: str
     housing_type: HousingType
     reference_m2: int
     results: list[ScoreResult]
+    recommendation: Recommendation | None = None  # None when every area is excluded
+    highlights: dict[str, str] = Field(default_factory=dict)  # cheapest | closest | cleanest_air | best_transit → area id
 
 
 # ---------- /api/ai (CONTRACTS §4.7–4.8) ----------

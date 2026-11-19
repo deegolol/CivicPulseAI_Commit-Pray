@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException
 
 from ..data import DEFAULT_WEIGHTS, Dataset, get_dataset
 from ..models import Campus, ScoreRequest, ScoreResponse
+from ..recommend import build_highlights, build_recommendation
 from ..scoring import DISTANCE_KEY, REFERENCE_M2, score_areas
 
 router = APIRouter(tags=["score"])
@@ -30,4 +31,6 @@ def score(req: ScoreRequest) -> ScoreResponse:
         housing_type=req.housing_type,
         reference_m2=REFERENCE_M2[req.housing_type],
         results=results,
+        recommendation=build_recommendation(results, ds.areas, ds.indicators, req),
+        highlights=build_highlights(results, ds.areas),
     )
