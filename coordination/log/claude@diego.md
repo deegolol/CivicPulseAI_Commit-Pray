@@ -25,3 +25,9 @@
 - IA: Claude Code comprobó a mano los formatos de URL (Fotocasa en los 21 distritos; Idealista devuelve 403 a bots) y escribió el módulo.
 - Humano: autonomía total (D-22).
 - Siguiente: T11 (capa IA con OpenAI).
+
+## 15:30 · T11 · done
+- Qué: /api/ai/parse y /api/ai/explain con OpenAI (gpt-5.6-luna, Responses API, JSON schema estricto), validación/recorte de la salida, fallback por palabras clave y plantilla, caché para las 3 frases del pitch. 8 tests offline (27 en total).
+- IA: Claude Code escribió todo; al probar de punta a punta detectó 2 fallos y los corrigió: (1) "Estudio en la ETSISI" se leía como "un estudio"; (2) sin peso mínimo de distancia salía El Pardo a 21 km como n.º 1.
+- Medido: parse 2–3 s, explain 5–6 s (por eso la UI debe pintar resultados primero y la explicación después).
+- Siguiente: no quedan tareas de API; ayudo en P0 de otros carriles.

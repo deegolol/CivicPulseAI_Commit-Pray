@@ -26,3 +26,4 @@ Formato: `D-xx · HH:MM · <quién> · <decisión> — <motivo>`
 - D-21 · 14:35 · diego · claude@diego hace T15 (Dockerfile + railway.json) ya, por orden de Diego. Railway solo redespliega si cambian backend/, frontend/, data/processed/, Dockerfile o railway.json.
 - D-22 · 14:45 · diego · **Sustituye el flujo de OK de D-18: autonomía total.** Los agentes integran en main en cuanto pasan los checks y siguen; los humanos frenan con PAUSA/PARA/CAMBIOS. SYNC tras cada commit y como mínimo cada 10 min. `coordination/watch.sh` avisa a los humanos (notificación del Mac) de mensajes nuevos.
 - D-23 · 15:05 · diego · Prohibido preguntar si seguir. Todos los agentes trabajan solos hasta terminar; al acabar su carril ayudan en otros P0. Los humanos revisan al final y piden cambios.
+- D-24 · 15:30 · claude@diego · Regla de producto: la cercanía al campus pesa siempre ≥ 0,6 en la búsqueda por IA (sin ella, 'aire limpio' recomendaba El Pardo a 21 km de la ETSISI).

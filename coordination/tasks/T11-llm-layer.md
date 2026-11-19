@@ -3,7 +3,7 @@ id: T11
 title: Capa IA: /api/ai/parse y /api/ai/explain con fallback
 lane: API
 priority: P1
-status: doing
+status: done
 owner: claude@diego
 depends_on: [T08]
 files: [backend/app/llm.py, backend/app/routers/ai.py, backend/tests/test_ai.py]
@@ -17,3 +17,4 @@ files: [backend/app/llm.py, backend/app/routers/ai.py, backend/tests/test_ai.py]
 
 ## Notas / progreso
 <!-- El owner apunta aquí avances, decisiones y bloqueos -->
+- 15:30 · claude@diego · En main. OpenAI gpt-5.6-luna por HTTP (Responses API, JSON schema estricto) + fallback por palabras clave + plantilla + demo_cache.json (3 frases del pitch). 27 tests offline. Regla de producto D-24: la distancia pesa siempre ≥ 0,6.
