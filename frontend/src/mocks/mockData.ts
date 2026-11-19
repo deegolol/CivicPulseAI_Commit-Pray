@@ -294,11 +294,20 @@ export function computeMockScore(req: ScoreRequest): ScoreResponse {
     if (req.filters?.only_within_budget && fitsBudget === false) {
       excluded = true;
     }
+    const minBudget = req.filters?.min_budget_eur_month;
+    const maxAir = req.filters?.max_air_no2;
+    const minTransit = req.filters?.min_transit_stops;
+    const air = area.values.air_no2;
+    const transit = area.values.transit_stops;
+    excluded ||= (minBudget != null && (estRent == null || estRent < minBudget))
+      || (maxAir != null && (air == null || air > maxAir))
+      || (minTransit != null && (transit == null || transit < minTransit));
 
     const breakdown: ScoreResultItem['breakdown'] = {};
     let totalScore = 0;
 
     for (const key of keys) {
+      if (!normWeights[key]) continue;
       const rawVal = key === 'distance_km' ? distance_km : (area.values[key] ?? null);
       const { min, max } = bounds[key];
       let normalized = 0.5;

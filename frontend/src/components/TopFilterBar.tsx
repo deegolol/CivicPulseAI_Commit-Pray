@@ -9,8 +9,10 @@ import type { Campus, HousingType } from '../api/types';
 import { HOUSING_TYPE_LABELS } from '../config';
 import {
   EXAMPLE_QUERIES,
-  PRIORITY_CHIPS,
+  priorityOptions,
+  TRANSPORT_LABELS,
   type AirLevelOption,
+  type TransportMode,
 } from '../constants/filters';
 import { formatEuro, formatKm } from '../utils/format';
 import { BrandLogo } from './BrandLogo';
@@ -27,6 +29,8 @@ interface TopFilterBarProps {
   campusId: string;
   onCampusChange: (campusId: string) => void;
   budget: number;
+  minBudget: number | null;
+  onMinBudgetChange: (value: number | null) => void;
   onBudgetChange: (budget: number) => void;
   housingType: HousingType;
   onHousingTypeChange: (type: HousingType) => void;
@@ -40,6 +44,8 @@ interface TopFilterBarProps {
   onOnlyWithinBudgetChange: (value: boolean) => void;
   selectedPriorities: string[];
   onTogglePriority: (key: string) => void;
+  transportMode: TransportMode;
+  onTransportModeChange: (mode: TransportMode) => void;
   compareCount: number;
   onOpenCompare: () => void;
 }
@@ -54,6 +60,8 @@ export function TopFilterBar({
   campusId,
   onCampusChange,
   budget,
+  minBudget,
+  onMinBudgetChange,
   onBudgetChange,
   housingType,
   onHousingTypeChange,
@@ -67,10 +75,13 @@ export function TopFilterBar({
   onOnlyWithinBudgetChange,
   selectedPriorities,
   onTogglePriority,
+  transportMode,
+  onTransportModeChange,
   compareCount,
   onOpenCompare,
 }: TopFilterBarProps) {
   const [openPopover, setOpenPopover] = useState<ActivePopover>(null);
+  const [budgetError, setBudgetError] = useState(false);
   const barRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -99,6 +110,7 @@ export function TopFilterBar({
     (onlyWithinBudget ? 1 : 0);
 
   const toggle = (name: ActivePopover) => {
+    setBudgetError(false);
     setOpenPopover((prev) => (prev === name ? null : name));
   };
 
@@ -144,7 +156,7 @@ export function TopFilterBar({
                 : 'border-border bg-bg text-ink hover:bg-surface'
             }`}
           >
-            <span>{formatEuro(budget)}/mes</span>
+            <span>{minBudget !== null ? formatEuro(minBudget) + '–' : ''}{formatEuro(budget)}/mes</span>
             <ChevronDown className="h-3.5 w-3.5 text-muted" strokeWidth={1.75} />
           </button>
 
@@ -268,26 +280,27 @@ export function TopFilterBar({
           )}
 
           {openPopover === 'budget' && (
-            <div className="space-y-3">
-              <div className="font-display text-2xl font-bold text-ink tabular-nums">
-                {formatEuro(budget)}
-                <span className="font-sans text-xs font-normal text-muted"> /mes</span>
+            <form className="space-y-2" onSubmit={(event) => {
+              event.preventDefault();
+              const fields = new FormData(event.currentTarget);
+              const minimum = fields.get('minimum') ? Number(fields.get('minimum')) : null;
+              const maximum = Number(fields.get('maximum'));
+              if (minimum !== null && minimum > maximum) {
+                setBudgetError(true);
+                return;
+              }
+              onMinBudgetChange(minimum);
+              onBudgetChange(maximum);
+              onOnlyWithinBudgetChange(true);
+              setOpenPopover(null);
+            }}>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <label>Desde (€)<input className="mt-1 w-full rounded-lg border border-border p-2" name="minimum" type="number" min="0" defaultValue={minBudget ?? ''} /></label>
+                <label>Hasta (€)<input className="mt-1 w-full rounded-lg border border-border p-2" name="maximum" type="number" min="1" required defaultValue={budget} /></label>
               </div>
-              <input
-                type="range"
-                min={300}
-                max={1200}
-                step={25}
-                value={budget}
-                onChange={(e) => onBudgetChange(Number(e.target.value))}
-                className="clean-range w-full"
-              />
-              <div className="flex justify-between text-[11px] text-muted tabular-nums">
-                <span>300 €</span>
-                <span>750 €</span>
-                <span>1.200 €</span>
-              </div>
-            </div>
+              {budgetError && <p role="alert" className="text-xs text-over">El mínimo debe ser menor o igual que el máximo.</p>}
+              <button type="submit" className="rounded-lg bg-ink px-3 py-2 text-xs font-semibold text-bg">Aplicar rango</button>
+            </form>
           )}
 
           {openPopover === 'type' && (
@@ -316,43 +329,34 @@ export function TopFilterBar({
           )}
 
           {openPopover === 'distance' && (
-            <div className="space-y-3">
-              <div className="font-display text-xl font-bold text-ink tabular-nums">
-                {maxDistanceKm === null ? 'Sin límite' : `Hasta ${formatKm(maxDistanceKm)}`}
-              </div>
-              <input
-                type="range"
-                min={2}
-                max={20}
-                step={1}
-                value={maxDistanceKm ?? 20}
-                onChange={(e) => {
-                  const val = Number(e.target.value);
-                  onMaxDistanceChange(val >= 20 ? null : val);
-                }}
-                className="clean-range w-full"
-              />
-              <div className="flex justify-between text-[11px] text-muted tabular-nums">
-                <span>2 km</span>
-                <span>10 km</span>
-                <span>Sin límite</span>
-              </div>
-            </div>
+            <form className="flex items-end gap-2" onSubmit={(event) => {
+              event.preventDefault();
+              const radius = new FormData(event.currentTarget).get('radius');
+              onMaxDistanceChange(radius ? Number(radius) : null);
+              setOpenPopover(null);
+            }}>
+              <label className="flex-1 text-xs">
+                Radio en km
+                <input className="mt-1 w-full rounded-lg border border-border p-2" name="radius" type="number"
+                  min="0.5" max="60" step="any" defaultValue={maxDistanceKm ?? ''} placeholder="Sin límite" />
+              </label>
+              <button type="submit" className="rounded-lg bg-ink px-3 py-2 text-xs font-semibold text-bg">Aplicar</button>
+            </form>
           )}
 
           {openPopover === 'more' && (
             <div className="space-y-4">
-              {availableKeys.has('air_no2') && (
+              {selectedPriorities.includes('air_no2') && (
                 <div className="space-y-2">
                   <span className="block text-xs font-medium text-muted">
-                    Calidad del aire (NO₂ máx.)
+                    Calidad del aire
                   </span>
                   <div className="grid grid-cols-3 gap-1.5">
                     {(
                       [
                         { id: 'any', label: 'Cualquiera' },
-                        { id: 'good', label: 'Buena ≤25' },
-                        { id: 'very_good', label: 'Muy buena ≤20' },
+                        { id: 'good', label: 'Buena' },
+                        { id: 'very_good', label: 'Muy buena' },
                       ] as const
                     ).map((opt) => (
                       <button
@@ -373,9 +377,9 @@ export function TopFilterBar({
               )}
 
               <div className="space-y-2">
-                {availableKeys.has('transit_stops') && (
+                {selectedPriorities.includes('transit_stops') && (
                   <label className="flex min-h-[40px] cursor-pointer items-center justify-between rounded-[8px] border border-border px-3 py-2 text-xs font-medium text-ink hover:bg-surface">
-                    <span>Bien comunicado en Metro (≥ 1 est./km²)</span>
+                    <span>Solo zonas bien comunicadas en Metro</span>
                     <input
                       type="checkbox"
                       checked={wellConnectedOnly}
@@ -396,17 +400,26 @@ export function TopFilterBar({
                 </label>
               </div>
 
+              <label className="flex items-center justify-between gap-3 text-xs font-medium">
+                Cómo te desplazas
+                <select value={transportMode} onChange={(event) => onTransportModeChange(event.target.value as TransportMode)} className="rounded-lg border border-border bg-bg px-2 py-1.5">
+                  {Object.entries(TRANSPORT_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                </select>
+              </label>
+
               <div className="space-y-2">
                 <span className="block text-xs font-medium text-muted">
                   Lo que más te importa
                 </span>
                 <div className="flex flex-wrap gap-1.5">
-                  {PRIORITY_CHIPS.filter((c) => availableKeys.has(c.key)).map((chip) => {
+                  {priorityOptions(availableKeys).map((chip) => {
                     const active = selectedPriorities.includes(chip.key);
                     return (
                       <button
                         key={chip.key}
                         type="button"
+                        aria-pressed={active}
+                        disabled={active && selectedPriorities.length === 1}
                         onClick={() => onTogglePriority(chip.key)}
                         className={`min-h-[34px] rounded-[8px] border px-3 py-1 text-xs font-medium transition ${
                           active

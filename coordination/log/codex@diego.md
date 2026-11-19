@@ -42,3 +42,8 @@
 ## T25 · Logo de PrimeraLlave
 - Diego pidió una marca simple y premium. Codex diseñó una puerta geométrica en carbón, blanco y rojo, y reutilizó el símbolo en las dos cabeceras y el favicon.
 - Verificado en Chromium a 1280 y 390 px y con npm run build. Integrado como 25a163b.
+
+## T25 y T28 · Búsqueda, preferencias y mapa
+- Diego pidió completar los cambios pendientes de publicación. Revisé main y las ramas remotas. Implementé búsqueda con revisión y formulario manual, criterios opcionales vinculados al scoring y estrellas globales destacadas.
+- El mapa conserva el color, limita el zoom y el desplazamiento al entorno de España y reduce actualizaciones durante hover. Corregí las fichas que quedaban pegadas al arrastrar (8c73930).
+- QA local con Chromium en escritorio y móvil, build web y 43 tests de backend.

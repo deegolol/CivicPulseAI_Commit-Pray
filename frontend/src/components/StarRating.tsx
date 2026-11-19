@@ -7,7 +7,7 @@ import { formatDecimal } from '../utils/format';
 interface StarRatingProps {
   /** Value from 0 to 5 (e.g. 4.3) */
   value: number;
-  size?: 'sm' | 'md';
+  size?: 'sm' | 'md' | 'lg';
   showNumber?: boolean;
 }
 
@@ -20,7 +20,7 @@ export function StarRating({
   showNumber = true,
 }: StarRatingProps) {
   const clamped = Math.max(0, Math.min(5, value));
-  const px = size === 'sm' ? 14 : 16;
+  const px = { sm: 14, md: 16, lg: 22 }[size];
 
   return (
     <div
@@ -74,7 +74,7 @@ export function StarRating({
       {showNumber && (
         <span
           className={`font-display font-bold text-ink tabular-nums ${
-            size === 'sm' ? 'text-xs' : 'text-sm'
+            size === 'lg' ? 'text-xl' : size === 'sm' ? 'text-xs' : 'text-sm'
           }`}
         >
           {formatDecimal(clamped)}

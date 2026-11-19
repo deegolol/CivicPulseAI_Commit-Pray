@@ -25,6 +25,7 @@ import { normalizedToStars, StarRating } from './StarRating';
 interface AreaDetailPanelProps {
   area: ScoreResultItem;
   indicators: IndicatorMeta[];
+  activeCriteria: Set<string>;
   sources: SourceInfo[];
   budget: number;
   housingType: HousingType;
@@ -54,6 +55,7 @@ function formatRawTechnical(key: string, value: number | null | undefined, unit:
 export function AreaDetailPanel({
   area,
   indicators,
+  activeCriteria,
   sources,
   budget,
   housingType,
@@ -98,7 +100,7 @@ export function AreaDetailPanel({
     {
       key: 'distance_km',
       label: FRIENDLY_LABELS.distance_km,
-      stars: normalizedToStars(area.breakdown.distance_km?.normalized),
+      stars: area.breakdown.distance_km ? normalizedToStars(area.breakdown.distance_km.normalized) : null,
       subtitle: `${formatKm(area.distance_km)} de tu campus`,
       rawValue: formatRawTechnical('distance_km', area.distance_km, 'km'),
       medianValue: null as string | null,
@@ -107,11 +109,12 @@ export function AreaDetailPanel({
     },
     ...indicators.map((ind) => {
       const val = area.breakdown[ind.key]?.value ?? detail?.values[ind.key] ?? null;
+      const rating = area.breakdown[ind.key];
       const med = detail?.city_median?.[ind.key] ?? null;
       return {
         key: ind.key,
         label: FRIENDLY_LABELS[ind.key] ?? ind.label,
-        stars: normalizedToStars(area.breakdown[ind.key]?.normalized),
+        stars: rating?.value != null ? normalizedToStars(rating.normalized) : null,
         subtitle: null as string | null,
         rawValue: formatRawTechnical(ind.key, val, ind.unit),
         medianValue: med != null ? formatRawTechnical(ind.key, med, ind.unit) : null,
@@ -119,7 +122,7 @@ export function AreaDetailPanel({
         source: sourcesById[ind.source],
       };
     }),
-  ];
+  ].filter((row) => activeCriteria.has(row.key));
 
   return (
     <div className="flex h-full flex-col bg-bg">
@@ -255,7 +258,9 @@ export function AreaDetailPanel({
                     </div>
                   )}
                 </div>
-                <StarRating value={row.stars} size="sm" />
+                {row.stars !== null
+                  ? <StarRating value={row.stars} size="sm" />
+                  : <span className="text-xs text-muted">Sin dato</span>}
               </div>
             ))}
           </div>

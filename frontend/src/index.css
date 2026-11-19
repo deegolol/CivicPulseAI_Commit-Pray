@@ -90,11 +90,6 @@ input[type="range"].clean-range::-webkit-slider-thumb:hover {
   z-index: 1;
 }
 
-/* Clean ultra-light Positron-like basemap on free OSM tiles (zero API key watermarks) */
-.leaflet-tile-pane {
-  filter: grayscale(100%) brightness(1.09) contrast(0.82) opacity(0.85);
-}
-
 .leaflet-tooltip.clean-tooltip {
   background-color: var(--color-bg);
   border: 1px solid var(--color-border);

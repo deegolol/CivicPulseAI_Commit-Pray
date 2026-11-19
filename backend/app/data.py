@@ -5,6 +5,7 @@ The backend never downloads or modifies data: the DATA lane produces the files, 
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
@@ -16,6 +17,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 PROCESSED_DIR = REPO_ROOT / "data" / "processed"
 MOCK_DIR = Path(__file__).resolve().parent / "mock_data"
 REQUIRED_FILES = ("indicators.json", "barrios.geojson", "campuses.json")
+SERVICE_COUNTS = re.compile(r"Bibliotecas: (\d+)\. Equipamientos deportivos: (\d+)\.")
 
 # Default priorities shown when the user hasn't chosen any (CONTRACTS §4.2).
 DEFAULT_WEIGHTS = {
@@ -60,17 +62,40 @@ def _pick_dir() -> tuple[Path, str]:
     return MOCK_DIR, "mock"
 
 
+def service_counts(area: Area) -> tuple[int, int] | None:
+    """Read the two official counts from the ETL and check against their sum."""
+    match = SERVICE_COUNTS.fullmatch(area.notes.get("services_count", ""))
+    if match:
+        libraries, sports = map(int, match.groups())
+        if libraries + sports == area.values.get("services_count"):
+            return libraries, sports
+    return None
+
+
 @lru_cache(maxsize=1)
 def get_dataset() -> Dataset:
     folder, kind = _pick_dir()
     ind = json.loads((folder / "indicators.json").read_text(encoding="utf-8"))
+    indicators = [Indicator(**i) for i in ind.get("indicators", [])]
+    areas = [Area(**a) for a in ind.get("areas", [])]
+    services = next((indicator for indicator in indicators if indicator.key == "services_count"), None)
+    if services:
+        counts = [service_counts(area) for area in areas]
+        if any(count is not None for count in counts):
+            for key, label, index in (
+                ("libraries_count", "Bibliotecas", 0),
+                ("sports_count", "Deporte municipal", 1),
+            ):
+                indicators.append(Indicator(key=key, label=label, unit="nº", higher_is_better=True, source=services.source))
+                for area, count in zip(areas, counts):
+                    area.values[key] = count[index] if count is not None else None
     return Dataset(
         source_dir=kind,
         level=ind.get("level", "barrio"),
         generated_at=ind.get("generated_at", ""),
         sources=[Source(**s) for s in ind.get("sources", [])],
-        indicators=[Indicator(**i) for i in ind.get("indicators", [])],
-        areas=[Area(**a) for a in ind.get("areas", [])],
+        indicators=indicators,
+        areas=areas,
         campuses=[Campus(**c) for c in json.loads((folder / "campuses.json").read_text(encoding="utf-8"))],
         geojson=json.loads((folder / "barrios.geojson").read_text(encoding="utf-8")),
     )

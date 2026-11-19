@@ -5,7 +5,8 @@
  * - Soft translucent polygon tints so Madrid streets stay legible.
  * - Auto-fit bounds to the active campus + Top 10 zones when results load or campus changes.
  */
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import type { Feature } from 'geojson';
 import {
   Circle,
   CircleMarker,
@@ -30,6 +31,11 @@ import type {
 } from '../api/types';
 import { MADRID_CENTER, MADRID_DEFAULT_ZOOM } from '../config';
 import { formatEuro, formatKm } from '../utils/format';
+
+// Includes mainland Spain, the Balearic Islands and the Canary Islands.
+const SPAIN_BOUNDS = L.latLngBounds([27.4, -18.3], [44.1, 4.8]);
+const CAMPUS_STYLE = { color: '#FFFFFF', weight: 2.5, fillColor: '#D7262E', fillOpacity: 1 };
+const RADIUS_STYLE = { color: '#4D7CF5', weight: 1.5, dashArray: '5 5', fillColor: '#4D7CF5', fillOpacity: 0.04 };
 
 interface MadridMapProps {
   geoData: BarriosGeoJSON | null;
@@ -88,6 +94,38 @@ function createPricePillIcon(
     </div>`,
   });
 }
+
+interface PricePill {
+  id: string;
+  rank: number;
+  name: string;
+  district: string;
+  distanceKm: number;
+  priceLabel: string;
+  coords: [number, number];
+  isRecommended: boolean;
+}
+
+const PricePillMarker = memo(function PricePillMarker({
+  pill, active, onSelect, onHover,
+}: { pill: PricePill; active: boolean; onSelect: (id: string) => void; onHover: (id: string | null) => void }) {
+  const handlers = useMemo(() => ({
+    click: () => onSelect(pill.id),
+    mouseover: () => onHover(pill.id),
+    mouseout: () => onHover(null),
+  }), [pill.id, onSelect, onHover]);
+  const icon = useMemo(() => createPricePillIcon(pill.priceLabel, pill.rank, pill.isRecommended, active), [pill, active]);
+  return (
+    <Marker position={pill.coords} icon={icon}
+      zIndexOffset={active ? 1000 : pill.isRecommended ? 500 : 100 - pill.rank}
+      eventHandlers={handlers}>
+      <Tooltip direction="top" offset={[0, -14]} className="clean-tooltip">
+        <div className="text-xs font-semibold text-ink">{pill.name}</div>
+        <div className="text-[11px] text-muted">{pill.district} · {formatKm(pill.distanceKm)}</div>
+      </Tooltip>
+    </Marker>
+  );
+});
 
 function buildTooltipHtml(
   name: string,
@@ -187,10 +225,19 @@ function MapViewportController({
 
   useEffect(() => {
     if (!visible) return;
-    const id = window.setTimeout(() => {
-      map.invalidateSize();
-    }, 60);
-    return () => window.clearTimeout(id);
+    function constrainZoom() {
+      const size = map.getSize();
+      if (size.x && size.y) map.setMinZoom(Math.max(5, map.getBoundsZoom(SPAIN_BOUNDS, true)));
+    }
+    const frame = window.requestAnimationFrame(() => {
+      map.invalidateSize({ pan: false });
+      constrainZoom();
+    });
+    map.on('resize', constrainZoom);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      map.off('resize', constrainZoom);
+    };
   }, [map, visible]);
 
   // Auto-fit bounds cleanly around campus + Top 10 whenever the campus or Top 10 set changes
@@ -241,7 +288,11 @@ export function MadridMap({
   isScoring = false,
   isVisible = true,
 }: MadridMapProps) {
+  const campusLatLng = useMemo<[number, number] | null>(() =>
+    activeCampus ? [activeCampus.coords[1], activeCampus.coords[0]] : null, [activeCampus]);
   const geoJsonRef = useRef<LeafletGeoJSON | null>(null);
+  const pathsById = useRef(new Map<string, { path: L.Path; feature: AreaFeature }>());
+  const previousInteraction = useRef({ selectedAreaId, hoveredAreaId });
   const scoresRef = useRef(scoresById);
   const top10Ref = useRef(top10RankById);
   const selectedRef = useRef(selectedAreaId);
@@ -304,7 +355,9 @@ export function MadridMap({
     };
   }, []);
 
-  // In-place update of polygon styles & tooltips (zero layer remounts across 131 barrios)
+  const geoStyle = useCallback((feature?: Feature) => getStyleForFeature(feature as AreaFeature | undefined), [getStyleForFeature]);
+
+  // Refresh all neighborhoods only when the ranking or score data changes.
   useEffect(() => {
     const group = geoJsonRef.current;
     if (!group) return;
@@ -318,10 +371,20 @@ export function MadridMap({
         buildTooltipHtml(name, district, scoresById[id], top10RankById[id], budget),
       );
     });
-  }, [scoresById, top10RankById, selectedAreaId, hoveredAreaId, recommendedAreaId, budget, getStyleForFeature]);
+  }, [geoData, scoresById, top10RankById, recommendedAreaId, budget, getStyleForFeature]);
+
+  useEffect(() => {
+    const previous = previousInteraction.current;
+    const changed = new Set([previous.selectedAreaId, previous.hoveredAreaId, selectedAreaId, hoveredAreaId]);
+    for (const id of changed) {
+      const entry = id ? pathsById.current.get(id) : undefined;
+      if (entry) entry.path.setStyle(getStyleForFeature(entry.feature));
+    }
+    previousInteraction.current = { selectedAreaId, hoveredAreaId };
+  }, [selectedAreaId, hoveredAreaId, getStyleForFeature]);
 
   // Top 10 floating price pill markers
-  const pricePills = useMemo(() => {
+  const pricePills = useMemo<PricePill[]>(() => {
     return Object.entries(top10RankById)
       .map(([id, rank]) => {
         const centroid = centroidsById[id];
@@ -347,11 +410,9 @@ export function MadridMap({
   // Bounds points: active campus + Top 10 price pills
   const boundsPoints = useMemo<[number, number][]>(() => {
     const pts: [number, number][] = pricePills.map((p) => p.coords);
-    if (activeCampus) {
-      pts.push([activeCampus.coords[1], activeCampus.coords[0]]);
-    }
+    if (campusLatLng) pts.push(campusLatLng);
     return pts;
-  }, [pricePills, activeCampus]);
+  }, [pricePills, campusLatLng]);
 
   const boundsSignature = useMemo(() => {
     const ids = pricePills.map((p) => p.id).sort().join(',');
@@ -368,6 +429,7 @@ export function MadridMap({
 
   const onEachFeature = useCallback((feature: AreaFeature, layer: Layer) => {
     const { id, name, district } = feature.properties;
+    pathsById.current.set(id, { path: layer as L.Path, feature });
     layer.bindTooltip(
       buildTooltipHtml(name, district, scoresRef.current[id], top10Ref.current[id], budgetRef.current),
       { sticky: true, direction: 'top', offset: [0, -8], className: 'clean-tooltip' },
@@ -379,6 +441,7 @@ export function MadridMap({
       click: () => onSelectRef.current(id),
     });
   }, []);
+  const bindFeature = useCallback((feature: Feature, layer: Layer) => onEachFeature(feature as AreaFeature, layer), [onEachFeature]);
 
   const campusShort = activeCampus?.name.split(' · ')[0] ?? '';
 
@@ -387,12 +450,16 @@ export function MadridMap({
       <MapContainer
         center={MADRID_CENTER}
         zoom={MADRID_DEFAULT_ZOOM}
+        minZoom={5}
+        maxBounds={SPAIN_BOUNDS}
+        maxBoundsViscosity={1}
         scrollWheelZoom
         className="h-full w-full"
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+          noWrap
         />
 
         <MapViewportController
@@ -403,17 +470,11 @@ export function MadridMap({
         />
 
         {/* Max distance circle around active campus */}
-        {activeCampus && maxDistanceKm !== null && (
+        {campusLatLng && maxDistanceKm !== null && (
           <Circle
-            center={[activeCampus.coords[1], activeCampus.coords[0]]}
+            center={campusLatLng}
             radius={maxDistanceKm * 1000}
-            pathOptions={{
-              color: '#4D7CF5',
-              weight: 1.5,
-              dashArray: '5 5',
-              fillColor: '#4D7CF5',
-              fillOpacity: 0.04,
-            }}
+            pathOptions={RADIUS_STYLE}
           />
         )}
 
@@ -421,47 +482,23 @@ export function MadridMap({
           <GeoJSON
             ref={geoJsonRef}
             data={geoData}
-            style={(feature) => getStyleForFeature(feature as AreaFeature | undefined)}
-            onEachFeature={(feature, layer) => onEachFeature(feature as AreaFeature, layer)}
+            style={geoStyle}
+            onEachFeature={bindFeature}
           />
         )}
 
         {/* Airbnb-style floating price pills on Top 10 zones */}
-        {pricePills.map((pill) => {
-          const isActive = pill.id === selectedAreaId || pill.id === hoveredAreaId;
-          return (
-            <Marker
-              key={pill.id}
-              position={pill.coords}
-              icon={createPricePillIcon(pill.priceLabel, pill.rank, pill.isRecommended, isActive)}
-              zIndexOffset={isActive ? 1000 : pill.isRecommended ? 500 : 100 - pill.rank}
-              eventHandlers={{
-                click: () => onSelectArea(pill.id),
-                mouseover: () => onHoverArea(pill.id),
-                mouseout: () => onHoverArea(null),
-              }}
-            >
-              <Tooltip direction="top" offset={[0, -14]} className="clean-tooltip">
-                <div className="text-xs font-semibold text-ink">{pill.name}</div>
-                <div className="text-[11px] text-muted">
-                  {pill.district} · {formatKm(pill.distanceKm)}
-                </div>
-              </Tooltip>
-            </Marker>
-          );
-        })}
+        {pricePills.map((pill) => (
+          <PricePillMarker key={pill.id} pill={pill} active={pill.id === selectedAreaId || pill.id === hoveredAreaId}
+            onSelect={onSelectArea} onHover={onHoverArea} />
+        ))}
 
         {/* Campus marker: Madrid red dot (#D7262E) with clean label */}
-        {activeCampus && (
+        {campusLatLng && (
           <CircleMarker
-            center={[activeCampus.coords[1], activeCampus.coords[0]]}
+            center={campusLatLng}
             radius={8}
-            pathOptions={{
-              color: '#FFFFFF',
-              weight: 2.5,
-              fillColor: '#D7262E',
-              fillOpacity: 1,
-            }}
+            pathOptions={CAMPUS_STYLE}
           >
             <Tooltip permanent direction="top" offset={[0, -10]} className="campus-label">
               {campusShort}

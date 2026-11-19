@@ -97,3 +97,29 @@ def test_api_score_rejects_unknown_campus_and_weight_keys():
     meta = client.get("/api/meta").json()
     r = client.post("/api/score", json={"campus_id": meta["defaults"]["campus_id"], "weights": {"bares": 1}})
     assert r.status_code == 422 and "bares" in r.json()["detail"]
+
+
+def test_optional_services_only_score_when_selected_and_budget_range_filters():
+    meta = client.get("/api/meta").json()
+    campus_id = meta["defaults"]["campus_id"]
+    areas = {area["id"]: area for area in client.get("/api/areas").json()["areas"]}
+    assert all(
+        area["values"]["libraries_count"] + area["values"]["sports_count"] == area["values"]["services_count"]
+        for area in areas.values()
+    )
+    winners = []
+    for key in ("libraries_count", "sports_count"):
+        response = client.post("/api/score", json={
+            "campus_id": campus_id,
+            "weights": {key: 1},
+            "budget_eur_month": 450,
+            "filters": {"min_budget_eur_month": 300, "only_within_budget": True},
+        })
+        assert response.status_code == 200
+        results = response.json()["results"]
+        assert all(set(area["breakdown"]) == {key} for area in results)
+        included = [area for area in results if not area["excluded"]]
+        assert included and all(300 <= area["est_rent_eur_month"] <= 450 for area in included)
+        assert included[0]["breakdown"][key]["value"] == max(area["breakdown"][key]["value"] for area in included)
+        winners.append(included[0]["id"])
+    assert winners[0] != winners[1]

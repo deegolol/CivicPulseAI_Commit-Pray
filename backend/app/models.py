@@ -78,6 +78,9 @@ class ScoreFilters(BaseModel):
     max_rent_eur_m2: float | None = None
     max_distance_km: float | None = None
     only_within_budget: bool = False
+    min_budget_eur_month: float | None = Field(default=None, ge=0)
+    max_air_no2: float | None = Field(default=None, ge=0)
+    min_transit_stops: float | None = Field(default=None, ge=0)
 
 
 class ScoreRequest(BaseModel):

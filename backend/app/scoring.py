@@ -93,10 +93,15 @@ def score_areas(areas: list[Area], indicators: list[Indicator], campus: Campus, 
         affordable = round(budget / rent, 1) if (budget is not None and rent) else None
 
         f = req.filters
+        no2 = area.values.get("air_no2")
+        transit = area.values.get("transit_stops")
         excluded = (
             (f.max_rent_eur_m2 is not None and rent is not None and rent > f.max_rent_eur_m2)
             or (f.max_distance_km is not None and distances[idx] > f.max_distance_km)
             or (f.only_within_budget and fits is False)
+            or (f.min_budget_eur_month is not None and (est_rent is None or est_rent < f.min_budget_eur_month))
+            or (f.max_air_no2 is not None and (no2 is None or no2 > f.max_air_no2))
+            or (f.min_transit_stops is not None and (transit is None or transit < f.min_transit_stops))
         )
         results.append(
             ScoreResult(

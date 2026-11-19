@@ -6,12 +6,10 @@ Reasons are ordered by what the user cares about most (their weights).
 """
 from __future__ import annotations
 
-import re
-
+from .data import service_counts
 from .models import Area, Indicator, Recommendation, ScoreRequest, ScoreResult
 
 HOUSING_ES = {"room": "una habitación", "studio": "un estudio", "flat": "un piso"}
-SERVICES_NOTE = re.compile(r"Bibliotecas: (\d+)\. Equipamientos deportivos: (\d+)\.")
 
 
 def _fmt(n: float, decimals: int = 0) -> str:
@@ -35,17 +33,16 @@ def _rank_among(value: float, others: list[float]) -> int:
 
 def _service_reason(area: Area, total: float) -> str:
     """Show the official breakdown if the dataset includes the two counts."""
-    match = SERVICES_NOTE.fullmatch(area.notes.get("services_count", ""))
-    if match:
-        libraries, sports = map(int, match.groups())
-        if libraries + sports == total:
-            facilities = []
-            if sports:
-                label = "equipamiento deportivo municipal" if sports == 1 else "equipamientos deportivos municipales"
-                facilities.append(f"{sports} {label}")
-            if libraries:
-                facilities.append("1 biblioteca" if libraries == 1 else f"{libraries} bibliotecas")
-            return f"{' y '.join(facilities)} en el barrio"
+    counts = service_counts(area)
+    if counts:
+        libraries, sports = counts
+        facilities = []
+        if sports:
+            label = "equipamiento deportivo municipal" if sports == 1 else "equipamientos deportivos municipales"
+            facilities.append(f"{sports} {label}")
+        if libraries:
+            facilities.append("1 biblioteca" if libraries == 1 else f"{libraries} bibliotecas")
+        return f"{' y '.join(facilities)} en el barrio"
     return f"{_fmt(total)} equipamientos del catálogo de bibliotecas y deporte en el barrio"
 
 
@@ -63,7 +60,7 @@ def build_recommendation(results: list[ScoreResult], areas: list[Area], indicato
     caveats: list[str] = []  # trade-offs for criteria with high priority
 
     # Price (always first when the user gave a budget)
-    if best.est_rent_eur_month is not None:
+    if best.est_rent_eur_month is not None and weights.get("rent_eur_m2", 0) > 0:
         housing = HOUSING_ES.get(req.housing_type, "una vivienda")
         if req.budget_eur_month and best.fits_budget:
             spare = round(req.budget_eur_month - best.est_rent_eur_month)
@@ -78,11 +75,12 @@ def build_recommendation(results: list[ScoreResult], areas: list[Area], indicato
     # Distance to campus
     pos = _rank_among(best.distance_km, distances)
     text = f"A {_fmt(best.distance_km, 1)} km de tu campus" + (f", entre las {max(5, (pos + 4) // 5 * 5)} zonas más cercanas" if pos <= 20 else "")
-    reasons.append((weights.get("distance_km", 0.6) + (0.25 if pos <= 10 else 0.1 if pos <= 20 else 0), text))
+    if weights.get("distance_km", 0) > 0:
+        reasons.append((weights["distance_km"] + (0.25 if pos <= 10 else 0.1 if pos <= 20 else 0), text))
 
     # Air quality (NO2, lower is better)
     no2 = area.values.get("air_no2")
-    if no2 is not None:
+    if no2 is not None and weights.get("air_no2", 0) > 0:
         pct = _share_better(no2, all_vals.get("air_no2", []), False)
         if pct >= 50:
             reasons.append((weights.get("air_no2", 0.2) + pct / 400, "Buena calidad del aire en comparación con otros barrios"))
@@ -91,7 +89,7 @@ def build_recommendation(results: list[ScoreResult], areas: list[Area], indicato
 
     # Metro
     transit = area.values.get("transit_stops")
-    if transit is not None and transit > 0:
+    if transit is not None and transit > 0 and weights.get("transit_stops", 0) > 0:
         pct = _share_better(transit, all_vals.get("transit_stops", []), True)
         if pct >= 50:
             reasons.append((weights.get("transit_stops", 0.2) + pct / 400, "Buena cobertura de metro dentro del barrio"))
@@ -103,18 +101,27 @@ def build_recommendation(results: list[ScoreResult], areas: list[Area], indicato
     # Services
     services = area.values.get("services_count")
     services_weight = weights.get("services_count", 0)
-    if services:
+    if services and services_weight > 0:
         pct = _share_better(services, all_vals.get("services_count", []), True)
         if pct >= 50 or services_weight >= 0.6:
             reasons.append((weights.get("services_count", 0.2) + pct / 400, _service_reason(area, services)))
-    if services_weight >= 0.6:
+    sports_weight = weights.get("sports_count", 0)
+    for key, singular, plural in (
+        ("sports_count", "equipamiento deportivo municipal", "equipamientos deportivos municipales"),
+        ("libraries_count", "biblioteca", "bibliotecas"),
+    ):
+        count = area.values.get(key)
+        weight = weights.get(key, 0)
+        if count and weight > 0:
+            reasons.append((weight, f"{_fmt(count)} {singular if count == 1 else plural} en el barrio"))
+    if max(services_weight, sports_weight) >= 0.6:
         caveats.insert(0, "Si buscas un gimnasio, comprueba la oferta en la zona. El dato deportivo cubre equipamientos municipales.")
 
     reasons.sort(key=lambda r: r[0], reverse=True)
     headline = f"{best.name} es la zona que mejor encaja con lo que buscas"
     if best.distance_km > 8 and weights.get("distance_km", 0) >= 0.6:
         caveats.append(f"Está a {_fmt(best.distance_km, 1)} km de tu campus: cuenta con el transporte")
-    if area.notes.get("rent_eur_m2"):
+    if area.notes.get("rent_eur_m2") and weights.get("rent_eur_m2", 0) > 0:
         caveats.append("El precio es una estimación con la mediana oficial de su distrito")
     return Recommendation(area_id=best.id, name=best.name, district=best.district,
                           headline=headline, reasons=[t for _, t in reasons[:4]], caveats=caveats[:2])

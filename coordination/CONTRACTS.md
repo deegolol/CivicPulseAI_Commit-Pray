@@ -135,6 +135,9 @@ Request:
 - `budget_eur_month` opcional. Si viene: se calcula `est_rent_eur_month` y `fits_budget`; con `only_within_budget: true` las que no encajan salen `excluded`.
 - `weights`: 0..1, se renormalizan para sumar 1. Claves desconocidas → 422.
 - `filters`: opcionales. Áreas que no los cumplen salen con `"excluded": true` y `score: 0` (la UI las pinta en gris).
+- `filters.min_budget_eur_month` aplica un mínimo inclusivo al alquiler mensual estimado. `only_within_budget` aplica el máximo de `budget_eur_month`.
+- `filters.max_air_no2` y `filters.min_transit_stops` filtran por los indicadores medidos de aire y densidad de Metro.
+- Cuando el agregado incluye el desglose municipal en `notes.services_count`, `/api/meta` ofrece `libraries_count` y `sports_count` como criterios independientes. `services_count` sigue disponible para clientes existentes.
 
 Response:
 ```json

@@ -83,6 +83,8 @@ KEYWORDS = {
     "air_no2": ("aire", "contamin", "limpio", "verde", "correr", "salud", "tranquil", "respirar"),
     "transit_stops": ("metro", "bus", "transporte", "cercanias", "comunicad", "tren"),
     "services_count": ("servicio", "biblioteca", "gimnasio", "deporte", "cultura", "centro de salud", "ambiente"),
+    "libraries_count": ("biblioteca", "leer", "lectura", "cultura", "ocio"),
+    "sports_count": ("gimnas", "deporte", "deportiv", "polideportiv", "entren", "piscina"),
 }
 CAMPUS_ALIASES = {
     "etsisi": ("etsisi", "campus sur", "vallecas", "sistemas informaticos", "software"),

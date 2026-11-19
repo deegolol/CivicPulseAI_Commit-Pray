@@ -79,11 +79,12 @@ export async function getGeo(): Promise<BarriosGeoJSON> {
   return fetchJson<BarriosGeoJSON>('/api/geo');
 }
 
-export async function postScore(payload: ScoreRequest): Promise<ScoreResponse> {
+export async function postScore(payload: ScoreRequest, signal?: AbortSignal): Promise<ScoreResponse> {
   if (USE_MOCKS) return computeMockScore(payload);
   return fetchJson<ScoreResponse>('/api/score', {
     method: 'POST',
     body: JSON.stringify(payload),
+    signal,
   });
 }
 

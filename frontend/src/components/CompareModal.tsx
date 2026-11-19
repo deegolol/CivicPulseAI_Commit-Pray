@@ -20,6 +20,7 @@ import { normalizedToStars, StarRating } from './StarRating';
 interface CompareModalProps {
   areas: ScoreResultItem[];
   indicators: IndicatorMeta[];
+  activeCriteria: Set<string>;
   housingType: HousingType;
   budget: number;
   onRemove: (areaId: string) => void;
@@ -39,6 +40,7 @@ const FRIENDLY_LABELS: Record<string, string> = {
 export function CompareModal({
   areas,
   indicators,
+  activeCriteria,
   housingType,
   budget,
   onRemove,
@@ -59,15 +61,16 @@ export function CompareModal({
         key: ind.key,
         label: FRIENDLY_LABELS[ind.key] ?? ind.label,
       })),
-    ],
-    [indicators],
+    ].filter((metric) => activeCriteria.has(metric.key)),
+    [indicators, activeCriteria],
   );
 
   const radarData = useMemo(() => {
     return allMetrics.map((metric) => {
-      const row: Record<string, string | number> = { axis: metric.label };
+      const row: Record<string, string | number | null> = { axis: metric.label };
       areas.forEach((area, idx) => {
-        row[`s${idx}`] = normalizedToStars(area.breakdown[metric.key]?.normalized);
+        const item = area.breakdown[metric.key];
+        row[`s${idx}`] = item?.value != null ? normalizedToStars(item.normalized) : null;
       });
       return row;
     });
@@ -158,8 +161,16 @@ export function CompareModal({
                 </tr>
               </thead>
               <tbody className="divide-y divide-border bg-bg tabular-nums">
-                {/* Coste estimado */}
-                <tr>
+                <tr className="bg-brand-soft">
+                  <th scope="row" className="px-4 py-4 font-display text-sm font-bold text-ink">Valoración global</th>
+                  {areas.map((area) => (
+                    <td key={area.id} className="px-4 py-4">
+                      <StarRating value={normalizedToStars(area.score / 100)} size="lg" />
+                    </td>
+                  ))}
+                </tr>
+
+                {activeCriteria.has('rent_eur_m2') && <tr>
                   <td className="px-4 py-3 font-medium text-muted">Precio estimado</td>
                   {areas.map((area) => {
                     const over =
@@ -185,40 +196,32 @@ export function CompareModal({
                       </td>
                     );
                   })}
-                </tr>
+                </tr>}
 
                 {/* Distancia en km */}
-                <tr>
+                {activeCriteria.has('distance_km') && <tr>
                   <td className="px-4 py-3 font-medium text-muted">Distancia al campus</td>
                   {areas.map((area) => (
                     <td key={area.id} className="px-4 py-3 font-semibold text-ink">
                       {formatKm(area.distance_km)}
                     </td>
                   ))}
-                </tr>
-
-                {/* Valoración global en estrellas */}
-                <tr>
-                  <td className="px-4 py-3 font-medium text-muted">Valoración global</td>
-                  {areas.map((area) => (
-                    <td key={area.id} className="px-4 py-3">
-                      <StarRating value={Math.round((area.score / 100) * 50) / 10} size="sm" />
-                    </td>
-                  ))}
-                </tr>
+                </tr>}
 
                 {/* Fractional 0–5 Star Ratings per dimension */}
                 {allMetrics.map((metric) => (
                   <tr key={metric.key}>
                     <td className="px-4 py-3 font-medium text-muted">{metric.label}</td>
-                    {areas.map((area) => (
-                      <td key={area.id} className="px-4 py-3">
-                        <StarRating
-                          value={normalizedToStars(area.breakdown[metric.key]?.normalized)}
-                          size="sm"
-                        />
-                      </td>
-                    ))}
+                    {areas.map((area) => {
+                      const item = area.breakdown[metric.key];
+                      return (
+                        <td key={area.id} className="px-4 py-3">
+                          {item?.value != null
+                            ? <StarRating value={normalizedToStars(item.normalized)} size="sm" />
+                            : <span className="text-muted">Sin dato</span>}
+                        </td>
+                      );
+                    })}
                   </tr>
                 ))}
 

@@ -11,7 +11,9 @@ export type IndicatorKey =
   | 'distance_km'
   | 'air_no2'
   | 'transit_stops'
-  | 'services_count';
+  | 'services_count'
+  | 'libraries_count'
+  | 'sports_count';
 
 export interface SourceInfo {
   id: string;
@@ -84,6 +86,9 @@ export interface ScoreFilters {
   max_rent_eur_m2?: number | null;
   max_distance_km?: number | null;
   only_within_budget?: boolean;
+  min_budget_eur_month?: number | null;
+  max_air_no2?: number | null;
+  min_transit_stops?: number | null;
 }
 
 export interface ScoreRequest {

@@ -6,7 +6,7 @@
  *   - Screen B (Results): fixed TopFilterBar + list-first ZoneList (left 440px) + blue-scale MadridMap (right)
  *     + slide-over AreaDetailPanel + CompareModal. On mobile: full-screen list with floating Mapa/Lista toggle.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { List, Map as MapIcon } from 'lucide-react';
 import {
   ApiError,
@@ -23,30 +23,33 @@ import type {
   HousingType,
   MetaResponse,
   Recommendation,
+  ScoreFilters,
   ScoreResultItem,
 } from './api/types';
 import { HOUSING_TYPE_LABELS } from './config';
 import {
   AIR_LEVEL_THRESHOLDS,
+  DEFAULT_PRIORITIES,
+  TRANSPORT_LABELS,
   WELL_CONNECTED_THRESHOLD,
   type AirLevelOption,
+  type TransportMode,
 } from './constants/filters';
 import { AreaDetailPanel } from './components/AreaDetailPanel';
 import { CompareModal } from './components/CompareModal';
 import { MadridMap } from './components/MadridMap';
-import { OnboardingScreen } from './components/OnboardingScreen';
+import { OnboardingScreen, type SearchReview } from './components/OnboardingScreen';
 import { TopFilterBar } from './components/TopFilterBar';
 import { ZoneList } from './components/ZoneList';
 import { formatEuro, formatKm } from './utils/format';
+import { searchPreferences } from './utils/searchPreferences';
 
 function prioritiesToWeights(
   selected: string[],
   availableKeys: Set<string>,
 ): Record<string, number> {
   const weights: Record<string, number> = {};
-  for (const key of availableKeys) {
-    weights[key] = selected.includes(key) ? 1.0 : 0.2;
-  }
+  for (const key of selected) if (availableKeys.has(key)) weights[key] = 1;
   return weights;
 }
 
@@ -58,7 +61,7 @@ function readInitialUrlParams() {
   const campus = params.get('campus') || undefined;
   const budgetRaw = Number(params.get('budget'));
   const budget =
-    Number.isFinite(budgetRaw) && budgetRaw >= 300 && budgetRaw <= 1500
+    Number.isFinite(budgetRaw) && budgetRaw > 0
       ? budgetRaw
       : undefined;
   const typeParam = params.get('type');
@@ -71,9 +74,15 @@ function readInitialUrlParams() {
     kmParam === 'any'
       ? null
       : kmParam && Number.isFinite(Number(kmParam))
-        ? Math.max(2, Math.min(20, Number(kmParam)))
+        ? Math.max(0.5, Math.min(60, Number(kmParam)))
         : undefined;
-  return { hasParams, campus, budget, housingType, maxDistanceKm };
+  const min = Number(params.get('min'));
+  const minBudget = min > 0 && budget !== undefined && min <= budget ? min : null;
+  const preferences = params.get('criteria')?.split(',').filter(Boolean);
+  const mode = params.get('mode');
+  const transportMode = mode && Object.prototype.hasOwnProperty.call(TRANSPORT_LABELS, mode) ? mode as TransportMode : 'any';
+  const onlyWithinBudget = params.get('range') === '1' || minBudget !== null;
+  return { hasParams, campus, budget, housingType, maxDistanceKm, minBudget, preferences, transportMode, onlyWithinBudget };
 }
 
 export function App() {
@@ -100,23 +109,28 @@ export function App() {
   const [query, setQuery] = useState('');
   const [campusId, setCampusId] = useState(initial.campus ?? 'etsisi');
   const [budget, setBudget] = useState(initial.budget ?? 500);
+  const [minBudget, setMinBudget] = useState<number | null>(initial.minBudget ?? null);
   const [housingType, setHousingType] = useState<HousingType>(initial.housingType ?? 'room');
   const [maxDistanceKm, setMaxDistanceKm] = useState<number | null>(
     initial.maxDistanceKm !== undefined ? initial.maxDistanceKm : 10,
   );
   const [airLevel, setAirLevel] = useState<AirLevelOption>('any');
   const [wellConnectedOnly, setWellConnectedOnly] = useState(false);
-  const [onlyWithinBudget, setOnlyWithinBudget] = useState(false);
-  const [selectedPriorities, setSelectedPriorities] = useState<string[]>([
-    'rent_eur_m2',
-    'distance_km',
-  ]);
+  const [onlyWithinBudget, setOnlyWithinBudget] = useState(initial.onlyWithinBudget ?? false);
+  const [transportMode, setTransportMode] = useState<TransportMode>(initial.transportMode ?? 'any');
+  const [selectedPriorities, setSelectedPriorities] = useState<string[]>(
+    initial.preferences?.length ? [...new Set(initial.preferences)] : DEFAULT_PRIORITIES,
+  );
   const [aiWeightsOverride, setAiWeightsOverride] = useState<Record<string, number> | null>(null);
 
   // Search summary & explanation text (from /api/ai/parse & /api/ai/explain)
   const [aiInterpretation, setAiInterpretation] = useState<string | null>(null);
   const [aiExplanation, setAiExplanation] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [searchReview, setSearchReview] = useState<SearchReview | null>(null);
+  const pendingExplanation = useRef<string | null>(null);
 
   // Selection, hover, comparison & mobile view state
   const [selectedAreaId, setSelectedAreaId] = useState<string | null>(null);
@@ -124,29 +138,28 @@ export function App() {
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [compareOpen, setCompareOpen] = useState(false);
   const [mobileView, setMobileView] = useState<'list' | 'map'>('list');
+  const [desktop, setDesktop] = useState(() => window.matchMedia('(min-width: 1024px)').matches);
+  const mapVisible = screen === 'results' && (desktop || mobileView === 'map');
 
-  // Bootstrap metadata, GeoJSON, and area centroids
+  useEffect(() => {
+    const media = window.matchMedia('(min-width: 1024px)');
+    const onChange = (event: MediaQueryListEvent) => setDesktop(event.matches);
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }, []);
+
+  // Load the controls immediately and fetch the larger map data when the map is opened.
   useEffect(() => {
     let cancelled = false;
     async function bootstrap() {
       try {
         setLoading(true);
-        const [metaRes, geoRes, areasRes] = await Promise.all([
-          getMeta(),
-          getGeo(),
-          getAreas(),
-        ]);
+        const metaRes = await getMeta();
         if (cancelled) return;
         setMeta(metaRes);
-        setGeoData(geoRes);
-        if (!initial.campus) {
-          setCampusId(metaRes.defaults.campus_id);
-        }
-        const centroidMap: Record<string, [number, number]> = {};
-        for (const a of areasRes.areas) {
-          centroidMap[a.id] = a.centroid;
-        }
-        setCentroidsById(centroidMap);
+        setCampusId((current) => metaRes.campuses.some((campus) => campus.id === current)
+          ? current
+          : metaRes.defaults.campus_id);
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : 'Error cargando datos iniciales');
@@ -159,10 +172,23 @@ export function App() {
     return () => {
       cancelled = true;
     };
-  }, [initial.campus]);
+  }, []);
+
+  useEffect(() => {
+    if (!mapVisible || geoData) return;
+    let cancelled = false;
+    Promise.all([getGeo(), getAreas()]).then(([geo, response]) => {
+      if (cancelled) return;
+      setGeoData(geo);
+      setCentroidsById(Object.fromEntries(response.areas.map((area) => [area.id, area.centroid])));
+    }).catch(() => {
+      if (!cancelled) setError('No se ha podido cargar el mapa.');
+    });
+    return () => { cancelled = true; };
+  }, [mapVisible, geoData]);
 
   const availableKeys = useMemo(() => {
-    const keys = new Set<string>(['distance_km']);
+    const keys = new Set<string>(DEFAULT_PRIORITIES);
     for (const ind of meta?.indicators ?? []) {
       keys.add(ind.key);
     }
@@ -170,17 +196,20 @@ export function App() {
   }, [meta]);
 
   const computedWeights = useMemo(() => {
-    if (aiWeightsOverride) {
-      const filtered: Record<string, number> = {};
-      for (const key of availableKeys) {
-        if (aiWeightsOverride[key] !== undefined) {
-          filtered[key] = aiWeightsOverride[key];
-        }
-      }
-      if (Object.keys(filtered).length > 0) return filtered;
-    }
-    return prioritiesToWeights(selectedPriorities, availableKeys);
+    const weights = prioritiesToWeights(selectedPriorities, availableKeys);
+    if (!Object.keys(weights).length) return prioritiesToWeights(DEFAULT_PRIORITIES, availableKeys);
+    for (const key of Object.keys(weights)) weights[key] = aiWeightsOverride?.[key] ?? 1;
+    return weights;
   }, [aiWeightsOverride, selectedPriorities, availableKeys]);
+  const activeCriteria = useMemo(() => new Set(Object.keys(computedWeights)), [computedWeights]);
+
+  const scoreFilters = useMemo<ScoreFilters>(() => ({
+    max_distance_km: maxDistanceKm,
+    only_within_budget: onlyWithinBudget,
+    min_budget_eur_month: minBudget,
+    max_air_no2: activeCriteria.has('air_no2') ? AIR_LEVEL_THRESHOLDS[airLevel] : null,
+    min_transit_stops: activeCriteria.has('transit_stops') && wellConnectedOnly ? WELL_CONNECTED_THRESHOLD : null,
+  }), [maxDistanceKm, onlyWithinBudget, minBudget, activeCriteria, airLevel, wellConnectedOnly]);
 
   // Sync URL querystring only when on Screen B (so Screen A stays clean at "/")
   useEffect(() => {
@@ -190,78 +219,81 @@ export function App() {
     params.set('budget', String(budget));
     params.set('type', housingType);
     params.set('km', maxDistanceKm === null ? 'any' : String(maxDistanceKm));
+    if (minBudget !== null) params.set('min', String(minBudget));
+    else params.delete('min');
+    params.set('criteria', [...activeCriteria].join(','));
+    if (transportMode !== 'any') params.set('mode', transportMode);
+    else params.delete('mode');
+    if (onlyWithinBudget) params.set('range', '1');
+    else params.delete('range');
     window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
-  }, [screen, campusId, budget, housingType, maxDistanceKm]);
+  }, [screen, campusId, budget, housingType, maxDistanceKm, minBudget, activeCriteria, transportMode, onlyWithinBudget]);
 
-  // Score whenever parameters change on Screen B (debounced 250 ms)
+  // Cancel obsolete rankings so a slower response cannot replace a newer search.
   useEffect(() => {
-    if (!meta || screen !== 'results') return;
-    let cancelled = false;
+    if (!meta || screen !== 'results' || !campusId || budget <= 0) return;
+    const controller = new AbortController();
     setIsScoring(true);
-
-    const timer = window.setTimeout(async () => {
+    setAiExplanation(null);
+    setAiLoading(Boolean(pendingExplanation.current));
+    async function updateScore() {
       try {
-        const res = await postScore({
+        const scored = await postScore({
           campus_id: campusId,
           weights: computedWeights,
-          filters: {
-            max_distance_km: maxDistanceKm,
-            only_within_budget: onlyWithinBudget,
-          },
+          filters: scoreFilters,
           budget_eur_month: budget,
           housing_type: housingType,
-        });
-        if (!cancelled) {
-          setRawResults(res.results);
-          setRecommendation(res.recommendation ?? null);
-          setHighlights(res.highlights ?? {});
-          setReferenceM2(res.reference_m2);
-          setError(null);
+        }, controller.signal);
+        if (controller.signal.aborted) return;
+        setRawResults(scored.results);
+        setRecommendation(scored.recommendation ?? null);
+        setHighlights(scored.highlights ?? {});
+        setReferenceM2(scored.reference_m2);
+        setError(null);
+        setIsScoring(false);
+
+        const confirmedQuery = pendingExplanation.current;
+        pendingExplanation.current = null;
+        const top3 = scored.results.filter((item) => !item.excluded).slice(0, 3);
+        if (confirmedQuery && top3.length) {
+          try {
+            const explained = await postAiExplain({
+              campus_id: campusId,
+              weights: computedWeights,
+              area_ids: top3.map((item) => item.id),
+              query: confirmedQuery,
+              budget_eur_month: budget,
+              housing_type: housingType,
+              filters: scoreFilters,
+            });
+            if (!controller.signal.aborted) setAiExplanation(explained.text);
+          } catch (err) {
+            if (controller.signal.aborted) return;
+            if (err instanceof ApiError && err.status === 429) setRateLimitNotice(err.detail);
+            setAiExplanation(top3.map((item, index) =>
+              `${index + 1}) ${item.name}: ${formatEuro(item.est_rent_eur_month)}/mes a ${formatKm(item.distance_km)}.`,
+            ).join(' '));
+          }
         }
       } catch (err) {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Error calculando recomendaciones');
-        }
+        if (!controller.signal.aborted) setError(err instanceof Error ? err.message : 'Error calculando recomendaciones');
       } finally {
-        if (!cancelled) setIsScoring(false);
+        if (!controller.signal.aborted) {
+          setIsScoring(false);
+          setAiLoading(false);
+        }
       }
-    }, 250);
+    }
+    updateScore();
+    return () => controller.abort();
+  }, [meta, screen, campusId, computedWeights, scoreFilters, budget, housingType]);
 
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timer);
-    };
-  }, [meta, screen, campusId, computedWeights, maxDistanceKm, onlyWithinBudget, budget, housingType]);
-
-  // Apply real-unit client-side thresholds for air NO₂ and Metro density
-  const results = useMemo(() => {
-    const maxNo2 = AIR_LEVEL_THRESHOLDS[airLevel];
-    const mapped = rawResults.map((item) => {
-      const no2 = item.breakdown.air_no2?.value;
-      const transit = item.breakdown.transit_stops?.value;
-      let excluded = item.excluded;
-
-      if (maxNo2 !== null && no2 != null && no2 > maxNo2) {
-        excluded = true;
-      }
-      if (wellConnectedOnly && (transit == null || transit < WELL_CONNECTED_THRESHOLD)) {
-        excluded = true;
-      }
-
-      return {
-        ...item,
-        excluded,
-        score: excluded ? 0 : item.score,
-      };
-    });
-
-    mapped.sort((a, b) => {
-      if (a.excluded !== b.excluded) return a.excluded ? 1 : -1;
-      return b.score - a.score;
-    });
-
-    return mapped.map((item, idx) => ({ ...item, rank: idx + 1 }));
-  }, [rawResults, airLevel, wellConnectedOnly]);
+  const results = rawResults;
+  const visibleHighlights = useMemo(() => {
+    const keys = { cheapest: 'rent_eur_m2', closest: 'distance_km', cleanest_air: 'air_no2', best_transit: 'transit_stops' };
+    return Object.fromEntries(Object.entries(highlights).filter(([key]) => activeCriteria.has(keys[key as keyof typeof keys])));
+  }, [highlights, activeCriteria]);
 
   const scoresById = useMemo(() => {
     const map: Record<string, ScoreResultItem> = {};
@@ -293,10 +325,25 @@ export function App() {
   );
 
   const handleTogglePriority = (key: string) => {
-    setAiWeightsOverride(null);
-    setSelectedPriorities((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
-    );
+    if (activeCriteria.size === 1 && activeCriteria.has(key)) return;
+    if (activeCriteria.has(key)) {
+      if (key === 'air_no2') setAirLevel('any');
+      if (key === 'transit_stops') {
+        setWellConnectedOnly(false);
+        if (transportMode === 'metro') setTransportMode('any');
+      }
+    }
+    setSelectedPriorities(activeCriteria.has(key)
+      ? [...activeCriteria].filter((item) => item !== key)
+      : [...activeCriteria, key]);
+  };
+
+  const handleTransportModeChange = (mode: TransportMode) => {
+    setTransportMode(mode);
+    const key = mode === 'metro' ? 'transit_stops' : 'distance_km';
+    if (mode !== 'any' && availableKeys.has(key) && !activeCriteria.has(key)) {
+      setSelectedPriorities([...activeCriteria, key]);
+    }
   };
 
   const handleToggleCompare = (areaId: string) => {
@@ -337,115 +384,64 @@ export function App() {
   };
 
   const handleSearchSubmit = async (queryText: string) => {
-    setScreen('results');
+    if (searching) return;
+    setScreen('onboarding');
     setSelectedAreaId(null);
-    setMobileView('list');
-    setAiLoading(true);
+    setSearching(true);
+    setSearchError(null);
     setRateLimitNotice(null);
+    setAiExplanation(null);
 
     try {
       const parsed = await postAiParse({ query: queryText });
-      const nextCampus = parsed.campus_id || campusId;
-      const nextBudget = parsed.budget_eur_month ?? budget;
-      const nextHousing = parsed.housing_type ?? housingType;
-      const nextMaxDist =
-        parsed.filters?.max_distance_km !== undefined
-          ? parsed.filters.max_distance_km
-          : maxDistanceKm;
-      const nextOnlyWithinBudget =
-        parsed.filters?.only_within_budget !== undefined &&
-        parsed.filters?.only_within_budget !== null
-          ? parsed.filters.only_within_budget
-          : false;
-
-      setCampusId(nextCampus);
-      setBudget(nextBudget);
-      setHousingType(nextHousing);
-      setMaxDistanceKm(nextMaxDist);
-      setOnlyWithinBudget(nextOnlyWithinBudget);
+      const inferred = searchPreferences(queryText, parsed, availableKeys);
+      setCampusId(parsed.campus_id || campusId);
+      setBudget(inferred.budget ?? budget);
+      setMinBudget(inferred.minBudget);
+      setHousingType(parsed.housing_type || housingType);
+      setMaxDistanceKm(parsed.filters.max_distance_km ?? maxDistanceKm);
+      setAirLevel('any');
+      setWellConnectedOnly(false);
+      setTransportMode(inferred.transportMode);
+      setSelectedPriorities(inferred.selectedPriorities);
+      setAiWeightsOverride(Object.fromEntries(inferred.selectedPriorities.map((key) => {
+        const weight = parsed.weights[key] ?? 0;
+        return [key, weight >= 0.5 ? weight : 1];
+      })));
       setAiInterpretation(parsed.interpretation);
-
-      const exactWeights: Record<string, number> = {};
-      for (const [k, w] of Object.entries(parsed.weights)) {
-        if (availableKeys.has(k) && typeof w === 'number' && w >= 0) {
-          exactWeights[k] = w;
-        }
-      }
-      const nextWeights =
-        Object.keys(exactWeights).length > 0
-          ? exactWeights
-          : prioritiesToWeights(selectedPriorities, availableKeys);
-      setAiWeightsOverride(Object.keys(exactWeights).length > 0 ? exactWeights : null);
-
-      const topKeys = Object.entries(nextWeights)
-        .filter(([, w]) => w >= 0.2)
-        .map(([k]) => k);
-      if (topKeys.length > 0) setSelectedPriorities(topKeys);
-
-      const scored = await postScore({
-        campus_id: nextCampus,
-        weights: nextWeights,
-        filters: {
-          max_distance_km: nextMaxDist,
-          only_within_budget: nextOnlyWithinBudget,
-        },
-        budget_eur_month: nextBudget,
-        housing_type: nextHousing,
-      });
-      setRawResults(scored.results);
-      setRecommendation(scored.recommendation ?? null);
-      setHighlights(scored.highlights ?? {});
-      setReferenceM2(scored.reference_m2);
-
-      const top3Items = scored.results.filter((r) => !r.excluded).slice(0, 3);
-      const top3Ids = top3Items.map((r) => r.id);
-
-      if (top3Ids.length > 0) {
-        try {
-          const explained = await postAiExplain({
-            campus_id: nextCampus,
-            weights: nextWeights,
-            area_ids: top3Ids,
-            query: queryText,
-            budget_eur_month: nextBudget,
-            housing_type: nextHousing,
-            filters: {
-              max_distance_km: nextMaxDist,
-              only_within_budget: nextOnlyWithinBudget,
-            },
-          });
-          setAiExplanation(explained.text);
-        } catch (err) {
-          if (err instanceof ApiError && err.status === 429) {
-            setRateLimitNotice(err.detail);
-          }
-          const fallbackSummary = top3Items
-            .map((item, i) => {
-              const rent =
-                item.est_rent_eur_month != null
-                  ? `~${formatEuro(item.est_rent_eur_month)}/mes`
-                  : 'sin dato de alquiler';
-              return `${i + 1}) ${item.name} (${item.district}): ${rent} a ${formatKm(item.distance_km)}.`;
-            })
-            .join(' ');
-          setAiExplanation(fallbackSummary);
-        }
-      } else {
-        setAiExplanation(null);
-      }
+      setSearchReview({ query: queryText, inferredFields: inferred.inferredFields, inferredPriorities: inferred.inferredPriorities });
     } catch (err) {
-      if (err instanceof ApiError && err.status === 429) {
-        setRateLimitNotice(err.detail);
-      }
-      setAiInterpretation(null);
-      setAiExplanation(null);
+      setSearchError(err instanceof ApiError && err.status === 429
+        ? err.detail
+        : 'No se ha podido interpretar la búsqueda. Puedes rellenarla a mano.');
     } finally {
-      setAiLoading(false);
+      setSearching(false);
     }
+  };
+
+  const handleStart = () => {
+    pendingExplanation.current = searchReview?.query ?? null;
+    if (!searchReview) {
+      setAiInterpretation(null);
+      setAiWeightsOverride(null);
+    }
+    setSearchReview(null);
+    setOnlyWithinBudget(true);
+    setSelectedAreaId(null);
+    setHoveredAreaId(null);
+    setCompareIds([]);
+    setCompareOpen(false);
+    setMobileView('list');
+    setRawResults([]);
+    setRecommendation(null);
+    setHighlights({});
+    setIsScoring(true);
+    setScreen('results');
   };
 
   const handleResetHome = () => {
     setScreen('onboarding');
+    setSearchReview(null);
     setSelectedAreaId(null);
     if (typeof window !== 'undefined') {
       window.history.replaceState(null, '', window.location.pathname);
@@ -453,11 +449,10 @@ export function App() {
   };
 
   const campusShort = activeCampus?.name.split(' · ')[0] ?? campusId.toUpperCase();
-  const summaryLine =
-    aiInterpretation ||
-    `${HOUSING_TYPE_LABELS[housingType]} hasta ${formatEuro(budget)} cerca de ${campusShort}${
-      maxDistanceKm !== null ? ` (≤ ${formatKm(maxDistanceKm)})` : ''
-    }`;
+  const budgetRange = minBudget === null ? `hasta ${formatEuro(budget)}` : `${formatEuro(minBudget)}–${formatEuro(budget)}`;
+  const summaryLine = `${HOUSING_TYPE_LABELS[housingType]} · ${budgetRange}/mes · ${campusShort}${
+    maxDistanceKm !== null ? ` (≤ ${formatKm(maxDistanceKm)})` : ''
+  }`;
 
   // Screen A: Map-free Onboarding
   if (screen === 'onboarding') {
@@ -467,18 +462,28 @@ export function App() {
           query={query}
           onQueryChange={setQuery}
           onSearchSubmit={handleSearchSubmit}
+          searching={searching}
+          searchError={searchError}
+          review={searchReview}
+          onBack={() => setSearchReview(null)}
+          interpretation={aiInterpretation}
           campuses={meta?.campuses ?? []}
           campusId={campusId}
           onCampusChange={setCampusId}
           budget={budget}
+          minBudget={minBudget}
           onBudgetChange={setBudget}
+          onMinBudgetChange={setMinBudget}
           housingType={housingType}
           onHousingTypeChange={setHousingType}
-          onStartManual={() => {
-            setAiInterpretation(null);
-            setAiExplanation(null);
-            setScreen('results');
-          }}
+          maxDistanceKm={maxDistanceKm}
+          onMaxDistanceChange={setMaxDistanceKm}
+          transportMode={transportMode}
+          onTransportModeChange={handleTransportModeChange}
+          availableKeys={availableKeys}
+          selectedPriorities={[...activeCriteria]}
+          onTogglePriority={handleTogglePriority}
+          onStart={handleStart}
         />
       </div>
     );
@@ -497,7 +502,9 @@ export function App() {
         campusId={campusId}
         onCampusChange={setCampusId}
         budget={budget}
+        minBudget={minBudget}
         onBudgetChange={setBudget}
+        onMinBudgetChange={setMinBudget}
         housingType={housingType}
         onHousingTypeChange={setHousingType}
         maxDistanceKm={maxDistanceKm}
@@ -508,8 +515,10 @@ export function App() {
         onWellConnectedChange={setWellConnectedOnly}
         onlyWithinBudget={onlyWithinBudget}
         onOnlyWithinBudgetChange={setOnlyWithinBudget}
-        selectedPriorities={selectedPriorities}
+        selectedPriorities={[...activeCriteria]}
         onTogglePriority={handleTogglePriority}
+        transportMode={transportMode}
+        onTransportModeChange={handleTransportModeChange}
         compareCount={compareIds.length}
         onOpenCompare={() => setCompareOpen(true)}
       />
@@ -558,14 +567,14 @@ export function App() {
           <ZoneList
             results={results}
             recommendation={recommendation}
-            highlights={highlights}
+            highlights={visibleHighlights}
             budget={budget}
             summaryLine={summaryLine}
             explanationText={aiExplanation}
             explanationLoading={aiLoading}
             selectedAreaId={selectedAreaId}
             hoveredAreaId={hoveredAreaId}
-            onSelectArea={(id) => setSelectedAreaId(id)}
+            onSelectArea={setSelectedAreaId}
             onHoverArea={setHoveredAreaId}
             compareIds={compareIds}
             onToggleCompare={handleToggleCompare}
@@ -581,7 +590,7 @@ export function App() {
             mobileView === 'map' ? 'block' : 'hidden lg:block'
           } relative z-0 min-w-0 flex-1`}
         >
-          <MadridMap
+          {(mapVisible || geoData) && <MadridMap
             geoData={geoData}
             scoresById={scoresById}
             top10RankById={top10RankById}
@@ -589,14 +598,14 @@ export function App() {
             selectedAreaId={selectedAreaId}
             hoveredAreaId={hoveredAreaId}
             recommendedAreaId={recommendation?.area_id ?? null}
-            onSelectArea={(id) => setSelectedAreaId(id)}
+            onSelectArea={setSelectedAreaId}
             onHoverArea={setHoveredAreaId}
             activeCampus={activeCampus}
             maxDistanceKm={maxDistanceKm}
             budget={budget}
             isScoring={isScoring}
-            isVisible={mobileView === 'map' || typeof window === 'undefined' || window.innerWidth >= 1024}
-          />
+            isVisible={mapVisible}
+          />}
         </main>
 
         {/* Area Detail Slide-Over Panel (right side on desktop, full-screen on mobile) */}
@@ -608,6 +617,7 @@ export function App() {
             <AreaDetailPanel
               area={selectedArea}
               indicators={meta?.indicators ?? []}
+              activeCriteria={activeCriteria}
               sources={meta?.sources ?? []}
               budget={budget}
               housingType={housingType}
@@ -647,6 +657,7 @@ export function App() {
         <CompareModal
           areas={comparedAreas}
           indicators={meta?.indicators ?? []}
+          activeCriteria={activeCriteria}
           housingType={housingType}
           budget={budget}
           onRemove={handleToggleCompare}

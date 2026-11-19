@@ -23,9 +23,27 @@ export const PRIORITY_CHIPS: PriorityOption[] = [
   { key: 'rent_eur_m2', label: 'Precio' },
   { key: 'distance_km', label: 'Cercanía' },
   { key: 'air_no2', label: 'Aire limpio' },
-  { key: 'transit_stops', label: 'Transporte' },
+  { key: 'transit_stops', label: 'Metro' },
+  { key: 'libraries_count', label: 'Ocio y cultura · bibliotecas' },
+  { key: 'sports_count', label: 'Deporte municipal' },
   { key: 'services_count', label: 'Servicios' },
 ];
+
+export const DEFAULT_PRIORITIES = ['rent_eur_m2', 'distance_km'];
+
+export function priorityOptions(availableKeys: Set<string>) {
+  return PRIORITY_CHIPS.filter(({ key }) => availableKeys.has(key)
+    && (key !== 'services_count' || (!availableKeys.has('libraries_count') && !availableKeys.has('sports_count'))));
+}
+
+export const TRANSPORT_LABELS = {
+  any: 'Sin preferencia',
+  walk: 'A pie',
+  metro: 'Metro',
+  car: 'Coche',
+};
+
+export type TransportMode = keyof typeof TRANSPORT_LABELS;
 
 /** Exact 3 demo queries cached on backend DEMO_CACHE for instant response */
 export const EXAMPLE_QUERIES = [
