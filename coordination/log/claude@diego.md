@@ -19,3 +19,9 @@
 - Qué: Dockerfile multi-stage, .dockerignore, railway.json (healthcheck, watchPatterns). Railway pasa de fallar en cada push a "Deployment successful"; API pública verificada.
 - IA: Claude Code diagnosticó el fallo (Railpack sin Dockerfile + redeploy en cada commit de coordinación) y escribió la configuración.
 - Humano: Diego pidió arreglarlo ya.
+
+## 15:00 · T22 · done
+- Qué: enlaces a búsquedas filtradas (zona + precio máx.) en Idealista, Fotocasa y Badi dentro de /api/score. 5 tests (19 en total).
+- IA: Claude Code comprobó a mano los formatos de URL (Fotocasa en los 21 distritos; Idealista devuelve 403 a bots) y escribió el módulo.
+- Humano: autonomía total (D-22).
+- Siguiente: T11 (capa IA con OpenAI).

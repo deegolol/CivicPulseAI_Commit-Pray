@@ -3,8 +3,8 @@ id: T11
 title: Capa IA: /api/ai/parse y /api/ai/explain con fallback
 lane: API
 priority: P1
-status: todo
-owner: ""
+status: doing
+owner: claude@diego
 depends_on: [T08]
 files: [backend/app/llm.py, backend/app/routers/ai.py, backend/tests/test_ai.py]
 ---
