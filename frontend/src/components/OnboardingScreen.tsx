@@ -65,7 +65,7 @@ export function OnboardingScreen({
   const needs = (field: string) => !review?.inferredFields.has(field);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg text-ink">
+    <div className="flex min-h-dvh flex-col overflow-x-clip bg-bg text-ink">
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-5 py-6 sm:px-9">
         <BrandLogo />
         <AccountButton />
@@ -73,19 +73,21 @@ export function OnboardingScreen({
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-5 pt-9 pb-16 sm:px-9 lg:pt-20">
         <div className="mx-auto max-w-[39rem]">
-          <h1 className="text-center font-display text-3xl leading-[1.08] font-bold tracking-tight sm:text-5xl">
+          <h1 className="relative z-10 text-center font-display text-3xl leading-[1.08] font-bold tracking-tight sm:text-5xl">
             {review ? 'Completa tu búsqueda' : manualOpen ? 'Configura tu búsqueda' : '¿Dónde vas a vivir este curso?'}
           </h1>
-          <p className="mt-3 text-center text-sm text-muted sm:text-base">
+          <p className="relative z-10 mt-3 text-center text-sm text-muted sm:text-base">
             {review && interpretation
               ? interpretation
               : 'Encuentra barrios de Madrid según tu campus, tu presupuesto y lo que te importa.'}
           </p>
 
           {!review && !manualOpen && (
-            <>
+            <div className="relative isolate mt-7">
+              <img src="/madrid-ilustracion.png" alt="" width="1300" height="667"
+                className="pointer-events-none absolute top-3/5 left-1/2 -z-10 h-auto w-[110%] max-w-none -translate-x-1/2 -translate-y-1/2 opacity-70 select-none sm:top-4/5 sm:w-[140%] sm:opacity-85" />
               <form
-                className="mt-7 overflow-hidden rounded-2xl border border-border bg-bg shadow-[0_12px_36px_#2637250d] focus-within:border-ink"
+                className="overflow-hidden rounded-2xl border border-border bg-bg shadow-[0_12px_36px_#2637250d] focus-within:border-ink"
                 onSubmit={(event) => {
                   event.preventDefault();
                   if (query.trim()) onSearchSubmit(query.trim());
@@ -134,7 +136,7 @@ export function OnboardingScreen({
                   </button>
                 ))}
               </div>
-            </>
+            </div>
           )}
           {searchError && <p role="alert" className="mt-3 text-sm text-over">{searchError}</p>}
 
@@ -233,10 +235,6 @@ export function OnboardingScreen({
             </form>
           )}
         </div>
-        {!review && !manualOpen && (
-          <img src="/madrid-ilustracion.png" alt="" width="1300" height="667"
-            className="pointer-events-none mx-auto mt-6 block h-auto w-full max-w-[48rem] select-none sm:mt-8" />
-        )}
       </main>
     </div>
   );
