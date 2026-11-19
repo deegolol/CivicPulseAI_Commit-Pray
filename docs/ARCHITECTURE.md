@@ -12,7 +12,7 @@
 
 ## API
 
-- `backend/app/main.py` registra los routers FastAPI y sirve `frontend/dist`. `data.py` carga los datos al arrancar y recurre a los ejemplos si falta el conjunto procesado. `/api/health` indica el origen.
+- `backend/app/main.py` registra los routers FastAPI y sirve `frontend/dist`. `data.py` carga y guarda los datos en memoria en el primer acceso y recurre a los ejemplos si falta el conjunto procesado. `/api/health` indica el origen.
 - `models.py` valida las peticiones con Pydantic. Los routers sirven metadatos, GeoJSON, fichas y ranking bajo `/api`.
 - `scoring.py` aplica min–max por indicador, invierte alquiler, NO₂ y distancia, usa la mediana para valores ausentes y suma los criterios con pesos normalizados. Los filtros marcan zonas excluidas.
 - La distancia al campus usa Haversine desde el centroide. El coste mensual multiplica €/m² por 25 m² para habitación, 35 m² para estudio o 60 m² para piso. `listings.py` forma búsquedas en portales por zona y presupuesto.
