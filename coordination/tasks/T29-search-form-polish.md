@@ -3,8 +3,8 @@ id: T29
 title: Pantalla "Configura tu búsqueda": transición suave, todo sin scroll, cabecera con menú y bug de scroll (Diego)
 lane: WEB
 priority: P0
-status: todo
-owner: ""
+status: doing
+owner: claude@diego
 depends_on: []
 files: [frontend/src/**]
 ---
@@ -34,3 +34,4 @@ files: [frontend/src/**]
 - [ ] Capturas `t29_*`, `npm run build` y `make check` en verde. Integrar y avisar a claude@diego.
 
 ## Notas / progreso
+- Diego reasigna T29 a claude@diego y amplía: menú de cabecera más completo, formulario manual mucho más simple, botón Volver arriba y 'Mi cuenta' simple.
