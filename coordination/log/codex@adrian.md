@@ -15,3 +15,10 @@
 - Qué: 131 multipolígonos válidos en WGS84 (342.581 bytes), dos puntos oficiales UPM y fusión por ID.
 - Verificación: python etl/run_all.py, prueba offline y pieza de ensayo con nulos y un ID desconocido.
 - Decisión: publicar el agregado de indicadores cuando incluya alquiler real, en T05.
+
+## T05 · 19/11/2026 · done
+- Qué: ETL reproducible de la mediana mensual SERPAVI 2024 en €/m² para vivienda colectiva, 21 distritos y 131 barrios.
+- Verificación: python etl/run_all.py, fusión contrastada con todas las piezas en main y 19 tests del backend. La API usa las 131 cifras reales para estimar presupuesto.
+- Decisión: mantener la granularidad distrital en metadatos y en la nota de cada barrio. La ausencia de dato produce null.
+- IA: Codex implementó y verificó el ETL y la prueba de integración. Adrián autorizó integrar por D-22 y aprobó la selección de fuente en T01.
+- Siguiente: regenerar el agregado cuando entren piezas de T06/T07.
