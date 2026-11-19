@@ -5,3 +5,7 @@
 - IA: Claude Code escribió todo el código y los mocks; probado con pytest y uvicorn en local.
 - Humano: pendiente de revisión de Diego.
 - Siguiente: T08 (motor de scoring + POST /api/score) en cuanto haya OK.
+- 13:50 · OK de Diego → T02 integrada en main.
+
+## 13:50 · T08 · doing
+- Qué: motor de scoring + POST /api/score.

@@ -3,8 +3,8 @@ id: T08
 title: Motor de scoring + POST /api/score
 lane: API
 priority: P0
-status: todo
-owner: ""
+status: doing
+owner: claude@diego
 depends_on: [T02]
 files: [backend/app/scoring.py, backend/app/routers/score.py, backend/tests/test_scoring.py]
 ---
