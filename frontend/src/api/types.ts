@@ -139,6 +139,7 @@ export interface AiParseResponse {
   filters: {
     max_rent_eur_m2: number | null;
     max_distance_km: number | null;
+    only_within_budget?: boolean | null;
   };
   budget_eur_month: number | null;
   housing_type: HousingType;

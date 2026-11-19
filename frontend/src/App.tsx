@@ -27,7 +27,9 @@ import { CompareModal } from './components/CompareModal';
 import { MadridMap } from './components/MadridMap';
 import {
   AIR_LEVEL_THRESHOLDS,
+  EXAMPLE_QUERIES,
   PriorityPanel,
+  WELL_CONNECTED_THRESHOLD,
   type AirLevelOption,
 } from './components/PriorityPanel';
 import { TopZonesRail } from './components/TopZonesRail';
@@ -91,6 +93,7 @@ export function App() {
     'rent_eur_m2',
     'distance_km',
   ]);
+  const [aiWeightsOverride, setAiWeightsOverride] = useState<Record<string, number> | null>(null);
 
   // AI parse & explanation state (T12)
   const [aiInterpretation, setAiInterpretation] = useState<string | null>(null);
@@ -104,6 +107,7 @@ export function App() {
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [compareOpen, setCompareOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [mobileSearchFocused, setMobileSearchFocused] = useState(false);
   const [mobileSheet, setMobileSheet] = useState<MobileSheetHeight>('peek');
 
   // Bootstrap metadata, GeoJSON, and area centroids
@@ -151,10 +155,18 @@ export function App() {
     return keys;
   }, [meta]);
 
-  const computedWeights = useMemo(
-    () => prioritiesToWeights(selectedPriorities, availableKeys),
-    [selectedPriorities, availableKeys],
-  );
+  const computedWeights = useMemo(() => {
+    if (aiWeightsOverride) {
+      const filtered: Record<string, number> = {};
+      for (const key of availableKeys) {
+        if (aiWeightsOverride[key] !== undefined) {
+          filtered[key] = aiWeightsOverride[key];
+        }
+      }
+      if (Object.keys(filtered).length > 0) return filtered;
+    }
+    return prioritiesToWeights(selectedPriorities, availableKeys);
+  }, [aiWeightsOverride, selectedPriorities, availableKeys]);
 
   // Sync core search parameters to URL querystring (shareable search links)
   useEffect(() => {
@@ -217,7 +229,7 @@ export function App() {
       if (maxNo2 !== null && no2 != null && no2 > maxNo2) {
         excluded = true;
       }
-      if (wellConnectedOnly && transit != null && transit < 35) {
+      if (wellConnectedOnly && (transit == null || transit < WELL_CONNECTED_THRESHOLD)) {
         excluded = true;
       }
 
@@ -275,6 +287,7 @@ export function App() {
   };
 
   const handleTogglePriority = (key: string) => {
+    setAiWeightsOverride(null);
     setSelectedPriorities((prev) =>
       prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
     );
@@ -303,29 +316,48 @@ export function App() {
         parsed.filters?.max_distance_km !== undefined
           ? parsed.filters.max_distance_km
           : maxDistanceKm;
+      const nextOnlyWithinBudget =
+        parsed.filters?.only_within_budget !== undefined &&
+        parsed.filters?.only_within_budget !== null
+          ? parsed.filters.only_within_budget
+          : false;
 
       setCampusId(nextCampus);
       setBudget(nextBudget);
       setHousingType(nextHousing);
       setMaxDistanceKm(nextMaxDist);
+      setOnlyWithinBudget(nextOnlyWithinBudget);
       setAiInterpretation(parsed.interpretation);
       setAiEngine(parsed.engine);
 
-      // Translate top returned weights to active priority chips (never showing %)
-      const topKeys = Object.entries(parsed.weights)
-        .filter(([k, w]) => availableKeys.has(k) && w >= 0.2)
+      // Preserve exact parsed weights (filtered to availableKeys) so ranking matches /api/ai/parse
+      const exactWeights: Record<string, number> = {};
+      for (const [k, w] of Object.entries(parsed.weights)) {
+        if (availableKeys.has(k) && typeof w === 'number' && w >= 0) {
+          exactWeights[k] = w;
+        }
+      }
+      const nextWeights =
+        Object.keys(exactWeights).length > 0
+          ? exactWeights
+          : prioritiesToWeights(selectedPriorities, availableKeys);
+      setAiWeightsOverride(Object.keys(exactWeights).length > 0 ? exactWeights : null);
+
+      // Reflect top priorities in the qualitative chips (never showing %)
+      const topKeys = Object.entries(nextWeights)
+        .filter(([, w]) => w >= 0.2)
         .map(([k]) => k);
-      const nextPriorities = topKeys.length > 0 ? topKeys : selectedPriorities;
-      setSelectedPriorities(nextPriorities);
+      if (topKeys.length > 0) {
+        setSelectedPriorities(topKeys);
+      }
 
       // 2. Score immediately with parsed parameters to get Top 3 IDs for explanation
-      const nextWeights = prioritiesToWeights(nextPriorities, availableKeys);
       const scored = await postScore({
         campus_id: nextCampus,
         weights: nextWeights,
         filters: {
           max_distance_km: nextMaxDist,
-          only_within_budget: onlyWithinBudget,
+          only_within_budget: nextOnlyWithinBudget,
         },
         budget_eur_month: nextBudget,
         housing_type: nextHousing,
@@ -348,7 +380,7 @@ export function App() {
             housing_type: nextHousing,
             filters: {
               max_distance_km: nextMaxDist,
-              only_within_budget: onlyWithinBudget,
+              only_within_budget: nextOnlyWithinBudget,
             },
           });
           setAiExplanation(explained.text);
@@ -498,44 +530,84 @@ export function App() {
         )}
       </aside>
 
-      {/* MOBILE (< 1024px): Floating top search + Filters trigger */}
-      <div className="fixed inset-x-3 top-3 z-[520] flex items-center gap-2 lg:hidden">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (query.trim()) handleQuerySubmit(query.trim());
-          }}
-          className="relative flex min-h-[46px] flex-1 items-center rounded-2xl border border-border bg-surface/95 px-3 shadow-floating backdrop-blur-md"
-        >
-          <div className="mr-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent text-surface">
-            <KeyRound className="h-3.5 w-3.5" strokeWidth={1.5} />
-          </div>
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={`${APP_NAME}: ETSISI, 500 €…`}
-            aria-label="Buscar zona"
-            className="w-full bg-transparent text-sm text-ink placeholder:text-muted/75 focus:outline-none"
-          />
-          <button
-            type="submit"
-            aria-label="Buscar"
-            className="ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted hover:text-accent"
+      {/* MOBILE (< 1024px): Floating top search + Filters trigger + Example chips dropdown */}
+      <div className="fixed inset-x-3 top-3 z-[520] space-y-2 lg:hidden">
+        <div className="flex items-center gap-2">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              setMobileSearchFocused(false);
+              if (query.trim()) handleQuerySubmit(query.trim());
+            }}
+            className="relative flex min-h-[46px] flex-1 items-center rounded-2xl border border-border bg-surface/95 px-3 shadow-floating backdrop-blur-md"
           >
-            <Search className="h-4 w-4" strokeWidth={1.5} />
-          </button>
-        </form>
+            <div className="mr-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent text-surface">
+              <KeyRound className="h-3.5 w-3.5" strokeWidth={1.5} />
+            </div>
+            <input
+              type="text"
+              value={query}
+              onFocus={() => setMobileSearchFocused(true)}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={`${APP_NAME}: ETSISI, 500 €…`}
+              aria-label="Buscar zona"
+              className="w-full bg-transparent text-sm text-ink placeholder:text-muted/75 focus:outline-none"
+            />
+            <button
+              type="submit"
+              aria-label="Buscar"
+              className="ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted hover:text-accent"
+            >
+              <Search className="h-4 w-4" strokeWidth={1.5} />
+            </button>
+          </form>
 
-        <button
-          type="button"
-          onClick={() => setMobileFiltersOpen(true)}
-          aria-label="Abrir filtros"
-          className="flex min-h-[46px] min-w-[46px] items-center justify-center gap-1.5 rounded-2xl border border-border bg-surface/95 px-3.5 text-xs font-medium text-ink shadow-floating backdrop-blur-md transition active:scale-95"
-        >
-          <SlidersHorizontal className="h-4 w-4 text-accent" strokeWidth={1.5} />
-          <span className="hidden sm:inline">Filtros</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => {
+              setMobileSearchFocused(false);
+              setMobileFiltersOpen(true);
+            }}
+            aria-label="Abrir filtros"
+            className="flex min-h-[46px] min-w-[46px] items-center justify-center gap-1.5 rounded-2xl border border-border bg-surface/95 px-3.5 text-xs font-medium text-ink shadow-floating backdrop-blur-md transition active:scale-95"
+          >
+            <SlidersHorizontal className="h-4 w-4 text-accent" strokeWidth={1.5} />
+            <span className="hidden sm:inline">Filtros</span>
+          </button>
+        </div>
+
+        {/* Mobile example chips dropdown when search bar is focused */}
+        {mobileSearchFocused && (
+          <div className="rounded-2xl border border-border bg-surface/98 p-3 shadow-floating backdrop-blur-md">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-[11px] font-medium text-muted">Ejemplos rápidos</span>
+              <button
+                type="button"
+                onClick={() => setMobileSearchFocused(false)}
+                aria-label="Cerrar ejemplos"
+                className="rounded-lg p-1 text-muted hover:bg-surface-subtle hover:text-ink"
+              >
+                <X className="h-3.5 w-3.5" strokeWidth={1.5} />
+              </button>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              {EXAMPLE_QUERIES.map((example) => (
+                <button
+                  key={example}
+                  type="button"
+                  onClick={() => {
+                    setQuery(example);
+                    setMobileSearchFocused(false);
+                    handleQuerySubmit(example);
+                  }}
+                  className="rounded-xl border border-border bg-canvas px-3 py-2 text-left text-xs text-ink transition hover:border-accent-border hover:bg-accent-soft"
+                >
+                  {example}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* MOBILE: Slide-over Filters Drawer */}

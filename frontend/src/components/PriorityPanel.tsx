@@ -18,14 +18,17 @@ import { APP_NAME, APP_TAGLINE, HOUSING_TYPE_LABELS } from '../config';
 import { formatEuro, formatKm } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
 
-export type AirLevelOption = 'any' | 'acceptable' | 'good' | 'very_good';
+export type AirLevelOption = 'any' | 'good' | 'very_good';
 
+/** Calibrated to real Madrid NO₂ distribution (9.4–31.7 µg/m³, median 23.4) */
 export const AIR_LEVEL_THRESHOLDS: Record<AirLevelOption, number | null> = {
   any: null,
-  acceptable: 40,
-  good: 30,
-  very_good: 25,
+  good: 25,
+  very_good: 20,
 };
+
+/** Calibrated to real CRTM Metro station density (0–8.17 est./km², median 0.79) */
+export const WELL_CONNECTED_THRESHOLD = 1.0;
 
 export interface PriorityOption {
   key: string;
@@ -40,7 +43,7 @@ export const PRIORITY_CHIPS: PriorityOption[] = [
   { key: 'services_count', label: 'Servicios' },
 ];
 
-const EXAMPLE_QUERIES = [
+export const EXAMPLE_QUERIES = [
   'Estudio en la ETSISI, tengo 500 euros y quiero una zona tranquila con aire limpio',
   'Voy a la facultad de informática de Montegancedo, busco un estudio para mí solo por menos de 750€',
   'Quiero algo barato y bien comunicado en metro cerca del Campus Sur, máximo 6 km',
@@ -294,8 +297,8 @@ export function PriorityPanel({
               {(
                 [
                   { id: 'any', label: 'Cualquiera' },
-                  { id: 'acceptable', label: 'Aceptable ≤40' },
-                  { id: 'good', label: 'Buena ≤30' },
+                  { id: 'good', label: 'Buena ≤25' },
+                  { id: 'very_good', label: 'Muy buena ≤20' },
                 ] as const
               ).map((opt) => {
                 const active = airLevel === opt.id;
@@ -324,7 +327,7 @@ export function PriorityPanel({
             <label className="flex min-h-[44px] cursor-pointer items-center justify-between rounded-xl border border-border bg-surface px-3.5 py-2 transition hover:bg-canvas">
               <span className="flex items-center gap-2 text-xs font-medium text-ink">
                 <TrainFront className="h-4 w-4 text-accent" strokeWidth={1.5} />
-                Bien comunicado (≥ 35 paradas/km²)
+                Bien comunicado en Metro (≥ 1 est./km²)
               </span>
               <input
                 type="checkbox"
