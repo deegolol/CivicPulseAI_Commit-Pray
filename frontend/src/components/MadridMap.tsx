@@ -9,7 +9,6 @@ import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import type { Feature } from 'geojson';
 import {
   Circle,
-  CircleMarker,
   GeoJSON,
   MapContainer,
   Marker,
@@ -35,7 +34,18 @@ import { MapLayersOverlay, MapLayersPanel, MapLayerShortcuts, type LayerId } fro
 
 // Includes mainland Spain, the Balearic Islands and the Canary Islands.
 const SPAIN_BOUNDS = L.latLngBounds([27.4, -18.3], [44.1, 4.8]);
-const CAMPUS_STYLE = { color: '#FFFFFF', weight: 2.5, fillColor: '#D7262E', fillOpacity: 1 };
+const CAMPUS_PIN = L.divIcon({
+  className: 'campus-pin',
+  iconSize: [36, 46],
+  iconAnchor: [18, 44],
+  tooltipAnchor: [0, -40],
+  html: `<svg width="36" height="46" viewBox="0 0 36 46" aria-hidden="true">
+    <path d="M18 45s15-14.5 15-26A15 15 0 0 0 3 19c0 11.5 15 26 15 26z" fill="#0D1117" stroke="#fff" stroke-width="2.5"/>
+    <path d="M9.5 17.5 18 13.5l8.5 4L18 21.5z" fill="#fff"/>
+    <path d="M12.5 19v4c3 2.2 8 2.2 11 0v-4" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="M26.5 17.5v5" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/>
+  </svg>`,
+});
 const RADIUS_STYLE = { color: '#7A6A58', weight: 1.2, dashArray: '6 6', fillOpacity: 0 };
 const BASEMAP_ATTRIBUTION = '&copy; <a href="https://www.ign.es/">IGN</a> · <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · <a href="https://datos.madrid.es/">Ayuntamiento de Madrid</a> · CRTM';
 
@@ -272,7 +282,7 @@ function MapViewportController({
   return null;
 }
 
-export function MadridMap({
+function MadridMapImpl({
   geoData,
   scoresById,
   top10RankById,
@@ -507,17 +517,13 @@ export function MadridMap({
             onSelect={onSelectArea} onHover={onHoverArea} />
         ))}
 
-        {/* Campus marker: Madrid red dot (#D7262E) with clean label */}
+        {/* Campus: dark pin with a graduation cap (red is reserved for the recommended zone) */}
         {campusLatLng && (
-          <CircleMarker
-            center={campusLatLng}
-            radius={8}
-            pathOptions={CAMPUS_STYLE}
-          >
-            <Tooltip permanent direction="top" offset={[0, -10]} className="campus-label">
+          <Marker position={campusLatLng} icon={CAMPUS_PIN} zIndexOffset={2000} keyboard={false}>
+            <Tooltip permanent direction="top" offset={[0, -2]} className="campus-label">
               {campusShort}
             </Tooltip>
-          </CircleMarker>
+          </Marker>
         )}
       </MapContainer>
 
@@ -547,3 +553,6 @@ export function MadridMap({
     </div>
   );
 }
+
+/** Memoised: only re-renders when its own props change (hovering elsewhere doesn't redraw it). */
+export const MadridMap = memo(MadridMapImpl);

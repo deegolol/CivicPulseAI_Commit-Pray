@@ -104,8 +104,14 @@ input[type="range"].clean-range::-webkit-slider-thumb:hover {
   display: none;
 }
 
+.campus-pin {
+  background: transparent;
+  border: none;
+  filter: drop-shadow(0 3px 4px rgb(13 17 23 / 0.3));
+}
+
 .leaflet-tooltip.campus-label {
-  background-color: var(--color-brand);
+  background-color: var(--color-ink);
   border: none;
   border-radius: 6px;
   color: var(--color-bg);

@@ -8,6 +8,7 @@
 import { useReducedMotion } from 'motion/react';
 import { Expandable } from './Expandable';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { memo as reactMemo } from 'react';
 import { Check, ChevronDown, ChevronUp, ExternalLink, Scale, X } from 'lucide-react';
 import type { Recommendation, ScoreResultItem } from '../api/types';
 import { formatEuro, formatKm } from '../utils/format';
@@ -40,7 +41,7 @@ const HIGHLIGHT_LABELS: Record<string, string> = {
   best_transit: 'Mejor comunicada',
 };
 
-export function ZoneList({
+function ZoneListImpl({
   results,
   recommendation,
   highlights,
@@ -501,3 +502,6 @@ export function ZoneList({
     </div>
   );
 }
+
+/** Memoised: only re-renders when its own props change (hovering elsewhere doesn't redraw it). */
+export const ZoneList = reactMemo(ZoneListImpl);

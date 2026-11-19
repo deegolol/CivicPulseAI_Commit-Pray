@@ -17,9 +17,9 @@ export function SiteHeader({ onBack, onHome, sources }: {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="relative z-30 shrink-0 border-b border-border/70 bg-bg">
-      <div className="flex h-16 items-center justify-between gap-3 px-4 sm:px-8">
-        <div className="flex min-w-0 items-center gap-2 sm:gap-4">
+    <header className="relative z-30 shrink-0">
+      <div className="flex h-16 items-center justify-between gap-3 px-3 pt-2 sm:px-6">
+        <div className="flex min-w-0 items-center gap-1 rounded-full border border-border/80 bg-bg/95 py-1 pr-1.5 pl-3 shadow-[0_4px_16px_-6px_rgb(13_17_23/0.18)] sm:gap-3 sm:pl-4">
           <button type="button" onClick={onHome} aria-label="Ir al inicio" className="rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink">
             <BrandLogo />
           </button>
@@ -33,7 +33,7 @@ export function SiteHeader({ onBack, onHome, sources }: {
             </>
           )}
         </div>
-        <nav aria-label="Principal" className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+        <nav aria-label="Principal" className="flex shrink-0 items-center gap-0.5 rounded-full border border-border/80 bg-bg/95 p-1 shadow-[0_4px_16px_-6px_rgb(13_17_23/0.18)] sm:gap-1">
           <button type="button" onClick={() => setOpen(true)} className={navClass}>
             <HelpCircle size={17} aria-hidden="true" className="sm:hidden" />
             <span className="hidden sm:inline">Cómo funciona</span>

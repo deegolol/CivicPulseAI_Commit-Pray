@@ -106,7 +106,7 @@ export function OnboardingScreen({
       <SiteHeader onBack={showForm ? goBack : undefined} onHome={goHome} sources={sources} />
 
       {!showForm ? (
-        <main key="phrase" className="animate-fade-up mx-auto flex w-full max-w-4xl flex-1 flex-col px-5 pt-10 pb-12 sm:pt-16">
+        <main key="phrase" className="animate-fade-up mx-auto flex w-full max-w-4xl flex-1 flex-col justify-center px-5 py-10 sm:pb-24">
           <h1 className="relative z-10 text-center font-display text-4xl leading-[1.05] font-bold tracking-tight sm:whitespace-nowrap sm:text-6xl">
             Encuentra tu sitio en Madrid
           </h1>

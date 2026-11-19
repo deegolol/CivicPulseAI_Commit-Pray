@@ -7,7 +7,7 @@
  *     + inline neighborhood details + CompareModal. On mobile: full-screen list with floating Mapa/Lista toggle.
  */
 import { AnimatePresence, m, useReducedMotion } from 'motion/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { List, Map as MapIcon } from 'lucide-react';
 import {
   ApiError,
@@ -37,9 +37,10 @@ import {
   type TransportMode,
 } from './constants/filters';
 import { AreaDetailPanel } from './components/AreaDetailPanel';
-import { CompareModal } from './components/CompareModal';
-import { MadridMap } from './components/MadridMap';
 import { DEFAULT_LAYERS, type LayerId } from './components/MapLayers';
+// Heavy parts (Leaflet map, Recharts comparison) are downloaded only when the results page needs them.
+const MadridMap = lazy(() => import('./components/MadridMap').then((m) => ({ default: m.MadridMap })));
+const CompareModal = lazy(() => import('./components/CompareModal').then((m) => ({ default: m.CompareModal })));
 import { OnboardingScreen, type SearchReview } from './components/OnboardingScreen';
 import { TopFilterBar } from './components/TopFilterBar';
 import type { ResultFilters } from './components/ResultsFilters';
@@ -353,8 +354,9 @@ export function App() {
         }
       }
     }
-    updateScore();
-    return () => controller.abort();
+    // Small debounce: dragging a slider fires many changes; only score once it settles (keeps clicks snappy).
+    const timer = window.setTimeout(updateScore, 180);
+    return () => { window.clearTimeout(timer); controller.abort(); };
   }, [meta, screen, campusId, computedWeights, scoreFilters, budget, housingType]);
 
   const results = useMemo(() => {
@@ -418,7 +420,7 @@ export function App() {
     }
   };
 
-  const handleToggleCompare = (areaId: string) => {
+  const handleToggleCompare = useCallback((areaId: string) => {
     setCompareIds((prev) => {
       if (prev.includes(areaId)) {
         const next = prev.filter((id) => id !== areaId);
@@ -428,10 +430,10 @@ export function App() {
       if (prev.length >= 3) return prev;
       return [...prev, areaId];
     });
-  };
+  }, []);
 
   /** 1-click compare Top 3 non-excluded zones immediately */
-  const handleCompareTop3 = () => {
+  const handleCompareTop3 = useCallback(() => {
     const top3Ids = results
       .filter((r) => !r.excluded)
       .slice(0, 3)
@@ -440,7 +442,7 @@ export function App() {
       setCompareIds(top3Ids);
       setCompareOpen(true);
     }
-  };
+  }, [results]);
 
   const handleSearchSubmit = async (queryText: string) => {
     if (searching) return;
@@ -532,6 +534,26 @@ export function App() {
       setLocation(filters.location);
     }
   }
+
+  // Stable callbacks so the map and the list don't re-render on every hover/click elsewhere (performance).
+  const scoresLatest = useRef(scoresById);
+  scoresLatest.current = scoresById;
+  const locationLatest = useRef(location);
+  locationLatest.current = location;
+  const handleListSelect = useCallback((id: string) => setSelectedAreaId((current) => current === id ? null : id), []);
+  const handleMapSelect = useCallback((id: string) => {
+    if (locationLatest.current && !scoresLatest.current[id]) return;
+    setSelectedAreaId(id);
+    setMobileView('list');
+  }, []);
+  const handleMapHover = useCallback((id: string | null) => {
+    setHoveredAreaId(id && locationLatest.current && !scoresLatest.current[id] ? null : id);
+  }, []);
+  const openCompare = useCallback(() => setCompareOpen(true), []);
+  const renderDetails = useCallback((area: ScoreResultItem) => (
+    <AreaDetailPanel area={area} indicators={meta?.indicators ?? []}
+      activeCriteria={activeCriteria} sources={meta?.sources ?? []} budget={budget} housingType={housingType} />
+  ), [meta, activeCriteria, budget, housingType]);
 
   const campusName = activeCampus?.name ?? campusId.toUpperCase();
   const budgetRange = minBudget === null ? `hasta ${formatEuro(budget)}` : `${formatEuro(minBudget)}–${formatEuro(budget)}`;
@@ -645,13 +667,12 @@ export function App() {
             explanationLoading={aiLoading}
             selectedAreaId={selectedAreaId}
             hoveredAreaId={hoveredAreaId}
-            onSelectArea={(id) => setSelectedAreaId((current) => current === id ? null : id)}
-            renderDetails={(area) => <AreaDetailPanel area={area} indicators={meta?.indicators ?? []}
-              activeCriteria={activeCriteria} sources={meta?.sources ?? []} budget={budget} housingType={housingType} />}
+            onSelectArea={handleListSelect}
+            renderDetails={renderDetails}
             onHoverArea={setHoveredAreaId}
             compareIds={compareIds}
             onToggleCompare={handleToggleCompare}
-            onOpenCompare={() => setCompareOpen(true)}
+            onOpenCompare={openCompare}
             onCompareTop3={handleCompareTop3}
             loading={loading || ((isScoring || aiLoading) && rawResults.length === 0)}
           />
@@ -664,7 +685,7 @@ export function App() {
             mobileView === 'map' ? 'block' : 'hidden lg:block'
           } relative z-0 min-w-0 flex-1`}
         >
-          {(mapVisible || geoData) && <MadridMap
+          {(mapVisible || geoData) && <Suspense fallback={<div className="h-full w-full bg-surface" />}><MadridMap
             layers={mapLayers}
             onToggleLayer={toggleMapLayer}
             geoData={geoData}
@@ -674,18 +695,14 @@ export function App() {
             selectedAreaId={selectedAreaId}
             hoveredAreaId={hoveredAreaId}
             recommendedAreaId={visibleRecommendation?.area_id ?? null}
-            onSelectArea={(id) => {
-              if (location && !scoresById[id]) return;
-              setSelectedAreaId(id);
-              setMobileView('list');
-            }}
-            onHoverArea={(id) => setHoveredAreaId(id && location && !scoresById[id] ? null : id)}
+            onSelectArea={handleMapSelect}
+            onHoverArea={handleMapHover}
             activeCampus={activeCampus}
             maxDistanceKm={maxDistanceKm}
             budget={budget}
             isScoring={isScoring}
             isVisible={mapVisible}
-          />}
+          /></Suspense>}
         </main>
 
         {/* Mobile view toggle */}
@@ -713,6 +730,7 @@ export function App() {
       {/* Comparison Modal */}
       <AnimatePresence initial={false}>
         {compareOpen && comparedAreas.length >= 2 && (
+          <Suspense fallback={null}>
           <CompareModal
             key="comparison"
             areas={comparedAreas}
@@ -723,6 +741,7 @@ export function App() {
             onRemove={handleToggleCompare}
             onClose={() => setCompareOpen(false)}
           />
+          </Suspense>
         )}
       </AnimatePresence>
 
