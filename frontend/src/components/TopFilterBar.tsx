@@ -6,7 +6,14 @@
 import { AnimatePresence, m, useReducedMotion } from 'motion/react';
 import { AccountButton } from './AccountProvider';
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, Scale, Search, SlidersHorizontal, X } from 'lucide-react';
+import {
+  ArrowLeft,
+  ChevronDown,
+  Scale,
+  Search,
+  SlidersHorizontal,
+  X,
+} from 'lucide-react';
 import type { Campus, HousingType } from '../api/types';
 import { HOUSING_TYPE_LABELS } from '../config';
 import {
@@ -25,6 +32,7 @@ type ActivePopover = 'campus' | 'budget' | 'type' | 'distance' | 'more' | 'searc
 interface TopFilterBarProps {
   availableKeys: Set<string>;
   onResetHome: () => void;
+  onBack: () => void;
   query: string;
   onQueryChange: (val: string) => void;
   onSearchSubmit: (queryText: string) => void;
@@ -56,6 +64,7 @@ interface TopFilterBarProps {
 export function TopFilterBar({
   availableKeys,
   onResetHome,
+  onBack,
   query,
   onQueryChange,
   onSearchSubmit,
@@ -149,17 +158,23 @@ export function TopFilterBar({
       className="relative z-40 shrink-0 border-b border-border bg-bg"
     >
       <div onScroll={openPopover ? updateAnchor : undefined} className="flex items-center gap-2 overflow-x-auto px-4 py-2.5">
-        {/* Brand button (returns to onboarding Screen A) */}
+        {/* Brand (home) first, then a simple way back (T29) */}
         <button
           type="button"
           onClick={onResetHome}
-          aria-label="Volver al inicio"
-          className="mr-1 flex shrink-0 items-center rounded-[8px] py-1 pr-2 text-left transition hover:bg-surface focus-visible:ring-2 focus-visible:ring-ink focus-visible:outline-none"
+          aria-label="Ir al inicio"
+          className="flex shrink-0 items-center rounded-[8px] py-1 pr-1 text-left transition hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ink focus-visible:outline-none"
         >
           <BrandLogo compact />
         </button>
-        <AccountButton />
-
+        <button
+          type="button"
+          onClick={onBack}
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-sm font-medium text-ink transition hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+        >
+          <ArrowLeft className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+          <span className="hidden sm:inline">Volver</span>
+        </button>
         <span className="hidden h-5 w-px shrink-0 bg-border sm:block" />
 
         {/* Editable summary chips */}
@@ -271,12 +286,15 @@ export function TopFilterBar({
           <button
             type="button"
             onClick={onOpenCompare}
-            className="ml-auto inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-[8px] bg-ink px-3.5 py-1.5 text-xs font-medium text-bg transition hover:opacity-90"
+            className="inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-[8px] bg-ink px-3.5 py-1.5 text-xs font-medium text-bg transition hover:opacity-90"
           >
             <Scale className="h-3.5 w-3.5" strokeWidth={1.75} />
             <span>Comparar ({compareCount})</span>
           </button>
         )}
+        <div className="ml-auto flex shrink-0 items-center pl-2">
+          <AccountButton />
+        </div>
       </div>
 
       {/* Popovers */}

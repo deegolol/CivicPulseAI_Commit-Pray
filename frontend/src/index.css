@@ -274,3 +274,15 @@ input[type="range"].clean-range::-webkit-slider-thumb:hover {
   from { opacity: .6; transform: translateY(4px); }
   to { opacity: 1; transform: none; }
 }
+
+/* T29: smooth entrance for screens, cards and dialogs (no sudden pop-in) */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+  animation: fade-up 280ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up { animation: none; }
+}

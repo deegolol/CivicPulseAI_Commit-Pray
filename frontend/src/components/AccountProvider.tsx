@@ -4,7 +4,7 @@ import { accountApi, isOfferNotice, saveFavorite, type CatalogOffer, type Favori
 import type { HousingType } from '../api/types';
 import { AccountDialog, type PendingWatch } from './AccountDialog';
 
-type AccountControls = { show: (watch?: PendingWatch, favorite?: FavoriteTarget) => void; unread: number };
+type AccountControls = { show: (watch?: PendingWatch, favorite?: FavoriteTarget) => void; unread: number; user: string | null };
 const AccountContext = createContext<AccountControls | null>(null);
 const buttonClass = 'inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-[8px] border border-border bg-bg px-2.5 py-1 text-xs font-medium text-ink hover:bg-surface';
 
@@ -22,6 +22,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     }
   });
   const [unread, setUnread] = useState(0);
+  const [user, setUser] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) return;
@@ -34,6 +35,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         const session = await accountApi.session();
         if (!active) return;
         setEnabled(session.enabled);
+        setUser(session.username ? (session.email ?? session.username) : null);
         if (!session.username) {
           setUnread(0);
           return;
@@ -60,7 +62,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AccountContext.Provider value={enabled ? { show, unread } : null}>
+    <AccountContext.Provider value={enabled ? { show, unread, user } : null}>
       {children}
       <AccountDialog open={open} pendingWatch={pendingWatch} pendingFavorite={pendingFavorite} onClose={() => setOpen(false)}
         onFavoriteSaved={() => setPendingFavorite(null)}
@@ -133,13 +135,20 @@ export function DistrictOffers({ district, housingType }: { district: string; ho
 export function AccountButton() {
   const controls = useContext(AccountContext);
   if (!controls) return null;
+  if (!controls.user) {
+    return (
+      <button type="button" onClick={() => controls.show()}
+        className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-border px-3.5 text-sm font-semibold text-ink transition hover:border-ink/40 hover:bg-surface">
+        <CircleUserRound size={16} aria-hidden="true" /> Entrar
+      </button>
+    );
+  }
   return (
-    <button type="button" onClick={() => controls.show()} className={buttonClass}>
-      <CircleUserRound size={16} aria-hidden="true" /> Mi cuenta
+    <button type="button" onClick={() => controls.show()} aria-label={`Mi cuenta (${controls.user})`} title={controls.user}
+      className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink font-display text-sm font-bold text-bg uppercase transition hover:opacity-90">
+      {controls.user.charAt(0)}
       {controls.unread > 0 && (
-        <span aria-label={`${controls.unread} avisos sin leer`} className="rounded-[8px] bg-brand px-1.5 text-xs text-bg">
-          {controls.unread}
-        </span>
+        <span aria-label={`${controls.unread} avisos sin leer`} className="absolute -top-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-bg bg-brand" />
       )}
     </button>
   );

@@ -81,14 +81,52 @@ function readInitialUrlParams() {
   return { hasParams, campus, budget, housingType, maxDistanceKm, minBudget, preferences, transportMode, onlyWithinBudget };
 }
 
+/** T29: every page has its own URL so the browser's back button moves between pages of the app. */
+type Route = 'home' | 'form' | 'results';
+const ROUTE_PATHS: Record<Route, string> = { home: '/', form: '/buscar', results: '/resultados' };
+
+function routeFromPath(pathname: string): Route {
+  if (pathname.startsWith('/resultados')) return 'results';
+  if (pathname.startsWith('/buscar')) return 'form';
+  return 'home';
+}
+
 export function App() {
   const reduced = useReducedMotion();
   const initial = useMemo(() => readInitialUrlParams(), []);
+  const [route, setRoute] = useState<Route>(() => {
+    const fromPath = routeFromPath(window.location.pathname);
+    // Old shared links like "/?campus=…" open the results page directly.
+    return fromPath === 'home' && initial.hasParams ? 'results' : fromPath;
+  });
 
-  // Screen A (onboarding) vs Screen B (results)
-  const [screen, setScreen] = useState<'onboarding' | 'results'>(
-    initial.hasParams ? 'results' : 'onboarding',
-  );
+  /** Go to a page of the app, adding a history entry so "atrás" returns here. */
+  const navigate = (to: Route, options: { replace?: boolean } = {}) => {
+    const search = to === 'results' ? window.location.search : '';
+    const url = ROUTE_PATHS[to] + search;
+    if (options.replace) window.history.replaceState({ app: true, depth: window.history.state?.depth ?? 0 }, '', url);
+    else window.history.pushState({ app: true, depth: (window.history.state?.depth ?? 0) + 1 }, '', url);
+    setRoute(to);
+  };
+  /** "Volver": previous page of the app if there is one, otherwise the parent page. Never leaves the app. */
+  const goBack = (fallback: Route) => {
+    if ((window.history.state?.depth ?? 0) > 0) window.history.back();
+    else navigate(fallback, { replace: true });
+  };
+
+  useEffect(() => {
+    // Normalise the first URL (e.g. "/?campus=…" → "/resultados?campus=…") and follow the browser's back/forward.
+    const path = ROUTE_PATHS[route];
+    if (window.location.pathname !== path) window.history.replaceState({ app: true, depth: 0 }, '', path + window.location.search);
+    else if (!window.history.state?.app) window.history.replaceState({ app: true, depth: 0 }, '', window.location.href);
+    const onPop = () => setRoute(routeFromPath(window.location.pathname));
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Screen A (start + form) vs Screen B (results)
+  const screen: 'onboarding' | 'results' = route === 'results' ? 'results' : 'onboarding';
   const viewMotion = {
     initial: reduced ? false as const : { opacity: 0 },
     animate: { opacity: 1 },
@@ -188,6 +226,19 @@ export function App() {
     return () => { cancelled = true; };
   }, [mapVisible, geoData]);
 
+  // T29 bug fix: never land on the results screen scrolled down with blank space. Reset the window
+  // scroll on every page change and lock page scrolling while the full-height results view is shown.
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+    const root = document.documentElement;
+    root.style.overflow = screen === 'results' ? 'hidden' : '';
+    document.body.style.overflow = screen === 'results' ? 'hidden' : '';
+    return () => {
+      root.style.overflow = '';
+      document.body.style.overflow = '';
+    };
+  }, [screen, route]);
+
   const availableKeys = useMemo(() => {
     const keys = new Set<string>(DEFAULT_PRIORITIES);
     for (const ind of meta?.indicators ?? []) {
@@ -225,7 +276,7 @@ export function App() {
     else params.delete('mode');
     if (onlyWithinBudget) params.set('range', '1');
     else params.delete('range');
-    window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
+    window.history.replaceState(window.history.state, '', `${ROUTE_PATHS.results}?${params.toString()}`);
   }, [screen, campusId, budget, housingType, maxDistanceKm, minBudget, computedWeights, transportMode, onlyWithinBudget]);
 
   // Cancel obsolete rankings so a slower response cannot replace a newer search.
@@ -366,7 +417,6 @@ export function App() {
 
   const handleSearchSubmit = async (queryText: string) => {
     if (searching) return;
-    setScreen('onboarding');
     setSelectedAreaId(null);
     setSearching(true);
     setSearchError(null);
@@ -390,6 +440,7 @@ export function App() {
       })));
       setAiInterpretation(parsed.interpretation);
       setSearchReview({ query: queryText, inferredFields: inferred.inferredFields });
+      navigate('form');
     } catch (err) {
       setSearchError(err instanceof ApiError && err.status === 429
         ? err.detail
@@ -415,16 +466,17 @@ export function App() {
     setRecommendation(null);
     setHighlights({});
     setIsScoring(true);
-    setScreen('results');
+    navigate('results');
   };
 
   const handleResetHome = () => {
-    setScreen('onboarding');
     setSearchReview(null);
     setSelectedAreaId(null);
-    if (typeof window !== 'undefined') {
-      window.history.replaceState(null, '', window.location.pathname);
-    }
+    navigate('home');
+  };
+  const handleBackFromResults = () => {
+    setSelectedAreaId(null);
+    goBack('form');
   };
 
   const campusName = activeCampus?.name ?? campusId.toUpperCase();
@@ -434,7 +486,7 @@ export function App() {
   }`;
 
   const screenView = screen === 'onboarding' ? (
-    <m.div key="onboarding" data-ui-motion="screen" {...viewMotion}>
+    <m.div key={route} data-ui-motion="screen" {...viewMotion}>
       <OnboardingScreen
         query={query}
         onQueryChange={setQuery}
@@ -442,7 +494,10 @@ export function App() {
         searching={searching}
         searchError={searchError}
         review={searchReview}
-        onBack={() => setSearchReview(null)}
+        view={route === 'form' ? 'form' : 'phrase'}
+        onOpenForm={() => navigate('form')}
+        onBack={() => { setSearchReview(null); goBack('home'); }}
+        onHome={handleResetHome}
         interpretation={aiInterpretation}
         campuses={meta?.campuses ?? []}
         campusId={campusId}
@@ -461,13 +516,15 @@ export function App() {
         priorityWeights={computedWeights}
         onPriorityChange={handlePriorityChange}
         onStart={handleStart}
+        sources={meta?.sources ?? []}
       />
     </m.div>
     ) : (
-    <m.div key="results" data-ui-motion="screen" {...viewMotion} className="flex h-dvh flex-col overflow-hidden bg-bg">
+    <m.div key="results" data-ui-motion="screen" {...viewMotion} className="fixed inset-0 flex flex-col overflow-hidden bg-bg">
       <TopFilterBar
         availableKeys={availableKeys}
         onResetHome={handleResetHome}
+        onBack={handleBackFromResults}
         query={query}
         onQueryChange={setQuery}
         onSearchSubmit={handleSearchSubmit}

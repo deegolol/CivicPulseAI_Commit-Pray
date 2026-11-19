@@ -8,8 +8,8 @@ function normalize(value: string) {
 }
 
 export function CampusPicker({
-  campuses, campusId, onChange, keepSelection = false, openOnMount = false,
-}: { campuses: Campus[]; campusId: string; onChange: (campusId: string) => void; keepSelection?: boolean; openOnMount?: boolean }) {
+  campuses, campusId, onChange, keepSelection = false, openOnMount = false, label = 'Universidad o campus',
+}: { campuses: Campus[]; campusId: string; onChange: (campusId: string) => void; keepSelection?: boolean; openOnMount?: boolean; label?: string }) {
   const id = useId();
   const reduced = useReducedMotion();
   const input = useRef<HTMLInputElement>(null);
@@ -39,7 +39,7 @@ export function CampusPicker({
 
   return (
     <div className="relative">
-      <label htmlFor={id} className="mb-1.5 block text-sm font-semibold">Universidad o campus</label>
+      <label htmlFor={id} className="mb-2 block text-sm font-semibold">{label}</label>
       <input
         ref={input}
         id={id}
@@ -77,7 +77,7 @@ export function CampusPicker({
             setActive((index) => (index + (event.key === 'ArrowDown' ? 1 : matches.length - 1)) % matches.length);
           }
         }}
-        className="block h-11 w-full rounded-lg border border-border bg-bg px-3 text-sm outline-none focus:border-ink"
+        className="block h-11 w-full rounded-xl border border-border bg-bg px-3.5 text-sm outline-none transition focus:border-ink"
       />
       <AnimatePresence initial={false}>
       {open && (matches.length ? (
