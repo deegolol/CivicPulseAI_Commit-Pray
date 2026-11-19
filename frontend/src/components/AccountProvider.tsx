@@ -1,12 +1,23 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { Bell, CircleUserRound } from 'lucide-react';
+import { accountApi } from '../api/account';
 import { AccountDialog, type PendingWatch } from './AccountDialog';
 
 const AccountContext = createContext<((watch?: PendingWatch) => void) | null>(null);
 const buttonClass = 'inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-[8px] border border-border bg-bg px-2.5 py-1 text-xs font-medium text-ink hover:bg-surface';
 
 export function AccountProvider({ children }: { children: ReactNode }) {
+  const [enabled, setEnabled] = useState(false);
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    accountApi.session().then(
+      (session) => { if (active) setEnabled(session.enabled); },
+      () => { if (active) setEnabled(false); },
+    );
+    return () => { active = false; };
+  }, []);
   const [pendingWatch, setPendingWatch] = useState<PendingWatch | null>(null);
   function show(watch?: PendingWatch) {
     setPendingWatch(watch ?? null);
@@ -14,7 +25,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AccountContext.Provider value={show}>
+    <AccountContext.Provider value={enabled ? show : null}>
       {children}
       <AccountDialog open={open} pendingWatch={pendingWatch} onClose={() => setOpen(false)}
         onWatchSaved={() => setPendingWatch(null)} />
