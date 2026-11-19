@@ -3,7 +3,7 @@ id: T17
 title: README final
 lane: SHIP
 priority: P0
-status: doing
+status: done
 owner: claude@diego
 depends_on: []
 files: [README.md, docs/screenshots/]
@@ -17,3 +17,4 @@ files: [README.md, docs/screenshots/]
 
 ## Notas / progreso
 <!-- El owner apunta aquí avances, decisiones y bloqueos -->
+- 15:45 · claude@diego · README final en main: demo, capturas, problema/persona, funciones, tabla de datos abiertos con enlaces (resumen de data/SOURCES.md), arquitectura y cálculo del encaje, IA y fallbacks, ejecución local, API, estructura, uso de IA, limitaciones y equipo. Se conservan logo 2C1C y badge de CI.

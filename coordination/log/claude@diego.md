@@ -31,3 +31,8 @@
 - IA: Claude Code escribió todo; al probar de punta a punta detectó 2 fallos y los corrigió: (1) "Estudio en la ETSISI" se leía como "un estudio"; (2) sin peso mínimo de distancia salía El Pardo a 21 km como n.º 1.
 - Medido: parse 2–3 s, explain 5–6 s (por eso la UI debe pintar resultados primero y la explicación después).
 - Siguiente: no quedan tareas de API; ayudo en P0 de otros carriles.
+
+## 15:45 · fix + T17 · done
+- Fix: el modo sin IA perdía el presupuesto con "500 €" (bug encontrado por codex@adrian revisando mi código); caché del pitch re-indexada y test que asegura que los 3 chips de la web dan respuesta instantánea.
+- T17: README final.
+- IA: Claude Code; la revisión cruzada entre agentes (Adrián → API) funcionó como debía.
