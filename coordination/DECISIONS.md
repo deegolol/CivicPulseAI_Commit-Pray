@@ -13,3 +13,4 @@ Formato: `D-xx · HH:MM · <quién> · <decisión> — <motivo>`
 - D-09 · 12:45 · diego · Hosting: **Railway**, un servicio con Dockerfile y auto-deploy desde `main` — no se duerme (demo rápida), cero config extra. Sin base de datos.
 - D-10 · 12:45 · diego · LLM dentro de la app: **Gemini** (clave gratis de Google AI Studio) — rápido y sin coste; fallback sin IA siempre activo.
 - D-11 · 12:45 · diego · **Ningún agente inicia sesión en servicios externos ni maneja claves.** Las cuentas y las claves son cosa de humanos (ver `coordination/ACCOUNTS.md`).
+- D-12 · 13:00 · diego · **Sustituye a D-10**: el LLM de la app es **OpenAI** (API ya pagada por diego). Modelo en `LLM_MODEL`, elegido por diego. Fallback sin IA igual.

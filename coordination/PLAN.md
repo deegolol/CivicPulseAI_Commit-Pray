@@ -105,7 +105,7 @@ Regla: **todo dataset usado se documenta en `data/SOURCES.md`** con nombre, orga
 - **Leaflet**: coroplético con GeoJSON en pocas líneas, sin API key.
 - **LLM solo como traductor/explicador**: salida estructurada validada; si falla → parser por palabras clave. Nunca hay datos inventados.
 - **Deploy**: un único contenedor (FastAPI sirve también el build del frontend) en **Railway**, redespliegue automático en cada push a `main`. Si falla, la demo es local (plan B).
-- **LLM**: **Gemini** (clave gratis de Google AI Studio), detrás de `backend/app/llm.py` con fallback sin IA.
+- **LLM**: **OpenAI** (API ya pagada por el equipo), detrás de `backend/app/llm.py` con salida JSON estructurada y fallback sin IA.
 - **Sin base de datos** (ni Neon ni similares): los datos son ficheros JSON precalculados por el ETL. Menos cuentas, menos fallos.
 
 ---

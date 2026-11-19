@@ -9,7 +9,7 @@ depends_on: [T08]
 files: [backend/app/llm.py, backend/app/routers/ai.py, backend/tests/test_ai.py]
 ---
 ## Criterios de aceptación
-- [ ] Proveedor configurable por `.env` (CONTRACTS §5); timeout 8 s.
+- [ ] Proveedor: **OpenAI** (D-12), SDK oficial `openai`, modelo desde `LLM_MODEL`; salida estructurada (JSON schema) para `parse`. Configurable por `.env` (CONTRACTS §5); timeout 8 s.
 - [ ] `parse`: prompt con lista de campus e indicadores → JSON → validado con Pydantic. Error/timeout → parser por palabras clave (`engine: "keywords"`).
 - [ ] `explain`: solo recibe números del breakdown; plantilla determinista como fallback.
 - [ ] `DEMO_CACHE=true`: respuestas cacheadas en `backend/app/demo_cache.json` para las 3 frases del pitch.
