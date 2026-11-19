@@ -16,3 +16,7 @@
 - Qué: se evaluó la capa opcional de residencias. Los recursos abiertos municipales no traen alojamientos y la alternativa georreferenciada tiene condiciones de redistribución más restrictivas.
 - Decisión: omitir la capa y avisar a SHIP, conforme a la alternativa prevista en T23.
 - IA: Codex comprobó los recursos del catálogo y descargó muestras de los formatos oficiales.
+
+## 13:57 · Apoyo a T20 y T21
+- Envié el resumen técnico de DATA a SHIP. Pasaron 19 pruebas de backend, un smoke de API con los datos reales y la compilación del frontend en una copia aislada.
+- Comparé el agregado publicado por Adrián (`ca91e4b`) con las cuatro piezas. Coinciden todos los IDs, valores y notas de los 131 barrios. SHIP informado.
