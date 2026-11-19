@@ -47,6 +47,7 @@ const EXAMPLE_QUERIES = [
 ];
 
 interface PriorityPanelProps {
+  availableKeys: Set<string>;
   query: string;
   onQueryChange: (value: string) => void;
   onQuerySubmit: (queryText: string) => void;
@@ -70,6 +71,7 @@ interface PriorityPanelProps {
 }
 
 export function PriorityPanel({
+  availableKeys,
   query,
   onQueryChange,
   onQuerySubmit,
@@ -274,60 +276,64 @@ export function PriorityPanel({
           </div>
         </div>
 
-        {/* Air quality in µg/m³ NO₂ */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-xs">
-            <span className="flex items-center gap-1.5 font-medium text-muted">
-              <Wind className="h-4 w-4 text-accent" strokeWidth={1.5} />
-              Calidad del aire (NO₂)
-            </span>
-            <span className="text-[11px] text-muted">
-              {airLevel === 'any'
-                ? 'Cualquiera'
-                : `≤ ${AIR_LEVEL_THRESHOLDS[airLevel]} µg/m³`}
-            </span>
+        {/* Air quality in µg/m³ NO₂ (shown when air_no2 dataset is available) */}
+        {availableKeys.has('air_no2') && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="flex items-center gap-1.5 font-medium text-muted">
+                <Wind className="h-4 w-4 text-accent" strokeWidth={1.5} />
+                Calidad del aire (NO₂)
+              </span>
+              <span className="text-[11px] text-muted">
+                {airLevel === 'any'
+                  ? 'Cualquiera'
+                  : `≤ ${AIR_LEVEL_THRESHOLDS[airLevel]} µg/m³`}
+              </span>
+            </div>
+            <div className="grid grid-cols-3 gap-1.5">
+              {(
+                [
+                  { id: 'any', label: 'Cualquiera' },
+                  { id: 'acceptable', label: 'Aceptable ≤40' },
+                  { id: 'good', label: 'Buena ≤30' },
+                ] as const
+              ).map((opt) => {
+                const active = airLevel === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => onAirLevelChange(opt.id)}
+                    className={`min-h-[36px] rounded-lg border px-2 py-1 text-[11px] font-medium transition duration-150 focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none ${
+                      active
+                        ? 'border-accent bg-accent-soft text-ink'
+                        : 'border-border bg-surface text-muted hover:bg-surface-subtle hover:text-ink'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-          <div className="grid grid-cols-3 gap-1.5">
-            {(
-              [
-                { id: 'any', label: 'Cualquiera' },
-                { id: 'acceptable', label: 'Aceptable ≤40' },
-                { id: 'good', label: 'Buena ≤30' },
-              ] as const
-            ).map((opt) => {
-              const active = airLevel === opt.id;
-              return (
-                <button
-                  key={opt.id}
-                  type="button"
-                  onClick={() => onAirLevelChange(opt.id)}
-                  className={`min-h-[36px] rounded-lg border px-2 py-1 text-[11px] font-medium transition duration-150 focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none ${
-                    active
-                      ? 'border-accent bg-accent-soft text-ink'
-                      : 'border-border bg-surface text-muted hover:bg-surface-subtle hover:text-ink'
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        )}
 
         {/* Clean toggles */}
         <div className="grid grid-cols-1 gap-2">
-          <label className="flex min-h-[44px] cursor-pointer items-center justify-between rounded-xl border border-border bg-surface px-3.5 py-2 transition hover:bg-canvas">
-            <span className="flex items-center gap-2 text-xs font-medium text-ink">
-              <TrainFront className="h-4 w-4 text-accent" strokeWidth={1.5} />
-              Bien comunicado (≥ 35 paradas/km²)
-            </span>
-            <input
-              type="checkbox"
-              checked={wellConnectedOnly}
-              onChange={(e) => onWellConnectedChange(e.target.checked)}
-              className="h-4 w-4 accent-accent"
-            />
-          </label>
+          {availableKeys.has('transit_stops') && (
+            <label className="flex min-h-[44px] cursor-pointer items-center justify-between rounded-xl border border-border bg-surface px-3.5 py-2 transition hover:bg-canvas">
+              <span className="flex items-center gap-2 text-xs font-medium text-ink">
+                <TrainFront className="h-4 w-4 text-accent" strokeWidth={1.5} />
+                Bien comunicado (≥ 35 paradas/km²)
+              </span>
+              <input
+                type="checkbox"
+                checked={wellConnectedOnly}
+                onChange={(e) => onWellConnectedChange(e.target.checked)}
+                className="h-4 w-4 accent-accent"
+              />
+            </label>
+          )}
 
           <label className="flex min-h-[44px] cursor-pointer items-center justify-between rounded-xl border border-border bg-surface px-3.5 py-2 transition hover:bg-canvas">
             <span className="flex items-center gap-2 text-xs font-medium text-ink">
@@ -353,7 +359,7 @@ export function PriorityPanel({
           <span className="text-[11px] text-muted">Elige tus prioridades</span>
         </div>
         <div className="flex flex-wrap gap-2">
-          {PRIORITY_CHIPS.map((chip) => {
+          {PRIORITY_CHIPS.filter((chip) => availableKeys.has(chip.key)).map((chip) => {
             const active = selectedPriorities.includes(chip.key);
             return (
               <button

@@ -18,7 +18,6 @@ import { AreaDetailPanel } from './components/AreaDetailPanel';
 import { MadridMap } from './components/MadridMap';
 import {
   AIR_LEVEL_THRESHOLDS,
-  PRIORITY_CHIPS,
   PriorityPanel,
   type AirLevelOption,
 } from './components/PriorityPanel';
@@ -27,10 +26,13 @@ import { formatEuro, formatKm, getFitLabel, getFitLevel } from './utils/format';
 
 type MobileSheetHeight = 'peek' | 'half' | 'full';
 
-function prioritiesToWeights(selected: string[]): Record<string, number> {
+function prioritiesToWeights(
+  selected: string[],
+  availableKeys: Set<string>,
+): Record<string, number> {
   const weights: Record<string, number> = {};
-  for (const chip of PRIORITY_CHIPS) {
-    weights[chip.key] = selected.includes(chip.key) ? 1.0 : 0.2;
+  for (const key of availableKeys) {
+    weights[key] = selected.includes(key) ? 1.0 : 0.2;
   }
   return weights;
 }
@@ -42,6 +44,7 @@ export function App() {
   const [rawResults, setRawResults] = useState<ScoreResultItem[]>([]);
   const [referenceM2, setReferenceM2] = useState<number | undefined>(undefined);
   const [loading, setLoading] = useState(true);
+  const [isScoring, setIsScoring] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // User search & real-unit filter state
@@ -98,16 +101,26 @@ export function App() {
     };
   }, []);
 
+  const availableKeys = useMemo(() => {
+    const keys = new Set<string>(['distance_km']);
+    for (const ind of meta?.indicators ?? []) {
+      keys.add(ind.key);
+    }
+    return keys;
+  }, [meta]);
+
   const computedWeights = useMemo(
-    () => prioritiesToWeights(selectedPriorities),
-    [selectedPriorities],
+    () => prioritiesToWeights(selectedPriorities, availableKeys),
+    [selectedPriorities, availableKeys],
   );
 
-  // Fetch scores whenever inputs change
+  // Fetch scores whenever inputs change (debounced 250 ms per T09)
   useEffect(() => {
     if (!meta) return;
     let cancelled = false;
-    async function runScore() {
+    setIsScoring(true);
+
+    const timer = window.setTimeout(async () => {
       try {
         const res = await postScore({
           campus_id: campusId,
@@ -122,16 +135,20 @@ export function App() {
         if (!cancelled) {
           setRawResults(res.results);
           setReferenceM2(res.reference_m2);
+          setError(null);
         }
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : 'Error calculando recomendaciones');
         }
+      } finally {
+        if (!cancelled) setIsScoring(false);
       }
-    }
-    runScore();
+    }, 250);
+
     return () => {
       cancelled = true;
+      window.clearTimeout(timer);
     };
   }, [meta, campusId, computedWeights, maxDistanceKm, onlyWithinBudget, budget, housingType]);
 
@@ -247,6 +264,7 @@ export function App() {
             onSelectArea={handleSelectArea}
             activeCampus={activeCampus}
             maxDistanceKm={maxDistanceKm}
+            isScoring={isScoring}
           />
         )}
       </main>
@@ -261,6 +279,7 @@ export function App() {
       {/* DESKTOP: Floating left editorial glass panel (~380px) */}
       <aside className="fixed top-4 bottom-4 left-4 z-[500] hidden w-[380px] overflow-hidden rounded-2xl border border-border bg-surface/92 shadow-floating backdrop-blur-md lg:block">
         <PriorityPanel
+          availableKeys={availableKeys}
           query={query}
           onQueryChange={setQuery}
           onQuerySubmit={handleQuerySubmit}
@@ -369,6 +388,7 @@ export function App() {
             </div>
             <div className="min-h-0 flex-1 overflow-hidden">
               <PriorityPanel
+                availableKeys={availableKeys}
                 query={query}
                 onQueryChange={setQuery}
                 onQuerySubmit={handleQuerySubmit}
