@@ -36,3 +36,6 @@
 - Probé tres recorridos Chrome (dos escritorio, uno móvil) con datos reales, comparador, enlace de anuncios y respuesta 503 simulada en explicación. Pasaron 27 tests de backend y el build de frontend.
 - Reporté a WEB/T21 el umbral de Metro que elimina todos los barrios y el filtro de presupuesto descartado por la UI. Reporté a API el símbolo € perdido al normalizar el texto sin LLM ni caché.
 - Dejé evidencia a SHIP y pasé los resultados de las consultas cacheadas a quien tiene T19.
+
+## T04 · 19/11/2026 · robustez de descarga
+- Se añadió el espejo municipal al fallar el catálogo. El ZIP de ambos endpoints coincidió por SHA-256 y se validaron los 131 barrios tras simular un reset y descargar desde el espejo.
