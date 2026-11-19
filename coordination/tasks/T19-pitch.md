@@ -3,8 +3,8 @@ id: T19
 title: Guion de pitch + demo + plan B
 lane: SHIP
 priority: P0
-status: todo
-owner: ""
+status: doing
+owner: claude@diego
 depends_on: []
 files: [docs/PITCH.md, docs/demo.gif]
 ---
