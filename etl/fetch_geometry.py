@@ -3,6 +3,7 @@
 import io
 import json
 import ssl
+from http.client import HTTPException
 from pathlib import Path
 from urllib.request import urlopen
 from zipfile import ZipFile
@@ -20,6 +21,10 @@ CACHE = ROOT / "data" / "raw" / "barrios.zip"
 BAR_LAYERS_URL = (
     "https://datos.madrid.es/dataset/300496-0-barrios-madrid/resource/"
     "300496-3-barrios-madrid/download/300496-3-barrios-madrid.zip"
+)
+BAR_LAYERS_MIRROR = (
+    "https://servpub.madrid.es/fsdescargas/IDEAM_WBGEOPORTAL/"
+    "LIMITES_ADMINISTRATIVOS/Barrios/Barrios.zip"
 )
 TO_WGS84 = Transformer.from_crs("EPSG:25830", "EPSG:4326", always_xy=True)
 SIMPLIFY_METERS = 1
@@ -73,14 +78,21 @@ def neighborhoods(archive_bytes):
     return {"type": "FeatureCollection", "features": features}
 
 
-def main():
-    if CACHE.is_file():
-        archive_bytes = CACHE.read_bytes()
-    else:
-        context = ssl.create_default_context()
-        context.load_verify_locations(certifi.where())
+def download_archive():
+    context = ssl.create_default_context()
+    context.load_verify_locations(certifi.where())
+    try:
         with urlopen(BAR_LAYERS_URL, timeout=30, context=context) as response:
-            archive_bytes = response.read()
+            return response.read()
+    except (OSError, HTTPException) as error:
+        print(f"Neighborhood catalog unavailable ({error}). Trying the city's mirror.")
+
+    with urlopen(BAR_LAYERS_MIRROR, timeout=30, context=context) as response:
+        return response.read()
+
+
+def main():
+    archive_bytes = CACHE.read_bytes() if CACHE.is_file() else download_archive()
 
     geojson = json.dumps(neighborhoods(archive_bytes), ensure_ascii=False, separators=(",", ":"))
     payload = (geojson + "\n").encode("utf-8")
