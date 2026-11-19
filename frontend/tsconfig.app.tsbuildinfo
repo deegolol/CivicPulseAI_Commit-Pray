@@ -1,1 +1,0 @@
-{"root":["./src/app.tsx","./src/config.ts","./src/main.tsx","./src/vite-env.d.ts","./src/api/client.ts","./src/api/types.ts","./src/components/areadetailpanel.tsx","./src/components/madridmap.tsx","./src/components/prioritypanel.tsx","./src/mocks/mockdata.ts"],"version":"5.7.3"}
