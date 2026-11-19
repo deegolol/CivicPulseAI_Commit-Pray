@@ -153,3 +153,4 @@ Una tarea está `done` solo si:
 - No hagas refactors masivos ni reformatees ficheros que no son tuyos.
 - No borres ni reescribas `coordination/` (solo añades / actualizas tu tarea).
 - No subas `.env`, claves API, `node_modules/`, `.venv/`, ni ficheros enormes.
+- No inicies sesión en servicios externos (Railway, Google, etc.) ni manejes claves: eso lo hacen los humanos (`coordination/ACCOUNTS.md`).

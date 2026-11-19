@@ -10,7 +10,8 @@ files: [Dockerfile, render.yaml, backend/app/main.py (solo montaje de estáticos
 ---
 ## Criterios de aceptación
 - [ ] Dockerfile multi-stage: build del frontend → FastAPI sirve `frontend/dist` y `/api`.
-- [ ] Desplegado en Render/Railway (o similar gratis) con URL pública; `LLM_*` como variables del servicio.
+- [ ] `railway.json` (o `railway.toml`) que use el Dockerfile; puerto desde `$PORT`; healthcheck en `/api/health`.
+- [ ] El agente NO inicia sesión en Railway: prepara los ficheros y deja en esta tarea los pasos exactos para el humano (ver `coordination/ACCOUNTS.md`). El humano de SHIP conecta el repo una vez y añade `LLM_PROVIDER`, `LLM_API_KEY`, `LLM_MODEL` como variables del servicio.
 - [ ] URL en README. Si a las 16:30 no funciona → se abandona y la demo es local (anotar en DECISIONS).
 
 ## Notas / progreso

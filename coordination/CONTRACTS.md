@@ -176,9 +176,9 @@ El prompt solo recibe los números del `breakdown`; el texto debe citar cifras r
 
 ## 5. Variables de entorno (`.env`, nunca en git; plantilla en `.env.example`)
 ```
-LLM_PROVIDER=none            # none | gemini | openai | anthropic
-LLM_API_KEY=
-LLM_MODEL=                   # modelo rápido/barato del proveedor elegido
+LLM_PROVIDER=gemini          # gemini (decidido, D-10) | none = modo sin IA
+LLM_API_KEY=                 # clave de Google AI Studio (gratis). Se pasa en privado, NUNCA en git
+LLM_MODEL=                   # un modelo Gemini Flash (rápido y gratis); comprobar el nombre exacto en AI Studio
 LLM_TIMEOUT_S=8
 DEMO_CACHE=true              # usa respuestas cacheadas para las frases de demo
 ```

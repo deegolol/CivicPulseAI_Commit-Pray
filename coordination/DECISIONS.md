@@ -10,3 +10,6 @@ Formato: `D-xx · HH:MM · <quién> · <decisión> — <motivo>`
 - D-06 · 12:15 · diego · Nombre del producto **pendiente**. Solo existe en `frontend/src/config.ts` (`APP_NAME`) y en README; en docs se dice "la app".
 - D-07 · 12:15 · equipo · ETL por piezas (`data/processed/parts/<fuente>.json`) para que varios agentes de DATA no editen el mismo fichero.
 - D-08 · 12:15 · equipo · Reparto: claude@diego=API · antigravity@diego=WEB · codex@diego=DATA (aire, transporte, servicios) · IA de amigo1=DATA (scout, geometría, alquiler, merge) · IA de amigo2=SHIP (integración, deploy, README, pitch). Arranque con registro en `coordination/agents/` y señal GO de los humanos.
+- D-09 · 12:45 · diego · Hosting: **Railway**, un servicio con Dockerfile y auto-deploy desde `main` — no se duerme (demo rápida), cero config extra. Sin base de datos.
+- D-10 · 12:45 · diego · LLM dentro de la app: **Gemini** (clave gratis de Google AI Studio) — rápido y sin coste; fallback sin IA siempre activo.
+- D-11 · 12:45 · diego · **Ningún agente inicia sesión en servicios externos ni maneja claves.** Las cuentas y las claves son cosa de humanos (ver `coordination/ACCOUNTS.md`).
