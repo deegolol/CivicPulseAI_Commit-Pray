@@ -1,5 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#0D1117"/>
-  <path d="M17 16h30v32h-6V22H23v26h-6z" fill="#FFFFFF"/>
-  <path d="m26 25 12 4v23l-12-4z" fill="#EF5156"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 840" fill="none" role="img" aria-label="PrimeraLlave">
+  <g fill="#C9272A">
+    <!-- Cabeza de pin con hueco interior transparente -->
+    <path fill-rule="evenodd" d="M 15 210 A 195 195 0 1 1 405 210 C 405 315.7 288.6 435.4 210 536.5 C 131.4 435.4 15 315.7 15 210 Z M 97.8 210 A 112.2 112.2 0 1 1 322.2 210 C 322.2 245.1 301.1 294.6 210 404 C 118.9 294.6 97.8 245.1 97.8 210 Z" />
+    <!-- Punto central del pin -->
+    <circle cx="210" cy="210" r="41" />
+    <!-- Tija de la llave con ranura central y dientes -->
+    <path d="M 146 489.5 L 146 766.5 L 210 822.5 L 309.5 736.5 L 309.5 678.5 L 271.5 665.5 L 271.5 639.5 L 314.5 593.5 L 274 556.5 L 274 489.5 L 220.5 556.5 L 220.5 753.5 Q 220.5 759.5 214.5 759.5 L 205.5 759.5 Q 199.5 759.5 199.5 753.5 L 199.5 556.5 Z" />
+  </g>
 </svg>
