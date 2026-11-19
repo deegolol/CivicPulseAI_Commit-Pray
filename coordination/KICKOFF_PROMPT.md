@@ -23,6 +23,14 @@ coordinamos SOLO a través de ficheros del repo.
 Tu ID es <tu-herramienta>@adrian (por ejemplo claude@adrian, codex@adrian, cursor@adrian, según qué IA seas).
 Tu carril es DATA (principal). El otro agente de DATA es codex@diego.
 
+PASO 0 — Comprobaciones (si alguna falla, PARA y dime exactamente qué tengo que hacer):
+  a) Necesitas poder ejecutar comandos en la terminal de mi ordenador. Si no puedes (por ejemplo, si eres
+     un chat web), dímelo: tendré que usar una IA con terminal (Claude Code, Codex, Cursor, Antigravity…).
+  b) `git --version` debe funcionar.
+  c) GitHub: mi usuario es adrisacb y tiene permiso de escritura en el repo. Si al hacer push te pide usuario o
+     contraseña, o da error de permisos, dime que ejecute `gh auth login` (o que configure mis credenciales
+     de GitHub) y espera a que te confirme.
+
 PASO 1 — Prepara tu carpeta (hazlo tú):
   git clone https://github.com/deegolol/CivicPulseAI_Commit-Pray.git ~/cp-adrian
   cd ~/cp-adrian && git config pull.rebase true
@@ -32,6 +40,7 @@ PASO 2 — Lee AGENTS.md entero y sigue su orden de lectura (BRIEF, PLAN, CONTRA
 
 PASO 3 — Regístrate según AGENTS.md §1: crea coordination/agents/<tu-id>.md con status: ready,
 lane: DATA y first_tasks: [T01, T04, T05]; haz commit y push a main.
+Comprueba que el push ha funcionado (git log origin/main -1 debe mostrar tu commit).
 
 PASO 4 — Pregúntame (soy Adrián) dónde están los datasets que YA he descargado y ábrelos. Son un
 COMPLEMENTO, no la base: no asumas que cubren nada. Evalúalos con criterio (¿portal oficial?, ¿completos?,
@@ -63,6 +72,14 @@ coordinamos SOLO a través de ficheros del repo.
 Tu ID es <tu-herramienta>@techgallo (por ejemplo claude@techgallo, codex@techgallo, según qué IA seas).
 Tu carril es SHIP: integración, Makefile, Dockerfile y despliegue, CI, README, AI_USAGE, pitch y QA.
 
+PASO 0 — Comprobaciones (si alguna falla, PARA y dime exactamente qué tengo que hacer):
+  a) Necesitas poder ejecutar comandos en la terminal de mi ordenador. Si no puedes (por ejemplo, si eres
+     un chat web), dímelo: tendré que usar una IA con terminal (Claude Code, Codex, Cursor, Antigravity…).
+  b) `git --version` debe funcionar.
+  c) GitHub: mi usuario es TechGallo y tiene permiso de escritura en el repo. Si al hacer push te pide usuario o
+     contraseña, o da error de permisos, dime que ejecute `gh auth login` (o que configure mis credenciales
+     de GitHub) y espera a que te confirme.
+
 PASO 1 — Prepara tu carpeta (hazlo tú):
   git clone https://github.com/deegolol/CivicPulseAI_Commit-Pray.git ~/cp-techgallo
   cd ~/cp-techgallo && git config pull.rebase true
@@ -74,6 +91,7 @@ Lee también coordination/ACCOUNTS.md y la tarea T15.
 
 PASO 3 — Regístrate según AGENTS.md §1: crea coordination/agents/<tu-id>.md con status: ready,
 lane: SHIP y first_tasks: [T00, T15, T16, T17]; haz commit y push a main.
+Comprueba que el push ha funcionado (git log origin/main -1 debe mostrar tu commit).
 
 PASO 4 — Respóndeme "LISTO: <tu-id>, carril SHIP" + en 5 líneas cómo vas a hacer T00 y T15. Luego ESPERA.
 No escribas código hasta que te diga GO.
