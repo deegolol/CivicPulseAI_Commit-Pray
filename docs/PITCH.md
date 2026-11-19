@@ -14,17 +14,20 @@
 > "Esta es Lucía. Tiene 18 años, viene de fuera y la semana que viene empieza en la ETSISI. Tiene 500 euros al mes y no conoce Madrid. Abre Idealista y ve miles de pisos… pero nadie le dice **en qué zona le conviene buscar**: cuánto se paga allí de verdad, a cuánto queda de su campus o si el aire está limpio. Esa información existe, pero está en datasets públicos que nadie cruza. Por eso hemos hecho **PrimeraLlave**."
 
 ### 0:30–3:00 · Demo en vivo — Diego (Adrián le apoya con los datos)
-1. **Escribe como Lucía** — pulsa el chip *"Estudio en la ETSISI, tengo 500 euros y quiero una zona tranquila con aire limpio"*.
-   > "Lucía escribe como habla. La IA entiende campus, presupuesto, que busca habitación y que le importa el aire… y **mirad cómo se mueven solos los controles**."
-2. **El mapa se colorea** (131 barrios) con el campus y su radio.
-   > "Cuanto más intenso el color, mejor encaja con ella. A la derecha, su top 3 —**Pueblo Nuevo, Palomeras Bajas y Media Legua**: a 3–4 km de Campus Sur y entre **287 y 332 € al mes** por una habitación— y arriba el **resumen de la IA**, que explica cada zona solo con cifras reales." 
-3. **Abre una zona del top 3** (p. ej. Palomeras Bajas) → bloque "Con tu presupuesto".
-   > "Aquí no inventamos nada: es la **mediana oficial del alquiler del Ministerio de Vivienda** por m², por los m² de una habitación. **~287 €/mes: encaja.** NO₂ 25 µg/m³, a 2,7 km… y cada cifra lleva su fuente." 
-4. **Pulsa "Ver pisos en esta zona"** → el portal (Fotocasa/Idealista/Badi) abierto con el distrito y el precio máximo ya filtrados.
-   > "Y de la zona, al piso: te llevamos a los anuncios **ya filtrados** por zona y presupuesto."
-5. **Cambia un control en unidades reales** (presupuesto o km máximos) → el ranking cambia al instante.
-6. *(Si sobra tiempo)* **Comparador** de 2 zonas, o el chip de **Montegancedo** con "un estudio por menos de 750 €" → el ranking cambia de campus y de tipo.
-7. **10 segundos en móvil** (DevTools o el móvil real): mapa a pantalla completa y bottom sheet.
+> Se empieza en la **pantalla de inicio** (sin mapa): "¿Dónde vas a vivir este curso?". Abrid la demo **sin parámetros en la URL**.
+
+1. **Escribe como Lucía**: pulsa el chip *"Estudio en la ETSISI, tengo 500 euros y quiero una zona tranquila con aire limpio"* (o escríbelo).
+   > "Lucía no rellena un formulario: escribe como habla. Entendemos su campus, su presupuesto, que busca habitación y que le importa el aire."
+2. **Aparecen sus resultados**: lista de zonas ordenada y, al lado, el mapa con solo las zonas que encajan en azul y su campus en rojo.
+   > "Esto es su Madrid: las zonas que encajan con ella, con lo que le costaría vivir allí y a cuánto queda su campus." *(Leed en voz alta el n.º 1 con su precio y distancia; ver "Cifras", abajo.)*
+3. **"Leer explicación"**: el resumen en lenguaje natural.
+   > "Y se lo explicamos en lenguaje natural… pero solo con cifras reales que hemos calculado nosotros. La IA no inventa ni un número."
+4. **Abre una zona** → detalle con el precio estimado grande.
+   > "Es la **mediana oficial del alquiler del Ministerio de Vivienda** por m², por los m² de una habitación: **encaja**. Aire, metro, distancia… y cada cifra lleva su fuente."
+5. **"Ver pisos"** → el portal (Fotocasa/Idealista/Badi) abierto con el distrito y el precio máximo ya filtrados.
+   > "Y de la zona, al piso: te llevamos a los anuncios ya filtrados por zona y presupuesto."
+6. **Cambia un chip de la barra superior** (presupuesto o km) → la lista y el mapa cambian al instante.
+7. **10 segundos en móvil**: misma app, lista primero y botón "Mapa".
 
 ### 3:00–4:00 · Cómo funciona — Adrián (datos) + Diego (IA) · *una sola imagen: el diagrama del README*
 - **Adrián:** "Cruzamos **5 fuentes oficiales**: los 131 barrios y la calidad del aire del **Ayuntamiento de Madrid**, el alquiler **SERPAVI 2024 del Ministerio de Vivienda**, las estaciones de **Metro del CRTM** y bibliotecas y polideportivos municipales. Scripts reproducibles: `make data` lo regenera todo desde las fuentes."
@@ -72,7 +75,8 @@
 
 ## Cifras para no equivocarse (comprobadas en la demo publicada)
 - 131 barrios · 21 distritos · 5 fuentes oficiales (9 ficheros) · 2 campus UPM.
-- Frase 1 (ETSISI, 500 €, aire limpio), **tal como sale en la web**: **Pueblo Nuevo (Ciudad Lineal) 4,1 km ~332 €** · **Palomeras Bajas 2,7 km ~287 €** · **Media Legua 3,5 km ~293 €** por habitación.
+- ⚠️ **Tras el rediseño v2 (T25) hay que volver a apuntar estas cifras** pulsando los chips en la demo publicada.
+- Frase 1 (ETSISI, 500 €, aire limpio), tal como salía antes del rediseño v2: **Pueblo Nuevo (Ciudad Lineal) 4,1 km ~332 €** · **Palomeras Bajas 2,7 km ~287 €** · **Media Legua 3,5 km ~293 €** por habitación.
 - ⚠️ El ranking que se ve depende de cómo la web traduce las prioridades; **repasad estas cifras el viernes a las 11:15** pulsando los chips en la demo publicada.
 - Frase 2 (Montegancedo, estudio < 750 €): **Campamento 3,8 km**, ~404 €/mes por un estudio.
 - Frase 3 (barato, metro, ≤ 6 km de Campus Sur): **40 de 131 zonas** quedan dentro; n.º 1 **Media Legua**, 3,5 km, ~293 €/mes.
