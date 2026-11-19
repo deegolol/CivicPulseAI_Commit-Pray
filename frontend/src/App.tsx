@@ -41,6 +41,7 @@ import { CompareModal } from './components/CompareModal';
 import { MadridMap } from './components/MadridMap';
 import { OnboardingScreen, type SearchReview } from './components/OnboardingScreen';
 import { TopFilterBar } from './components/TopFilterBar';
+import type { ResultFilters } from './components/ResultsFilters';
 import { ZoneList } from './components/ZoneList';
 import { formatEuro, formatKm } from './utils/format';
 import { searchPreferences } from './utils/searchPreferences';
@@ -78,7 +79,9 @@ function readInitialUrlParams() {
   const mode = params.get('mode');
   const transportMode = mode && Object.prototype.hasOwnProperty.call(TRANSPORT_LABELS, mode) ? mode as TransportMode : 'any';
   const onlyWithinBudget = params.get('range') === '1' || minBudget !== null;
-  return { hasParams, campus, budget, housingType, maxDistanceKm, minBudget, preferences, transportMode, onlyWithinBudget };
+  const locationParam = params.get('location') ?? '';
+  const location = /^(area|district):.+$/.test(locationParam) ? locationParam : '';
+  return { hasParams: hasParams || Boolean(location), campus, budget, housingType, maxDistanceKm, minBudget, preferences, transportMode, onlyWithinBudget, location };
 }
 
 /** T29: every page has its own URL so the browser's back button moves between pages of the app. */
@@ -150,6 +153,7 @@ export function App() {
   const [campusId, setCampusId] = useState(initial.campus ?? 'etsisi');
   const [budget, setBudget] = useState(initial.budget ?? 500);
   const [minBudget, setMinBudget] = useState<number | null>(initial.minBudget ?? null);
+  const [location, setLocation] = useState(initial.location ?? '');
   const [housingType, setHousingType] = useState<HousingType>(initial.housingType ?? 'room');
   const [maxDistanceKm, setMaxDistanceKm] = useState<number | null>(
     initial.maxDistanceKm !== undefined ? initial.maxDistanceKm : 10,
@@ -276,8 +280,10 @@ export function App() {
     else params.delete('mode');
     if (onlyWithinBudget) params.set('range', '1');
     else params.delete('range');
+    if (location) params.set('location', location);
+    else params.delete('location');
     window.history.replaceState(window.history.state, '', `${ROUTE_PATHS.results}?${params.toString()}`);
-  }, [screen, campusId, budget, housingType, maxDistanceKm, minBudget, computedWeights, transportMode, onlyWithinBudget]);
+  }, [screen, campusId, budget, housingType, maxDistanceKm, minBudget, computedWeights, transportMode, onlyWithinBudget, location]);
 
   // Cancel obsolete rankings so a slower response cannot replace a newer search.
   useEffect(() => {
@@ -338,7 +344,15 @@ export function App() {
     return () => controller.abort();
   }, [meta, screen, campusId, computedWeights, scoreFilters, budget, housingType]);
 
-  const results = rawResults;
+  const results = useMemo(() => {
+    if (location.startsWith('area:')) return rawResults.filter((area) => area.id === location.slice(5));
+    if (location.startsWith('district:')) return rawResults.filter((area) => area.district === location.slice(9));
+    return rawResults;
+  }, [rawResults, location]);
+  const locationLabel = location.startsWith('district:')
+    ? location.slice(9)
+    : results.find((area) => area.id === location.slice(5))?.name;
+  const visibleRecommendation = results.some((area) => area.id === recommendation?.area_id) ? recommendation : null;
   const visibleHighlights = useMemo(() => {
     const keys = { cheapest: 'rent_eur_m2', closest: 'distance_km', cleanest_air: 'air_no2', best_transit: 'transit_stops' };
     return Object.fromEntries(Object.entries(highlights).filter(([key]) => activeCriteria.has(keys[key as keyof typeof keys])));
@@ -457,6 +471,7 @@ export function App() {
     }
     setSearchReview(null);
     setOnlyWithinBudget(true);
+    setLocation('');
     setSelectedAreaId(null);
     setHoveredAreaId(null);
     setCompareIds([]);
@@ -474,16 +489,33 @@ export function App() {
     setSelectedAreaId(null);
     navigate('home');
   };
-  const handleBackFromResults = () => {
-    setSelectedAreaId(null);
-    goBack('form');
-  };
+
+  function handleApplyFilters(filters: ResultFilters) {
+    setCampusId(filters.campusId);
+    setBudget(filters.budget);
+    setMinBudget(filters.minBudget);
+    setHousingType(filters.housingType);
+    setMaxDistanceKm(filters.maxDistanceKm);
+    setAirLevel(filters.airLevel);
+    setWellConnectedOnly(filters.wellConnectedOnly);
+    setOnlyWithinBudget(filters.onlyWithinBudget);
+    setTransportMode(filters.transportMode);
+    if (filters.priorityWeights !== computedWeights) setPreferenceWeights(filters.priorityWeights);
+    if (location !== filters.location) {
+      setSelectedAreaId(null);
+      setHoveredAreaId(null);
+      setCompareIds([]);
+      setCompareOpen(false);
+      setAiExplanation(null);
+      setLocation(filters.location);
+    }
+  }
 
   const campusName = activeCampus?.name ?? campusId.toUpperCase();
   const budgetRange = minBudget === null ? `hasta ${formatEuro(budget)}` : `${formatEuro(minBudget)}–${formatEuro(budget)}`;
   const summaryLine = `${HOUSING_TYPE_LABELS[housingType]} · ${budgetRange}/mes · ${campusName}${
     maxDistanceKm !== null ? ` (≤ ${formatKm(maxDistanceKm)})` : ''
-  }`;
+  }${locationLabel ? ' · ' + locationLabel : ''}`;
 
   const screenView = screen === 'onboarding' ? (
     <m.div key={route} data-ui-motion="screen" {...viewMotion}>
@@ -524,33 +556,18 @@ export function App() {
       <TopFilterBar
         availableKeys={availableKeys}
         onResetHome={handleResetHome}
-        onBack={handleBackFromResults}
         query={query}
+        searching={searching}
+        searchError={searchError}
         onQueryChange={setQuery}
         onSearchSubmit={handleSearchSubmit}
         campuses={meta?.campuses ?? []}
-        campusId={campusId}
-        onCampusChange={setCampusId}
-        budget={budget}
-        minBudget={minBudget}
-        onBudgetChange={setBudget}
-        onMinBudgetChange={setMinBudget}
-        housingType={housingType}
-        onHousingTypeChange={setHousingType}
-        maxDistanceKm={maxDistanceKm}
-        onMaxDistanceChange={setMaxDistanceKm}
-        airLevel={airLevel}
-        onAirLevelChange={setAirLevel}
-        wellConnectedOnly={wellConnectedOnly}
-        onWellConnectedChange={setWellConnectedOnly}
-        onlyWithinBudget={onlyWithinBudget}
-        onOnlyWithinBudgetChange={setOnlyWithinBudget}
-        priorityWeights={computedWeights}
-        onPriorityChange={handlePriorityChange}
-        transportMode={transportMode}
-        onTransportModeChange={handleTransportModeChange}
-        compareCount={compareIds.length}
-        onOpenCompare={() => setCompareOpen(true)}
+        areas={rawResults}
+        filters={{
+          campusId, budget, minBudget, housingType, maxDistanceKm, airLevel, wellConnectedOnly, onlyWithinBudget,
+          priorityWeights: computedWeights, transportMode, location,
+        }}
+        onApplyFilters={handleApplyFilters}
       />
 
       {error && (
@@ -597,7 +614,7 @@ export function App() {
         >
           <ZoneList
             results={results}
-            recommendation={recommendation}
+            recommendation={visibleRecommendation}
             highlights={visibleHighlights}
             budget={budget}
             summaryLine={summaryLine}
@@ -631,12 +648,13 @@ export function App() {
             centroidsById={centroidsById}
             selectedAreaId={selectedAreaId}
             hoveredAreaId={hoveredAreaId}
-            recommendedAreaId={recommendation?.area_id ?? null}
+            recommendedAreaId={visibleRecommendation?.area_id ?? null}
             onSelectArea={(id) => {
+              if (location && !scoresById[id]) return;
               setSelectedAreaId(id);
               setMobileView('list');
             }}
-            onHoverArea={setHoveredAreaId}
+            onHoverArea={(id) => setHoveredAreaId(id && location && !scoresById[id] ? null : id)}
             activeCampus={activeCampus}
             maxDistanceKm={maxDistanceKm}
             budget={budget}

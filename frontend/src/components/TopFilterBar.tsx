@@ -1,523 +1,171 @@
-/**
- * Screen B fixed top bar with editable filter chips and clean popovers (T25).
- * Chips: Campus · Budget €/mes · Housing type · Max km · Más filtros (air, transit, budget-only, priorities, search).
- * Zero percentages anywhere; crisp 1px borders and subtle popover shadow only.
- */
 import { AnimatePresence, m, useReducedMotion } from 'motion/react';
+import { useLayoutEffect, useRef, useState } from 'react';
+import { Search, SlidersHorizontal, X } from 'lucide-react';
+import type { Campus, ScoreResultItem } from '../api/types';
+import { EXAMPLE_QUERIES } from '../constants/filters';
 import { AccountButton } from './AccountProvider';
-import { useEffect, useRef, useState } from 'react';
-import {
-  ArrowLeft,
-  ChevronDown,
-  Scale,
-  Search,
-  SlidersHorizontal,
-  X,
-} from 'lucide-react';
-import type { Campus, HousingType } from '../api/types';
-import { HOUSING_TYPE_LABELS } from '../config';
-import {
-  EXAMPLE_QUERIES,
-  TRANSPORT_LABELS,
-  type AirLevelOption,
-  type TransportMode,
-} from '../constants/filters';
-import { formatEuro, formatKm } from '../utils/format';
 import { BrandLogo } from './BrandLogo';
-import { CampusPicker } from './CampusPicker';
-import { PreferenceControls } from './PreferenceControls';
-
-type ActivePopover = 'campus' | 'budget' | 'type' | 'distance' | 'more' | 'search' | null;
+import { ResultsFilters, type ResultFilters } from './ResultsFilters';
 
 interface TopFilterBarProps {
   availableKeys: Set<string>;
   onResetHome: () => void;
-  onBack: () => void;
   query: string;
-  onQueryChange: (val: string) => void;
-  onSearchSubmit: (queryText: string) => void;
+  searching: boolean;
+  searchError: string | null;
+  onQueryChange: (value: string) => void;
+  onSearchSubmit: (value: string) => void;
   campuses: Campus[];
-  campusId: string;
-  onCampusChange: (campusId: string) => void;
-  budget: number;
-  minBudget: number | null;
-  onMinBudgetChange: (value: number | null) => void;
-  onBudgetChange: (budget: number) => void;
-  housingType: HousingType;
-  onHousingTypeChange: (type: HousingType) => void;
-  maxDistanceKm: number | null;
-  onMaxDistanceChange: (km: number | null) => void;
-  airLevel: AirLevelOption;
-  onAirLevelChange: (level: AirLevelOption) => void;
-  wellConnectedOnly: boolean;
-  onWellConnectedChange: (value: boolean) => void;
-  onlyWithinBudget: boolean;
-  onOnlyWithinBudgetChange: (value: boolean) => void;
-  priorityWeights: Record<string, number>;
-  onPriorityChange: (key: string, weight: number) => void;
-  transportMode: TransportMode;
-  onTransportModeChange: (mode: TransportMode) => void;
-  compareCount: number;
-  onOpenCompare: () => void;
+  areas: Pick<ScoreResultItem, 'id' | 'name' | 'district'>[];
+  filters: ResultFilters;
+  onApplyFilters: (filters: ResultFilters) => void;
 }
 
+type Panel = 'search' | 'filters';
+
+const controlClass = 'inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-border px-2 min-[360px]:gap-2 min-[360px]:px-2.5 text-sm font-semibold text-ink hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink sm:px-3.5';
+
 export function TopFilterBar({
-  availableKeys,
-  onResetHome,
-  onBack,
-  query,
-  onQueryChange,
-  onSearchSubmit,
-  campuses,
-  campusId,
-  onCampusChange,
-  budget,
-  minBudget,
-  onMinBudgetChange,
-  onBudgetChange,
-  housingType,
-  onHousingTypeChange,
-  maxDistanceKm,
-  onMaxDistanceChange,
-  airLevel,
-  onAirLevelChange,
-  wellConnectedOnly,
-  onWellConnectedChange,
-  onlyWithinBudget,
-  onOnlyWithinBudgetChange,
-  priorityWeights,
-  onPriorityChange,
-  transportMode,
-  onTransportModeChange,
-  compareCount,
-  onOpenCompare,
+  availableKeys, onResetHome, query, searching, searchError, onQueryChange, onSearchSubmit, campuses, areas, filters, onApplyFilters,
 }: TopFilterBarProps) {
-  const [openPopover, setOpenPopover] = useState<ActivePopover>(null);
-  const [budgetError, setBudgetError] = useState(false);
-  const barRef = useRef<HTMLElement>(null);
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [openPanel, setOpenPanel] = useState<Panel | null>(null);
+  const [filterRevision, setFilterRevision] = useState(0);
+  const filterPanelId = `results-filters-panel-${filterRevision}`;
+  const panelId = openPanel === 'filters' ? filterPanelId : 'results-search-panel';
+  const [anchor, setAnchor] = useState({ left: 12, origin: 20 });
+  const headerRef = useRef<HTMLElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLButtonElement>(null);
+  const filtersRef = useRef<HTMLButtonElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const reduced = useReducedMotion();
-  const [anchor, setAnchor] = useState({ left: 16, origin: 20 });
 
-  function closePopover(restoreFocus = true) {
-    setOpenPopover(null);
-    if (restoreFocus) triggerRef.current?.focus();
-  }
-
-  function updateAnchor() {
-    const bar = barRef.current?.getBoundingClientRect();
-    const trigger = triggerRef.current?.getBoundingClientRect();
-    if (!bar || !trigger) return;
-    const width = Math.min(bar.width - 32, 28 * parseFloat(getComputedStyle(document.documentElement).fontSize));
-    const left = Math.max(16, Math.min(trigger.left - bar.left, bar.width - width - 16));
-    const origin = Math.max(12, Math.min(trigger.left + trigger.width / 2 - bar.left - left, width - 12));
-    setAnchor({ left, origin });
-  }
-
-  useEffect(() => {
-    if (!openPopover) return;
-    window.addEventListener('resize', updateAnchor);
-    return () => window.removeEventListener('resize', updateAnchor);
-  }, [openPopover]);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (barRef.current && !barRef.current.contains(e.target as Node)) {
-        closePopover(false);
+  useLayoutEffect(() => {
+    if (!openPanel) return;
+    const trigger = openPanel === 'search' ? searchRef.current : filtersRef.current;
+    const updateAnchor = () => {
+      const header = headerRef.current?.getBoundingClientRect();
+      const button = trigger?.getBoundingClientRect();
+      if (!header || !button) return;
+      const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      const width = Math.min(header.width - 24, (openPanel === 'filters' ? 42 : 28) * rootFontSize);
+      const left = Math.max(12, Math.min(button.left - header.left, header.width - width - 12));
+      setAnchor({ left, origin: button.left + button.width / 2 - header.left - left });
+    };
+    const dismiss = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (!panelRef.current?.contains(target) && !searchRef.current?.contains(target) && !filtersRef.current?.contains(target)) {
+        setOpenPanel(null);
       }
     };
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && openPopover) closePopover();
+    const escape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      setOpenPanel(null);
+      trigger?.focus();
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    window.addEventListener('keydown', handleKey);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      window.removeEventListener('keydown', handleKey);
-    };
-  }, [openPopover]);
-
-  const activeCampus = campuses.find((c) => c.id === campusId);
-  const campusName = activeCampus?.name ?? campusId.toUpperCase();
-
-  const extraFilterCount =
-    (airLevel !== 'any' ? 1 : 0) +
-    (wellConnectedOnly ? 1 : 0) +
-    (onlyWithinBudget ? 1 : 0);
-
-  const toggle = (name: ActivePopover, trigger: HTMLButtonElement) => {
-    triggerRef.current = trigger;
     updateAnchor();
-    setBudgetError(false);
-    setOpenPopover((prev) => (prev === name ? null : name));
-  };
+    document.addEventListener('pointerdown', dismiss);
+    window.addEventListener('keydown', escape);
+    window.addEventListener('resize', updateAnchor);
+    (openPanel === 'search' ? searchInputRef.current : panelRef.current)?.focus({ preventScroll: true });
+    return () => {
+      document.removeEventListener('pointerdown', dismiss);
+      window.removeEventListener('keydown', escape);
+      window.removeEventListener('resize', updateAnchor);
+    };
+  }, [openPanel]);
+
+  function closePanel() {
+    (openPanel === 'search' ? searchRef.current : filtersRef.current)?.focus();
+    setOpenPanel(null);
+  }
+
+  function submitSearch(value: string) {
+    if (searching || !value.trim()) return;
+    onSearchSubmit(value.trim());
+  }
 
   return (
-    <header
-      ref={barRef}
-      className="relative z-40 shrink-0 border-b border-border bg-bg"
-    >
-      <div onScroll={openPopover ? updateAnchor : undefined} className="flex items-center gap-2 overflow-x-auto px-4 py-2.5">
-        {/* Brand (home) first, then a simple way back (T29) */}
-        <button
-          type="button"
-          onClick={onResetHome}
-          aria-label="Ir al inicio"
-          className="flex shrink-0 items-center rounded-[8px] py-1 pr-1 text-left transition hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ink focus-visible:outline-none"
-        >
+    <header ref={headerRef} className="relative z-40 shrink-0 border-b border-border bg-bg">
+      <nav aria-label="Navegación de resultados" className="flex items-center gap-1.5 px-2 py-2 min-[360px]:gap-2 min-[360px]:px-3 sm:gap-3 sm:px-4">
+        <button type="button" onClick={onResetHome} aria-label="Volver al inicio"
+          className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg sm:mr-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">
           <BrandLogo compact />
         </button>
-        <button
-          type="button"
-          onClick={onBack}
-          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-sm font-medium text-ink transition hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-        >
-          <ArrowLeft className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
-          <span className="hidden sm:inline">Volver</span>
+        <button ref={searchRef} type="button" aria-label="Buscar por frase" aria-expanded={openPanel === 'search'}
+          aria-controls={openPanel === 'search' ? 'results-search-panel' : undefined}
+          onClick={() => setOpenPanel((panel) => panel === 'search' ? null : 'search')}
+          className={controlClass + ' min-w-0 flex-1 bg-surface text-left sm:w-56 sm:flex-none'}>
+          <Search size={18} className="shrink-0 text-muted" aria-hidden="true" />
+          <span className="truncate sm:hidden">Buscar</span>
+          <span className="hidden truncate sm:inline">Buscar por frase</span>
         </button>
-        <span className="hidden h-5 w-px shrink-0 bg-border sm:block" />
+        <button ref={filtersRef} type="button" aria-expanded={openPanel === 'filters'}
+          aria-controls={openPanel === 'filters' ? filterPanelId : undefined}
+          onClick={() => {
+            if (openPanel === 'filters') setOpenPanel(null);
+            else {
+              setFilterRevision((revision) => revision + 1);
+              setOpenPanel('filters');
+            }
+          }}
+          className={controlClass + ' shrink-0 aria-expanded:border-ink aria-expanded:bg-surface'}>
+          <SlidersHorizontal size={18} aria-hidden="true" /> Filtros
+        </button>
+        <div className="ml-auto flex shrink-0"><AccountButton toolbar /></div>
+      </nav>
 
-        {/* Editable summary chips */}
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={(event) => toggle('campus', event.currentTarget)}
-            aria-expanded={openPopover === 'campus'}
-            aria-controls={openPopover === 'campus' ? 'filter-popover-campus' : undefined}
-            data-ui-motion="filter-trigger"
-            className={`inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-[8px] border px-3 py-1.5 text-xs font-medium transition ${
-              openPopover === 'campus'
-                ? 'border-ink bg-surface text-ink'
-                : 'border-border bg-bg text-ink hover:bg-surface'
-            }`}
-          >
-            <span className="max-w-36 truncate" title={campusName}>{campusName}</span>
-            <ChevronDown data-menu-chevron className="h-3.5 w-3.5 text-muted" strokeWidth={1.75} />
-          </button>
-
-          <button
-            type="button"
-            onClick={(event) => toggle('budget', event.currentTarget)}
-            aria-expanded={openPopover === 'budget'}
-            aria-controls={openPopover === 'budget' ? 'filter-popover-budget' : undefined}
-            data-ui-motion="filter-trigger"
-            className={`inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-[8px] border px-3 py-1.5 text-xs font-medium tabular-nums transition ${
-              openPopover === 'budget'
-                ? 'border-ink bg-surface text-ink'
-                : 'border-border bg-bg text-ink hover:bg-surface'
-            }`}
-          >
-            <span>{minBudget !== null ? formatEuro(minBudget) + '–' : ''}{formatEuro(budget)}/mes</span>
-            <ChevronDown data-menu-chevron className="h-3.5 w-3.5 text-muted" strokeWidth={1.75} />
-          </button>
-
-          <button
-            type="button"
-            onClick={(event) => toggle('type', event.currentTarget)}
-            aria-expanded={openPopover === 'type'}
-            aria-controls={openPopover === 'type' ? 'filter-popover-type' : undefined}
-            data-ui-motion="filter-trigger"
-            className={`inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-[8px] border px-3 py-1.5 text-xs font-medium transition ${
-              openPopover === 'type'
-                ? 'border-ink bg-surface text-ink'
-                : 'border-border bg-bg text-ink hover:bg-surface'
-            }`}
-          >
-            <span>{HOUSING_TYPE_LABELS[housingType]}</span>
-            <ChevronDown data-menu-chevron className="h-3.5 w-3.5 text-muted" strokeWidth={1.75} />
-          </button>
-
-          <button
-            type="button"
-            onClick={(event) => toggle('distance', event.currentTarget)}
-            aria-expanded={openPopover === 'distance'}
-            aria-controls={openPopover === 'distance' ? 'filter-popover-distance' : undefined}
-            data-ui-motion="filter-trigger"
-            className={`inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-[8px] border px-3 py-1.5 text-xs font-medium tabular-nums transition ${
-              openPopover === 'distance'
-                ? 'border-ink bg-surface text-ink'
-                : 'border-border bg-bg text-ink hover:bg-surface'
-            }`}
-          >
-            <span>{maxDistanceKm === null ? 'Sin límite km' : `≤ ${formatKm(maxDistanceKm)}`}</span>
-            <ChevronDown data-menu-chevron className="h-3.5 w-3.5 text-muted" strokeWidth={1.75} />
-          </button>
-
-          <button
-            type="button"
-            onClick={(event) => toggle('more', event.currentTarget)}
-            aria-expanded={openPopover === 'more'}
-            aria-controls={openPopover === 'more' ? 'filter-popover-more' : undefined}
-            data-ui-motion="filter-trigger"
-            className={`inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-[8px] border px-3 py-1.5 text-xs font-medium transition ${
-              openPopover === 'more' || extraFilterCount > 0
-                ? 'border-ink bg-surface text-ink'
-                : 'border-border bg-bg text-ink hover:bg-surface'
-            }`}
-          >
-            <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={1.75} />
-            <span>Más filtros</span>
-            {extraFilterCount > 0 && (
-              <span className="ml-0.5 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-ink px-1 text-[10px] font-semibold text-bg">
-                {extraFilterCount}
-              </span>
-            )}
-          </button>
-
-          <button
-            type="button"
-            onClick={(event) => toggle('search', event.currentTarget)}
-            aria-expanded={openPopover === 'search'}
-            aria-controls={openPopover === 'search' ? 'filter-popover-search' : undefined}
-            data-ui-motion="filter-trigger"
-            className={`inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-[8px] border px-3 py-1.5 text-xs font-medium transition ${
-              openPopover === 'search'
-                ? 'border-ink bg-surface text-ink'
-                : 'border-border bg-bg text-muted hover:bg-surface hover:text-ink'
-            }`}
-          >
-            <Search className="h-3.5 w-3.5" strokeWidth={1.75} />
-            <span>Buscar frase</span>
-          </button>
-        </div>
-
-        {/* Compare button on the right when >= 2 selected */}
-        {compareCount >= 2 && (
-          <button
-            type="button"
-            onClick={onOpenCompare}
-            className="inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-[8px] bg-ink px-3.5 py-1.5 text-xs font-medium text-bg transition hover:opacity-90"
-          >
-            <Scale className="h-3.5 w-3.5" strokeWidth={1.75} />
-            <span>Comparar ({compareCount})</span>
-          </button>
-        )}
-        <div className="ml-auto flex shrink-0 items-center pl-2">
-          <AccountButton />
-        </div>
-      </div>
-
-      {/* Popovers */}
       <AnimatePresence initial={false}>
-      {openPopover && (
-        <m.div
-          key={openPopover}
-          id={`filter-popover-${openPopover}`}
-          data-ui-motion="filter-popover"
-          initial={reduced ? false : { opacity: 0, y: -7, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: reduced ? 1 : 0, y: reduced ? 0 : -4, scale: reduced ? 1 : 0.99, transition: { duration: reduced ? 0 : 0.14 } }}
-          transition={{ duration: reduced ? 0 : 0.21, ease: [0.2, 0.65, 0.25, 1] }}
-          style={{ left: anchor.left, transformOrigin: `${anchor.origin}px top` }}
-          className={`absolute top-full z-50 mt-2 w-[calc(100vw-2rem)] max-w-md rounded-[10px] border border-border bg-bg p-4 shadow-popover ${
-            openPopover === 'campus' ? '' : 'max-h-[min(66dvh,34rem)] overflow-y-auto overscroll-contain'
-          }`}
-        >
-          <div className="mb-3 flex items-center justify-between">
-            <span className="text-xs font-semibold text-ink">
-              {openPopover === 'campus' && 'Elige tu campus'}
-              {openPopover === 'budget' && 'Presupuesto mensual'}
-              {openPopover === 'type' && 'Tipo de vivienda'}
-              {openPopover === 'distance' && 'Distancia máxima al campus'}
-              {openPopover === 'more' && 'Más filtros y prioridades'}
-              {openPopover === 'search' && 'Buscar en lenguaje natural'}
-            </span>
-            <button
-              type="button"
-              onClick={() => closePopover()}
-              aria-label="Cerrar panel"
-              className="rounded-[6px] p-1 text-muted hover:bg-surface hover:text-ink"
-            >
-              <X className="h-4 w-4" strokeWidth={1.75} />
-            </button>
-          </div>
-
-          {openPopover === 'campus' && (
-            <CampusPicker campuses={campuses} campusId={campusId} keepSelection openOnMount
-              onChange={(id) => {
-                onCampusChange(id);
-                closePopover();
-              }} />
-          )}
-
-          {openPopover === 'budget' && (
-            <form className="space-y-2" onSubmit={(event) => {
-              event.preventDefault();
-              const fields = new FormData(event.currentTarget);
-              const minimum = fields.get('minimum') ? Number(fields.get('minimum')) : null;
-              const maximum = Number(fields.get('maximum'));
-              if (minimum !== null && minimum > maximum) {
-                setBudgetError(true);
-                return;
-              }
-              onMinBudgetChange(minimum);
-              onBudgetChange(maximum);
-              onOnlyWithinBudgetChange(true);
-              closePopover();
-            }}>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <label>Desde (€)<input className="mt-1 w-full rounded-lg border border-border p-2" name="minimum" type="number" min="0" defaultValue={minBudget ?? ''} /></label>
-                <label>Hasta (€)<input className="mt-1 w-full rounded-lg border border-border p-2" name="maximum" type="number" min="1" required defaultValue={budget} /></label>
-              </div>
-              {budgetError && <p role="alert" className="text-xs text-over">El mínimo debe ser menor o igual que el máximo.</p>}
-              <button type="submit" className="rounded-lg bg-ink px-3 py-2 text-xs font-semibold text-bg">Aplicar rango</button>
-            </form>
-          )}
-
-          {openPopover === 'type' && (
-            <div className="grid grid-cols-3 gap-2">
-              {(Object.keys(HOUSING_TYPE_LABELS) as HousingType[]).map((type) => {
-                const active = housingType === type;
-                return (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => {
-                      onHousingTypeChange(type);
-                      closePopover();
-                    }}
-                    className={`min-h-[40px] rounded-[8px] border px-3 py-2 text-xs font-medium transition ${
-                      active
-                        ? 'border-ink bg-ink text-bg'
-                        : 'border-border bg-bg text-ink hover:bg-surface'
-                    }`}
-                  >
-                    {HOUSING_TYPE_LABELS[type]}
-                  </button>
-                );
-              })}
+        {openPanel && (
+          <m.div
+            key={panelId}
+            ref={panelRef}
+            id={panelId}
+            role="region"
+            aria-labelledby={`${panelId}-title`}
+            tabIndex={-1}
+            initial={reduced ? false : { opacity: 0, y: -7, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: reduced ? 1 : 0, y: reduced ? 0 : -4, pointerEvents: 'none', transition: { duration: reduced ? 0 : 0.14 } }}
+            transition={{ duration: reduced ? 0 : 0.21, ease: [0.2, 0.65, 0.25, 1] }}
+            style={{ left: anchor.left, transformOrigin: `${anchor.origin}px top` }}
+            className={`absolute top-full z-50 mt-2 flex max-h-[calc(100dvh-5.75rem)] w-[calc(100%-1.5rem)] flex-col overflow-hidden rounded-2xl border border-border bg-bg shadow-popover outline-none ${openPanel === 'filters' ? 'max-w-[42rem]' : 'max-w-md'}`}
+          >
+            <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border py-1 pr-2 pl-4 sm:pl-5">
+              <h2 id={`${panelId}-title`} className="font-display text-base font-bold">
+                {openPanel === 'filters' ? 'Filtros' : 'Buscar por frase'}
+              </h2>
+              <button type="button" onClick={closePanel} aria-label="Cerrar panel"
+                className="grid size-11 place-items-center rounded-lg text-muted hover:bg-surface focus-visible:outline-2 focus-visible:outline-ink">
+                <X size={18} aria-hidden="true" />
+              </button>
             </div>
-          )}
 
-          {openPopover === 'distance' && (
-            <form className="flex items-end gap-2" onSubmit={(event) => {
-              event.preventDefault();
-              const radius = new FormData(event.currentTarget).get('radius');
-              onMaxDistanceChange(radius ? Number(radius) : null);
-              closePopover();
-            }}>
-              <label className="flex-1 text-xs">
-                Radio en km
-                <input className="mt-1 w-full rounded-lg border border-border p-2" name="radius" type="number"
-                  min="0.5" max="60" step="any" defaultValue={maxDistanceKm ?? ''} placeholder="Sin límite" />
-              </label>
-              <button type="submit" className="rounded-lg bg-ink px-3 py-2 text-xs font-semibold text-bg">Aplicar</button>
-            </form>
-          )}
-
-          {openPopover === 'more' && (
-            <div className="space-y-4">
-              {Boolean(priorityWeights.air_no2) && (
-                <div className="space-y-2">
-                  <span className="block text-xs font-medium text-muted">
-                    Calidad del aire
-                  </span>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {(
-                      [
-                        { id: 'any', label: 'Cualquiera' },
-                        { id: 'good', label: 'Buena' },
-                        { id: 'very_good', label: 'Muy buena' },
-                      ] as const
-                    ).map((opt) => (
-                      <button
-                        key={opt.id}
-                        type="button"
-                        onClick={() => onAirLevelChange(opt.id)}
-                        className={`min-h-[36px] rounded-[8px] border px-2 py-1.5 text-xs font-medium transition ${
-                          airLevel === opt.id
-                            ? 'border-ink bg-ink text-bg'
-                            : 'border-border bg-bg text-ink hover:bg-surface'
-                        }`}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="space-y-2">
-                {Boolean(priorityWeights.transit_stops) && (
-                  <label className="flex min-h-[40px] cursor-pointer items-center justify-between rounded-[8px] border border-border px-3 py-2 text-xs font-medium text-ink hover:bg-surface">
-                    <span>Solo zonas bien comunicadas en Metro</span>
-                    <input
-                      type="checkbox"
-                      checked={wellConnectedOnly}
-                      onChange={(e) => onWellConnectedChange(e.target.checked)}
-                      className="h-4 w-4 accent-ink"
-                    />
-                  </label>
-                )}
-
-                <label className="flex min-h-[40px] cursor-pointer items-center justify-between rounded-[8px] border border-border px-3 py-2 text-xs font-medium text-ink hover:bg-surface">
-                  <span>Solo zonas dentro de mi presupuesto</span>
-                  <input
-                    type="checkbox"
-                    checked={onlyWithinBudget}
-                    onChange={(e) => onOnlyWithinBudgetChange(e.target.checked)}
-                    className="h-4 w-4 accent-ink"
-                  />
-                </label>
-              </div>
-
-              <label className="flex items-center justify-between gap-3 text-xs font-medium">
-                Cómo te desplazas
-                <select value={transportMode} onChange={(event) => onTransportModeChange(event.target.value as TransportMode)} className="rounded-lg border border-border bg-bg px-2 py-1.5">
-                  {Object.entries(TRANSPORT_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-                </select>
-              </label>
-
-              <PreferenceControls availableKeys={availableKeys} weights={priorityWeights} onChange={onPriorityChange} />
-            </div>
-          )}
-
-          {openPopover === 'search' && (
-            <div className="space-y-3">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (query.trim()) {
-                    onSearchSubmit(query.trim());
-                    closePopover();
-                  }
-                }}
-                className="flex gap-2"
-              >
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(e) => onQueryChange(e.target.value)}
-                  placeholder="Estudio en la ETSISI, 500 € y aire limpio…"
-                  className="min-h-[40px] flex-1 rounded-[8px] border border-border bg-surface px-3 text-xs text-ink focus:border-ink focus:bg-bg focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  className="rounded-[8px] bg-brand px-3.5 text-xs font-medium text-bg hover:bg-brand-hover"
-                >
-                  Buscar
-                </button>
-              </form>
-              <div className="flex flex-col gap-1.5">
+            {openPanel === 'filters' ? (
+              <ResultsFilters availableKeys={availableKeys} campuses={campuses} areas={areas} filters={filters}
+                onApply={(value) => { onApplyFilters(value); closePanel(); }} onCancel={closePanel} />
+            ) : (
+              <div className="space-y-3 overflow-y-auto overscroll-contain p-4 sm:p-5">
+                <form onSubmit={(event) => { event.preventDefault(); submitSearch(query); }} className="flex gap-2">
+                  <input ref={searchInputRef} type="search" aria-label="Describe lo que buscas"
+                    value={query} onChange={(event) => onQueryChange(event.target.value)}
+                    placeholder="Ej. Habitación cerca de la ETSISI…"
+                    className="min-h-11 min-w-0 flex-1 rounded-lg border border-border bg-surface px-3 text-base focus-visible:outline-2 focus-visible:outline-ink" />
+                  <button type="submit" disabled={searching || !query.trim()}
+                    className="min-h-11 rounded-lg bg-brand px-3 text-sm font-semibold text-bg hover:bg-brand-hover disabled:opacity-60">{searching ? 'Buscando…' : 'Buscar'}</button>
+                </form>
+                {searchError && <p role="alert" className="text-sm text-over">{searchError}</p>}
                 {EXAMPLE_QUERIES.map((example) => (
-                  <button
-                    key={example}
-                    type="button"
-                    onClick={() => {
-                      onQueryChange(example);
-                      onSearchSubmit(example);
-                      closePopover();
-                    }}
-                    className="rounded-[8px] border border-border bg-surface px-3 py-2 text-left text-xs text-ink transition hover:border-ink/40 hover:bg-bg"
-                  >
+                  <button key={example} type="button" disabled={searching} onClick={() => { onQueryChange(example); submitSearch(example); }}
+                    className="block min-h-11 w-full rounded-lg border border-border px-3 py-2 text-left text-sm hover:bg-surface disabled:opacity-60">
                     {example}
                   </button>
                 ))}
               </div>
-            </div>
-          )}
-        </m.div>
-      )}
+            )}
+          </m.div>
+        )}
       </AnimatePresence>
     </header>
   );

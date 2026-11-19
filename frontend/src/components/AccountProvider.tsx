@@ -132,9 +132,20 @@ export function DistrictOffers({ district, housingType }: { district: string; ho
   );
 }
 
-export function AccountButton() {
+export function AccountButton({ toolbar = false }: { toolbar?: boolean }) {
   const controls = useContext(AccountContext);
   if (!controls) return null;
+  if (toolbar) {
+    return (
+      <button type="button" onClick={() => controls.show()}
+        className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-border px-2.5 text-sm font-semibold hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink sm:px-3.5">
+        <CircleUserRound size={18} className="hidden min-[360px]:block" aria-hidden="true" /> Mi cuenta
+        {controls.unread > 0 && (
+          <span aria-label={`${controls.unread} avisos sin leer`} className="size-2 rounded-full bg-brand" />
+        )}
+      </button>
+    );
+  }
   if (!controls.user) {
     return (
       <button type="button" onClick={() => controls.show()}
