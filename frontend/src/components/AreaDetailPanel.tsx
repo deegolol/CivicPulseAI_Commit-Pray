@@ -2,6 +2,7 @@
  * Neighborhood detail panel with 0–5 fractional star ratings (e.g., 4.3) + 1-click compare.
  * Student-friendly ratings up front; raw technical units & official source links neatly collapsible below.
  */
+import { DistrictOffers, FavoriteButton, WatchZoneButton } from './AccountProvider';
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, ChevronDown, ChevronUp, ExternalLink, Scale, X } from 'lucide-react';
 import { getAreaDetail } from '../api/client';
@@ -137,7 +138,8 @@ export function AreaDetailPanel({
           <span>Volver</span>
         </button>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center justify-end gap-1.5">
+          <FavoriteButton target={{ area_id: area.id, housing_type: housingType, budget_eur_month: budget }} />
           <button
             type="button"
             onClick={() => onQuickCompare(area.id)}
@@ -175,6 +177,7 @@ export function AreaDetailPanel({
             <span className="text-xs text-muted">Valoración para tu perfil</span>
           </div>
         </div>
+        <DistrictOffers district={area.district} housingType={housingType} />
 
         {/* Hero budget block */}
         <section className="mt-5 rounded-[10px] border border-border bg-surface p-4">
@@ -209,6 +212,15 @@ export function AreaDetailPanel({
           <p className="mt-1 text-[11px] text-muted">
             Estimación oficial con referencia de {m2Used} m².
           </p>
+
+          <div className="mt-3">
+            <WatchZoneButton watch={{
+              area_id: area.id,
+              area_name: area.name,
+              housing_type: housingType,
+              budget_eur_month: Math.round(budget),
+            }} />
+          </div>
 
           {/* Primary Madrid Red CTA */}
           {primaryLink && (

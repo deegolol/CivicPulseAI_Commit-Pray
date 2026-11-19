@@ -9,3 +9,6 @@ data/raw
 .env.*
 coordination
 docs
+
+# Private account storage
+.primerallave/

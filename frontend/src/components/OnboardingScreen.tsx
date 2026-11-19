@@ -1,6 +1,7 @@
 /** Starts a search with natural language or a focused manual form. */
 import { useState } from 'react';
 import { ArrowRight, ChevronDown, Search } from 'lucide-react';
+import { AccountButton } from './AccountProvider';
 import type { Campus, HousingType } from '../api/types';
 import { HOUSING_TYPE_LABELS } from '../config';
 import {
@@ -68,8 +69,9 @@ export function OnboardingScreen({
 
   return (
     <div className="flex min-h-dvh flex-col bg-bg text-ink">
-      <header className="mx-auto w-full max-w-4xl px-5 py-6">
+      <header className="mx-auto flex w-full max-w-4xl items-center justify-between px-5 py-6">
         <BrandLogo />
+        <AccountButton />
       </header>
 
       <main className="mx-auto w-full max-w-2xl flex-1 px-5 pt-8 pb-12 sm:pt-14">
