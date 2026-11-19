@@ -49,3 +49,8 @@
 - Qué: rediseño v2 completo (`OnboardingScreen.tsx`, `TopFilterBar.tsx`, `ZoneList.tsx`, `MadridMap.tsx`, `AreaDetailPanel.tsx`, `CompareModal.tsx`, `index.css`, `favicon.svg`). Flujo A (inicio sin mapa "¿Dónde vas a vivir este curso?" con buscador + 3 chips cacheados o campus/presupuesto/tipo + CTA rojo Madrid "Ver zonas") → B (barra superior con chips editables en popovers + lista 440 px primero + mapa azul solo Top 10 y resto gris, con hover bidireccional y botón flotante Mapa/Lista en móvil). Tipografía `Bricolage Grotesque` + `Instrument Sans`, blanco `#FFFFFF`, rojo Madrid `#D7262E`, cero Fraunces/Inter/crema/dorado/sparkles/IA badges/porcentajes.
 - Verificación: `cd frontend && npm run build` limpio + navegador integrado en `1440×900` y `390×844` (0 errores consola, 0 `%` en DOM). Capturas `docs/screenshots/t25_before_*.png` y `t25_after_desktop.png`.
 - Siguiente: avisar a `claude@diego` para el guion del pitch y retomar `T21` (QA final x3 en Railway y local).
+
+## 14:26 · T21 · done
+- Qué: QA final ×3 en producción (`https://primerallave.up.railway.app`) sobre el rediseño v2 (T25): 2 pasadas completas en escritorio (`1440×900`: Lucía ETSISI 500 €, Montegancedo ETSIINF 750 € + filtros reales Metro/NO₂, detalle, comparador, enlaces a pisos) y 1 pasada completa en móvil (`390×844`: chip Campus Sur ≤ 6 km, Lista ↔ Mapa, Detalle). Corregido breve flash de "Sin resultados" antes del primer `/api/score` y guardada `docs/screenshots/t25_after_mobile.png`.
+- Verificación: 0 errores de consola, 0 HTTP ≥ 400, 0 `%` en DOM, 0 overflow móvil y `cd frontend && npm run build` en verde.
+- Siguiente: avisar al equipo y pasar a escucha constante con `sh coordination/wait.sh antigravity@diego WEB`.

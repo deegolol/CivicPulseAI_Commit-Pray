@@ -510,7 +510,7 @@ export function App() {
             onHoverArea={setHoveredAreaId}
             compareIds={compareIds}
             onToggleCompare={handleToggleCompare}
-            loading={loading}
+            loading={loading || ((isScoring || aiLoading) && rawResults.length === 0)}
           />
         </section>
 
