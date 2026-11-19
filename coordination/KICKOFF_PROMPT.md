@@ -14,7 +14,7 @@
 
 ## Portátiles de los amigos
 ```bash
-git clone https://github.com/adrisacb/CivicPulseAI_Commit-Pray.git cp-<tuNombre>
+git clone https://github.com/deegolol/CivicPulseAI_Commit-Pray.git cp-<tuNombre>
 ```
 Abrid esa carpeta en vuestra IA. ID = `<herramienta>@<tuNombre>` (ej. `cursor@adri`, `claude@adri`).
 
