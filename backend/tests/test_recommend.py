@@ -28,6 +28,21 @@ def test_reasons_quote_the_real_numbers():
     assert any(dist in x for x in rec["reasons"])
 
 
+def test_sports_reason_uses_official_count_and_plain_language():
+    result = score(
+        campus_id="etsiinf", budget_eur_month=500,
+        weights={"distance_km": 1, "services_count": 1, "rent_eur_m2": 0.6, "air_no2": 0.2},
+    )
+    rec = result["recommendation"]
+    detail = client.get(f"/api/areas/{rec['area_id']}").json()
+    sports = int(detail["notes"]["services_count"].split("Equipamientos deportivos: ")[1].rstrip("."))
+    assert any(f"{sports} equipamiento" in reason for reason in rec["reasons"])
+    assert any("gimnasio" in caveat and "municipales" in caveat for caveat in rec["caveats"])
+    assert any("calidad del aire" in reason for reason in rec["reasons"])
+    assert not any(symbol in text for text in rec["reasons"] + rec["caveats"] for symbol in ("%", "NO₂", "µg/m³"))
+    assert result["results"][0]["breakdown"]["air_no2"]["value"] == detail["values"]["air_no2"]
+
+
 def test_honest_caveat_when_a_priority_is_weak():
     r = score(budget_eur_month=500, weights={"air_no2": 1, "rent_eur_m2": 0.8, "distance_km": 0.6})
     rec = r["recommendation"]
