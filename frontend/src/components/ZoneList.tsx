@@ -68,12 +68,19 @@ export function ZoneList({
               onClick={() => setExplanationOpen((v) => !v)}
               className="inline-flex shrink-0 items-center gap-1 rounded-[6px] px-2 py-1 text-xs font-medium text-ink underline decoration-border underline-offset-2 hover:bg-bg"
             >
-              <span>{explanationOpen ? 'Ocultar' : 'Leer explicación'}</span>
-              {explanationOpen ? (
-                <ChevronUp className="h-3.5 w-3.5" strokeWidth={1.75} />
-              ) : (
-                <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.75} />
-              )}
+              <span>
+                {explanationLoading
+                  ? 'Preparando explicación…'
+                  : explanationOpen
+                    ? 'Ocultar'
+                    : 'Leer explicación'}
+              </span>
+              {!explanationLoading &&
+                (explanationOpen ? (
+                  <ChevronUp className="h-3.5 w-3.5" strokeWidth={1.75} />
+                ) : (
+                  <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.75} />
+                ))}
             </button>
           )}
         </div>

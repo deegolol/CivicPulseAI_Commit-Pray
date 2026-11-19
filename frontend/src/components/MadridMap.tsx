@@ -67,8 +67,9 @@ function buildTooltipHtml(
     result?.est_rent_eur_month != null && result.est_rent_eur_month > budget
       ? Math.round(result.est_rent_eur_month - budget)
       : 0;
-  const badgeHtml =
-    result?.est_rent_eur_month != null
+  const badgeHtml = result?.excluded
+    ? `<span style="color:#5D6673;font-weight:600">Fuera de filtros</span>`
+    : result?.est_rent_eur_month != null
       ? over === 0
         ? `<span style="color:#12805C;font-weight:600">Encaja</span>`
         : `<span style="color:#B54708;font-weight:600">Se pasa ${formatEuro(over)}</span>`
