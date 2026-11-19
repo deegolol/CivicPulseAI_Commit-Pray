@@ -33,8 +33,8 @@ interface CompareModalProps {
   onClose: () => void;
 }
 
-/** 3 editorial series colors from design tokens (brass, fit-green, info-blue) */
-const SERIES_COLORS = ['#B8862B', '#1F7A5A', '#3B5BA9'] as const;
+/** 3 clean urban series colors (blue, fit-green, ink) */
+const SERIES_COLORS = ['#1F4FD6', '#12805C', '#0D1117'] as const;
 
 function shortAxisLabel(key: string, fallback: string): string {
   switch (key) {
@@ -118,19 +118,19 @@ export function CompareModal({
       className="fixed inset-0 z-[700] flex items-center justify-center p-4"
     >
       <div
-        className="fixed inset-0 bg-ink/30 backdrop-blur-xs"
+        className="fixed inset-0 bg-ink/35"
         onClick={onClose}
       />
 
-      <div className="relative z-10 flex max-h-[90dvh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border border-border bg-surface shadow-floating">
+      <div className="relative z-10 flex max-h-[90dvh] w-full max-w-3xl flex-col overflow-hidden rounded-[10px] border border-border bg-bg shadow-popover">
         {/* Header */}
         <header className="flex items-center justify-between border-b border-border px-6 py-4">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent-soft text-accent">
-              <Scale className="h-4 w-4" strokeWidth={1.5} />
+            <div className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-surface text-ink">
+              <Scale className="h-4 w-4" strokeWidth={1.75} />
             </div>
             <div>
-              <h2 className="font-serif text-lg font-semibold text-ink">
+              <h2 className="font-display text-lg font-bold text-ink">
                 Comparativa de zonas
               </h2>
               <p className="text-xs text-muted">
@@ -143,9 +143,9 @@ export function CompareModal({
             type="button"
             onClick={onClose}
             aria-label="Cerrar comparador"
-            className="flex h-10 w-10 items-center justify-center rounded-xl text-muted transition hover:bg-surface-subtle hover:text-ink"
+            className="flex h-10 w-10 items-center justify-center rounded-[8px] text-muted transition hover:bg-surface hover:text-ink"
           >
-            <X className="h-5 w-5" strokeWidth={1.5} />
+            <X className="h-5 w-5" strokeWidth={1.75} />
           </button>
         </header>
 
@@ -156,7 +156,7 @@ export function CompareModal({
             {areas.map((area, idx) => (
               <div
                 key={area.id}
-                className="inline-flex items-center gap-2 rounded-full border border-border bg-canvas py-1.5 pr-2 pl-3 text-xs font-medium text-ink"
+                className="inline-flex items-center gap-2 rounded-[8px] border border-border bg-surface py-1.5 pr-2 pl-3 text-xs font-medium text-ink"
               >
                 <span
                   className="h-2.5 w-2.5 rounded-full"
@@ -169,9 +169,9 @@ export function CompareModal({
                     type="button"
                     onClick={() => onRemove(area.id)}
                     aria-label={`Quitar ${area.name}`}
-                    className="ml-0.5 rounded-full p-0.5 text-muted hover:bg-surface-subtle hover:text-ink"
+                    className="ml-0.5 rounded-[6px] p-0.5 text-muted hover:bg-bg hover:text-ink"
                   >
-                    <X className="h-3.5 w-3.5" strokeWidth={1.5} />
+                    <X className="h-3.5 w-3.5" strokeWidth={1.75} />
                   </button>
                 )}
               </div>
@@ -180,17 +180,17 @@ export function CompareModal({
 
           {/* Overlaid Radar Chart (when >= 3 metrics) */}
           {radarData.length >= 3 && (
-            <section className="rounded-2xl border border-border bg-canvas p-4">
+            <section className="rounded-[10px] border border-border bg-surface p-4">
               <h3 className="text-xs font-medium text-muted">
                 Perfil comparado (más hacia fuera = mejor resultado en ese indicador)
               </h3>
               <div className="mt-2 h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart data={radarData} outerRadius="74%">
-                    <PolarGrid stroke="#E7E5E0" />
+                    <PolarGrid stroke="#E4E7EC" />
                     <PolarAngleAxis
                       dataKey="axis"
-                      tick={{ fill: '#14161A', fontSize: 12 }}
+                      tick={{ fill: '#0D1117', fontSize: 12 }}
                     />
                     {areas.map((area, idx) => (
                       <Radar
@@ -200,7 +200,7 @@ export function CompareModal({
                         stroke={SERIES_COLORS[idx % SERIES_COLORS.length]}
                         strokeWidth={2}
                         fill={SERIES_COLORS[idx % SERIES_COLORS.length]}
-                        fillOpacity={0.14}
+                        fillOpacity={0.12}
                       />
                     ))}
                     <RechartsTooltip
@@ -208,7 +208,7 @@ export function CompareModal({
                         if (!active || !payload?.length) return null;
                         const row = payload[0].payload as Record<string, string>;
                         return (
-                          <div className="rounded-xl border border-border bg-surface px-3 py-2 text-xs shadow-floating">
+                          <div className="rounded-[8px] border border-border bg-bg px-3 py-2 text-xs shadow-popover">
                             <div className="font-semibold text-ink">{row.axis}</div>
                             <div className="mt-1 space-y-0.5 tabular-nums">
                               {areas.map((area, idx) => (
@@ -237,10 +237,10 @@ export function CompareModal({
           )}
 
           {/* Side-by-side table in real units */}
-          <div className="overflow-x-auto rounded-2xl border border-border">
+          <div className="overflow-x-auto rounded-[10px] border border-border">
             <table className="w-full border-collapse text-left text-xs">
               <thead>
-                <tr className="border-b border-border bg-canvas">
+                <tr className="border-b border-border bg-surface">
                   <th className="px-4 py-3 font-medium text-muted">Indicador</th>
                   {areas.map((area, idx) => (
                     <th key={area.id} className="px-4 py-3 font-semibold text-ink">
@@ -255,23 +255,23 @@ export function CompareModal({
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border bg-surface tabular-nums">
+              <tbody className="divide-y divide-border bg-bg tabular-nums">
                 {/* Estimated monthly rent row */}
                 <tr>
                   <td className="px-4 py-3 font-medium text-muted">Coste estimado</td>
                   {areas.map((area) => (
                     <td key={area.id} className="px-4 py-3">
-                      <div className="font-serif text-base font-semibold text-ink">
+                      <div className="font-display text-base font-bold text-ink">
                         {area.est_rent_eur_month != null
                           ? `~${formatEuro(area.est_rent_eur_month)}/mes`
                           : 'Sin dato'}
                       </div>
                       {area.fits_budget !== null && (
                         <span
-                          className={`mt-0.5 inline-block rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                          className={`mt-0.5 inline-block rounded-[6px] px-2 py-0.5 text-[10px] font-medium ${
                             area.fits_budget
                               ? 'bg-fit-soft text-fit'
-                              : 'bg-nofit-soft text-nofit'
+                              : 'bg-over-soft text-over'
                           }`}
                         >
                           {area.fits_budget ? 'Encaja' : 'Por encima'}
@@ -339,10 +339,10 @@ export function CompareModal({
                             href={firstLink.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 font-medium text-accent hover:underline"
+                            className="inline-flex items-center gap-1 font-medium text-brand hover:underline"
                           >
                             <span>Ver pisos</span>
-                            <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.5} />
+                            <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.75} />
                           </a>
                         ) : (
                           <span className="text-muted">—</span>

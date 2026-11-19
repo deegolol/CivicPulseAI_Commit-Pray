@@ -1,11 +1,13 @@
 /**
- * Root workspace for PrimeraLlave (T24 editorial redesign).
- * - Desktop: full-bleed Madrid map + floating left glass control panel + floating right Top 3 / Detail rail.
- * - Mobile (< 768px): full-bleed map + top floating search/filters bar + 3-height bottom sheet (peek / half / full).
- * - Zero percentages in UI: real units (€/mes, km, µg/m³ NO₂, paradas) + qualitative priority chips.
+ * Root application for PrimeraLlave (T25 Redesign v2).
+ * 2-screen flow:
+ *   - Screen A (OnboardingScreen): map-free entry ("¿Dónde vas a vivir este curso?").
+ *     Skipped automatically if URL already carries query params (?campus= / ?budget=).
+ *   - Screen B (Results): fixed TopFilterBar + list-first ZoneList (left 440px) + blue-scale MadridMap (right)
+ *     + slide-over AreaDetailPanel + CompareModal. On mobile: full-screen list with floating Mapa/Lista toggle.
  */
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronDown, ChevronUp, KeyRound, Search, SlidersHorizontal, X } from 'lucide-react';
+import { List, Map as MapIcon } from 'lucide-react';
 import {
   getAreas,
   getGeo,
@@ -21,21 +23,19 @@ import type {
   MetaResponse,
   ScoreResultItem,
 } from './api/types';
-import { APP_NAME } from './config';
+import { HOUSING_TYPE_LABELS } from './config';
+import {
+  AIR_LEVEL_THRESHOLDS,
+  WELL_CONNECTED_THRESHOLD,
+  type AirLevelOption,
+} from './constants/filters';
 import { AreaDetailPanel } from './components/AreaDetailPanel';
 import { CompareModal } from './components/CompareModal';
 import { MadridMap } from './components/MadridMap';
-import {
-  AIR_LEVEL_THRESHOLDS,
-  EXAMPLE_QUERIES,
-  PriorityPanel,
-  WELL_CONNECTED_THRESHOLD,
-  type AirLevelOption,
-} from './components/PriorityPanel';
-import { TopZonesRail } from './components/TopZonesRail';
-import { formatEuro, formatKm, getFitLabel, getFitLevel } from './utils/format';
-
-type MobileSheetHeight = 'peek' | 'half' | 'full';
+import { OnboardingScreen } from './components/OnboardingScreen';
+import { TopFilterBar } from './components/TopFilterBar';
+import { ZoneList } from './components/ZoneList';
+import { formatEuro, formatKm } from './utils/format';
 
 function prioritiesToWeights(
   selected: string[],
@@ -49,14 +49,21 @@ function prioritiesToWeights(
 }
 
 function readInitialUrlParams() {
-  if (typeof window === 'undefined') return {};
+  if (typeof window === 'undefined') return { hasParams: false };
   const params = new URLSearchParams(window.location.search);
+  const hasParams =
+    params.has('campus') || params.has('budget') || params.has('type') || params.has('km');
   const campus = params.get('campus') || undefined;
   const budgetRaw = Number(params.get('budget'));
-  const budget = Number.isFinite(budgetRaw) && budgetRaw >= 300 && budgetRaw <= 1500 ? budgetRaw : undefined;
+  const budget =
+    Number.isFinite(budgetRaw) && budgetRaw >= 300 && budgetRaw <= 1500
+      ? budgetRaw
+      : undefined;
   const typeParam = params.get('type');
   const housingType: HousingType | undefined =
-    typeParam === 'room' || typeParam === 'studio' || typeParam === 'flat' ? typeParam : undefined;
+    typeParam === 'room' || typeParam === 'studio' || typeParam === 'flat'
+      ? typeParam
+      : undefined;
   const kmParam = params.get('km');
   const maxDistanceKm =
     kmParam === 'any'
@@ -64,11 +71,17 @@ function readInitialUrlParams() {
       : kmParam && Number.isFinite(Number(kmParam))
         ? Math.max(2, Math.min(20, Number(kmParam)))
         : undefined;
-  return { campus, budget, housingType, maxDistanceKm };
+  return { hasParams, campus, budget, housingType, maxDistanceKm };
 }
 
 export function App() {
-  const initialParams = useMemo(() => readInitialUrlParams(), []);
+  const initial = useMemo(() => readInitialUrlParams(), []);
+
+  // Screen A (onboarding) vs Screen B (results)
+  const [screen, setScreen] = useState<'onboarding' | 'results'>(
+    initial.hasParams ? 'results' : 'onboarding',
+  );
+
   const [meta, setMeta] = useState<MetaResponse | null>(null);
   const [geoData, setGeoData] = useState<BarriosGeoJSON | null>(null);
   const [centroidsById, setCentroidsById] = useState<Record<string, [number, number]>>({});
@@ -78,13 +91,13 @@ export function App() {
   const [isScoring, setIsScoring] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // User search & real-unit filter state (hydrated from URL querystring when present)
+  // User search & real-unit filter state
   const [query, setQuery] = useState('');
-  const [campusId, setCampusId] = useState(initialParams.campus ?? 'etsisi');
-  const [budget, setBudget] = useState(initialParams.budget ?? 500);
-  const [housingType, setHousingType] = useState<HousingType>(initialParams.housingType ?? 'room');
+  const [campusId, setCampusId] = useState(initial.campus ?? 'etsisi');
+  const [budget, setBudget] = useState(initial.budget ?? 500);
+  const [housingType, setHousingType] = useState<HousingType>(initial.housingType ?? 'room');
   const [maxDistanceKm, setMaxDistanceKm] = useState<number | null>(
-    initialParams.maxDistanceKm !== undefined ? initialParams.maxDistanceKm : 10,
+    initial.maxDistanceKm !== undefined ? initial.maxDistanceKm : 10,
   );
   const [airLevel, setAirLevel] = useState<AirLevelOption>('any');
   const [wellConnectedOnly, setWellConnectedOnly] = useState(false);
@@ -95,20 +108,17 @@ export function App() {
   ]);
   const [aiWeightsOverride, setAiWeightsOverride] = useState<Record<string, number> | null>(null);
 
-  // AI parse & explanation state (T12)
+  // Search summary & explanation text (from /api/ai/parse & /api/ai/explain)
   const [aiInterpretation, setAiInterpretation] = useState<string | null>(null);
   const [aiExplanation, setAiExplanation] = useState<string | null>(null);
-  const [aiEngine, setAiEngine] = useState<'llm' | 'keywords' | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
-  const [aiError, setAiError] = useState<string | null>(null);
 
-  // Selection, comparison & responsive UI state
+  // Selection, hover, comparison & mobile view state
   const [selectedAreaId, setSelectedAreaId] = useState<string | null>(null);
+  const [hoveredAreaId, setHoveredAreaId] = useState<string | null>(null);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [compareOpen, setCompareOpen] = useState(false);
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const [mobileSearchFocused, setMobileSearchFocused] = useState(false);
-  const [mobileSheet, setMobileSheet] = useState<MobileSheetHeight>('peek');
+  const [mobileView, setMobileView] = useState<'list' | 'map'>('list');
 
   // Bootstrap metadata, GeoJSON, and area centroids
   useEffect(() => {
@@ -124,10 +134,9 @@ export function App() {
         if (cancelled) return;
         setMeta(metaRes);
         setGeoData(geoRes);
-        if (!initialParams.campus) {
+        if (!initial.campus) {
           setCampusId(metaRes.defaults.campus_id);
         }
-
         const centroidMap: Record<string, [number, number]> = {};
         for (const a of areasRes.areas) {
           centroidMap[a.id] = a.centroid;
@@ -145,7 +154,7 @@ export function App() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [initial.campus]);
 
   const availableKeys = useMemo(() => {
     const keys = new Set<string>(['distance_km']);
@@ -168,21 +177,20 @@ export function App() {
     return prioritiesToWeights(selectedPriorities, availableKeys);
   }, [aiWeightsOverride, selectedPriorities, availableKeys]);
 
-  // Sync core search parameters to URL querystring (shareable search links)
+  // Sync URL querystring only when on Screen B (so Screen A stays clean at "/")
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || screen !== 'results') return;
     const params = new URLSearchParams(window.location.search);
     params.set('campus', campusId);
     params.set('budget', String(budget));
     params.set('type', housingType);
     params.set('km', maxDistanceKm === null ? 'any' : String(maxDistanceKm));
-    const nextUrl = `${window.location.pathname}?${params.toString()}`;
-    window.history.replaceState(null, '', nextUrl);
-  }, [campusId, budget, housingType, maxDistanceKm]);
+    window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
+  }, [screen, campusId, budget, housingType, maxDistanceKm]);
 
-  // Fetch scores whenever inputs change (debounced 250 ms per T09)
+  // Score whenever parameters change on Screen B (debounced 250 ms)
   useEffect(() => {
-    if (!meta) return;
+    if (!meta || screen !== 'results') return;
     let cancelled = false;
     setIsScoring(true);
 
@@ -216,9 +224,9 @@ export function App() {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [meta, campusId, computedWeights, maxDistanceKm, onlyWithinBudget, budget, housingType]);
+  }, [meta, screen, campusId, computedWeights, maxDistanceKm, onlyWithinBudget, budget, housingType]);
 
-  // Apply client-side real-unit thresholds for air NO₂ and transit ("Bien comunicado")
+  // Apply real-unit client-side thresholds for air NO₂ and Metro density
   const results = useMemo(() => {
     const maxNo2 = AIR_LEVEL_THRESHOLDS[airLevel];
     const mapped = rawResults.map((item) => {
@@ -250,16 +258,19 @@ export function App() {
 
   const scoresById = useMemo(() => {
     const map: Record<string, ScoreResultItem> = {};
-    for (const item of results) {
-      map[item.id] = item;
-    }
+    for (const item of results) map[item.id] = item;
     return map;
   }, [results]);
 
-  const topResults = useMemo(
-    () => results.filter((r) => !r.excluded).slice(0, 3),
-    [results],
-  );
+  // Only Top 10 non-excluded neighborhoods are highlighted in blue on the map (T25)
+  const top10RankById = useMemo(() => {
+    const map: Record<string, number> = {};
+    const top10 = results.filter((r) => !r.excluded).slice(0, 10);
+    top10.forEach((item, idx) => {
+      map[item.id] = idx + 1;
+    });
+    return map;
+  }, [results]);
 
   const selectedArea = selectedAreaId ? (scoresById[selectedAreaId] ?? null) : null;
   const comparedAreas = useMemo(
@@ -274,6 +285,13 @@ export function App() {
     [meta, campusId],
   );
 
+  const handleTogglePriority = (key: string) => {
+    setAiWeightsOverride(null);
+    setSelectedPriorities((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
+    );
+  };
+
   const handleToggleCompare = (areaId: string) => {
     setCompareIds((prev) => {
       if (prev.includes(areaId)) {
@@ -286,28 +304,13 @@ export function App() {
     });
   };
 
-  const handleTogglePriority = (key: string) => {
-    setAiWeightsOverride(null);
-    setSelectedPriorities((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
-    );
-  };
-
-  const handleSelectArea = (areaId: string) => {
-    setSelectedAreaId(areaId);
-    setMobileFiltersOpen(false);
-    setMobileSheet('full');
-  };
-
-  const handleQuerySubmit = async (queryText: string) => {
-    setAiLoading(true);
-    setAiError(null);
+  const handleSearchSubmit = async (queryText: string) => {
+    setScreen('results');
     setSelectedAreaId(null);
-    setMobileFiltersOpen(false);
-    setMobileSheet('half');
+    setMobileView('list');
+    setAiLoading(true);
 
     try {
-      // 1. Parse natural language query into structured parameters
       const parsed = await postAiParse({ query: queryText });
       const nextCampus = parsed.campus_id || campusId;
       const nextBudget = parsed.budget_eur_month ?? budget;
@@ -328,9 +331,7 @@ export function App() {
       setMaxDistanceKm(nextMaxDist);
       setOnlyWithinBudget(nextOnlyWithinBudget);
       setAiInterpretation(parsed.interpretation);
-      setAiEngine(parsed.engine);
 
-      // Preserve exact parsed weights (filtered to availableKeys) so ranking matches /api/ai/parse
       const exactWeights: Record<string, number> = {};
       for (const [k, w] of Object.entries(parsed.weights)) {
         if (availableKeys.has(k) && typeof w === 'number' && w >= 0) {
@@ -343,15 +344,11 @@ export function App() {
           : prioritiesToWeights(selectedPriorities, availableKeys);
       setAiWeightsOverride(Object.keys(exactWeights).length > 0 ? exactWeights : null);
 
-      // Reflect top priorities in the qualitative chips (never showing %)
       const topKeys = Object.entries(nextWeights)
         .filter(([, w]) => w >= 0.2)
         .map(([k]) => k);
-      if (topKeys.length > 0) {
-        setSelectedPriorities(topKeys);
-      }
+      if (topKeys.length > 0) setSelectedPriorities(topKeys);
 
-      // 2. Score immediately with parsed parameters to get Top 3 IDs for explanation
       const scored = await postScore({
         campus_id: nextCampus,
         weights: nextWeights,
@@ -365,7 +362,6 @@ export function App() {
       setRawResults(scored.results);
       setReferenceM2(scored.reference_m2);
 
-      // 3. Explain the Top 3 with real numbers (non-blocking; deterministic fallback from real /api/score data)
       const top3Items = scored.results.filter((r) => !r.excluded).slice(0, 3);
       const top3Ids = top3Items.map((r) => r.id);
 
@@ -384,9 +380,7 @@ export function App() {
             },
           });
           setAiExplanation(explained.text);
-          setAiEngine(explained.engine);
         } catch {
-          // Real-data-only fallback built strictly from /api/score numbers (never synthetic mocks)
           const fallbackSummary = top3Items
             .map((item, i) => {
               const rent =
@@ -397,85 +391,41 @@ export function App() {
             })
             .join(' ');
           setAiExplanation(fallbackSummary);
-          setAiEngine('keywords');
         }
       } else {
-        setAiExplanation(
-          'No hemos encontrado zonas dentro de filtros tan estrictos. Prueba a ampliar la distancia máxima.',
-        );
+        setAiExplanation(null);
       }
     } catch {
-      setAiError('No pudimos interpretar la búsqueda ahora mismo. Puedes ajustar los filtros manualmente.');
+      setAiInterpretation(null);
+      setAiExplanation(null);
     } finally {
       setAiLoading(false);
     }
   };
 
-  const handleDismissAi = () => {
-    setAiInterpretation(null);
-    setAiExplanation(null);
-    setAiEngine(null);
-    setAiError(null);
+  const handleResetHome = () => {
+    setScreen('onboarding');
+    setSelectedAreaId(null);
+    if (typeof window !== 'undefined') {
+      window.history.replaceState(null, '', window.location.pathname);
+    }
   };
 
-  const cycleMobileSheet = () => {
-    setMobileSheet((prev) => {
-      if (prev === 'peek') return 'half';
-      if (prev === 'half') return 'full';
-      return 'peek';
-    });
-  };
+  const campusShort = activeCampus?.name.split(' · ')[0] ?? campusId.toUpperCase();
+  const summaryLine =
+    aiInterpretation ||
+    `${HOUSING_TYPE_LABELS[housingType]} hasta ${formatEuro(budget)} cerca de ${campusShort}${
+      maxDistanceKm !== null ? ` (≤ ${formatKm(maxDistanceKm)})` : ''
+    }`;
 
-  const isMockMode = USE_MOCKS || meta?.is_mock;
-  const firstResult = topResults[0] ?? null;
-
-  return (
-    <div className="relative h-dvh w-screen overflow-hidden bg-canvas">
-      {/* Full-bleed interactive Madrid map */}
-      <main className="relative z-0 h-full w-full">
-        {loading ? (
-          <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-canvas">
-            <div className="h-10 w-10 animate-pulse rounded-2xl bg-accent-soft" />
-            <div className="h-3 w-44 animate-pulse rounded-full bg-surface-subtle" />
-          </div>
-        ) : (
-          <MadridMap
-            geoData={geoData}
-            scoresById={scoresById}
-            centroidsById={centroidsById}
-            selectedAreaId={selectedAreaId}
-            onSelectArea={handleSelectArea}
-            activeCampus={activeCampus}
-            maxDistanceKm={maxDistanceKm}
-            isScoring={isScoring}
-          />
-        )}
-      </main>
-
-      {/* Error banner if API fails */}
-      {error && (
-        <div
-          role="alert"
-          className="fixed top-4 left-1/2 z-[650] flex -translate-x-1/2 items-center gap-3 rounded-xl border border-nofit/30 bg-nofit-soft px-4 py-2 text-xs font-medium text-nofit shadow-floating"
-        >
-          <span>{error}</span>
-          <button
-            type="button"
-            onClick={() => window.location.reload()}
-            className="rounded-lg bg-nofit px-2.5 py-1 text-[11px] font-medium text-surface transition hover:opacity-90"
-          >
-            Reintentar
-          </button>
-        </div>
-      )}
-
-      {/* DESKTOP: Floating left editorial glass panel (~380px) */}
-      <aside className="fixed top-4 bottom-4 left-4 z-[500] hidden w-[380px] overflow-hidden rounded-2xl border border-border bg-surface/92 shadow-floating backdrop-blur-md lg:block">
-        <PriorityPanel
-          availableKeys={availableKeys}
+  // Screen A: Map-free Onboarding
+  if (screen === 'onboarding') {
+    return (
+      <div className="transition-opacity duration-300">
+        <OnboardingScreen
           query={query}
           onQueryChange={setQuery}
-          onQuerySubmit={handleQuerySubmit}
+          onSearchSubmit={handleSearchSubmit}
           campuses={meta?.campuses ?? []}
           campusId={campusId}
           onCampusChange={setCampusId}
@@ -483,273 +433,116 @@ export function App() {
           onBudgetChange={setBudget}
           housingType={housingType}
           onHousingTypeChange={setHousingType}
-          maxDistanceKm={maxDistanceKm}
-          onMaxDistanceChange={setMaxDistanceKm}
-          airLevel={airLevel}
-          onAirLevelChange={setAirLevel}
-          wellConnectedOnly={wellConnectedOnly}
-          onWellConnectedChange={setWellConnectedOnly}
-          onlyWithinBudget={onlyWithinBudget}
-          onOnlyWithinBudgetChange={setOnlyWithinBudget}
-          selectedPriorities={selectedPriorities}
-          onTogglePriority={handleTogglePriority}
+          onStartManual={() => {
+            setAiInterpretation(null);
+            setAiExplanation(null);
+            setScreen('results');
+          }}
         />
-      </aside>
+      </div>
+    );
+  }
 
-      {/* DESKTOP: Floating right rail (Top 3 cards OR Area Detail) */}
-      <aside className="fixed top-4 right-4 bottom-4 z-[500] hidden w-[348px] overflow-hidden rounded-2xl border border-border bg-surface/92 shadow-floating backdrop-blur-md lg:block">
-        {selectedArea ? (
-          <AreaDetailPanel
-            area={selectedArea}
-            indicators={meta?.indicators ?? []}
-            sources={meta?.sources ?? []}
-            budget={budget}
-            housingType={housingType}
-            referenceM2={referenceM2}
-            isCompared={compareIds.includes(selectedArea.id)}
-            canAddCompare={compareIds.length < 3}
-            onToggleCompare={handleToggleCompare}
-            onBack={() => setSelectedAreaId(null)}
-          />
-        ) : (
-          <TopZonesRail
-            topResults={topResults}
-            selectedAreaId={selectedAreaId}
-            onSelectArea={handleSelectArea}
-            compareIds={compareIds}
-            onToggleCompare={handleToggleCompare}
-            onOpenCompare={() => setCompareOpen(true)}
-            aiInterpretation={aiInterpretation}
-            aiExplanation={aiExplanation}
-            aiEngine={aiEngine}
-            aiLoading={aiLoading}
-            aiError={aiError}
-            onDismissAi={handleDismissAi}
-            loading={loading}
-          />
-        )}
-      </aside>
+  // Screen B: Results (List first on left, blue-scale Map on right)
+  return (
+    <div className="flex h-dvh flex-col overflow-hidden bg-bg transition-opacity duration-300">
+      <TopFilterBar
+        availableKeys={availableKeys}
+        onResetHome={handleResetHome}
+        query={query}
+        onQueryChange={setQuery}
+        onSearchSubmit={handleSearchSubmit}
+        campuses={meta?.campuses ?? []}
+        campusId={campusId}
+        onCampusChange={setCampusId}
+        budget={budget}
+        onBudgetChange={setBudget}
+        housingType={housingType}
+        onHousingTypeChange={setHousingType}
+        maxDistanceKm={maxDistanceKm}
+        onMaxDistanceChange={setMaxDistanceKm}
+        airLevel={airLevel}
+        onAirLevelChange={setAirLevel}
+        wellConnectedOnly={wellConnectedOnly}
+        onWellConnectedChange={setWellConnectedOnly}
+        onlyWithinBudget={onlyWithinBudget}
+        onOnlyWithinBudgetChange={setOnlyWithinBudget}
+        selectedPriorities={selectedPriorities}
+        onTogglePriority={handleTogglePriority}
+        compareCount={compareIds.length}
+        onOpenCompare={() => setCompareOpen(true)}
+      />
 
-      {/* MOBILE (< 1024px): Floating top search + Filters trigger + Example chips dropdown */}
-      <div className="fixed inset-x-3 top-3 z-[520] space-y-2 lg:hidden">
-        <div className="flex items-center gap-2">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              setMobileSearchFocused(false);
-              if (query.trim()) handleQuerySubmit(query.trim());
-            }}
-            className="relative flex min-h-[46px] flex-1 items-center rounded-2xl border border-border bg-surface/95 px-3 shadow-floating backdrop-blur-md"
-          >
-            <div className="mr-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent text-surface">
-              <KeyRound className="h-3.5 w-3.5" strokeWidth={1.5} />
-            </div>
-            <input
-              type="text"
-              value={query}
-              onFocus={() => setMobileSearchFocused(true)}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={`${APP_NAME}: ETSISI, 500 €…`}
-              aria-label="Buscar zona"
-              className="w-full bg-transparent text-sm text-ink placeholder:text-muted/75 focus:outline-none"
-            />
-            <button
-              type="submit"
-              aria-label="Buscar"
-              className="ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted hover:text-accent"
-            >
-              <Search className="h-4 w-4" strokeWidth={1.5} />
-            </button>
-          </form>
-
+      {error && (
+        <div
+          role="alert"
+          className="flex items-center justify-between border-b border-border bg-over-soft px-4 py-2 text-xs text-over"
+        >
+          <span>{error}</span>
           <button
             type="button"
-            onClick={() => {
-              setMobileSearchFocused(false);
-              setMobileFiltersOpen(true);
-            }}
-            aria-label="Abrir filtros"
-            className="flex min-h-[46px] min-w-[46px] items-center justify-center gap-1.5 rounded-2xl border border-border bg-surface/95 px-3.5 text-xs font-medium text-ink shadow-floating backdrop-blur-md transition active:scale-95"
+            onClick={() => window.location.reload()}
+            className="rounded-[6px] bg-over px-2.5 py-1 text-[11px] font-medium text-bg"
           >
-            <SlidersHorizontal className="h-4 w-4 text-accent" strokeWidth={1.5} />
-            <span className="hidden sm:inline">Filtros</span>
+            Reintentar
           </button>
-        </div>
-
-        {/* Mobile example chips dropdown when search bar is focused */}
-        {mobileSearchFocused && (
-          <div className="rounded-2xl border border-border bg-surface/98 p-3 shadow-floating backdrop-blur-md">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-[11px] font-medium text-muted">Ejemplos rápidos</span>
-              <button
-                type="button"
-                onClick={() => setMobileSearchFocused(false)}
-                aria-label="Cerrar ejemplos"
-                className="rounded-lg p-1 text-muted hover:bg-surface-subtle hover:text-ink"
-              >
-                <X className="h-3.5 w-3.5" strokeWidth={1.5} />
-              </button>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              {EXAMPLE_QUERIES.map((example) => (
-                <button
-                  key={example}
-                  type="button"
-                  onClick={() => {
-                    setQuery(example);
-                    setMobileSearchFocused(false);
-                    handleQuerySubmit(example);
-                  }}
-                  className="rounded-xl border border-border bg-canvas px-3 py-2 text-left text-xs text-ink transition hover:border-accent-border hover:bg-accent-soft"
-                >
-                  {example}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* MOBILE: Slide-over Filters Drawer */}
-      {mobileFiltersOpen && (
-        <div className="fixed inset-0 z-[600] flex lg:hidden">
-          <div
-            className="fixed inset-0 bg-ink/25 backdrop-blur-xs"
-            onClick={() => setMobileFiltersOpen(false)}
-          />
-          <div className="relative z-10 flex h-full w-full max-w-[360px] flex-col bg-surface shadow-floating">
-            <div className="flex items-center justify-between border-b border-border px-5 py-3">
-              <span className="font-serif text-base font-semibold text-ink">
-                Ajusta tu búsqueda
-              </span>
-              <button
-                type="button"
-                onClick={() => setMobileFiltersOpen(false)}
-                aria-label="Cerrar filtros"
-                className="flex h-10 w-10 items-center justify-center rounded-xl text-muted hover:bg-surface-subtle hover:text-ink"
-              >
-                <X className="h-5 w-5" strokeWidth={1.5} />
-              </button>
-            </div>
-            <div className="min-h-0 flex-1 overflow-hidden">
-              <PriorityPanel
-                availableKeys={availableKeys}
-                query={query}
-                onQueryChange={setQuery}
-                onQuerySubmit={handleQuerySubmit}
-                campuses={meta?.campuses ?? []}
-                campusId={campusId}
-                onCampusChange={setCampusId}
-                budget={budget}
-                onBudgetChange={setBudget}
-                housingType={housingType}
-                onHousingTypeChange={setHousingType}
-                maxDistanceKm={maxDistanceKm}
-                onMaxDistanceChange={setMaxDistanceKm}
-                airLevel={airLevel}
-                onAirLevelChange={setAirLevel}
-                wellConnectedOnly={wellConnectedOnly}
-                onWellConnectedChange={setWellConnectedOnly}
-                onlyWithinBudget={onlyWithinBudget}
-                onOnlyWithinBudgetChange={setOnlyWithinBudget}
-                selectedPriorities={selectedPriorities}
-                onTogglePriority={handleTogglePriority}
-              />
-            </div>
-          </div>
         </div>
       )}
 
-      {/* MOBILE: 3-height Bottom Sheet (peek = #1, half = Top 3, full = Detail) */}
-      <section
-        aria-label="Recomendaciones"
-        className={`fixed inset-x-0 bottom-0 z-[510] flex flex-col rounded-t-3xl border-t border-border bg-surface shadow-floating transition-all duration-200 ease-out lg:hidden ${
-          mobileSheet === 'peek'
-            ? 'h-[124px]'
-            : mobileSheet === 'half'
-              ? 'h-[52dvh]'
-              : 'h-[84dvh]'
-        }`}
-      >
-        {/* Sheet handle & height toggle */}
-        <button
-          type="button"
-          onClick={cycleMobileSheet}
-          aria-label="Cambiar altura del panel"
-          className="flex min-h-[36px] w-full shrink-0 flex-col items-center justify-center gap-1 pt-2 pb-1"
+      {/* Main Split Workspace */}
+      <div className="relative flex min-h-0 flex-1 overflow-hidden">
+        {/* Left Column: Ordered Zone List (440px desktop, full-screen on mobile when mobileView='list') */}
+        <section
+          aria-label="Lista de zonas recomendadas"
+          className={`${
+            mobileView === 'list' ? 'flex' : 'hidden lg:flex'
+          } h-full w-full shrink-0 flex-col border-r border-border lg:w-[440px]`}
         >
-          <span className="h-1 w-10 rounded-full bg-border" />
-          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted">
-            {mobileSheet === 'peek' ? (
-              <>
-                Ver top 3 <ChevronUp className="h-3.5 w-3.5" strokeWidth={1.5} />
-              </>
-            ) : mobileSheet === 'half' ? (
-              <>
-                Ampliar <ChevronUp className="h-3.5 w-3.5" strokeWidth={1.5} />
-              </>
-            ) : (
-              <>
-                Minimizar <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.5} />
-              </>
-            )}
-          </span>
-        </button>
+          <ZoneList
+            results={results}
+            budget={budget}
+            summaryLine={summaryLine}
+            explanationText={aiExplanation}
+            explanationLoading={aiLoading}
+            selectedAreaId={selectedAreaId}
+            hoveredAreaId={hoveredAreaId}
+            onSelectArea={(id) => setSelectedAreaId(id)}
+            onHoverArea={setHoveredAreaId}
+            compareIds={compareIds}
+            onToggleCompare={handleToggleCompare}
+            loading={loading}
+          />
+        </section>
 
-        {/* Sheet content */}
-        <div className="min-h-0 flex-1 overflow-hidden">
-          {mobileSheet === 'peek' ? (
-            firstResult ? (
-              <button
-                type="button"
-                onClick={() => handleSelectArea(firstResult.id)}
-                className="flex w-full items-center justify-between gap-3 px-5 py-2 text-left"
-              >
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="inline-flex h-5 items-center rounded-full bg-accent px-2 text-[11px] font-semibold text-surface">
-                      #1
-                    </span>
-                    <span className="truncate text-sm font-semibold text-ink">
-                      {firstResult.name}
-                    </span>
-                  </div>
-                  <p className="mt-0.5 truncate text-xs text-muted tabular-nums">
-                    {firstResult.district} · {formatKm(firstResult.distance_km)} ·{' '}
-                    {getFitLabel(getFitLevel(firstResult.score, firstResult.excluded))}
-                  </p>
-                </div>
-                <div className="shrink-0 text-right">
-                  <div className="font-serif text-lg font-semibold text-ink tabular-nums">
-                    {firstResult.est_rent_eur_month != null
-                      ? `~${formatEuro(firstResult.est_rent_eur_month)}`
-                      : '—'}
-                  </div>
-                  <div className="text-[10px] text-muted">/mes</div>
-                </div>
-              </button>
-            ) : (
-              <div className="px-5 py-2 text-xs text-muted">
-                Ajusta tus filtros para ver zonas recomendadas.
-              </div>
-            )
-          ) : mobileSheet === 'half' && !selectedArea ? (
-            <TopZonesRail
-              topResults={topResults}
-              selectedAreaId={selectedAreaId}
-              onSelectArea={handleSelectArea}
-              compareIds={compareIds}
-              onToggleCompare={handleToggleCompare}
-              onOpenCompare={() => setCompareOpen(true)}
-              aiInterpretation={aiInterpretation}
-              aiExplanation={aiExplanation}
-              aiEngine={aiEngine}
-              aiLoading={aiLoading}
-              aiError={aiError}
-              onDismissAi={handleDismissAi}
-              loading={loading}
-            />
-          ) : selectedArea ? (
+        {/* Right Column: Support Map (desktop flex-1, mobile full-screen when mobileView='map') */}
+        <main
+          className={`${
+            mobileView === 'map' ? 'block' : 'hidden lg:block'
+          } relative z-0 min-w-0 flex-1`}
+        >
+          <MadridMap
+            geoData={geoData}
+            scoresById={scoresById}
+            top10RankById={top10RankById}
+            centroidsById={centroidsById}
+            selectedAreaId={selectedAreaId}
+            hoveredAreaId={hoveredAreaId}
+            onSelectArea={(id) => setSelectedAreaId(id)}
+            onHoverArea={setHoveredAreaId}
+            activeCampus={activeCampus}
+            maxDistanceKm={maxDistanceKm}
+            budget={budget}
+            isScoring={isScoring}
+            isVisible={mobileView === 'map' || typeof window === 'undefined' || window.innerWidth >= 1024}
+          />
+        </main>
+
+        {/* Area Detail Slide-Over Panel (right side on desktop, full-screen on mobile) */}
+        {selectedArea && (
+          <aside
+            aria-label={`Detalle de ${selectedArea.name}`}
+            className="fixed inset-0 z-50 border-l border-border bg-bg lg:absolute lg:inset-y-0 lg:right-0 lg:left-auto lg:w-[420px] lg:shadow-popover"
+          >
             <AreaDetailPanel
               area={selectedArea}
               indicators={meta?.indicators ?? []}
@@ -760,32 +553,36 @@ export function App() {
               isCompared={compareIds.includes(selectedArea.id)}
               canAddCompare={compareIds.length < 3}
               onToggleCompare={handleToggleCompare}
-              onBack={() => {
-                setSelectedAreaId(null);
-                setMobileSheet('half');
-              }}
+              onClose={() => setSelectedAreaId(null)}
             />
-          ) : (
-            <TopZonesRail
-              topResults={topResults}
-              selectedAreaId={selectedAreaId}
-              onSelectArea={handleSelectArea}
-              compareIds={compareIds}
-              onToggleCompare={handleToggleCompare}
-              onOpenCompare={() => setCompareOpen(true)}
-              aiInterpretation={aiInterpretation}
-              aiExplanation={aiExplanation}
-              aiEngine={aiEngine}
-              aiLoading={aiLoading}
-              aiError={aiError}
-              onDismissAi={handleDismissAi}
-              loading={loading}
-            />
-          )}
-        </div>
-      </section>
+          </aside>
+        )}
 
-      {/* Side-by-side comparison modal (2–3 neighborhoods) */}
+        {/* Mobile Floating Toggle Button ("Mapa" / "Lista") */}
+        {!selectedArea && (
+          <div className="fixed bottom-5 left-1/2 z-30 -translate-x-1/2 lg:hidden">
+            <button
+              type="button"
+              onClick={() => setMobileView((v) => (v === 'list' ? 'map' : 'list'))}
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-xs font-medium text-bg shadow-popover transition active:scale-95"
+            >
+              {mobileView === 'list' ? (
+                <>
+                  <MapIcon className="h-4 w-4" strokeWidth={1.75} />
+                  <span>Mapa</span>
+                </>
+              ) : (
+                <>
+                  <List className="h-4 w-4" strokeWidth={1.75} />
+                  <span>Lista</span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Comparison Modal */}
       {compareOpen && comparedAreas.length >= 2 && (
         <CompareModal
           areas={comparedAreas}
@@ -796,10 +593,10 @@ export function App() {
         />
       )}
 
-      {/* Discreet mock indicator pill (bottom-center-left, never overlaps Leaflet attribution) */}
-      {isMockMode && (
-        <div className="pointer-events-none fixed bottom-1.5 left-[410px] z-[450] hidden rounded-full bg-surface/80 px-2 py-0.5 text-[10px] text-muted lg:block">
-          Datos de demostración
+      {/* Ultra-discreet mock indicator only when running in mock mode (top-right inside map, zero attribution overlap) */}
+      {(USE_MOCKS || meta?.is_mock) && (
+        <div className="pointer-events-none fixed right-3 bottom-7 z-30 hidden rounded-[6px] bg-bg/90 px-2 py-0.5 text-[10px] text-muted lg:block">
+          Modo demostración
         </div>
       )}
     </div>

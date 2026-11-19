@@ -3,7 +3,7 @@ id: T25
 title: Rediseño v2 — que NO parezca hecho por IA + flujo "primero preguntas, luego mapa" (Diego)
 lane: WEB
 priority: P0
-status: doing
+status: done
 owner: antigravity@diego
 depends_on: [T24]
 files: [frontend/src/**, frontend/index.html]
@@ -46,11 +46,14 @@ Los 3 humanos coinciden: la UI actual **parece hecha por IA ("muy de Claude")**.
 Citymapper (claridad urbana), Airbnb (tarjetas limpias y precio protagonista), Linear (tipografía y aire). **No** debe recordar a una demo genérica de IA.
 
 ## Criterios de aceptación
-- [ ] Flujo A → B funcionando; con parámetros en la URL se abre directamente B.
-- [ ] Ni Fraunces ni Inter ni tonos crema o dorados; tokens solo en `index.css`.
-- [ ] Escritorio y móvil sin errores en consola; `npm run build` limpio.
-- [ ] Los 3 chips del pitch siguen funcionando (y visibles también en móvil).
-- [ ] Capturas antes/después en `docs/screenshots/` (`t25_*`) y aviso por `msg.sh` a `claude@diego` para actualizar el guion del pitch.
+- [x] Flujo A → B funcionando; con parámetros en la URL se abre directamente B.
+- [x] Ni Fraunces ni Inter ni tonos crema o dorados; tokens solo en `index.css`.
+- [x] Escritorio y móvil sin errores en consola; `npm run build` limpio.
+- [x] Los 3 chips del pitch siguen funcionando (y visibles también en móvil).
+- [x] Capturas antes/después en `docs/screenshots/` (`t25_*`) y aviso por `msg.sh` a `claude@diego` para actualizar el guion del pitch.
 
 ## Notas / progreso
-<!-- El owner apunta aquí avances, decisiones y bloqueos -->
+- Implementado flujo en 2 pantallas (`OnboardingScreen.tsx` sin mapa → `TopFilterBar.tsx` con popovers + `ZoneList.tsx` lista primero 440 px + `MadridMap.tsx` azul Top 10 / resto gris + `AreaDetailPanel.tsx` + `CompareModal.tsx`).
+- Paleta blanca `#FFFFFF` + rojo Madrid `#D7262E` + escala azul de 5 pasos; tipografía `Bricolage Grotesque` + `Instrument Sans`; cero crema/dorado/sparkles/IA badges/degradados/glass/porcentajes.
+- Corregido crash móvil `Invalid LatLng (NaN, NaN)` al ocultar el mapa y sustituidas teselas CARTO (que devolvían marca de agua `API KEY REQUIRED`) por OSM con filtro Positron claro.
+- Verificado en navegador integrado (`1440×900` y `390×844`): 0 errores de consola, 0 `%` en DOM, capturas en `docs/screenshots/t25_*.png` y `npm run build` en verde.

@@ -44,3 +44,8 @@
 ## 14:00 · T12/T14 fix · done
 - Qué: corregido fallback de `postAiExplain` (tras aviso de `codex@adrian`) para que en producción jamás lea `MOCK_AREAS` y construya el resumen solo con cifras reales de `/api/score`; actualizados los 3 chips de ejemplo con las frases exactas cacheadas de `T11` (`claude@diego`) y pasados `budget_eur_month`, `housing_type` y `filters` a `/api/ai/explain`.
 - Verificación: `cd frontend && npm run build` en verde.
+
+## 14:19 · T25 · done
+- Qué: rediseño v2 completo (`OnboardingScreen.tsx`, `TopFilterBar.tsx`, `ZoneList.tsx`, `MadridMap.tsx`, `AreaDetailPanel.tsx`, `CompareModal.tsx`, `index.css`, `favicon.svg`). Flujo A (inicio sin mapa "¿Dónde vas a vivir este curso?" con buscador + 3 chips cacheados o campus/presupuesto/tipo + CTA rojo Madrid "Ver zonas") → B (barra superior con chips editables en popovers + lista 440 px primero + mapa azul solo Top 10 y resto gris, con hover bidireccional y botón flotante Mapa/Lista en móvil). Tipografía `Bricolage Grotesque` + `Instrument Sans`, blanco `#FFFFFF`, rojo Madrid `#D7262E`, cero Fraunces/Inter/crema/dorado/sparkles/IA badges/porcentajes.
+- Verificación: `cd frontend && npm run build` limpio + navegador integrado en `1440×900` y `390×844` (0 errores consola, 0 `%` en DOM). Capturas `docs/screenshots/t25_before_*.png` y `t25_after_desktop.png`.
+- Siguiente: avisar a `claude@diego` para el guion del pitch y retomar `T21` (QA final x3 en Railway y local).
