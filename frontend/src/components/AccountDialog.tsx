@@ -21,6 +21,7 @@ export interface AccountDialogProps {
 
 export function AccountDialog({ open, pendingWatch, onClose, onWatchSaved }: AccountDialogProps) {
   const dialog = useRef<HTMLDialogElement>(null);
+  const googleReturn = useRef(new URLSearchParams(window.location.search).get('cuenta'));
   const listingForm = useRef<HTMLFormElement>(null);
   const [session, setSession] = useState<AccountSession | null>(null);
   const [workspace, setWorkspace] = useState<AccountWorkspace | null>(null);
@@ -41,18 +42,39 @@ export function AccountDialog({ open, pendingWatch, onClose, onWatchSaved }: Acc
     let current = true;
     setSession(null);
     setWorkspace(null);
-    setError('');
-    setFeedback('');
+    const outcome = googleReturn.current;
+    setError(outcome === 'google_error' ? 'No se pudo continuar con Google. Si ya tienes una cuenta con ese correo, entra con tu contraseña y vincula Google.' : '');
+    setFeedback(outcome === 'google' ? 'Sesión de Google iniciada.' : '');
     accountApi.session().then(async (nextSession) => {
       if (!current) return;
       setSession(nextSession);
       const entries = nextSession.username ? await accountApi.workspace() : null;
-      if (current) setWorkspace(entries);
+      if (current) {
+        setWorkspace(entries);
+        if (outcome) {
+          googleReturn.current = null;
+          const url = new URL(window.location.href);
+          url.searchParams.delete('cuenta');
+          window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+        }
+      }
     }).catch((failure: Error) => {
       if (current) setError(failure.message);
     });
     return () => { current = false; };
   }, [open]);
+
+  useEffect(() => {
+    if (!open || !session?.username || busy) return;
+    let current = true;
+    const interval = window.setInterval(() => {
+      void accountApi.workspace().then((entries) => {
+        if (current) setWorkspace(entries);
+      }).catch(() => {});
+    }, 60_000);
+    return () => { current = false; window.clearInterval(interval); };
+  }, [open, session?.username, busy]);
+
 
   async function perform(action: () => Promise<void>) {
     setBusy(true);
@@ -71,7 +93,7 @@ export function AccountDialog({ open, pendingWatch, onClose, onWatchSaved }: Acc
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     void perform(async () => {
-      const nextSession = await accountApi.authenticate(mode, String(form.get('username')), String(form.get('password')));
+      const nextSession = await accountApi.authenticate(mode, String(form.get('email')), String(form.get('password')));
       setSession(nextSession);
       setTab('saved');
       setWorkspace(await accountApi.workspace());
@@ -118,15 +140,17 @@ export function AccountDialog({ open, pendingWatch, onClose, onWatchSaved }: Acc
               <button type="button" aria-pressed={mode === 'register'} onClick={() => setMode('register')} className={mode === 'register' ? primaryClass : secondaryClass}>Crear cuenta</button>
             </div>
             <label className="block text-sm font-medium">
-              Usuario
-              <input name="username" autoComplete="username" required minLength={3} maxLength={30} pattern="[A-Za-z0-9_]+" className={inputClass} />
+              Correo electrónico
+              <input name="email" type={mode === 'register' ? 'email' : 'text'} inputMode="email"
+                autoComplete="username" required maxLength={254} className={inputClass} />
             </label>
             <label className="block text-sm font-medium">
               Contraseña
               <input name="password" type="password" autoComplete={mode === 'register' ? 'new-password' : 'current-password'} required minLength={mode === 'register' ? 8 : undefined} maxLength={128} className={inputClass} />
             </label>
-            {mode === 'register' && <p className="text-xs text-muted">Usa al menos 8 caracteres. Guarda tu contraseña, ya que la cuenta se crea sin correo de recuperación.</p>}
+            {mode === 'register' && <p className="text-xs text-muted">Usa al menos 8 caracteres.</p>}
             <button type="submit" disabled={busy} className={primaryClass}>{mode === 'register' ? 'Registrarme' : 'Entrar'}</button>
+            {session.google_enabled && <a className={secondaryClass} href="/api/account/google/start">Continuar con Google</a>}
           </form>
         )}
         {session?.username && (
@@ -135,11 +159,25 @@ export function AccountDialog({ open, pendingWatch, onClose, onWatchSaved }: Acc
               <p className="text-sm font-medium">{session.username}</p>
               <button type="button" className={secondaryClass} disabled={busy} onClick={() => void perform(async () => {
                 await accountApi.logout();
-                setSession({ enabled: true, username: null });
+                setSession({ ...session, username: null, email: null, google_linked: false });
                 setMode('login');
                 setWorkspace(null);
               })}>Cerrar sesión</button>
             </div>
+            {!session.email && (
+              <form className="space-y-2" onSubmit={(event) => {
+                event.preventDefault();
+                const email = String(new FormData(event.currentTarget).get('legacy_email'));
+                void perform(async () => setSession(await accountApi.addEmail(email)));
+              }}>
+                <label className="block text-sm">Añade un correo a tu cuenta
+                  <input name="legacy_email" type="email" autoComplete="email" required className={inputClass} />
+                </label>
+                <button type="submit" disabled={busy} className={secondaryClass}>Guardar correo</button>
+              </form>
+            )}
+            {session.email && session.google_enabled && !session.google_linked &&
+              <a className={secondaryClass} href="/api/account/google/start">Vincular Google</a>}
             {pendingWatch && (
               <div className="space-y-2 rounded-[8px] border border-border bg-surface p-3">
                 <p className="text-sm"><strong>{pendingWatch.area_name}</strong> · {HOUSING_TYPE_LABELS[pendingWatch.housing_type]} · {money(pendingWatch.budget_eur_month)}</p>
@@ -162,6 +200,24 @@ export function AccountDialog({ open, pendingWatch, onClose, onWatchSaved }: Acc
             </nav>
             {tab === 'saved' && (
               <div className="space-y-5">
+                {!!workspace?.offers?.length && (
+                  <section aria-label="Ofertas disponibles" className="space-y-2">
+                    <h3 className="font-display font-semibold">Ofertas disponibles</h3>
+                    {workspace.offers.map((offer) => (
+                      <div key={offer.url} className="flex items-center justify-between gap-2 rounded-[8px] border border-border p-3 text-sm">
+                        <div className="min-w-0">
+                          <a className="break-words font-medium underline" href={offer.url} target="_blank" rel="noopener noreferrer">{offer.title}</a>
+                          <p className="text-muted">{offer.district} · {money(offer.price_eur_month)}</p>
+                        </div>
+                        <button type="button" className={secondaryClass} disabled={busy} aria-label={"Guardar " + offer.title}
+                          onClick={() => void perform(async () => {
+                            setWorkspace(await accountApi.saveListing({ title: offer.title, url: offer.url, remind_on: null }));
+                            setFeedback('Vivienda guardada.');
+                          })}>Guardar</button>
+                      </div>
+                    ))}
+                  </section>
+                )}
                 <form ref={listingForm} onSubmit={saveListing} className="space-y-3 rounded-[8px] border border-border p-3">
                   <h3 className="font-display font-semibold">Guardar una vivienda</h3>
                   <label className="block text-sm">Nombre del anuncio<input required name="title" maxLength={120} className={inputClass} /></label>
@@ -176,6 +232,7 @@ export function AccountDialog({ open, pendingWatch, onClose, onWatchSaved }: Acc
                         <a href={listing.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-medium underline">
                           <span className="break-words">{listing.title}</span><ExternalLink size={14} className="shrink-0" aria-hidden="true" />
                         </a>
+                        {listing.price_eur_month !== undefined && <p className="mt-1 text-xs text-muted">{money(listing.price_eur_month)}</p>}
                         {listing.remind_on && <p className="mt-1 text-xs text-muted">Recordatorio: {listing.remind_on.split('-').reverse().join('/')}</p>}
                       </div>
                       <button type="button" disabled={busy} aria-label={`Quitar ${listing.title}`} className={secondaryClass} onClick={() => void perform(async () => setWorkspace(await accountApi.removeListing(listing.id)))}>
@@ -188,11 +245,17 @@ export function AccountDialog({ open, pendingWatch, onClose, onWatchSaved }: Acc
             )}
             {tab === 'notices' && (
               <div className="space-y-4">
-                <p className="text-sm text-muted">Consulta los recordatorios de tus anuncios y los avisos de presupuesto de las zonas guardadas.</p>
+                <p className="text-sm text-muted">Consulta bajadas de precio, sugerencias, recordatorios y avisos de presupuesto.</p>
                 <ul className="space-y-2" aria-label="Notificaciones">
                   {workspace?.notifications.map((notice) => (
                     <li key={notice.id} className="flex items-start justify-between gap-3 rounded-[8px] border border-border p-3 text-sm">
-                      <p className={notice.read ? 'text-muted' : 'font-medium'}>{notice.message}</p>
+                      <div>
+                        <p className={notice.read ? 'text-muted' : 'font-medium'}>{notice.message}</p>
+                        {notice.url && <a className="mt-1 inline-block underline" href={notice.url} target="_blank" rel="noopener noreferrer">Ver anuncio</a>}
+                        <time dateTime={notice.created_at} className="mt-1 block text-xs text-muted">
+                          {new Date(notice.created_at).toLocaleDateString('es-ES')}
+                        </time>
+                      </div>
                       {!notice.read && (
                         <button type="button" aria-label="Marcar como leído" disabled={busy} className={secondaryClass} onClick={() => void perform(async () => setWorkspace(await accountApi.markRead(notice.id)))}>
                           <Check size={16} aria-hidden="true" />

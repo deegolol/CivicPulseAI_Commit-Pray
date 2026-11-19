@@ -1,16 +1,18 @@
 """Account flows and privacy boundaries for saved listings and notifications."""
 
 from datetime import date
+import json
 import sqlite3
+from urllib.parse import parse_qs, urlsplit
 
 import pytest
 from fastapi.testclient import TestClient
 
-from app import accounts
+from app import account_google, accounts
 from app.main import app
 
 PREFIX = "/api/account"
-CREDS = {"username": "estudiante", "password": "una-clave-de-prueba"}
+CREDS = {"email": "estudiante@example.com", "password": "una-clave-de-prueba"}
 JSON = {"Content-Type": "application/json"}
 
 
@@ -39,7 +41,7 @@ def test_register_logout_login_and_expiring_cookie(accounts_db):
     assert "short" not in invalid.text
     response = client.post(f"{PREFIX}/register", json=CREDS)
     assert response.status_code == 201
-    assert response.json()["username"] == CREDS["username"]
+    assert response.json()["username"] == CREDS["email"]
     assert response.headers["cache-control"] == "no-store"
     cookie = response.headers["set-cookie"]
     assert all(attribute in cookie for attribute in ("HttpOnly", "Secure", "SameSite=lax", "Path=/api/account"))
@@ -47,7 +49,7 @@ def test_register_logout_login_and_expiring_cookie(accounts_db):
     with sqlite3.connect(accounts_db) as conn:
         assert conn.execute("SELECT password_hash FROM accounts").fetchone()[0] != CREDS["password"].encode()
         assert conn.execute("SELECT token_hash FROM sessions").fetchone()[0] != token
-    assert client.get(f"{PREFIX}/session").json()["username"] == CREDS["username"]
+    assert client.get(f"{PREFIX}/session").json()["username"] == CREDS["email"]
     assert client.post(f"{PREFIX}/register", json=CREDS).status_code == 409
     assert client.post(f"{PREFIX}/logout", headers=JSON).status_code == 204
     assert client.get(f"{PREFIX}/workspace").status_code == 401
@@ -62,7 +64,7 @@ def test_register_logout_login_and_expiring_cookie(accounts_db):
 def test_saved_listing_reminders_and_isolation(accounts_db):
     first, second = TestClient(app), TestClient(app)
     assert first.post(f"{PREFIX}/register", json=CREDS).status_code == 201
-    assert second.post(f"{PREFIX}/register", json={**CREDS, "username": "otro_usuario"}).status_code == 201
+    assert second.post(f"{PREFIX}/register", json={**CREDS, "email": "otro@example.com"}).status_code == 201
 
     listing = {"title": "Piso compartido", "url": "https://www.idealista.com/inmueble/123456/", "remind_on": date.today().isoformat()}
     response = first.post(f"{PREFIX}/listings", json=listing)
@@ -110,3 +112,118 @@ def test_rate_limit_uses_proxy_client_ip(accounts_db, monkeypatch):
     )
     assert response.status_code == 429
     assert seen == ["198.51.100.3"]
+
+def test_legacy_user_can_add_email_without_losing_favorites(accounts_db):
+    value = accounts.password_hash(CREDS["password"], b"1234567890123456")
+    with accounts.database(accounts_db, write=True) as conn:
+        account_id = accounts.create_account(conn, "legacy_user", b"1234567890123456", value)
+        accounts.save_listing(conn, account_id, "Anuncio anterior", "https://example.org/123", None)
+    client = TestClient(app)
+    assert client.post(f"{PREFIX}/login", json={"username": "legacy_user", "password": CREDS["password"]}).status_code == 200
+    assert client.post(f"{PREFIX}/email", json={"email": CREDS["email"]}).json()["email"] == CREDS["email"]
+    client.post(f"{PREFIX}/logout", headers=JSON)
+    assert client.post(f"{PREFIX}/login", json=CREDS).status_code == 200
+    assert client.get(f"{PREFIX}/workspace").json()["listings"][0]["title"] == "Anuncio anterior"
+
+
+@pytest.fixture
+def google_profile(monkeypatch):
+    monkeypatch.setenv("GOOGLE_CLIENT_ID", "test-client")
+    monkeypatch.setenv("GOOGLE_CLIENT_SECRET", "test-secret")
+    monkeypatch.setenv("GOOGLE_REDIRECT_URI", "http://localhost:5173/api/account/google/callback")
+    calls = []
+
+    def fake_exchange(config, code, verifier, nonce):
+        assert code == "provider-code" and verifier and nonce
+        calls.append(code)
+        return "google-subject-42", CREDS["email"]
+
+    monkeypatch.setattr(account_google, "exchange", fake_exchange)
+    return calls
+
+
+def start_google(client):
+    response = client.get(f"{PREFIX}/google/start", follow_redirects=False)
+    assert response.status_code == 303
+    target = urlsplit(response.headers["location"])
+    assert target.hostname == "accounts.google.com"
+    params = parse_qs(target.query)
+    assert params["code_challenge_method"] == ["S256"]
+    assert "HttpOnly" in response.headers["set-cookie"]
+    return params["state"][0]
+
+
+def test_google_state_and_session(accounts_db, google_profile):
+    client = TestClient(app, base_url="http://localhost:5173")
+    state = start_google(client)
+    callback = client.get(f"{PREFIX}/google/callback", params={"state": state, "code": "provider-code"}, follow_redirects=False)
+    assert callback.headers["location"] == "/?cuenta=google"
+    assert client.get(f"{PREFIX}/session").json()["google_linked"]
+    callback = client.get(f"{PREFIX}/google/callback", params={"state": state, "code": "provider-code"}, follow_redirects=False,
+                          headers={"Cookie": f"primerallave_google_state={state}"})
+    assert callback.headers["location"] == "/?cuenta=google_error"
+    assert len(google_profile) == 1
+
+
+def test_google_cannot_claim_existing_account_without_password_session(accounts_db, google_profile):
+    founder = TestClient(app, base_url="http://localhost:5173")
+    assert founder.post(f"{PREFIX}/register", json=CREDS).status_code == 201
+    outsider = TestClient(app, base_url="http://localhost:5173")
+    state = start_google(outsider)
+    callback = outsider.get(f"{PREFIX}/google/callback", params={"state": state, "code": "provider-code"}, follow_redirects=False)
+    assert callback.headers["location"] == "/?cuenta=google_error"
+    assert outsider.get(f"{PREFIX}/workspace").status_code == 401
+    state = start_google(founder)
+    callback = founder.get(f"{PREFIX}/google/callback", params={"state": state, "code": "provider-code"}, follow_redirects=False)
+    assert callback.headers["location"] == "/?cuenta=google"
+    assert founder.get(f"{PREFIX}/session").json()["google_linked"]
+
+
+def test_catalog_price_observations_and_matching_suggestions(accounts_db, monkeypatch, tmp_path):
+    catalog = tmp_path / "catalog.json"
+    monkeypatch.setenv("ACCOUNTS_CATALOG_PATH", str(catalog))
+    favorite = {"id": "a", "title": "Habitación guardada", "url": "https://idealista.com/inmueble/42/",
+                "district": "Centro", "housing_type": "room", "price_eur_month": 650}
+    suggested = {**favorite, "id": "b", "title": "Habitación cercana", "url": "https://example.org/b", "price_eur_month": 540}
+    unrelated = {**suggested, "id": "c", "url": "https://example.org/c", "district": "Retiro"}
+    catalog.write_text(json.dumps({"offers": [favorite, suggested, unrelated]}), encoding="utf-8")
+    client = TestClient(app)
+    assert client.post(f"{PREFIX}/register", json=CREDS).status_code == 201
+    saved = client.post(f"{PREFIX}/listings", json={
+        "title": favorite["title"], "url": "https://www.idealista.com/inmueble/42/?utm_source=share"
+    }).json()
+    assert saved["listings"][0]["price_eur_month"] == 650
+    assert [(n["kind"], n["url"]) for n in saved["notifications"]] == [("suggestion", suggested["url"])]
+    catalog.write_text(json.dumps({"offers": [{**favorite, "price_eur_month": 590}, suggested, unrelated]}), encoding="utf-8")
+    new_state = client.get(f"{PREFIX}/workspace").json()
+    assert new_state["listings"][0]["price_eur_month"] == 590
+    assert [n["kind"] for n in new_state["notifications"]] == ["price_drop", "suggestion"]
+    assert len(client.get(f"{PREFIX}/workspace").json()["notifications"]) == 2
+
+@pytest.mark.parametrize("verified, nonce", [(False, "expected"), (True, "different"), (True, "expected")])
+def test_google_exchange_checks_verified_email_and_nonce(monkeypatch, verified, nonce):
+    config = account_google.Config("client", "secret", "https://example.org/api/account/google/callback")
+
+    class TokenResponse:
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {"id_token": "signed-token"}
+
+    def exchange_request(url, *, data, timeout):
+        assert url == "https://oauth2.googleapis.com/token"
+        assert data["code_verifier"] == "verifier"
+        return TokenResponse()
+
+    def verify_token(token, fetch, audience):
+        assert token == "signed-token" and audience == config.client_id
+        return {"sub": "123", "email": "Test@example.com", "email_verified": verified, "nonce": nonce}
+
+    monkeypatch.setattr(account_google.httpx, "post", exchange_request)
+    monkeypatch.setattr(account_google.id_token, "verify_oauth2_token", verify_token)
+    if verified and nonce == "expected":
+        assert account_google.exchange(config, "code", "verifier", "expected") == ("123", "test@example.com")
+    else:
+        with pytest.raises(account_google.IdentityError):
+            account_google.exchange(config, "code", "verifier", "expected")
