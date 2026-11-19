@@ -5,3 +5,8 @@
 
 ## T01 · 19/11/2026 · done
 - Adrián aprobó la tanda y se integró el inventario en main.
+
+## T04 · 19/11/2026 · review
+- Qué: ETL de 131 barrios, coordenadas UPM, centroides y fusión de piezas reproducible con y sin red.
+- IA: Codex implementó y verificó la geometría, los campus y el contrato de fusión con datos de prueba. Revisión humana pendiente.
+- Siguiente: avisar a DATA y API al integrar la geometría y arrancar T05.

@@ -3,7 +3,7 @@ id: T04
 title: ETL geometría de barrios + campus
 lane: DATA
 priority: P0
-status: doing
+status: review
 owner: codex@adrian
 depends_on: [T01]
 files: [etl/fetch_geometry.py, etl/build_indicators.py, etl/run_all.py, data/processed/barrios.geojson, data/processed/campuses.json]
@@ -18,3 +18,5 @@ files: [etl/fetch_geometry.py, etl/build_indicators.py, etl/run_all.py, data/pro
 
 ## Notas / progreso
 <!-- El owner apunta aquí avances, decisiones y bloqueos -->
+
+- 19/11/2026 · 131 multipolígonos válidos, dos campus UPM y fusión verificada con una pieza de prueba. Rama `t04-geometria-campus`, pendiente de OK de Adrián.
