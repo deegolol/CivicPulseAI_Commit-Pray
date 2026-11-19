@@ -16,7 +16,12 @@ import {
   Tooltip,
   useMap,
 } from 'react-leaflet';
-import L, { type GeoJSON as LeafletGeoJSON, type Layer, type PathOptions } from 'leaflet';
+import L, {
+  type GeoJSON as LeafletGeoJSON,
+  type Layer,
+  type PathOptions,
+  type TooltipEvent,
+} from 'leaflet';
 import type {
   AreaFeature,
   BarriosGeoJSON,
@@ -136,6 +141,49 @@ function MapViewportController({
 }) {
   const map = useMap();
   const lastBoundsSig = useRef<string>('');
+
+  useEffect(() => {
+    let dragging = false;
+
+    function closePreviews() {
+      map.eachLayer((layer) => {
+        if (layer instanceof L.Tooltip && !layer.options.permanent) {
+          map.closeTooltip(layer);
+        }
+      });
+    }
+
+    function startDrag() {
+      dragging = true;
+      closePreviews();
+    }
+
+    function suppressPreview({ tooltip }: TooltipEvent) {
+      if (dragging && !tooltip.options.permanent) {
+        queueMicrotask(() => map.closeTooltip(tooltip));
+      }
+    }
+
+    function finishDrag() {
+      if (!dragging) return;
+      // Leaflet reopens delayed hover tooltips in its own moveend handlers.
+      queueMicrotask(() => {
+        if (!dragging) return;
+        closePreviews();
+        dragging = false;
+      });
+    }
+
+    map.on('dragstart', startDrag);
+    map.on('tooltipopen', suppressPreview);
+    map.on('moveend', finishDrag);
+    return () => {
+      dragging = false;
+      map.off('dragstart', startDrag);
+      map.off('tooltipopen', suppressPreview);
+      map.off('moveend', finishDrag);
+    };
+  }, [map]);
 
   useEffect(() => {
     if (!visible) return;
