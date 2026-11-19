@@ -1,5 +1,7 @@
 <img width="3950" height="868" alt="2c1c-encadenados-logo-fondo-oscuro" src="https://github.com/user-attachments/assets/6c74e246-e94f-417c-8e98-ac9a276aa3a9" />
 
+[![CI](https://github.com/deegolol/CivicPulseAI_Commit-Pray/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/deegolol/CivicPulseAI_Commit-Pray/actions/workflows/ci.yml)
+
 # 🚀 2Campus1Code - Hackatón DAETSISI-DAETSIINF-ORANGE
 
 Desarrolla un MVP de una aplicación web que consuma al menos una fuente oficial de datos abiertos y la transforme en un servicio útil, visual e interactivo para la ciudadanía. Al acabar, presenta tu solución a los jueces.
