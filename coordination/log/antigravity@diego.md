@@ -40,3 +40,7 @@
 - Qué: favicon SVG editorial (`frontend/public/favicon.svg`), metadatos en `index.html`, sincronización de búsqueda en URL querystring (`?campus=&budget=&type=&km=`), botón `Reintentar` en errores y QA end-to-end completo en escritorio (`1440×900`) y móvil (`390×844`) cubriendo T09, T10, T12, T13, T14 y T24.
 - Verificación: `cd frontend && npm run build` limpio + navegador integrado (0 errores consola, 0 HTTP ≥ 400, 0 `%` en DOM, 0 overflow horizontal). Captura móvil guardada en `docs/screenshots/t24_after_mobile.png`.
 - Carril WEB 100% completado (T03, T24, T09, T10, T12, T13, T14).
+
+## 14:00 · T12/T14 fix · done
+- Qué: corregido fallback de `postAiExplain` (tras aviso de `codex@adrian`) para que en producción jamás lea `MOCK_AREAS` y construya el resumen solo con cifras reales de `/api/score`; actualizados los 3 chips de ejemplo con las frases exactas cacheadas de `T11` (`claude@diego`) y pasados `budget_eur_month`, `housing_type` y `filters` a `/api/ai/explain`.
+- Verificación: `cd frontend && npm run build` en verde.

@@ -151,6 +151,9 @@ export interface AiExplainRequest {
   weights: Record<string, number>;
   area_ids: string[];
   query?: string;
+  budget_eur_month?: number | null;
+  housing_type?: HousingType;
+  filters?: ScoreFilters;
 }
 
 export interface AiExplainResponse {

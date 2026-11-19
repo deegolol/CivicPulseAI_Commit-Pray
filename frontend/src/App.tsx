@@ -333,21 +333,40 @@ export function App() {
       setRawResults(scored.results);
       setReferenceM2(scored.reference_m2);
 
-      // 3. Explain the Top 3 with real numbers
-      const top3Ids = scored.results
-        .filter((r) => !r.excluded)
-        .slice(0, 3)
-        .map((r) => r.id);
+      // 3. Explain the Top 3 with real numbers (non-blocking; deterministic fallback from real /api/score data)
+      const top3Items = scored.results.filter((r) => !r.excluded).slice(0, 3);
+      const top3Ids = top3Items.map((r) => r.id);
 
       if (top3Ids.length > 0) {
-        const explained = await postAiExplain({
-          campus_id: nextCampus,
-          weights: nextWeights,
-          area_ids: top3Ids,
-          query: queryText,
-        });
-        setAiExplanation(explained.text);
-        setAiEngine(explained.engine);
+        try {
+          const explained = await postAiExplain({
+            campus_id: nextCampus,
+            weights: nextWeights,
+            area_ids: top3Ids,
+            query: queryText,
+            budget_eur_month: nextBudget,
+            housing_type: nextHousing,
+            filters: {
+              max_distance_km: nextMaxDist,
+              only_within_budget: onlyWithinBudget,
+            },
+          });
+          setAiExplanation(explained.text);
+          setAiEngine(explained.engine);
+        } catch {
+          // Real-data-only fallback built strictly from /api/score numbers (never synthetic mocks)
+          const fallbackSummary = top3Items
+            .map((item, i) => {
+              const rent =
+                item.est_rent_eur_month != null
+                  ? `~${formatEuro(item.est_rent_eur_month)}/mes`
+                  : 'sin dato de alquiler';
+              return `${i + 1}) ${item.name} (${item.district}): ${rent} a ${formatKm(item.distance_km)}.`;
+            })
+            .join(' ');
+          setAiExplanation(fallbackSummary);
+          setAiEngine('keywords');
+        }
       } else {
         setAiExplanation(
           'No hemos encontrado zonas dentro de filtros tan estrictos. Prueba a ampliar la distancia máxima.',

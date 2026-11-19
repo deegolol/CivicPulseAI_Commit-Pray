@@ -81,12 +81,8 @@ export async function postAiParse(payload: AiParseRequest): Promise<AiParseRespo
 
 export async function postAiExplain(payload: AiExplainRequest): Promise<AiExplainResponse> {
   if (USE_MOCKS) return mockAiExplain(payload);
-  try {
-    return await fetchJson<AiExplainResponse>('/api/ai/explain', {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
-  } catch {
-    return mockAiExplain(payload);
-  }
+  return fetchJson<AiExplainResponse>('/api/ai/explain', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
 }

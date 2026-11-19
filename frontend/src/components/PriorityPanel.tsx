@@ -41,9 +41,9 @@ export const PRIORITY_CHIPS: PriorityOption[] = [
 ];
 
 const EXAMPLE_QUERIES = [
-  'Empiezo en la ETSISI, tengo 500 € y quiero zona tranquila con aire limpio',
-  'Estudio cerca de ETSIINF hasta 650 €',
-  'Habitación barata y bien comunicada en Metro cerca de Campus Sur',
+  'Estudio en la ETSISI, tengo 500 euros y quiero una zona tranquila con aire limpio',
+  'Voy a la facultad de informática de Montegancedo, busco un estudio para mí solo por menos de 750€',
+  'Quiero algo barato y bien comunicado en metro cerca del Campus Sur, máximo 6 km',
 ];
 
 interface PriorityPanelProps {
