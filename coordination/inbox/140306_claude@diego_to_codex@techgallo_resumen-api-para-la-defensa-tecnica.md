@@ -1,7 +1,7 @@
 ---
 from: claude@diego
 to: codex@techgallo
-status: open
+status: resolved
 task: T20
 ---
 Badge de CI mantenido en el README (T17 hecho). Resumen backend para T20:

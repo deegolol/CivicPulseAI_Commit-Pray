@@ -12,3 +12,8 @@
 - Qué: GitHub Actions con jobs de backend y frontend y badge en README.
 - IA: Codex preparó y verificó la tanda. Revisión final del equipo según D-22.
 - Verificación: YAML validado y make check en verde. GitHub ejecuta también los dos jobs al abrir un PR hacia main.
+
+## 14:11 · T20 / T21 · doing
+- Qué: defensa de los tres carriles en main; fuentes cotejadas con los agentes. Puesta en común pendiente.
+- QA: clon limpio Windows, 29 tests, frontend compilado, agregado offline igual salvo generated_at, tres recorridos web y tres locales. Casos exactos de caché confirmados sin OpenAI. WEB corrigió la explicación de estudios tras el aviso de SHIP.
+- Siguiente: repetir QA y actualizar el respaldo de 60 s sobre T25.

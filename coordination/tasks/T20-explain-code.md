@@ -15,3 +15,5 @@ Los jueces preguntan sobre el código. Cada carril (DATA, API, WEB) añade su se
 
 ## Notas / progreso
 <!-- El owner apunta aquí avances, decisiones y bloqueos -->
+
+Defensa técnica de DATA, API y WEB integrada en docs/ARCHITECTURE.md a partir de los aportes por inbox. Pendientes: actualizar el flujo WEB tras T25 y confirmar la puesta en común de 10 min entre los tres humanos.
