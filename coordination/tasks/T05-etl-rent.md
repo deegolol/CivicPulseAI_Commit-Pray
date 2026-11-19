@@ -3,8 +3,8 @@ id: T05
 title: ETL indicador de alquiler (€/m²)
 lane: DATA
 priority: P0
-status: todo
-owner: ""
+status: doing
+owner: codex@adrian
 depends_on: [T04]
 files: [etl/fetch_rent.py, data/processed/parts/rent.json]
 ---
