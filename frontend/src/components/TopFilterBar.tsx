@@ -14,7 +14,7 @@ interface TopFilterBarProps {
   searching: boolean;
   searchError: string | null;
   onQueryChange: (value: string) => void;
-  onSearchSubmit: (value: string) => void;
+  onSearchSubmit: (value: string) => Promise<boolean>;
   campuses: Campus[];
   areas: Pick<ScoreResultItem, 'id' | 'name' | 'district'>[];
   filters: ResultFilters;
@@ -81,9 +81,13 @@ export function TopFilterBar({
     setOpenPanel(null);
   }
 
-  function submitSearch(value: string) {
+  async function submitSearch(value: string) {
     if (searching || !value.trim()) return;
-    onSearchSubmit(value.trim());
+    const applied = await onSearchSubmit(value.trim());
+    if (applied && panelRef.current?.id === 'results-search-panel') {
+      searchRef.current?.focus();
+      setOpenPanel(null);
+    }
   }
 
   return (

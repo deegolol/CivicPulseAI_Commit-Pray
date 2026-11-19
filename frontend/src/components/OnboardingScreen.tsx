@@ -15,23 +15,16 @@ import { CampusPicker } from './CampusPicker';
 import { SiteHeader } from './SiteHeader';
 import { StudentBackdrop } from './StudentBackdrop';
 
-export type SearchReview = {
-  query: string;
-  inferredFields: Set<string>;
-};
-
 interface OnboardingScreenProps {
   query: string;
   onQueryChange: (value: string) => void;
   onSearchSubmit: (query: string) => void;
   searching: boolean;
   searchError: string | null;
-  review: SearchReview | null;
   view: 'phrase' | 'form';
   onOpenForm: () => void;
   onBack: () => void;
   onHome: () => void;
-  interpretation: string | null;
   campuses: Campus[];
   campusId: string;
   onCampusChange: (id: string) => void;
@@ -84,13 +77,12 @@ const primaryButton = 'inline-flex min-h-12 items-center justify-center gap-2 ro
 const labelClass = 'text-sm font-semibold text-ink';
 
 export function OnboardingScreen({
-  query, onQueryChange, onSearchSubmit, searching, searchError, review, view, onOpenForm, onBack, onHome, interpretation,
+  query, onQueryChange, onSearchSubmit, searching, searchError, view, onOpenForm, onBack, onHome,
   campuses, campusId, onCampusChange, budget, onBudgetChange, housingType, onHousingTypeChange,
   maxDistanceKm, onMaxDistanceChange, availableKeys, priorityWeights, onPriorityChange, onStart, sources, rentRange,
 }: OnboardingScreenProps) {
   const [formError, setFormError] = useState<string | null>(null);
   const showForm = view === 'form';
-  const needs = (field: string) => !review?.inferredFields.has(field);
   const options = priorityOptions(availableKeys);
   const activeCount = options.filter(({ key }) => (priorityWeights[key] ?? 0) > 0).length;
   const kmValue = maxDistanceKm === null ? KM_UNLIMITED : Math.min(KM_MAX, Math.max(KM_MIN, maxDistanceKm));
@@ -175,10 +167,10 @@ export function OnboardingScreen({
         <main key="manual" className="animate-fade-up mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-5 py-6 sm:py-8">
           <div className="mb-5 text-center">
             <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-              {review ? 'Ya casi está' : 'Cuéntanos lo básico'}
+              Cuéntanos lo básico
             </h1>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-muted sm:text-base">
-              {review && interpretation ? interpretation : 'Cuatro datos y lo que más te importa. Puedes cambiarlo después.'}
+              Cuatro datos y lo que más te importa. Puedes cambiarlo después.
             </p>
           </div>
 
@@ -193,55 +185,47 @@ export function OnboardingScreen({
             }}
           >
             <div className="space-y-6">
-              {needs('campus') && (
-                <CampusPicker campuses={campuses.length ? campuses : DEFAULT_CAMPUSES} campusId={campusId} onChange={onCampusChange} label="¿Dónde estudias?" />
-              )}
+              <CampusPicker campuses={campuses.length ? campuses : DEFAULT_CAMPUSES} campusId={campusId} onChange={onCampusChange} label="¿Dónde estudias?" />
 
-              {needs('housing') && (
-                <div>
-                  <span className={labelClass}>Qué buscas</span>
-                  <div role="radiogroup" aria-label="Tipo de vivienda" className="mt-2 grid grid-cols-3 gap-1 rounded-xl bg-surface p-1">
-                    {(Object.entries(HOUSING_TYPE_LABELS) as [HousingType, string][]).map(([value, label]) => (
-                      <button key={value} type="button" role="radio" aria-checked={housingType === value}
-                        onClick={() => onHousingTypeChange(value)}
-                        className={'min-h-10 rounded-lg text-sm font-semibold transition ' +
-                          (housingType === value ? 'bg-bg text-ink shadow-sm ring-1 ring-ink/5' : 'text-muted hover:text-ink')}>
-                        {label}
-                      </button>
-                    ))}
-                  </div>
+              <div>
+                <span className={labelClass}>Qué buscas</span>
+                <div role="radiogroup" aria-label="Tipo de vivienda" className="mt-2 grid grid-cols-3 gap-1 rounded-xl bg-surface p-1">
+                  {(Object.entries(HOUSING_TYPE_LABELS) as [HousingType, string][]).map(([value, label]) => (
+                    <button key={value} type="button" role="radio" aria-checked={housingType === value}
+                      onClick={() => onHousingTypeChange(value)}
+                      className={'min-h-10 rounded-lg text-sm font-semibold transition ' +
+                        (housingType === value ? 'bg-bg text-ink shadow-sm ring-1 ring-ink/5' : 'text-muted hover:text-ink')}>
+                      {label}
+                    </button>
+                  ))}
                 </div>
-              )}
+              </div>
 
-              {needs('budget') && (
-                <div>
-                  <div className="flex items-baseline justify-between">
-                    <label htmlFor="budget-range" className={labelClass}>Presupuesto al mes</label>
-                    <span className="font-display text-2xl font-bold tabular-nums">{budgetValue.toLocaleString('es-ES')} €</span>
-                  </div>
-                  <input id="budget-range" type="range" min={budgetMin} max={budgetMax} step={1}
-                    value={budgetValue}
-                    onChange={(event) => onBudgetChange(Number(event.target.value))}
-                    className="clean-range mt-3 w-full" />
-                  <div className="mt-1 flex justify-between text-xs text-muted"><span>{budgetMin.toLocaleString('es-ES')} €</span><span>{budgetMax.toLocaleString('es-ES')} €+</span></div>
+              <div>
+                <div className="flex items-baseline justify-between">
+                  <label htmlFor="budget-range" className={labelClass}>Presupuesto al mes</label>
+                  <span className="font-display text-2xl font-bold tabular-nums">{budgetValue.toLocaleString('es-ES')} €</span>
                 </div>
-              )}
+                <input id="budget-range" type="range" min={budgetMin} max={budgetMax} step={1}
+                  value={budgetValue}
+                  onChange={(event) => onBudgetChange(Number(event.target.value))}
+                  className="clean-range mt-3 w-full" />
+                <div className="mt-1 flex justify-between text-xs text-muted"><span>{budgetMin.toLocaleString('es-ES')} €</span><span>{budgetMax.toLocaleString('es-ES')} €+</span></div>
+              </div>
 
-              {needs('distance') && (
-                <div>
-                  <div className="flex items-baseline justify-between">
-                    <label htmlFor="km-range" className={labelClass}>Distancia máxima al campus</label>
-                    <span className="text-sm font-semibold tabular-nums">{maxDistanceKm === null ? 'Sin límite' : `${kmValue.toLocaleString('es-ES', { maximumFractionDigits: 1 })} km`}</span>
-                  </div>
-                  <input id="km-range" type="range" min={KM_MIN} max={KM_UNLIMITED} step={0.5} value={kmValue}
-                    onChange={(event) => {
-                      const value = Number(event.target.value);
-                      onMaxDistanceChange(value > KM_MAX ? null : value);
-                    }}
-                    className="clean-range mt-3 w-full" />
-                  <div className="mt-1 flex justify-between text-xs text-muted"><span>{KM_MIN} km</span><span>{KM_MAX} km · Sin límite</span></div>
+              <div>
+                <div className="flex items-baseline justify-between">
+                  <label htmlFor="km-range" className={labelClass}>Distancia máxima al campus</label>
+                  <span className="text-sm font-semibold tabular-nums">{maxDistanceKm === null ? 'Sin límite' : `${kmValue.toLocaleString('es-ES', { maximumFractionDigits: 1 })} km`}</span>
                 </div>
-              )}
+                <input id="km-range" type="range" min={KM_MIN} max={KM_UNLIMITED} step={0.5} value={kmValue}
+                  onChange={(event) => {
+                    const value = Number(event.target.value);
+                    onMaxDistanceChange(value > KM_MAX ? null : value);
+                  }}
+                  className="clean-range mt-3 w-full" />
+                <div className="mt-1 flex justify-between text-xs text-muted"><span>{KM_MIN} km</span><span>{KM_MAX} km · Sin límite</span></div>
+              </div>
             </div>
 
             <div className="flex flex-col">
@@ -278,7 +262,7 @@ export function OnboardingScreen({
                   Ver zonas <ArrowRight size={18} aria-hidden="true" />
                 </button>
                 <button type="button" onClick={goBack} className="mt-3 w-full text-center text-sm font-medium text-muted transition hover:text-ink">
-                  {review ? 'Cambiar mi frase' : 'O búscalo con una frase'}
+                  O búscalo con una frase
                 </button>
               </div>
             </div>

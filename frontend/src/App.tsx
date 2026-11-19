@@ -41,7 +41,7 @@ import { DEFAULT_LAYERS, type LayerId } from './components/MapLayers';
 // Heavy parts (Leaflet map, Recharts comparison) are downloaded only when the results page needs them.
 const MadridMap = lazy(() => import('./components/MadridMap').then((m) => ({ default: m.MadridMap })));
 const CompareModal = lazy(() => import('./components/CompareModal').then((m) => ({ default: m.CompareModal })));
-import { OnboardingScreen, type SearchReview } from './components/OnboardingScreen';
+import { OnboardingScreen } from './components/OnboardingScreen';
 import { TopFilterBar } from './components/TopFilterBar';
 import type { ResultFilters } from './components/ResultsFilters';
 import { ZoneList } from './components/ZoneList';
@@ -168,13 +168,11 @@ export function App() {
     () => Object.fromEntries(initial.preferences?.length ? initial.preferences : DEFAULT_PRIORITIES.map((key) => [key, 1])),
   );
 
-  // Search summary & explanation text (from /api/ai/parse & /api/ai/explain)
-  const [aiInterpretation, setAiInterpretation] = useState<string | null>(null);
+  // Natural-language search and explanation state.
   const [aiExplanation, setAiExplanation] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
-  const [searchReview, setSearchReview] = useState<SearchReview | null>(null);
   const pendingExplanation = useRef<string | null>(null);
 
   // Selection, hover, comparison & mobile view state
@@ -444,48 +442,8 @@ export function App() {
     }
   }, [results]);
 
-  const handleSearchSubmit = async (queryText: string) => {
-    if (searching) return;
-    setSelectedAreaId(null);
-    setSearching(true);
-    setSearchError(null);
-    setRateLimitNotice(null);
-    setAiExplanation(null);
-
-    try {
-      const parsed = await postAiParse({ query: queryText });
-      const inferred = searchPreferences(queryText, parsed, availableKeys, meta?.campuses.find((campus) => campus.id === parsed.campus_id));
-      setCampusId(inferred.inferredFields.has('campus') ? parsed.campus_id : campusId || parsed.campus_id);
-      setBudget(inferred.budget ?? budget);
-      setMinBudget(inferred.minBudget);
-      setHousingType(parsed.housing_type || housingType);
-      setMaxDistanceKm(parsed.filters.max_distance_km ?? maxDistanceKm);
-      setAirLevel('any');
-      setWellConnectedOnly(false);
-      setTransportMode(inferred.transportMode);
-      setPreferenceWeights(Object.fromEntries(inferred.selectedPriorities.map((key) => {
-        const weight = parsed.weights[key] ?? 0;
-        return [key, weight >= 0.5 ? weight : 1];
-      })));
-      setAiInterpretation(parsed.interpretation);
-      setSearchReview({ query: queryText, inferredFields: inferred.inferredFields });
-      navigate('form');
-    } catch (err) {
-      setSearchError(err instanceof ApiError && err.status === 429
-        ? err.detail
-        : 'No se ha podido interpretar la búsqueda. Puedes rellenarla a mano.');
-    } finally {
-      setSearching(false);
-    }
-  };
-
-  const handleStart = () => {
-    pendingExplanation.current = searchReview?.query ?? null;
-    if (!searchReview) {
-      setAiInterpretation(null);
-    }
-    setSearchReview(null);
-    setOnlyWithinBudget(true);
+  function startResults(phrase: string | null = null) {
+    pendingExplanation.current = phrase;
     setLocation('');
     setSelectedAreaId(null);
     setHoveredAreaId(null);
@@ -495,12 +453,58 @@ export function App() {
     setRawResults([]);
     setRecommendation(null);
     setHighlights({});
+    setAiExplanation(null);
     setIsScoring(true);
-    navigate('results');
+    if (route !== 'results') navigate('results');
+  }
+
+  async function handleSearchSubmit(queryText: string): Promise<boolean> {
+    if (searching) return false;
+    const fromPath = window.location.pathname;
+    setSearching(true);
+    setSearchError(null);
+    setRateLimitNotice(null);
+
+    try {
+      const parsed = await postAiParse({ query: queryText });
+      if (window.location.pathname !== fromPath) return false;
+      const campus = meta?.campuses.find((item) => item.id === parsed.campus_id);
+      const inferred = searchPreferences(queryText, parsed, availableKeys, campus);
+      if (inferred.inferredFields.has('campus')) setCampusId(parsed.campus_id);
+      if (inferred.inferredFields.has('housing')) setHousingType(parsed.housing_type);
+      if (inferred.budget !== null) {
+        setBudget(inferred.budget);
+        setMinBudget(inferred.minBudget);
+        setOnlyWithinBudget(inferred.minBudget !== null || (parsed.filters.only_within_budget ?? true));
+      }
+      setMaxDistanceKm(parsed.filters.max_distance_km ?? maxDistanceKm);
+      setAirLevel('any');
+      setWellConnectedOnly(false);
+      setTransportMode(inferred.transportMode);
+      setPreferenceWeights(Object.fromEntries(inferred.selectedPriorities.map((key) => {
+        const weight = parsed.weights[key] ?? 0;
+        return [key, weight >= 0.5 ? weight : 1];
+      })));
+      startResults(queryText);
+      return true;
+    } catch (err) {
+      if (window.location.pathname === fromPath) {
+        setSearchError(err instanceof ApiError && err.status === 429
+          ? err.detail
+          : 'No se ha podido interpretar la búsqueda. Prueba con otra frase.');
+      }
+      return false;
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  const handleStart = () => {
+    setOnlyWithinBudget(true);
+    startResults();
   };
 
   const handleResetHome = () => {
-    setSearchReview(null);
     setSelectedAreaId(null);
     navigate('home');
   };
@@ -569,12 +573,10 @@ export function App() {
         onSearchSubmit={handleSearchSubmit}
         searching={searching}
         searchError={searchError}
-        review={searchReview}
         view={route === 'form' ? 'form' : 'phrase'}
         onOpenForm={() => navigate('form')}
-        onBack={() => { setSearchReview(null); goBack('home'); }}
+        onBack={() => goBack('home')}
         onHome={handleResetHome}
-        interpretation={aiInterpretation}
         campuses={meta?.campuses ?? []}
         campusId={campusId}
         onCampusChange={setCampusId}
