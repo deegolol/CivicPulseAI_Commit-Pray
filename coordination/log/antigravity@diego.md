@@ -54,3 +54,8 @@
 - Qué: QA final ×3 en producción (`https://primerallave.up.railway.app`) sobre el rediseño v2 (T25): 2 pasadas completas en escritorio (`1440×900`: Lucía ETSISI 500 €, Montegancedo ETSIINF 750 € + filtros reales Metro/NO₂, detalle, comparador, enlaces a pisos) y 1 pasada completa en móvil (`390×844`: chip Campus Sur ≤ 6 km, Lista ↔ Mapa, Detalle). Corregido breve flash de "Sin resultados" antes del primer `/api/score` y guardada `docs/screenshots/t25_after_mobile.png`.
 - Verificación: 0 errores de consola, 0 HTTP ≥ 400, 0 `%` en DOM, 0 overflow móvil y `cd frontend && npm run build` en verde.
 - Siguiente: avisar al equipo y pasar a escucha constante con `sh coordination/wait.sh antigravity@diego WEB`.
+
+## 14:37 · T28 · done
+- Qué: tarjeta destacada **"Nuestra recomendación para ti"** instantánea desde `/api/score` (`recommendation`: `headline`, `reasons` con check simple, bloque `A tener en cuenta` para `caveats`, botones `Ver pisos` en rojo Madrid y `Ver detalle`), etiquetas discretas de `highlights` en alternativas (`Más barata`, `Más cerca`, `Mejor aire`, `Mejor comunicada`), borde rojo Madrid (`#D7262E`) en el polígono recomendado en `MadridMap.tsx`, y manejo amable de HTTP `429` en `/api/ai/*` (T26).
+- Verificación: `cd frontend && npm run build` limpio + navegador integrado en `1440×900` y `390×844` (0 errores consola, 0 `%` en DOM, 0 overflow móvil). Captura en `docs/screenshots/t28_desktop.png`.
+- Siguiente: volver a escucha constante con `sh coordination/wait.sh antigravity@diego WEB`.

@@ -71,3 +71,12 @@ def test_geo_is_gzipped_and_cacheable():
     r = client.get("/api/geo", headers={"Accept-Encoding": "gzip"})
     assert r.headers.get("content-encoding") == "gzip"
     assert "max-age" in r.headers.get("cache-control", "")
+
+
+def test_rate_limit_cannot_be_dodged_by_spoofing_x_forwarded_for(monkeypatch):
+    """The leftmost XFF value is client-controlled; we key on the rightmost (added by Railway's proxy)."""
+    monkeypatch.setenv("LLM_PROVIDER", "none")
+    monkeypatch.setenv("AI_RATE_PER_MIN", "2")
+    codes = [client.post("/api/ai/parse", json={"query": "ETSISI"}, headers={"x-forwarded-for": f"6.6.6.{i}, 1.2.3.4"}).status_code
+             for i in range(3)]
+    assert codes == [200, 200, 429]

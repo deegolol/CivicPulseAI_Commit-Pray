@@ -9,6 +9,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { List, Map as MapIcon } from 'lucide-react';
 import {
+  ApiError,
   getAreas,
   getGeo,
   getMeta,
@@ -21,6 +22,7 @@ import type {
   BarriosGeoJSON,
   HousingType,
   MetaResponse,
+  Recommendation,
   ScoreResultItem,
 } from './api/types';
 import { HOUSING_TYPE_LABELS } from './config';
@@ -86,10 +88,13 @@ export function App() {
   const [geoData, setGeoData] = useState<BarriosGeoJSON | null>(null);
   const [centroidsById, setCentroidsById] = useState<Record<string, [number, number]>>({});
   const [rawResults, setRawResults] = useState<ScoreResultItem[]>([]);
+  const [recommendation, setRecommendation] = useState<Recommendation | null>(null);
+  const [highlights, setHighlights] = useState<Record<string, string>>({});
   const [referenceM2, setReferenceM2] = useState<number | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [isScoring, setIsScoring] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [rateLimitNotice, setRateLimitNotice] = useState<string | null>(null);
 
   // User search & real-unit filter state
   const [query, setQuery] = useState('');
@@ -208,6 +213,8 @@ export function App() {
         });
         if (!cancelled) {
           setRawResults(res.results);
+          setRecommendation(res.recommendation ?? null);
+          setHighlights(res.highlights ?? {});
           setReferenceM2(res.reference_m2);
           setError(null);
         }
@@ -309,6 +316,7 @@ export function App() {
     setSelectedAreaId(null);
     setMobileView('list');
     setAiLoading(true);
+    setRateLimitNotice(null);
 
     try {
       const parsed = await postAiParse({ query: queryText });
@@ -360,6 +368,8 @@ export function App() {
         housing_type: nextHousing,
       });
       setRawResults(scored.results);
+      setRecommendation(scored.recommendation ?? null);
+      setHighlights(scored.highlights ?? {});
       setReferenceM2(scored.reference_m2);
 
       const top3Items = scored.results.filter((r) => !r.excluded).slice(0, 3);
@@ -380,7 +390,10 @@ export function App() {
             },
           });
           setAiExplanation(explained.text);
-        } catch {
+        } catch (err) {
+          if (err instanceof ApiError && err.status === 429) {
+            setRateLimitNotice(err.detail);
+          }
           const fallbackSummary = top3Items
             .map((item, i) => {
               const rent =
@@ -395,7 +408,10 @@ export function App() {
       } else {
         setAiExplanation(null);
       }
-    } catch {
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 429) {
+        setRateLimitNotice(err.detail);
+      }
       setAiInterpretation(null);
       setAiExplanation(null);
     } finally {
@@ -489,6 +505,22 @@ export function App() {
         </div>
       )}
 
+      {rateLimitNotice && (
+        <div
+          role="status"
+          className="flex items-center justify-between border-b border-border bg-over-soft px-4 py-2 text-xs text-over"
+        >
+          <span>{rateLimitNotice}</span>
+          <button
+            type="button"
+            onClick={() => setRateLimitNotice(null)}
+            className="rounded-[6px] border border-over/30 px-2 py-0.5 text-[11px] font-medium text-over"
+          >
+            Entendido
+          </button>
+        </div>
+      )}
+
       {/* Main Split Workspace */}
       <div className="relative flex min-h-0 flex-1 overflow-hidden">
         {/* Left Column: Ordered Zone List (440px desktop, full-screen on mobile when mobileView='list') */}
@@ -500,6 +532,8 @@ export function App() {
         >
           <ZoneList
             results={results}
+            recommendation={recommendation}
+            highlights={highlights}
             budget={budget}
             summaryLine={summaryLine}
             explanationText={aiExplanation}
@@ -527,6 +561,7 @@ export function App() {
             centroidsById={centroidsById}
             selectedAreaId={selectedAreaId}
             hoveredAreaId={hoveredAreaId}
+            recommendedAreaId={recommendation?.area_id ?? null}
             onSelectArea={(id) => setSelectedAreaId(id)}
             onHoverArea={setHoveredAreaId}
             activeCampus={activeCampus}

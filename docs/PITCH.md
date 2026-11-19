@@ -18,11 +18,11 @@
 
 1. **Escribe como Lucía**: pulsa el chip *"Estudio en la ETSISI, tengo 500 euros y quiero una zona tranquila con aire limpio"* (o escríbelo).
    > "Lucía no rellena un formulario: escribe como habla. Entendemos su campus, su presupuesto, que busca habitación y que le importa el aire."
-2. **Aparecen sus resultados**: lista de zonas ordenada y, al lado, el mapa con solo las zonas que encajan en azul y su campus en rojo.
-   > "Esto es su Madrid: **Palomeras Bajas, Palomeras Sureste y Pavones**, a 1–3 km de Campus Sur y por **unos 290 € al mes** una habitación. En el mapa, solo las zonas que encajan, alrededor de su campus."
-3. **"Leer explicación"**: el resumen en lenguaje natural.
-   > "Y se lo explicamos en lenguaje natural… pero solo con cifras reales que hemos calculado nosotros. La IA no inventa ni un número."
-4. **Abre Palomeras Bajas** → detalle con el precio estimado grande.
+2. **Aparece su recomendación**, arriba del todo y resaltada en rojo también en el mapa.
+   > "No le damos una lista y ya está: le decimos **cuál es su mejor opción y por qué**. **Palomeras Bajas**: unos **287 € al mes** por una habitación, **le sobran 213 €** de su presupuesto, a 2,7 km de su campus y bien comunicada."
+3. **Señala "A tener en cuenta"**.
+   > "Y somos honestos: Lucía pidió aire limpio y aquí el aire es mejorable. **Se lo decimos**, con la cifra. Debajo tiene alternativas: la más cercana, la más barata, la de mejor aire… y si quiere, la explicación en lenguaje natural, solo con cifras reales."
+4. **"Ver detalle"** de la recomendada → precio estimado grande y cada cifra con su fuente.
    > "Es la **mediana oficial del alquiler del Ministerio de Vivienda** por m², por los m² de una habitación: **encaja**. Aire, metro, distancia… y cada cifra lleva su fuente."
 5. **"Ver pisos"** → el portal (Fotocasa/Idealista/Badi) abierto con el distrito y el precio máximo ya filtrados.
    > "Y de la zona, al piso: te llevamos a los anuncios ya filtrados por zona y presupuesto."

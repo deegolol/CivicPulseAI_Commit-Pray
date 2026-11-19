@@ -32,6 +32,7 @@ interface MadridMapProps {
   centroidsById: Record<string, [number, number]>;
   selectedAreaId: string | null;
   hoveredAreaId: string | null;
+  recommendedAreaId?: string | null;
   onSelectArea: (areaId: string) => void;
   onHoverArea: (areaId: string | null) => void;
   activeCampus: Campus | null;
@@ -139,6 +140,7 @@ export function MadridMap({
   centroidsById,
   selectedAreaId,
   hoveredAreaId,
+  recommendedAreaId = null,
   onSelectArea,
   onHoverArea,
   activeCampus,
@@ -152,6 +154,7 @@ export function MadridMap({
   const top10Ref = useRef(top10RankById);
   const selectedRef = useRef(selectedAreaId);
   const hoveredRef = useRef(hoveredAreaId);
+  const recommendedRef = useRef(recommendedAreaId);
   const budgetRef = useRef(budget);
   const onSelectRef = useRef(onSelectArea);
   const onHoverRef = useRef(onHoverArea);
@@ -160,6 +163,7 @@ export function MadridMap({
   top10Ref.current = top10RankById;
   selectedRef.current = selectedAreaId;
   hoveredRef.current = hoveredAreaId;
+  recommendedRef.current = recommendedAreaId;
   budgetRef.current = budget;
   onSelectRef.current = onSelectArea;
   onHoverRef.current = onHoverArea;
@@ -169,12 +173,19 @@ export function MadridMap({
     const rank = id ? top10Ref.current[id] : undefined;
     const isSelected = id === selectedRef.current;
     const isHovered = id === hoveredRef.current;
+    const isRecommended = id === recommendedRef.current;
 
     return {
       fillColor: getTop10BlueFill(rank),
-      fillOpacity: rank ? (isSelected || isHovered ? 0.88 : 0.72) : isHovered ? 0.55 : 0.35,
-      color: isSelected ? '#0D1117' : isHovered ? '#1F4FD6' : '#FFFFFF',
-      weight: isSelected ? 2.5 : isHovered ? 2 : 1,
+      fillOpacity: rank ? (isSelected || isHovered || isRecommended ? 0.88 : 0.72) : isHovered ? 0.55 : 0.35,
+      color: isSelected
+        ? '#0D1117'
+        : isRecommended
+          ? '#D7262E'
+          : isHovered
+            ? '#1F4FD6'
+            : '#FFFFFF',
+      weight: isSelected || isRecommended ? 2.5 : isHovered ? 2 : 1,
       opacity: 1,
     };
   }, []);
@@ -193,7 +204,7 @@ export function MadridMap({
         buildTooltipHtml(name, district, scoresById[id], top10RankById[id], budget),
       );
     });
-  }, [scoresById, top10RankById, selectedAreaId, hoveredAreaId, budget, getStyleForFeature]);
+  }, [scoresById, top10RankById, selectedAreaId, hoveredAreaId, recommendedAreaId, budget, getStyleForFeature]);
 
   const flyTarget = useMemo<[number, number] | null>(() => {
     if (selectedAreaId && centroidsById[selectedAreaId]) {
