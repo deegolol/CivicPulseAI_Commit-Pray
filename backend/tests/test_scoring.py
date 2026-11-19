@@ -34,6 +34,14 @@ def test_normalize_inverts_when_lower_is_better_and_fills_nulls_with_median():
     assert normalize([5, 5], higher_is_better=True) == [1.0, 1.0]
 
 
+def test_percentile_is_robust_to_outliers():
+    """A typical value must not be crushed by one extreme (the old Metro problem)."""
+    values = [0.0, 0.5, 0.8, 1.0, 1.7, 8.2]
+    norm = normalize(values, higher_is_better=True)
+    assert norm[2] == 0.4 and norm[-1] == 1.0  # 0.8 st/km² is mid-table, not ~0.1 as with min-max
+    assert normalize([1, 1, 3], higher_is_better=True) == [0.25, 0.25, 1.0]  # ties share the average rank
+
+
 def test_weights_are_clamped_and_renormalized():
     assert normalize_weights({"a": 2, "b": 1}) == {"a": 0.5, "b": 0.5}
     assert normalize_weights({"a": 0.3, "b": 0.1}) == pytest.approx({"a": 0.75, "b": 0.25})

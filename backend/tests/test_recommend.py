@@ -38,7 +38,8 @@ def test_sports_reason_uses_official_count_and_plain_language():
     sports = int(detail["notes"]["services_count"].split("Equipamientos deportivos: ")[1].rstrip("."))
     assert any(f"{sports} equipamiento" in reason for reason in rec["reasons"])
     assert any("gimnasio" in caveat and "municipales" in caveat for caveat in rec["caveats"])
-    assert any("calidad del aire" in reason for reason in rec["reasons"])
+    if result["results"][0]["breakdown"]["air_no2"]["normalized"] >= 0.5:  # only claim good air when it is
+        assert any("calidad del aire" in reason for reason in rec["reasons"])
     assert not any(symbol in text for text in rec["reasons"] + rec["caveats"] for symbol in ("%", "NO₂", "µg/m³"))
     assert result["results"][0]["breakdown"]["air_no2"]["value"] == detail["values"]["air_no2"]
 

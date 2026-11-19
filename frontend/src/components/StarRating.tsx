@@ -85,9 +85,10 @@ export function StarRating({
   );
 }
 
-/** Converts a 0..1 normalized indicator score to a 0.0–5.0 star rating */
+/** Converts a 0..1 percentile (1 = better than every other neighbourhood) to a 1.0–5.0 star rating.
+ * The worst neighbourhood still gets 1 star; the median one 3 stars. */
 export function normalizedToStars(normalized: number | undefined | null): number {
-  if (normalized == null || Number.isNaN(normalized)) return 2.5;
+  if (normalized == null || Number.isNaN(normalized)) return 3;
   const clamped = Math.max(0, Math.min(1, normalized));
-  return Math.round(clamped * 50) / 10;
+  return Math.round((1 + clamped * 4) * 10) / 10;
 }

@@ -1,7 +1,7 @@
 """Scoring engine: ranks areas for a student given their campus, budget and priorities.
 
 How a score is built (this is what we explain to the jury):
-1. Every indicator is min-max normalized across ALL areas to 0..1, where 1 is always "best"
+1. Every indicator is turned into a percentile across ALL areas (0..1, where 1 is always "best"
    (inverted when lower is better, e.g. rent or NO2). Missing values count as the city median.
 2. `distance_km` is a virtual indicator: straight-line distance (haversine) from the area centroid to the campus.
 3. The user's weights are renormalized to sum 1; score = Σ normalized × weight × 100 (0..100).
@@ -37,17 +37,28 @@ def haversine_km(a: tuple[float, float], b: tuple[float, float]) -> float:
 
 
 def normalize(values: list[float | None], higher_is_better: bool) -> list[float]:
-    """Min-max to 0..1 (1 = best). None → city median. All equal → 1.0 (the indicator doesn't discriminate)."""
+    """Percentile rank to 0..1 (1 = best): "better than X % of Madrid's neighbourhoods".
+
+    We use ranks instead of min-max because a few extreme areas (e.g. the city centre has 10x more Metro
+    stations per km² than a typical neighbourhood) squashed everybody else near 0 with min-max.
+    None → city median. Ties share the same value. All equal → 1.0 (the indicator doesn't discriminate).
+    """
     present = [v for v in values if v is not None]
     if not present:
         return [1.0 for _ in values]
     fill = median(present)
     filled = [fill if v is None else v for v in values]
-    lo, hi = min(filled), max(filled)
-    if hi == lo:
+    if max(filled) == min(filled):
         return [1.0 for _ in filled]
-    scaled = [(v - lo) / (hi - lo) for v in filled]
-    return scaled if higher_is_better else [1.0 - s for s in scaled]
+    order = sorted(filled)
+    n = len(order)
+    first: dict[float, int] = {}
+    last: dict[float, int] = {}
+    for i, v in enumerate(order):
+        first.setdefault(v, i)
+        last[v] = i
+    ranks = [((first[v] + last[v]) / 2) / (n - 1) for v in filled]  # 0 = lowest value, 1 = highest
+    return ranks if higher_is_better else [1.0 - r for r in ranks]
 
 
 def normalize_weights(weights: dict[str, float]) -> dict[str, float]:
