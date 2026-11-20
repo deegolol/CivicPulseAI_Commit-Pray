@@ -69,7 +69,7 @@ def build_recommendation(results: list[ScoreResult], areas: list[Area], indicato
         rent = area.values.get("rent_eur_m2")
         pct = _share_better(rent, all_vals.get("rent_eur_m2", []), False) if rent is not None else 0
         if best.rent_median_eur_month is not None and req.housing_type == "flat":
-            text = f"Pisos en {best.district}: alquiler mediano oficial de {_fmt(best.rent_median_eur_month)} €/mes (contratos 2024)"
+            text = f"Pisos en {best.name}: alquiler mediano oficial de {_fmt(best.rent_median_eur_month)} €/mes (contratos 2024)"
             if req.budget_eur_month and best.fits_budget:
                 text += ", dentro de tu presupuesto"
             reasons.append((10.0 if best.fits_budget else weights.get("rent_eur_m2", 0.3) + 1, text))

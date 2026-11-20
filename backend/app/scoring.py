@@ -78,11 +78,20 @@ def district_id(area: Area) -> str:
     return area.id[:2]
 
 
+def official_figures(area: Area, rents: dict) -> tuple[dict, str]:
+    """Barrio figures when we have them (SERPAVI sections), else the district's. Returns (figures, where)."""
+    own = rents.get(area.id)
+    if own and own.get("median"):
+        return own, area.name
+    return rents.get(district_id(area)) or {}, area.district
+
+
 def official_rent(area: Area, rents: dict, housing_type: str) -> tuple[int | None, str]:
-    """(monthly € you'd pay, how we know it). Only a published official figure, never a calculation of ours."""
-    official = rents.get(district_id(area)) or {}
+    """(monthly € you'd pay, how we know it). Only a published official figure, never a calculation of ours.
+    `rents` maps area ids (barrio level) and/or district ids ("01".."21") to SERPAVI figures."""
+    official, where = official_figures(area, rents)
     if housing_type == "flat" and official.get("median"):
-        return official["median"], f"Alquiler mensual mediano de pisos en {area.district} (contratos 2024, SERPAVI · Ministerio de Vivienda)"
+        return official["median"], f"Alquiler mensual mediano de pisos en {where} (contratos 2024, SERPAVI · Ministerio de Vivienda)"
     return None, "No hay dato oficial de precio para habitaciones ni estudios: mira el precio exacto en los anuncios"
 
 
@@ -123,7 +132,7 @@ def score_areas(areas: list[Area], indicators: list[Indicator], campus: Campus, 
 
         rent = area.values.get(RENT_KEY)
         est_rent, rent_basis = official_rent(area, rents, req.housing_type)
-        official = rents.get(district_id(area)) or {}
+        official = official_figures(area, rents)[0]
         travel_min = times[idx].get(mode_key)
         budget = req.budget_eur_month
         fits = (est_rent <= budget) if (budget is not None and est_rent is not None) else None

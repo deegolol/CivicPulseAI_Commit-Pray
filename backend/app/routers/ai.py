@@ -53,7 +53,7 @@ def explain(req: AiExplainRequest) -> AiExplainResponse:
     scored = score_areas(ds.areas, ds.indicators, campus, ScoreRequest(
         campus_id=campus.id, weights=weights, filters=req.filters,
         budget_eur_month=req.budget_eur_month, housing_type=req.housing_type, travel_mode=req.travel_mode),
-        ds.travel.get(campus.id), ds.rents)
+        ds.travel.get(campus.id), ds.rents | ds.barrio_rents)
     by_id = {r.id: r for r in scored}
     labels = {i.key: (i.label, i.unit) for i in ds.indicators} | {"distance_km": ("Tiempo al campus", "min")}
     items = []

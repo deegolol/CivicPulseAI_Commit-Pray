@@ -209,7 +209,7 @@ def workspace(conn: sqlite3.Connection, account: int) -> dict:
     watches = []
     for row in conn.execute("SELECT * FROM watches WHERE account_id = ? ORDER BY id DESC", (account,)):
         area = dataset.area(row["area_id"])
-        estimate = official_rent(area, dataset.rents, row["housing_type"])[0] if area else None
+        estimate = official_rent(area, dataset.rents | dataset.barrio_rents, row["housing_type"])[0] if area else None
         matches = estimate is not None and estimate <= row["budget_eur_month"]
         if matches and not row["last_match"]:
             emit_notice(conn, account, f"{area.name} encaja en tu presupuesto: {estimate} €/mes de alquiler mediano oficial de pisos en su distrito.", kind="budget")

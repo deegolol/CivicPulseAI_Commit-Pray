@@ -27,7 +27,7 @@ Cada curso, miles de estudiantes llegan a Madrid sin conocer la ciudad y con un 
 - **Búsqueda en lenguaje natural** — escribe lo que buscas; la IA lo convierte en campus, presupuesto, tipo de vivienda, tiempo máximo, modo de transporte y prioridades. Antes de llamar a la IA, un filtro sin IA descarta frases sin sentido, y las preguntas que no tratan de buscar vivienda no se buscan.
 - **Tiempos reales puerta a puerta** al campus en **transporte público** (horarios oficiales del CRTM: Metro, Cercanías, Metro Ligero, EMT e interurbanos) y en **coche** (red de calles de OpenStreetMap). Nunca distancia en línea recta.
 - **Mapa de los 131 barrios** con los minutos hasta tu campus y capas útiles (Metro, supermercados, bibliotecas, gimnasios, parques…).
-- **Precios sin inventar**: alquiler oficial publicado por el Ministerio (pisos, por distrito) y anuncios reales con su precio exacto y enlace; nunca una estimación nuestra.
+- **Precios sin inventar**: alquiler oficial publicado por el Ministerio para cada barrio y anuncios reales con su precio exacto y enlace; nunca una estimación nuestra.
 - **Controles en unidades reales**: €/mes, minutos, tipo de vivienda y lo que más te importa (sin porcentajes).
 - **Top 3, detalle de cada zona y comparador** con las cifras y la fuente oficial de cada dato.
 - **"Ver pisos en esta zona"** — enlaces a Idealista, Fotocasa y Badi ya filtrados por distrito y precio máximo (solo enlaces, sin scraping).
@@ -46,7 +46,7 @@ Todos oficiales, descargados el 19/11/2026 y transformados con scripts reproduci
 | Transporte | Estaciones de Metro (M4) · *Powered by CRTM* | Consorcio Regional de Transportes de Madrid | [crtm.es](https://www.crtm.es/) |
 | Tiempo en transporte público | GTFS Metro, Cercanías, Metro Ligero, EMT e interurbanos · *Powered by CRTM* | Consorcio Regional de Transportes de Madrid | [datos.crtm.es](https://datos.crtm.es/) |
 | Tiempo en coche | Red de calles de OpenStreetMap (motor OSRM) | © OpenStreetMap contributors (ODbL) | [osrm](https://project-osrm.org/) |
-| Alquiler mensual (€/mes) | SERPAVI 2024 · mediana y percentiles 25/75 del alquiler mensual de pisos (por distrito) | Ministerio de Vivienda y Agenda Urbana | mismo XLSX |
+| Alquiler mensual (€/mes) | SERPAVI 2024 · alquiler mensual de pisos por **sección censal**, agrupado en los 131 barrios | Ministerio de Vivienda y Agenda Urbana · secciones censales del INE | mismo XLSX · [INE](https://www.ine.es/prodyser/cartografia/seccionado_2024.zip) |
 | Servicios | Bibliotecas municipales · Centros deportivos municipales | Ayuntamiento de Madrid | [bibliotecas](https://datos.madrid.es/dataset/201747-0-bibliobuses-bibliotecas) · [polideportivos](https://datos.madrid.es/dataset/200186-0-polideportivos) |
 | Campus | Ubicación de ETSISI y ETSIINF | Universidad Politécnica de Madrid | [ETSISI](https://www.etsisi.upm.es/ubicacion-como-llegar/) · [ETSIINF](https://dia.etsiinf.upm.es/index.php?pagina=166) |
 
@@ -139,11 +139,14 @@ Dockerfile · railway.json · Makefile
 
 Hemos trabajado 3 personas con 5 agentes de IA (Claude Code, ChatGPT Codex y Gemini Antigravity) en paralelo sobre este mismo repositorio, coordinados mediante ficheros: reglas comunes en [AGENTS.md](AGENTS.md), tareas con dueño, contratos de API fijos, un buzón de mensajes entre agentes y un registro de decisiones en [coordination/](coordination/). Detalle de qué hizo cada herramienta y qué revisaron los humanos en **[AI_USAGE.md](AI_USAGE.md)**.
 
-## ⚠️ Limitaciones conocidas
+## 🔎 De dónde sale cada número
 
-- **No hay datos abiertos con el precio de cada piso.** No calculamos precios: mostramos el alquiler oficial publicado (SERPAVI 2024, pisos, **por distrito**) y anuncios reales con enlace. Para habitaciones y estudios no existe cifra oficial, así que solo enseñamos anuncios reales. Los anuncios se consultaron a mano el 20/11/2026 para las zonas de la demo; integrarlos en directo para toda la ciudad requiere la API de Idealista (acceso para socios) o un acuerdo con el portal: no hacemos scraping.
-- **Tiempos de viaje**: transporte público en día laborable de 07:00 a 10:00 (espera = mitad de la frecuencia), desde las zonas habitadas de cada barrio; en coche, **sin tráfico ni aparcamiento**.
-- Idealista bloquea las comprobaciones automáticas, así que sus enlaces siguen su formato público. Los enlaces de Fotocasa están comprobados.
+- **Precio por barrio**: alquiler mensual oficial de pisos de los **131 barrios** (SERPAVI 2024), agrupando las 2.397 secciones censales de Madrid por barrio con los límites del INE (mediana ponderada por número de contratos). No calculamos ni estimamos precios.
+- **Anuncios reales**: habitaciones publicadas en Fotocasa con su precio exacto, enlace y fecha de consulta. Los botones «Ver pisos con precio exacto» abren Fotocasa, Idealista y Badi ya filtrados por zona y presupuesto, con los anuncios del momento.
+- **Tiempos de viaje**: transporte público con los horarios oficiales del CRTM en día laborable de 07:00 a 10:00 (incluida la espera según la frecuencia), desde las zonas habitadas de cada barrio; en coche, minutos de conducción por la red de calles de OpenStreetMap, sin contar el tráfico de ese momento.
+- **IA**: solo interpreta la frase (con un filtro previo sin IA para frases sin sentido o fuera de tema) y redacta explicaciones con cifras que ya calculamos. Misma frase y mismas opciones → mismo resultado.
+
+**Siguiente paso**: solicitar la API de Idealista para traer todos los anuncios y precios en tiempo real dentro de la app.
 
 ## 👥 Equipo — Commit & Pray
 

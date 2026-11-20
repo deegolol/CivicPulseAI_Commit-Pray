@@ -1,0 +1,1054 @@
+{
+ "source": "SERPAVI 2024 (MIVAU) por sección censal + secciones censales INE 2024; mediana ponderada por nº de contratos",
+ "year": 2024,
+ "areas": {
+  "041": {
+   "median": 1600,
+   "p25": 1137,
+   "p75": 2486,
+   "eur_m2": 21.76,
+   "contracts": 1654,
+   "sections": 14
+  },
+  "042": {
+   "median": 1200,
+   "p25": 904,
+   "p75": 1601,
+   "eur_m2": 19.1,
+   "contracts": 3810,
+   "sections": 27
+  },
+  "062": {
+   "median": 963,
+   "p25": 800,
+   "p75": 1288,
+   "eur_m2": 17.13,
+   "contracts": 4729,
+   "sections": 29
+  },
+  "113": {
+   "median": 700,
+   "p25": 600,
+   "p75": 844,
+   "eur_m2": 12.23,
+   "contracts": 3532,
+   "sections": 27
+  },
+  "121": {
+   "median": 810,
+   "p25": 702,
+   "p75": 907,
+   "eur_m2": 9.21,
+   "contracts": 736,
+   "sections": 17
+  },
+  "122": {
+   "median": 800,
+   "p25": 678,
+   "p75": 937,
+   "eur_m2": 12.71,
+   "contracts": 698,
+   "sections": 8
+  },
+  "123": {
+   "median": 700,
+   "p25": 613,
+   "p75": 850,
+   "eur_m2": 10.03,
+   "contracts": 1329,
+   "sections": 14
+  },
+  "132": {
+   "median": 658,
+   "p25": 553,
+   "p75": 756,
+   "eur_m2": 12.61,
+   "contracts": 4023,
+   "sections": 30
+  },
+  "175": {
+   "median": 700,
+   "p25": 600,
+   "p75": 800,
+   "eur_m2": 10.23,
+   "contracts": 2086,
+   "sections": 26
+  },
+  "174": {
+   "median": 656,
+   "p25": 550,
+   "p75": 772,
+   "eur_m2": 10.59,
+   "contracts": 2410,
+   "sections": 26
+  },
+  "207": {
+   "median": 776,
+   "p25": 665,
+   "p75": 895,
+   "eur_m2": 11.6,
+   "contracts": 2207,
+   "sections": 20
+  },
+  "208": {
+   "median": 900,
+   "p25": 790,
+   "p75": 1100,
+   "eur_m2": 13.1,
+   "contracts": 648,
+   "sections": 8
+  },
+  "201": {
+   "median": 794,
+   "p25": 700,
+   "p75": 872,
+   "eur_m2": 14.01,
+   "contracts": 2643,
+   "sections": 21
+  },
+  "011": {
+   "median": 950,
+   "p25": 761,
+   "p75": 1258,
+   "eur_m2": 17.08,
+   "contracts": 3371,
+   "sections": 18
+  },
+  "012": {
+   "median": 857,
+   "p25": 694,
+   "p75": 1075,
+   "eur_m2": 17.26,
+   "contracts": 6274,
+   "sections": 36
+  },
+  "013": {
+   "median": 1000,
+   "p25": 779,
+   "p75": 1353,
+   "eur_m2": 18.09,
+   "contracts": 1705,
+   "sections": 11
+  },
+  "014": {
+   "median": 1150,
+   "p25": 864,
+   "p75": 1500,
+   "eur_m2": 18.47,
+   "contracts": 2545,
+   "sections": 12
+  },
+  "015": {
+   "median": 950,
+   "p25": 767,
+   "p75": 1254,
+   "eur_m2": 18.44,
+   "contracts": 5561,
+   "sections": 27
+  },
+  "016": {
+   "median": 1003,
+   "p25": 788,
+   "p75": 1349,
+   "eur_m2": 17.69,
+   "contracts": 1062,
+   "sections": 7
+  },
+  "021": {
+   "median": 945,
+   "p25": 797,
+   "p75": 1230,
+   "eur_m2": 16.04,
+   "contracts": 2240,
+   "sections": 17
+  },
+  "022": {
+   "median": 969,
+   "p25": 820,
+   "p75": 1200,
+   "eur_m2": 16.06,
+   "contracts": 3440,
+   "sections": 27
+  },
+  "023": {
+   "median": 870,
+   "p25": 726,
+   "p75": 1036,
+   "eur_m2": 15.13,
+   "contracts": 2163,
+   "sections": 16
+  },
+  "024": {
+   "median": 1100,
+   "p25": 903,
+   "p75": 1315,
+   "eur_m2": 16.41,
+   "contracts": 2040,
+   "sections": 11
+  },
+  "025": {
+   "median": 918,
+   "p25": 792,
+   "p75": 1180,
+   "eur_m2": 16.19,
+   "contracts": 3028,
+   "sections": 19
+  },
+  "026": {
+   "median": 925,
+   "p25": 750,
+   "p75": 1150,
+   "eur_m2": 16.31,
+   "contracts": 3423,
+   "sections": 18
+  },
+  "027": {
+   "median": 1200,
+   "p25": 950,
+   "p75": 1468,
+   "eur_m2": 15.2,
+   "contracts": 103,
+   "sections": 1
+  },
+  "031": {
+   "median": 927,
+   "p25": 779,
+   "p75": 1242,
+   "eur_m2": 15.4,
+   "contracts": 3533,
+   "sections": 26
+  },
+  "032": {
+   "median": 962,
+   "p25": 800,
+   "p75": 1198,
+   "eur_m2": 16.07,
+   "contracts": 1679,
+   "sections": 12
+  },
+  "033": {
+   "median": 1259,
+   "p25": 960,
+   "p75": 1496,
+   "eur_m2": 14.18,
+   "contracts": 1179,
+   "sections": 19
+  },
+  "034": {
+   "median": 1150,
+   "p25": 859,
+   "p75": 1599,
+   "eur_m2": 17.76,
+   "contracts": 2310,
+   "sections": 19
+  },
+  "035": {
+   "median": 1853,
+   "p25": 1100,
+   "p75": 2913,
+   "eur_m2": 16.75,
+   "contracts": 501,
+   "sections": 6
+  },
+  "036": {
+   "median": 1217,
+   "p25": 949,
+   "p75": 1646,
+   "eur_m2": 16.66,
+   "contracts": 1056,
+   "sections": 11
+  },
+  "043": {
+   "median": 942,
+   "p25": 780,
+   "p75": 1236,
+   "eur_m2": 16.48,
+   "contracts": 2461,
+   "sections": 17
+  },
+  "044": {
+   "median": 996,
+   "p25": 800,
+   "p75": 1277,
+   "eur_m2": 17.35,
+   "contracts": 4506,
+   "sections": 34
+  },
+  "045": {
+   "median": 1169,
+   "p25": 895,
+   "p75": 1605,
+   "eur_m2": 18.9,
+   "contracts": 2547,
+   "sections": 18
+  },
+  "046": {
+   "median": 1381,
+   "p25": 1048,
+   "p75": 2084,
+   "eur_m2": 21.06,
+   "contracts": 1820,
+   "sections": 14
+  },
+  "051": {
+   "median": 1493,
+   "p25": 1155,
+   "p75": 2150,
+   "eur_m2": 18.52,
+   "contracts": 1376,
+   "sections": 13
+  },
+  "052": {
+   "median": 950,
+   "p25": 800,
+   "p75": 1205,
+   "eur_m2": 16.0,
+   "contracts": 4651,
+   "sections": 27
+  },
+  "053": {
+   "median": 918,
+   "p25": 757,
+   "p75": 1200,
+   "eur_m2": 16.78,
+   "contracts": 2215,
+   "sections": 13
+  },
+  "054": {
+   "median": 1348,
+   "p25": 999,
+   "p75": 1587,
+   "eur_m2": 17.49,
+   "contracts": 3118,
+   "sections": 21
+  },
+  "055": {
+   "median": 1243,
+   "p25": 981,
+   "p75": 1745,
+   "eur_m2": 18.53,
+   "contracts": 2381,
+   "sections": 14
+  },
+  "056": {
+   "median": 1161,
+   "p25": 883,
+   "p75": 1450,
+   "eur_m2": 16.47,
+   "contracts": 2017,
+   "sections": 13
+  },
+  "061": {
+   "median": 803,
+   "p25": 665,
+   "p75": 1004,
+   "eur_m2": 15.94,
+   "contracts": 3729,
+   "sections": 22
+  },
+  "063": {
+   "median": 930,
+   "p25": 779,
+   "p75": 1150,
+   "eur_m2": 17.05,
+   "contracts": 3195,
+   "sections": 16
+  },
+  "064": {
+   "median": 833,
+   "p25": 705,
+   "p75": 1067,
+   "eur_m2": 14.54,
+   "contracts": 1904,
+   "sections": 16
+  },
+  "065": {
+   "median": 795,
+   "p25": 666,
+   "p75": 959,
+   "eur_m2": 15.58,
+   "contracts": 3326,
+   "sections": 17
+  },
+  "066": {
+   "median": 800,
+   "p25": 675,
+   "p75": 961,
+   "eur_m2": 15.38,
+   "contracts": 3342,
+   "sections": 17
+  },
+  "071": {
+   "median": 1127,
+   "p25": 870,
+   "p75": 1500,
+   "eur_m2": 18.64,
+   "contracts": 3647,
+   "sections": 19
+  },
+  "072": {
+   "median": 1100,
+   "p25": 876,
+   "p75": 1450,
+   "eur_m2": 18.37,
+   "contracts": 3805,
+   "sections": 22
+  },
+  "073": {
+   "median": 1090,
+   "p25": 848,
+   "p75": 1471,
+   "eur_m2": 18.95,
+   "contracts": 3766,
+   "sections": 23
+  },
+  "074": {
+   "median": 1374,
+   "p25": 1031,
+   "p75": 1977,
+   "eur_m2": 19.4,
+   "contracts": 2165,
+   "sections": 18
+  },
+  "075": {
+   "median": 1186,
+   "p25": 898,
+   "p75": 1504,
+   "eur_m2": 18.75,
+   "contracts": 4009,
+   "sections": 22
+  },
+  "076": {
+   "median": 1356,
+   "p25": 1058,
+   "p75": 1724,
+   "eur_m2": 17.37,
+   "contracts": 2128,
+   "sections": 17
+  },
+  "081": {
+   "median": 782,
+   "p25": 650,
+   "p75": 867,
+   "eur_m2": 11.49,
+   "contracts": 150,
+   "sections": 3
+  },
+  "082": {
+   "median": 1735,
+   "p25": 1316,
+   "p75": 2288,
+   "eur_m2": 13.78,
+   "contracts": 177,
+   "sections": 3
+  },
+  "083": {
+   "median": 940,
+   "p25": 768,
+   "p75": 1100,
+   "eur_m2": 13.38,
+   "contracts": 3208,
+   "sections": 36
+  },
+  "084": {
+   "median": 775,
+   "p25": 653,
+   "p75": 875,
+   "eur_m2": 14.15,
+   "contracts": 4781,
+   "sections": 45
+  },
+  "085": {
+   "median": 1156,
+   "p25": 956,
+   "p75": 1339,
+   "eur_m2": 12.5,
+   "contracts": 1676,
+   "sections": 26
+  },
+  "086": {
+   "median": 1102,
+   "p25": 949,
+   "p75": 1258,
+   "eur_m2": 13.48,
+   "contracts": 6790,
+   "sections": 40
+  },
+  "087": {
+   "median": 1225,
+   "p25": 1038,
+   "p75": 1463,
+   "eur_m2": 14.24,
+   "contracts": 1943,
+   "sections": 20
+  },
+  "088": {
+   "median": 1250,
+   "p25": 1050,
+   "p75": 1442,
+   "eur_m2": 14.29,
+   "contracts": 1920,
+   "sections": 7
+  },
+  "091": {
+   "median": 974,
+   "p25": 800,
+   "p75": 1200,
+   "eur_m2": 15.47,
+   "contracts": 1157,
+   "sections": 11
+  },
+  "092": {
+   "median": 1200,
+   "p25": 886,
+   "p75": 1600,
+   "eur_m2": 18.18,
+   "contracts": 3142,
+   "sections": 20
+  },
+  "093": {
+   "median": 1100,
+   "p25": 901,
+   "p75": 1431,
+   "eur_m2": 16.74,
+   "contracts": 1511,
+   "sections": 12
+  },
+  "094": {
+   "median": 877,
+   "p25": 750,
+   "p75": 1000,
+   "eur_m2": 12.93,
+   "contracts": 2947,
+   "sections": 24
+  },
+  "097": {
+   "median": 1275,
+   "p25": 1083,
+   "p75": 1502,
+   "eur_m2": 14.83,
+   "contracts": 1533,
+   "sections": 12
+  },
+  "095": {
+   "median": 1428,
+   "p25": 1080,
+   "p75": 2000,
+   "eur_m2": 18.29,
+   "contracts": 453,
+   "sections": 3
+  },
+  "101": {
+   "median": 754,
+   "p25": 650,
+   "p75": 903,
+   "eur_m2": 11.76,
+   "contracts": 1271,
+   "sections": 15
+  },
+  "102": {
+   "median": 776,
+   "p25": 629,
+   "p75": 928,
+   "eur_m2": 12.99,
+   "contracts": 4430,
+   "sections": 36
+  },
+  "103": {
+   "median": 750,
+   "p25": 648,
+   "p75": 866,
+   "eur_m2": 11.74,
+   "contracts": 2988,
+   "sections": 29
+  },
+  "104": {
+   "median": 750,
+   "p25": 650,
+   "p75": 841,
+   "eur_m2": 10.98,
+   "contracts": 5261,
+   "sections": 57
+  },
+  "105": {
+   "median": 743,
+   "p25": 637,
+   "p75": 844,
+   "eur_m2": 12.19,
+   "contracts": 1763,
+   "sections": 11
+  },
+  "107": {
+   "median": 720,
+   "p25": 625,
+   "p75": 804,
+   "eur_m2": 11.0,
+   "contracts": 3546,
+   "sections": 42
+  },
+  "106": {
+   "median": 800,
+   "p25": 701,
+   "p75": 900,
+   "eur_m2": 15.06,
+   "contracts": 354,
+   "sections": 3
+  },
+  "111": {
+   "median": 762,
+   "p25": 626,
+   "p75": 875,
+   "eur_m2": 12.94,
+   "contracts": 2276,
+   "sections": 17
+  },
+  "112": {
+   "median": 750,
+   "p25": 631,
+   "p75": 850,
+   "eur_m2": 12.1,
+   "contracts": 3230,
+   "sections": 26
+  },
+  "114": {
+   "median": 706,
+   "p25": 600,
+   "p75": 820,
+   "eur_m2": 11.53,
+   "contracts": 4116,
+   "sections": 34
+  },
+  "115": {
+   "median": 700,
+   "p25": 598,
+   "p75": 800,
+   "eur_m2": 11.48,
+   "contracts": 2975,
+   "sections": 25
+  },
+  "116": {
+   "median": 714,
+   "p25": 600,
+   "p75": 842,
+   "eur_m2": 11.38,
+   "contracts": 3483,
+   "sections": 29
+  },
+  "117": {
+   "median": 706,
+   "p25": 600,
+   "p75": 819,
+   "eur_m2": 10.87,
+   "contracts": 2341,
+   "sections": 21
+  },
+  "124": {
+   "median": 699,
+   "p25": 590,
+   "p75": 812,
+   "eur_m2": 11.96,
+   "contracts": 1837,
+   "sections": 14
+  },
+  "125": {
+   "median": 750,
+   "p25": 625,
+   "p75": 850,
+   "eur_m2": 12.13,
+   "contracts": 2289,
+   "sections": 17
+  },
+  "126": {
+   "median": 655,
+   "p25": 590,
+   "p75": 788,
+   "eur_m2": 11.75,
+   "contracts": 1116,
+   "sections": 10
+  },
+  "127": {
+   "median": 660,
+   "p25": 550,
+   "p75": 800,
+   "eur_m2": 11.54,
+   "contracts": 1400,
+   "sections": 11
+  },
+  "131": {
+   "median": 681,
+   "p25": 562,
+   "p75": 797,
+   "eur_m2": 10.38,
+   "contracts": 1296,
+   "sections": 25
+  },
+  "133": {
+   "median": 714,
+   "p25": 615,
+   "p75": 806,
+   "eur_m2": 10.56,
+   "contracts": 2638,
+   "sections": 26
+  },
+  "134": {
+   "median": 710,
+   "p25": 610,
+   "p75": 841,
+   "eur_m2": 11.21,
+   "contracts": 2385,
+   "sections": 33
+  },
+  "135": {
+   "median": 700,
+   "p25": 594,
+   "p75": 800,
+   "eur_m2": 11.11,
+   "contracts": 1761,
+   "sections": 22
+  },
+  "136": {
+   "median": 700,
+   "p25": 600,
+   "p75": 800,
+   "eur_m2": 12.26,
+   "contracts": 4018,
+   "sections": 34
+  },
+  "141": {
+   "median": 850,
+   "p25": 749,
+   "p75": 946,
+   "eur_m2": 11.72,
+   "contracts": 431,
+   "sections": 8
+  },
+  "143": {
+   "median": 837,
+   "p25": 737,
+   "p75": 958,
+   "eur_m2": 11.85,
+   "contracts": 1553,
+   "sections": 24
+  },
+  "144": {
+   "median": 775,
+   "p25": 675,
+   "p75": 882,
+   "eur_m2": 12.29,
+   "contracts": 1168,
+   "sections": 16
+  },
+  "145": {
+   "median": 751,
+   "p25": 650,
+   "p75": 867,
+   "eur_m2": 11.71,
+   "contracts": 1366,
+   "sections": 17
+  },
+  "146": {
+   "median": 799,
+   "p25": 700,
+   "p75": 900,
+   "eur_m2": 11.54,
+   "contracts": 1283,
+   "sections": 15
+  },
+  "142": {
+   "median": 950,
+   "p25": 831,
+   "p75": 1118,
+   "eur_m2": 11.45,
+   "contracts": 210,
+   "sections": 4
+  },
+  "151": {
+   "median": 768,
+   "p25": 650,
+   "p75": 892,
+   "eur_m2": 12.72,
+   "contracts": 5287,
+   "sections": 41
+  },
+  "152": {
+   "median": 750,
+   "p25": 660,
+   "p75": 873,
+   "eur_m2": 12.1,
+   "contracts": 5833,
+   "sections": 46
+  },
+  "153": {
+   "median": 778,
+   "p25": 670,
+   "p75": 912,
+   "eur_m2": 13.22,
+   "contracts": 2941,
+   "sections": 20
+  },
+  "154": {
+   "median": 837,
+   "p25": 701,
+   "p75": 995,
+   "eur_m2": 13.85,
+   "contracts": 2583,
+   "sections": 18
+  },
+  "155": {
+   "median": 850,
+   "p25": 725,
+   "p75": 982,
+   "eur_m2": 14.56,
+   "contracts": 1687,
+   "sections": 13
+  },
+  "156": {
+   "median": 1052,
+   "p25": 872,
+   "p75": 1407,
+   "eur_m2": 15.97,
+   "contracts": 1159,
+   "sections": 9
+  },
+  "157": {
+   "median": 1022,
+   "p25": 851,
+   "p75": 1344,
+   "eur_m2": 15.9,
+   "contracts": 692,
+   "sections": 5
+  },
+  "158": {
+   "median": 1199,
+   "p25": 950,
+   "p75": 1464,
+   "eur_m2": 17.01,
+   "contracts": 168,
+   "sections": 1
+  },
+  "159": {
+   "median": 1252,
+   "p25": 1044,
+   "p75": 1438,
+   "eur_m2": 15.19,
+   "contracts": 1773,
+   "sections": 15
+  },
+  "161": {
+   "median": 1292,
+   "p25": 1125,
+   "p75": 1553,
+   "eur_m2": 15.76,
+   "contracts": 386,
+   "sections": 4
+  },
+  "162": {
+   "median": 1450,
+   "p25": 1000,
+   "p75": 1750,
+   "eur_m2": 17.04,
+   "contracts": 748,
+   "sections": 7
+  },
+  "163": {
+   "median": 875,
+   "p25": 744,
+   "p75": 1062,
+   "eur_m2": 13.51,
+   "contracts": 2864,
+   "sections": 31
+  },
+  "164": {
+   "median": 800,
+   "p25": 700,
+   "p75": 922,
+   "eur_m2": 12.31,
+   "contracts": 3680,
+   "sections": 37
+  },
+  "165": {
+   "median": 897,
+   "p25": 726,
+   "p75": 1075,
+   "eur_m2": 12.21,
+   "contracts": 827,
+   "sections": 11
+  },
+  "166": {
+   "median": 1187,
+   "p25": 1000,
+   "p75": 1375,
+   "eur_m2": 14.04,
+   "contracts": 5712,
+   "sections": 27
+  },
+  "171": {
+   "median": 631,
+   "p25": 550,
+   "p75": 761,
+   "eur_m2": 10.26,
+   "contracts": 3067,
+   "sections": 30
+  },
+  "172": {
+   "median": 600,
+   "p25": 500,
+   "p75": 692,
+   "eur_m2": 10.18,
+   "contracts": 811,
+   "sections": 11
+  },
+  "173": {
+   "median": 802,
+   "p25": 706,
+   "p75": 900,
+   "eur_m2": 10.34,
+   "contracts": 1218,
+   "sections": 9
+  },
+  "181": {
+   "median": 681,
+   "p25": 600,
+   "p75": 777,
+   "eur_m2": 11.11,
+   "contracts": 2483,
+   "sections": 27
+  },
+  "182": {
+   "median": 800,
+   "p25": 707,
+   "p75": 898,
+   "eur_m2": 10.0,
+   "contracts": 987,
+   "sections": 18
+  },
+  "183": {
+   "median": 817,
+   "p25": 718,
+   "p75": 950,
+   "eur_m2": 13.36,
+   "contracts": 4434,
+   "sections": 21
+  },
+  "191": {
+   "median": 687,
+   "p25": 600,
+   "p75": 787,
+   "eur_m2": 11.32,
+   "contracts": 2837,
+   "sections": 27
+  },
+  "192": {
+   "median": 872,
+   "p25": 775,
+   "p75": 959,
+   "eur_m2": 9.47,
+   "contracts": 774,
+   "sections": 10
+  },
+  "193": {
+   "median": 916,
+   "p25": 800,
+   "p75": 1031,
+   "eur_m2": 10.88,
+   "contracts": 1107,
+   "sections": 9
+  },
+  "202": {
+   "median": 700,
+   "p25": 640,
+   "p75": 800,
+   "eur_m2": 12.69,
+   "contracts": 539,
+   "sections": 8
+  },
+  "203": {
+   "median": 667,
+   "p25": 592,
+   "p75": 745,
+   "eur_m2": 13.04,
+   "contracts": 661,
+   "sections": 9
+  },
+  "204": {
+   "median": 788,
+   "p25": 630,
+   "p75": 888,
+   "eur_m2": 12.62,
+   "contracts": 1412,
+   "sections": 19
+  },
+  "205": {
+   "median": 950,
+   "p25": 856,
+   "p75": 1076,
+   "eur_m2": 12.31,
+   "contracts": 1613,
+   "sections": 16
+  },
+  "206": {
+   "median": 909,
+   "p25": 795,
+   "p75": 1100,
+   "eur_m2": 13.46,
+   "contracts": 1474,
+   "sections": 9
+  },
+  "211": {
+   "median": 1100,
+   "p25": 900,
+   "p75": 1282,
+   "eur_m2": 11.97,
+   "contracts": 1056,
+   "sections": 14
+  },
+  "213": {
+   "median": 750,
+   "p25": 650,
+   "p75": 874,
+   "eur_m2": 12.68,
+   "contracts": 1059,
+   "sections": 5
+  },
+  "214": {
+   "median": 913,
+   "p25": 800,
+   "p75": 1100,
+   "eur_m2": 13.44,
+   "contracts": 1152,
+   "sections": 7
+  },
+  "215": {
+   "median": 1175,
+   "p25": 1002,
+   "p75": 1302,
+   "eur_m2": 14.53,
+   "contracts": 620,
+   "sections": 4
+  },
+  "212": {
+   "median": 650,
+   "p25": 533,
+   "p75": 770,
+   "eur_m2": 12.27,
+   "contracts": 167,
+   "sections": 1
+  },
+  "096": {
+   "median": 1897,
+   "p25": 1209,
+   "p75": 2269,
+   "eur_m2": 18.91,
+   "contracts": 90,
+   "sections": 1
+  },
+  "194": {
+   "median": 1050,
+   "p25": 920,
+   "p75": 1200,
+   "eur_m2": 11.88,
+   "contracts": 630,
+   "sections": 1
+  }
+ }
+}

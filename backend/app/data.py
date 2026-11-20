@@ -43,6 +43,8 @@ class Dataset:
     travel: dict = field(default_factory=dict)
     # district id ("01".."21") → official monthly rents of flats {"median", "p25", "p75", ...} (etl/fetch_rent_monthly.py)
     rents: dict = field(default_factory=dict)
+    # area id → official rents of flats in that barrio {"median", "p25", "p75", "eur_m2", ...} (etl/fetch_rent_barrio.py)
+    barrio_rents: dict = field(default_factory=dict)
 
     def area(self, area_id: str) -> Area | None:
         return next((a for a in self.areas if a.id == area_id), None)
@@ -93,6 +95,13 @@ def get_dataset() -> Dataset:
                 indicators.append(Indicator(key=key, label=label, unit="nº", higher_is_better=True, source=services.source))
                 for area, count in zip(areas, counts):
                     area.values[key] = count[index] if count is not None else None
+    # Barrio-level official rent (SERPAVI census sections grouped by barrio) replaces the district value when built.
+    barrio_rents = _optional_json(folder / "rent_barrio.json").get("areas", {})
+    for area in areas:
+        own = barrio_rents.get(area.id)
+        if own and own.get("eur_m2"):
+            area.values["rent_eur_m2"] = own["eur_m2"]
+            area.notes["rent_eur_m2"] = f"valor del barrio: {own['sections']} secciones censales, {own['contracts']} contratos (SERPAVI 2024)"
     return Dataset(
         source_dir=kind,
         level=ind.get("level", "barrio"),
@@ -104,6 +113,7 @@ def get_dataset() -> Dataset:
         geojson=json.loads((folder / "barrios.geojson").read_text(encoding="utf-8")),
         travel=_optional_json(folder / "travel_times.json").get("campuses", {}),
         rents=_optional_json(folder / "rent_monthly.json").get("districts", {}),
+        barrio_rents=barrio_rents,
     )
 
 
