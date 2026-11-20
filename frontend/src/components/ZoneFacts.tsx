@@ -20,7 +20,9 @@ export function listingsFor(areaId: string, budget: number | null = null): Listi
 export function TravelTimes({ area, className = '' }: { area: ScoreResultItem; className?: string }) {
   if (area.transit_min == null) return <span className={className}>{formatKm(area.distance_km)} de tu campus</span>;
   return (
-    <span className={'inline-flex items-center gap-2 tabular-nums ' + className}>
+    <span className={'inline-flex flex-wrap items-center gap-x-2 tabular-nums ' + className}>
+      <span title="Distancia por carretera">{formatKm(area.distance_km)}</span>
+      <span aria-hidden="true">·</span>
       <span className="inline-flex items-center gap-1" title="Transporte público, día laborable en hora punta">
         <TrainFront size={13} aria-hidden="true" /> {formatMinutes(area.transit_min)}
       </span>
@@ -40,22 +42,18 @@ export function HeroFigure({ area, budget, housingType, large = false }: {
 }) {
   const size = large ? 'text-2xl' : 'text-xl';
   const listings = housingType === 'room' ? listingsFor(area.id, budget) : [];
-  const price = listings.length ? Math.min(...listings.map((l) => l.price_eur_month))
-    : housingType === 'flat' ? area.est_rent_eur_month ?? area.rent_median_eur_month ?? null : null;
-  if (price != null) {
-    return (
-      <div className="text-right">
-        <div className={`font-display ${size} font-bold text-ink tabular-nums`}>
-          {formatEuro(price)}<span className="font-sans text-xs font-normal text-muted">/mes</span>
-        </div>
-        <div className="text-[11px] text-muted">{listings.length ? 'desde · anuncio real' : 'alquiler oficial de un piso aquí'}</div>
-      </div>
-    );
+  const estimated = (area.rent_basis ?? '').startsWith('Estimado');
+  const price = listings.length ? Math.min(...listings.map((l) => l.price_eur_month)) : area.est_rent_eur_month;
+  const caption = listings.length ? 'desde · anuncio real' : estimated ? 'precio estimado' : 'alquiler oficial de un piso aquí';
+  if (price == null) {
+    return <div className="text-right text-sm font-semibold text-muted">Sin dato de precio</div>;
   }
   return (
     <div className="text-right">
-      <div className="text-sm font-semibold text-ink">Precio en los anuncios</div>
-      <div className="text-[11px] text-muted">pulsa «Ver pisos»</div>
+      <div className={`font-display ${size} font-bold text-ink tabular-nums`}>
+        {!listings.length && estimated ? '~' : ''}{formatEuro(price)}<span className="font-sans text-xs font-normal text-muted">/mes</span>
+      </div>
+      <div className="text-[11px] text-muted">{caption}</div>
     </div>
   );
 }

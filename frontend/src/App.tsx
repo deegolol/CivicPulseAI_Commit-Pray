@@ -163,7 +163,7 @@ export function App() {
   const [location, setLocation] = useState(initial.location ?? '');
   const [housingType, setHousingType] = useState<HousingType>(initial.housingType ?? 'room');
   const [maxTravelMin, setMaxTravelMin] = useState<number | null>(
-    initial.maxTravelMin !== undefined ? initial.maxTravelMin : 45,
+    initial.maxTravelMin !== undefined ? initial.maxTravelMin : null,
   );
   const [maxDistanceKm, setMaxDistanceKm] = useState<number | null>(initial.maxDistanceKm ?? null);
   const [airLevel, setAirLevel] = useState<AirLevelOption>('any');
@@ -519,7 +519,7 @@ export function App() {
       setBudget(inferred.budget);
       setOnlyWithinBudget(inferred.minBudget !== null || (parsed.filters.only_within_budget ?? true));
     }
-    setMaxTravelMin(parsed.filters.max_travel_min ?? maxTravelMin);
+    setMaxTravelMin(parsed.filters.max_travel_min ?? null);
     setMaxDistanceKm(parsed.filters.max_distance_km);
     setAirLevel('any');
     setWellConnectedOnly(false);
@@ -607,7 +607,8 @@ export function App() {
   const campusName = activeCampus?.name ?? campusId.toUpperCase();
   const budgetRange = budget >= NO_BUDGET_LIMIT ? 'sin límite de precio' : minBudget === null ? `hasta ${formatEuro(budget)}/mes` : `${formatEuro(minBudget)}–${formatEuro(budget)}/mes`;
   const summaryLine = `${HOUSING_TYPE_LABELS[housingType]} · ${budgetRange} · ${campusName}${
-    maxTravelMin !== null ? ` (≤ ${maxTravelMin} min en ${transportMode === 'car' ? 'coche' : 'transporte público'})` : ''
+    (maxDistanceKm !== null ? ` · ≤ ${String(maxDistanceKm).replace('.', ',')} km por carretera` : '')
+    + (maxTravelMin !== null ? ` · ≤ ${maxTravelMin} min en ${transportMode === 'car' ? 'coche' : 'transporte público'}` : '')
   }${locationLabel ? ' · ' + locationLabel : ''}`;
 
   const screenView = screen === 'onboarding' ? (
@@ -633,8 +634,8 @@ export function App() {
         onMinBudgetChange={setMinBudget}
         housingType={housingType}
         onHousingTypeChange={setHousingType}
-        maxTravelMin={maxTravelMin}
-        onMaxTravelChange={setMaxTravelMin}
+        maxDistanceKm={maxDistanceKm}
+        onMaxDistanceChange={(km: number | null) => { setMaxDistanceKm(km); setMaxTravelMin(null); }}
         transportMode={transportMode}
         onTransportModeChange={handleTransportModeChange}
         availableKeys={availableKeys}

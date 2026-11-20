@@ -73,6 +73,12 @@ def build_recommendation(results: list[ScoreResult], areas: list[Area], indicato
             if req.budget_eur_month and best.fits_budget:
                 text += ", dentro de tu presupuesto"
             reasons.append((10.0 if best.fits_budget else weights.get("rent_eur_m2", 0.3) + 1, text))
+        elif best.est_rent_eur_month is not None:
+            housing = HOUSING_ES.get(req.housing_type, "una vivienda")
+            text = f"~{_fmt(best.est_rent_eur_month)} €/mes estimados por {housing}"
+            if req.budget_eur_month and best.fits_budget:
+                text += f": te sobran ~{_fmt(round(req.budget_eur_month - best.est_rent_eur_month))} €"
+            reasons.append((10.0 if best.fits_budget else weights.get("rent_eur_m2", 0.3) + 1, text))
         elif pct >= 50:
             reasons.append((weights.get("rent_eur_m2", 0.3) + 1,
                             ("Uno de los barrios con el alquiler más barato de Madrid" if pct >= 75 else "Alquiler más barato que en la mitad de Madrid")

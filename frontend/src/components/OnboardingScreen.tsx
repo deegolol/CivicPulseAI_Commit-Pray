@@ -36,9 +36,9 @@ interface OnboardingScreenProps {
   onMinBudgetChange: (value: number | null) => void;
   housingType: HousingType;
   onHousingTypeChange: (type: HousingType) => void;
-  /** Maximum door-to-door minutes to the campus with `transportMode` (null = no limit). */
-  maxTravelMin: number | null;
-  onMaxTravelChange: (value: number | null) => void;
+  /** Maximum distance to the campus by road, in km (null = no limit). Never straight line. */
+  maxDistanceKm: number | null;
+  onMaxDistanceChange: (value: number | null) => void;
   transportMode: TransportMode;
   onTransportModeChange: (mode: TransportMode) => void;
   availableKeys: Set<string>;
@@ -52,7 +52,7 @@ const DEFAULT_CAMPUSES: Campus[] = [
   { id: 'etsisi', name: 'ETSISI · Campus Sur UPM', coords: [-3.6286, 40.3897] },
   { id: 'etsiinf', name: 'ETSIINF · Campus Montegancedo UPM', coords: [-3.8392, 40.4053] },
 ];
-const EXAMPLE_LABELS = ['Habitación y aire limpio', 'Un estudio en Montegancedo', 'Barato y cerca del metro'];
+const EXAMPLE_LABELS = ['Habitación cerca de la ETSISI', 'Habitación y aire limpio', 'Un estudio en Montegancedo'];
 const PRIORITY_META: Record<string, { icon: LucideIcon; hint: string }> = {
   rent_eur_m2: { icon: Euro, hint: 'Alquiler más bajo' },
   distance_km: { icon: MapPin, hint: 'Menos minutos hasta clase' },
@@ -62,10 +62,10 @@ const PRIORITY_META: Record<string, { icon: LucideIcon; hint: string }> = {
   sports_count: { icon: Dumbbell, hint: 'Polideportivos cerca' },
   services_count: { icon: BookOpen, hint: 'Bibliotecas y deporte' },
 };
-// Real door-to-door travel time (CRTM timetables / OSRM): 10 min up to 90 min; the last stop = no limit.
-const MIN_MIN = 10;
-const MIN_MAX = 90;
-const MIN_UNLIMITED = MIN_MAX + 5;
+// Distance by road (OpenStreetMap), never straight line: 1 km up to 40 km; the last stop = no limit.
+const KM_MIN = 1;
+const KM_MAX = 40;
+const KM_UNLIMITED = KM_MAX + 1;
 
 /** Budget slider bounds: wide, fixed ranges per housing type. The budget filters the real listings we link to. */
 const BUDGET_BOUNDS: Record<HousingType, [number, number]> = { room: [200, 1000], studio: [400, 1600], flat: [600, 3000] };
@@ -98,14 +98,14 @@ const labelClass = 'text-sm font-semibold text-ink';
 export function OnboardingScreen({
   query, onQueryChange, onSearchSubmit, searching, searchError, campusChoices, onCampusChoice, view, onOpenForm, onBack, onHome,
   campuses, campusId, onCampusChange, budget, onBudgetChange, housingType, onHousingTypeChange,
-  maxTravelMin, onMaxTravelChange, transportMode, onTransportModeChange, availableKeys, priorityWeights, onPriorityChange,
+  maxDistanceKm, onMaxDistanceChange, transportMode, onTransportModeChange, availableKeys, priorityWeights, onPriorityChange,
   onStart, sources,
 }: OnboardingScreenProps) {
   const [formError, setFormError] = useState<string | null>(null);
   const showForm = view === 'form';
   const options = priorityOptions(availableKeys);
   const activeCount = options.filter(({ key }) => (priorityWeights[key] ?? 0) > 0).length;
-  const minValue = maxTravelMin === null ? MIN_UNLIMITED : Math.min(MIN_MAX, Math.max(MIN_MIN, maxTravelMin));
+  const kmValue = maxDistanceKm === null ? KM_UNLIMITED : Math.min(KM_MAX, Math.max(KM_MIN, maxDistanceKm));
   const [budgetMin, budgetMax] = BUDGET_BOUNDS[housingType];
   const noLimit = budget >= NO_BUDGET_LIMIT;
   const budgetValue = noLimit ? budgetMax + 10 : Math.min(budgetMax, Math.max(budgetMin, budget));
@@ -240,7 +240,7 @@ export function OnboardingScreen({
 
                 <div>
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <label htmlFor="minutes-range" className={labelClass}>Tiempo hasta el campus</label>
+                    <label htmlFor="km-range" className={labelClass}>Distancia al campus</label>
                     <div role="radiogroup" aria-label="Cómo irás a clase" className="inline-flex gap-0.5 rounded-lg bg-surface p-0.5">
                       {(Object.entries(TRANSPORT_LABELS) as [TransportMode, string][]).map(([value, label]) => {
                         const Icon = value === 'car' ? Car : TrainFront;
@@ -255,14 +255,14 @@ export function OnboardingScreen({
                       })}
                     </div>
                   </div>
-                  <input id="minutes-range" type="range" min={MIN_MIN} max={MIN_UNLIMITED} step={5} value={minValue}
+                  <input id="km-range" type="range" min={KM_MIN} max={KM_UNLIMITED} step={1} value={kmValue}
                     onChange={(event) => {
                       const value = Number(event.target.value);
-                      onMaxTravelChange(value > MIN_MAX ? null : value);
+                      onMaxDistanceChange(value > KM_MAX ? null : value);
                     }}
                     className="clean-range mt-3 w-full" />
-                  <div className="mt-1 flex items-baseline justify-between text-xs text-muted"><span>{MIN_MIN} min</span><span className="text-sm font-semibold text-ink tabular-nums">{maxTravelMin === null ? 'Sin límite' : `Máximo ${minValue} min`}</span><span>{MIN_MAX} min · Sin límite</span></div>
-                  <p className="mt-1 text-xs text-muted">Tiempo real puerta a puerta (horarios del CRTM y calles de OpenStreetMap).</p>
+                  <div className="mt-1 flex items-baseline justify-between text-xs text-muted"><span>{KM_MIN} km</span><span className="text-sm font-semibold text-ink tabular-nums">{maxDistanceKm === null ? 'Sin límite' : `Máximo ${kmValue} km`}</span><span>{KM_MAX} km · Sin límite</span></div>
+                  <p className="mt-1 text-xs text-muted">Distancia por carretera, no en línea recta. En los resultados verás también los minutos en transporte público y en coche.</p>
                 </div>
             </div>
 

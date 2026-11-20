@@ -148,10 +148,10 @@ function buildTooltipHtml(
   // Only real numbers: travel minutes, and the official flat rent exactly as published (never our estimate).
   const rentText =
     result?.est_rent_eur_month != null
-      ? `${formatEuro(result.est_rent_eur_month)}/mes`
+      ? `${(result.rent_basis ?? '').startsWith('Estimado') ? '~' : ''}${formatEuro(result.est_rent_eur_month)}/mes`
       : result?.travel_min != null ? `${formatMinutes(result.travel_min)} a tu campus` : '';
   const distText = result?.transit_min != null
-    ? `${formatMinutes(result.transit_min)} en transporte · ${formatMinutes(result.car_min)} en coche${result.est_rent_eur_month != null ? ' · alquiler oficial de pisos' : ''}`
+    ? `${formatMinutes(result.transit_min)} en transporte · ${formatMinutes(result.car_min)} en coche${result.est_rent_eur_month != null ? ((result.rent_basis ?? '').startsWith('Estimado') ? ' · precio estimado' : ' · alquiler oficial') : ''}`
     : result ? `${formatKm(result.distance_km)} de tu campus` : '';
   const over =
     result?.est_rent_eur_month != null && result.est_rent_eur_month > budget
@@ -427,7 +427,7 @@ function MadridMapImpl({
         if (!centroid || !area) return null;
         // Pills show the real travel time; a price only when it is an official published figure (flats).
         const priceLabel = area.est_rent_eur_month != null
-          ? formatEuro(area.est_rent_eur_month)
+          ? ((area.rent_basis ?? '').startsWith('Estimado') ? '~' : '') + formatEuro(area.est_rent_eur_month)
           : area.travel_min != null ? formatMinutes(area.travel_min) : formatKm(area.distance_km);
         return {
           id,

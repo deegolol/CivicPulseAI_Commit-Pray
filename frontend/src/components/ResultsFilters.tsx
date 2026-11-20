@@ -3,6 +3,7 @@ import type { Campus, HousingType, ScoreResultItem } from '../api/types';
 import { HOUSING_TYPE_LABELS, NO_BUDGET_LIMIT } from '../config';
 
 const BUDGET_SLIDER_MAX = 3000;
+const KM_SLIDER_MAX = 40;
 import { TRANSPORT_LABELS, type AirLevelOption, type TransportMode } from '../constants/filters';
 import { formatEuro } from '../utils/format';
 import { CampusPicker } from './CampusPicker';
@@ -26,7 +27,7 @@ export interface ResultFilters {
 type FilterArea = Pick<ScoreResultItem, 'id' | 'name' | 'district'>;
 
 const fieldClass = 'mt-1 block h-11 w-full min-w-0 rounded-lg border border-border bg-bg px-3 text-base focus-visible:outline-2 focus-visible:outline-ink';
-const rangeClass = 'clean-range mt-3 mb-2 w-full';
+const rangeClass = 'clean-range mt-2.5 mb-1 w-full';
 
 export function ResultsFilters({ availableKeys, campuses, areas, filters, onApply, onCancel }: {
   availableKeys: Set<string>;
@@ -73,8 +74,7 @@ export function ResultsFilters({ availableKeys, campuses, areas, filters, onAppl
 
 
   const noLimit = draft.budget >= NO_BUDGET_LIMIT;
-  const minutes = draft.maxTravelMin ?? filters.maxTravelMin ?? 45;
-  const minutesText = draft.maxTravelMin === null ? 'Sin límite' : `${minutes} min`;
+  const kmValue = Math.min(KM_SLIDER_MAX, Math.max(1, draft.maxDistanceKm ?? 15));
 
   return (
     <form className="flex min-h-0 flex-1 flex-col" onSubmit={(event) => {
@@ -104,50 +104,50 @@ export function ResultsFilters({ availableKeys, campuses, areas, filters, onAppl
           </label>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <section aria-label="Presupuesto mensual" className="min-w-0 rounded-xl border border-border bg-surface p-3.5">
-            <label htmlFor={priceId} className="flex flex-wrap items-baseline justify-between gap-1 text-sm font-semibold">
-              Alquiler máximo <span className="tabular-nums text-ink">{noLimit ? 'Sin límite' : `${formatEuro(draft.budget)}/mes`}</span>
-            </label>
+        <div className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
+          <div className="min-w-0">
+            <div className="flex items-baseline justify-between gap-2 text-sm font-semibold">
+              <label htmlFor={priceId}>Alquiler máximo</label>
+              <span className="tabular-nums">{noLimit ? 'Sin límite' : `${formatEuro(draft.budget)}/mes`}</span>
+            </div>
             <input id={priceId} type="range" min="100" max={BUDGET_SLIDER_MAX + 50} step="10" value={noLimit ? BUDGET_SLIDER_MAX + 50 : Math.min(draft.budget, BUDGET_SLIDER_MAX)}
               aria-label="Alquiler máximo" aria-valuetext={noLimit ? 'Sin límite' : formatEuro(draft.budget) + ' al mes'}
               onChange={(event) => updateBudget(event.target.valueAsNumber > BUDGET_SLIDER_MAX ? NO_BUDGET_LIMIT : Math.round(event.target.valueAsNumber))} className={rangeClass} />
-            <div aria-hidden="true" className="flex justify-between text-xs text-muted">
+            <div aria-hidden="true" className="flex justify-between text-[11px] text-muted">
               <span>100 €</span><span>{formatEuro(BUDGET_SLIDER_MAX)} · Sin límite</span>
             </div>
-            {draft.housingType === 'flat' ? (
-              <label className="mt-2 flex min-h-11 items-center gap-2 text-sm">
-                <input type="checkbox" checked={draft.onlyWithinBudget} onChange={(event) => update('onlyWithinBudget', event.target.checked)}
-                  className="size-4 shrink-0 accent-brand" />
-                Ocultar zonas cuyo alquiler oficial lo supera
-              </label>
-            ) : (
-              <p className="mt-2 text-xs text-muted">Tu presupuesto filtra los anuncios reales que abrimos en Fotocasa, Idealista y Badi.</p>
-            )}
-          </section>
-
-          <section aria-label="Tiempo hasta el campus" className="min-w-0 rounded-xl border border-border bg-surface p-3.5">
-            <label className="block text-xs font-semibold">
-              Cómo irás a clase
-              <select value={draft.transportMode} onChange={(event) => update('transportMode', event.target.value as TransportMode)} className={fieldClass}>
-                {Object.entries(TRANSPORT_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-              </select>
-            </label>
-            <label htmlFor={distanceId} className="mt-3 flex flex-wrap items-baseline justify-between gap-1 text-sm font-semibold">
-              Tiempo máximo <span className="tabular-nums text-ink">{minutesText}</span>
-            </label>
-            <input id={distanceId} type="range" min="10" max="120" step="5" value={minutes}
-              aria-label="Tiempo máximo hasta el campus" aria-valuetext={minutesText}
-              onChange={(event) => update('maxTravelMin', event.target.valueAsNumber)} className={rangeClass} />
-            <div aria-hidden="true" className="-mt-1 flex justify-between text-xs text-muted">
-              <span>10 min</span><span>120 min</span>
-            </div>
-            <label className="mt-2 flex min-h-11 items-center gap-2 text-sm">
-              <input type="checkbox" checked={draft.maxTravelMin === null} onChange={(event) => update('maxTravelMin', event.target.checked ? null : minutes)}
+            <label className="mt-2 flex items-center gap-2 text-xs text-ink">
+              <input type="checkbox" checked={draft.onlyWithinBudget} onChange={(event) => update('onlyWithinBudget', event.target.checked)}
                 className="size-4 shrink-0 accent-brand" />
-              Sin límite de tiempo
+              Solo zonas dentro de mi presupuesto
             </label>
-          </section>
+          </div>
+
+          <div className="min-w-0">
+            <div className="flex items-baseline justify-between gap-2 text-sm font-semibold">
+              <label htmlFor={distanceId}>Distancia máxima</label>
+              <span className="tabular-nums">{draft.maxDistanceKm === null ? 'Sin límite' : `${kmValue} km`}</span>
+            </div>
+            <input id={distanceId} type="range" min="1" max={KM_SLIDER_MAX + 1} step="1" value={draft.maxDistanceKm === null ? KM_SLIDER_MAX + 1 : kmValue}
+              aria-label="Distancia máxima al campus por carretera" aria-valuetext={draft.maxDistanceKm === null ? 'Sin límite' : `${kmValue} km`}
+              onChange={(event) => setDraft((previous) => ({ ...previous, maxTravelMin: null,
+                maxDistanceKm: event.target.valueAsNumber > KM_SLIDER_MAX ? null : event.target.valueAsNumber }))} className={rangeClass} />
+            <div aria-hidden="true" className="flex justify-between text-[11px] text-muted">
+              <span>1 km</span><span>{KM_SLIDER_MAX} km · Sin límite</span>
+            </div>
+            <div className="mt-2 flex items-center gap-2 text-xs text-ink">
+              <span>Cercanía en</span>
+              <div role="radiogroup" aria-label="Cómo irás a clase" className="inline-flex gap-0.5 rounded-lg bg-surface p-0.5">
+                {(Object.entries(TRANSPORT_LABELS) as [TransportMode, string][]).map(([value, label]) => (
+                  <button key={value} type="button" role="radio" aria-checked={draft.transportMode === value}
+                    onClick={() => update('transportMode', value)}
+                    className={'h-7 rounded-md px-2.5 font-semibold transition ' + (draft.transportMode === value ? 'bg-bg text-ink shadow-sm ring-1 ring-ink/5' : 'text-muted hover:text-ink')}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
 
         <PreferenceControls availableKeys={availableKeys} weights={draft.priorityWeights} onChange={updatePriority} spacious />

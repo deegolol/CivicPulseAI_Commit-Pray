@@ -69,15 +69,16 @@ TRAVEL = {"cheap": {"transit_min": 40, "car_min": 10, "car_km": 2.0},
           "pricey": {"transit_min": 60, "car_min": 25, "car_km": 12.0}}
 
 
-def test_price_is_only_the_official_figure_never_our_estimate():
+def test_flats_use_official_rent_rooms_an_estimate():
     flat = {r.id: r for r in score_areas(AREAS, IND, CAMPUS, req(weights={"rent_eur_m2": 1}, budget_eur_month=1000, housing_type="flat"), rents=RENTS)}
     assert flat["cheap"].est_rent_eur_month == 900 and flat["cheap"].fits_budget is True  # SERPAVI median as published
     assert flat["mid"].est_rent_eur_month == 1200 and flat["mid"].fits_budget is False
     assert flat["cheap"].rent_p25_eur_month == 700 and flat["cheap"].rent_p75_eur_month == 1100
-    assert flat["pricey"].est_rent_eur_month is None  # no official data → no number
-    room = score_areas(AREAS, IND, CAMPUS, req(weights={"rent_eur_m2": 1}, budget_eur_month=300, housing_type="room"), rents=RENTS)
-    assert all(r.est_rent_eur_month is None and r.fits_budget is None for r in room)  # no official room price exists
-    assert room[0].rent_median_eur_month == 900 and "anuncios" in room[0].rent_basis
+    assert flat["pricey"].est_rent_eur_month == 1200  # no official figure → labelled estimate (20 €/m² × 60 m²)
+    room = {r.id: r for r in score_areas(AREAS, IND, CAMPUS, req(weights={"rent_eur_m2": 1}, budget_eur_month=300, housing_type="room"), rents=RENTS)}
+    assert room["cheap"].est_rent_eur_month == 250 and room["cheap"].fits_budget is True  # 10 €/m² × 25 m²
+    assert room["pricey"].est_rent_eur_month == 500 and room["pricey"].fits_budget is False
+    assert "Estimado" in room["cheap"].rent_basis
 
 
 def test_proximity_uses_real_travel_minutes_of_the_chosen_mode():
@@ -152,4 +153,4 @@ def test_barrio_rent_wins_over_district_rent():
     rents = {"ch": {"median": 900}, "cheap": {"median": 700, "p25": 600, "p75": 800}}
     flat = {r.id: r for r in score_areas(AREAS, IND, CAMPUS, req(weights={"rent_eur_m2": 1}, housing_type="flat"), rents=rents)}
     assert flat["cheap"].est_rent_eur_month == 700 and "Barata" in flat["cheap"].rent_basis  # barrio figure, named
-    assert flat["mid"].est_rent_eur_month is None  # district "mi" has no data in this fixture
+    assert flat["mid"].est_rent_eur_month == 900 and "Estimado" in flat["mid"].rent_basis

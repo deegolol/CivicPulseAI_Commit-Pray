@@ -92,7 +92,12 @@ def official_rent(area: Area, rents: dict, housing_type: str) -> tuple[int | Non
     official, where = official_figures(area, rents)
     if housing_type == "flat" and official.get("median"):
         return official["median"], f"Alquiler mensual mediano de pisos en {where} (contratos 2024, SERPAVI · Ministerio de Vivienda)"
-    return None, "No hay dato oficial de precio para habitaciones ni estudios: mira el precio exacto en los anuncios"
+    # Rooms and studios: estimate = official €/m² of the barrio × reference m² (labelled as an estimate in the UI).
+    eur_m2 = area.values.get(RENT_KEY)
+    if eur_m2:
+        return round(eur_m2 * REFERENCE_M2[housing_type]), (
+            f"Estimado: {eur_m2:.2f} €/m² oficiales de {where} × {REFERENCE_M2[housing_type]} m² de referencia".replace(".", ","))
+    return None, "Sin dato de alquiler para esta zona"
 
 
 def score_areas(areas: list[Area], indicators: list[Indicator], campus: Campus, req: ScoreRequest,

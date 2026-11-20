@@ -13,7 +13,7 @@ import { Check, ChevronDown, ChevronUp, ExternalLink, Scale, X } from 'lucide-re
 import type { HousingType, Recommendation, ScoreResultItem } from '../api/types';
 import { NO_BUDGET_LIMIT } from '../config';
 import { formatEuro } from '../utils/format';
-import { HeroFigure, RealListings, TravelTimes } from './ZoneFacts';
+import { HeroFigure, listingsFor, RealListings, TravelTimes } from './ZoneFacts';
 import { normalizedToStars, StarRating } from './StarRating';
 
 interface ZoneListProps {
@@ -220,7 +220,10 @@ function ZoneListImpl({
                 {/* Reasons with simple Check icon (no emoji) */}
                 {recommendation.reasons.length > 0 && (
                   <ul className="mt-2.5 space-y-1.5">
-                    {recommendation.reasons.slice(0, 4).map((reason) => (
+                    {recommendation.reasons
+                      // With real listings on the card, the estimate would contradict them: hide that reason.
+                      .filter((reason) => !(housingType === 'room' && listingsFor(recommendedArea.id, budgetLimit).length && reason.includes('estimados')))
+                      .slice(0, 4).map((reason) => (
                       <li key={reason} className="flex items-start gap-2 text-xs text-ink">
                         <Check
                           className="mt-0.5 h-3.5 w-3.5 shrink-0 text-fit"

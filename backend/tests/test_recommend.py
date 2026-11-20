@@ -16,7 +16,7 @@ def test_recommendation_is_the_first_non_excluded_result_with_reasons():
     assert rec["area_id"] == first["id"] and rec["name"] == first["name"]
     assert 2 <= len(rec["reasons"]) <= 4 and len(rec["caveats"]) <= 2
     assert any("min de tu campus en transporte público" in x for x in rec["reasons"])
-    assert not any("~" in x or "estimad" in x for x in rec["reasons"])  # never our own price estimate
+    assert "estimados" in rec["reasons"][0] and "te sobran" in rec["reasons"][0]  # estimate, clearly labelled, goes first
 
 
 def test_reasons_quote_the_real_numbers():

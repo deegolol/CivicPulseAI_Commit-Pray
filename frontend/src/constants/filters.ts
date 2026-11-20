@@ -49,7 +49,7 @@ export const DEMO_QUERY = 'Estudio en la ETSISI y busco una habitación por meno
 
 /** Example chips. The backend keeps a saved AI answer for them in case the AI is down during the demo. */
 export const EXAMPLE_QUERIES = [
+  DEMO_QUERY,
   'Estudio en la ETSISI, tengo 500 euros y quiero una zona tranquila con aire limpio',
   'Voy a la facultad de informática de Montegancedo, busco un estudio para mí solo por menos de 750€',
-  'Quiero algo barato y bien comunicado en metro cerca del Campus Sur, a menos de 25 minutos',
 ];
