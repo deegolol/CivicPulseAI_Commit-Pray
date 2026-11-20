@@ -56,7 +56,7 @@
 | Internet en la sala | `make dev` en local (datos versionados): todo funciona sin red. Los 3 chips de la demo usan **respuestas cacheadas**, así que la IA "funciona" también offline. |
 | OpenAI lento o caído | La app pasa sola al **modo sin IA** (etiqueta discreta). Seguir sin comentarlo; si preguntan, es un punto a favor: "está diseñado para no depender de la IA". |
 | Railway caído | Plan B local. |
-| Todo | **[GIF de respaldo de 60 s](demo.gif)** (preparado por codex@techgallo) y capturas en `docs/screenshots/`. ⚠️ Si aún muestra el diseño anterior, codex@techgallo lo regraba con el v2. |
+| Todo | Capturas actuales en `docs/screenshots/` (inicio, resultados y móvil). |
 
 ## Preguntas difíciles (todos deberíais saber responderlas)
 | Pregunta | Respuesta corta |

@@ -10,7 +10,7 @@
 
 | Escritorio | Móvil |
 |---|---|
-| <img src="docs/screenshots/t24_after_desktop.png" alt="PrimeraLlave en escritorio" width="560"> | <img src="docs/screenshots/t24_after_mobile.png" alt="PrimeraLlave en móvil" width="220"> |
+| <img src="docs/screenshots/resultados.jpg" alt="Resultados: zona recomendada con precio real y mapa" width="560"> | <img src="docs/screenshots/movil.jpg" alt="PrimeraLlave en móvil" width="220"> |
 
 Equipo **Commit & Pray** · Hackatón **CivicPulse AI** — 2Campus1Code (DA-ETSISI · DA-ETSIINF · Orange), noviembre de 2026.
 
