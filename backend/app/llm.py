@@ -319,23 +319,15 @@ def _fmt(n: float | None, decimals: int = 0) -> str:
 
 
 def template_explain(items: list[dict], housing_type: str) -> str:
-    """Deterministic fallback explanation built only from our numbers."""
-    lines = []
-    for i, it in enumerate(items, 1):
-        txt = f"{i}) {it['name']} ({it['district']}): "
-        if it.get("distancia_en_linea_recta_km") is not None:
-            txt += f"a {_fmt(it['distancia_en_linea_recta_km'], 1)} km en línea recta del campus"
-        else:
-            txt += (f"{_fmt(it.get('min_transporte_publico'))} min en transporte público "
-                    f"y {_fmt(it.get('min_coche'))} min en coche hasta tu campus")
-        if it.get("alquiler_oficial_piso_mediana") is not None:
-            txt += f"; pisos del distrito: {_fmt(it['alquiler_oficial_piso_mediana'])} €/mes de alquiler mediano oficial (2024)"
-        if it.get("fits_budget") is True:
-            txt += ", dentro de tu presupuesto"
-        elif it.get("fits_budget") is False:
-            txt += ", algo por encima de tu presupuesto"
-        lines.append(txt + ".")
-    return "\n".join(lines) + "\nEl precio exacto de cada piso está en los anuncios enlazados."
+    """Deterministic fallback: two short plain sentences about the recommended (first) zone."""
+    it = items[0]
+    text = f"{it['name']} ({it['district']}) te queda a {_fmt(it.get('min_transporte_publico'))} min en transporte público"
+    text += f" y {_fmt(it.get('min_coche'))} min en coche de tu campus."
+    if it.get("fits_budget") is True:
+        text += " Además, encaja en tu presupuesto."
+    elif it.get("fits_budget") is False:
+        text += " Ojo: puede pasarse un poco de tu presupuesto."
+    return text
 
 
 def explain_areas(items: list[dict], housing_type: str, query: str | None) -> tuple[str, str]:

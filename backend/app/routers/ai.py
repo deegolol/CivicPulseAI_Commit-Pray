@@ -68,7 +68,9 @@ def explain(req: AiExplainRequest) -> AiExplainResponse:
             "name": r.name, "district": r.district,
             **({"min_transporte_publico": r.transit_min, "min_coche": r.car_min} if timed else
                {"distancia_en_linea_recta_km": r.distance_km}),
-            "alquiler_oficial_piso_mediana": r.rent_median_eur_month, "fits_budget": r.fits_budget,
+            # Whole-flat rent only for flat searches: next to a room price it would confuse the student.
+            **({"alquiler_piso_al_mes": r.rent_median_eur_month} if req.housing_type == "flat" else {}),
+            "fits_budget": r.fits_budget,
             "puntos_fuertes": [{"criterio": labels[k][0], "valor": b.value, "unidad": labels[k][1]} for k, b in best],
             "nota": ds.area(area_id).notes if ds.area(area_id) else {},
         })
