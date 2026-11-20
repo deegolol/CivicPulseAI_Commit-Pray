@@ -196,12 +196,12 @@ export function AreaDetailPanel({
       </Expandable>
     </section>
       <div className="flex flex-wrap items-center gap-2 [&:empty]:hidden">
-        <FavoriteButton target={{ area_id: area.id, housing_type: housingType, budget_eur_month: budget }} />
+        <FavoriteButton target={{ area_id: area.id, housing_type: housingType, budget_eur_month: Math.min(budget, 3000) }} />
         <WatchZoneButton watch={{
           area_id: area.id,
           area_name: area.name,
           housing_type: housingType,
-          budget_eur_month: Math.round(budget),
+          budget_eur_month: Math.round(Math.min(budget, 3000)),
         }} />
       </div>
       <DistrictOffers district={area.district} housingType={housingType} />

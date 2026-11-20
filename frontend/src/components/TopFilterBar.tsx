@@ -168,7 +168,7 @@ export function TopFilterBar({
                     onChange={(id) => { onCampusChoice(id); closePanel(); }} />
                 </div>}
                 {!campusChoices.length && EXAMPLE_QUERIES.map((example) => (
-                  <button key={example} type="button" disabled={searching} onClick={() => { onQueryChange(example); submitSearch(example); }}
+                  <button key={example} type="button" disabled={searching} onClick={() => onQueryChange(example)}
                     className="block min-h-11 w-full rounded-lg border border-border px-3 py-2 text-left text-sm hover:bg-surface disabled:opacity-60">
                     {example}
                   </button>

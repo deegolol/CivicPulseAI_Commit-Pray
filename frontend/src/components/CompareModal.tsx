@@ -3,6 +3,8 @@
  * Shows protagonist ~€/mes price, distance in km, and fractional 0–5 Star Ratings for every dimension,
  * plus an overlaid radar chart and direct "Ver pisos" links. Zero technical unit clutter.
  */
+import { NO_BUDGET_LIMIT } from '../config';
+import { listingsFor } from './ZoneFacts';
 import { useEffect, useMemo, useRef } from 'react';
 import { m, useReducedMotion } from 'motion/react';
 import { ExternalLink, Scale, X } from 'lucide-react';
@@ -202,7 +204,9 @@ export function CompareModal({
                     return (
                       <td key={area.id} className="px-4 py-3">
                         <div className="font-display text-base font-bold text-ink">
-                          {area.est_rent_eur_month != null
+                          {housingType === 'room' && listingsFor(area.id, budget >= NO_BUDGET_LIMIT ? null : budget).length
+                            ? `desde ${formatEuro(listingsFor(area.id, budget >= NO_BUDGET_LIMIT ? null : budget)[0].price_eur_month)}/mes`
+                            : area.est_rent_eur_month != null
                             ? `${(area.rent_basis ?? '').startsWith('Estimado') ? '~' : ''}${formatEuro(area.est_rent_eur_month)}/mes`
                             : area.rent_median_eur_month != null
                               ? <span className="font-sans text-xs font-normal text-muted">Pisos: {formatEuro(area.rent_median_eur_month)}/mes (mediana oficial)</span>

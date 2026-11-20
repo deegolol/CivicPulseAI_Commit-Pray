@@ -229,7 +229,7 @@ export function OnboardingScreen({
               <div>
                 <div className="flex items-baseline justify-between">
                   <label htmlFor="budget-range" className={labelClass}>Presupuesto al mes</label>
-                  <span className="font-display text-2xl font-bold tabular-nums">{noLimit ? 'Sin límite' : `${budgetValue.toLocaleString('es-ES')} €`}</span>
+                  <span className="font-display text-2xl font-bold tabular-nums">{noLimit ? 'Sin límite' : `${budget.toLocaleString('es-ES')} €`}</span>
                 </div>
                 <input id="budget-range" type="range" min={budgetMin} max={budgetMax + 10} step={1}
                   value={budgetValue}

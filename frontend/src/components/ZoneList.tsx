@@ -450,7 +450,7 @@ function ListingsMenu({ links, listings = [], primary = false }: {
         Ver pisos <ChevronDown className={'h-3.5 w-3.5 transition ' + (open ? 'rotate-180' : '')} strokeWidth={2} aria-hidden="true" />
       </button>
       {open && (
-        <div role="menu" className="absolute bottom-full left-0 z-30 mb-1.5 w-[300px] max-w-[80vw] rounded-xl border border-border bg-bg p-1 shadow-popover">
+        <div role="menu" className="absolute top-full left-0 z-30 mt-1.5 w-[300px] max-w-[80vw] rounded-xl border border-border bg-bg p-1 shadow-popover">
           {listings.map((listing) => (
             <a key={listing.url} role="menuitem" href={listing.url} target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)}
               className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm text-ink hover:bg-surface">

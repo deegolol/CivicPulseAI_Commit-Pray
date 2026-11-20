@@ -452,6 +452,7 @@ export function App() {
 
   function startResults(phrase: string | null = null) {
     pendingExplanation.current = phrase;
+    setCompareMode(false);
     setLocation('');
     setSelectedAreaId(null);
     setHoveredAreaId(null);
@@ -521,7 +522,7 @@ export function App() {
       setOnlyWithinBudget(inferred.minBudget !== null || (parsed.filters.only_within_budget ?? true));
     }
     setMaxTravelMin(parsed.filters.max_travel_min ?? null);
-    setMaxDistanceKm(parsed.filters.max_distance_km);
+    setMaxDistanceKm(parsed.filters.max_distance_km ?? null);
     setAirLevel('any');
     setWellConnectedOnly(false);
     setTransportMode(parsed.travel_mode ?? inferred.transportMode);
@@ -551,6 +552,7 @@ export function App() {
 
   const handleResetHome = () => {
     setSelectedAreaId(null);
+    setCompareMode(false);
     navigate('home');
   };
 
