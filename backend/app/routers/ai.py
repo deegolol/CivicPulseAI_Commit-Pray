@@ -71,6 +71,11 @@ def explain(req: AiExplainRequest) -> AiExplainResponse:
             # Whole-flat rent only for flat searches: next to a room price it would confuse the student.
             **({"alquiler_piso_al_mes": r.rent_median_eur_month} if req.housing_type == "flat" else {}),
             "fits_budget": r.fits_budget,
+            # How it compares with the rest of Madrid (percentile among the 131 barrios, 100 = best).
+            "comparado_con_madrid": {label: round(r.breakdown[key].normalized * 100)
+                                     for key, label in (("rent_eur_m2", "precio_mejor_que_pct"), ("transit_stops", "metro_mejor_que_pct"),
+                                                        ("air_no2", "aire_mejor_que_pct"), ("distance_km", "cercania_mejor_que_pct"))
+                                     if key in r.breakdown},
             "puntos_fuertes": [{"criterio": labels[k][0], "valor": b.value, "unidad": labels[k][1]} for k, b in best],
             "nota": ds.area(area_id).notes if ds.area(area_id) else {},
         })

@@ -24,13 +24,15 @@ Reglas:
 - interpretation: una frase corta, en español y tuteando, que resuma lo que has entendido (sin inventar datos).
 """
 
-EXPLAIN_INSTRUCTIONS = """Eres el asistente de PrimeraLlave. Explica a un estudiante, en 2 frases cortas, por qué le recomendamos la PRIMERA zona del JSON.
+EXPLAIN_INSTRUCTIONS = """Eres el asistente de PrimeraLlave. Ya hay un título "Por qué te la recomendamos" encima de tu texto.
+Escribe 2 frases cortas (máx. 40 palabras) que expliquen por qué la PRIMERA zona del JSON es mejor opción que las demás.
 
 Reglas estrictas:
-- Habla SOLO de la primera zona. No enumeres ni menciones las demás.
-- Máximo 40 palabras. Español, tuteando, tono cercano y natural, como un amigo que conoce Madrid.
-- Usa SOLO datos del JSON, sin inventar nada. Cifras permitidas: minutos hasta el campus (transporte público y coche)
-  y euros al mes (solo si viene "alquiler_piso_al_mes"). Nada de unidades técnicas: nunca €/m², paradas/km², µg/m³, percentiles ni "contratos".
-- Traduce los datos a lenguaje normal: "bien comunicada en metro", "de las zonas más baratas", "aire más limpio".
-- Si "fits_budget" es false dilo con tacto; si es null no hables del presupuesto. Sin listas ni numeración.
+- NO empieces con "Te recomendamos" ni repitas el nombre de la zona al principio. Ve directo a la razón.
+- NO repitas los minutos al campus: ya se ven en la tarjeta.
+- Destaca lo que la hace especial frente a Madrid y frente a las otras zonas del JSON, usando "comparado_con_madrid"
+  (percentil: 90 = mejor que el 90 % de los barrios). Ej.: "Es más barata que el 80 % de los barrios de Madrid".
+  Compara con la 2.ª zona si aporta ("más barata que Vinateros", "mejor metro que…").
+- Usa SOLO datos del JSON. Nada de unidades técnicas (€/m², paradas/km², µg/m³). Español, tuteando, natural.
+- Si "fits_budget" es false dilo con tacto. Sin listas ni numeración.
 """
