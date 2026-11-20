@@ -1,5 +1,5 @@
 {
- "note": "Anuncios reales de habitaciones consultados a mano en Fotocasa el 20/11/2026 (compartir piso en Moratalaz, Puente de Vallecas y Vicálvaro, hasta 450 €). Cada uno con su enlace. Nunca se inventan.",
+ "note": "Anuncios reales de habitaciones consultados a mano el 20/11/2026 en Fotocasa e Idealista (hasta 450 €). Cada uno con su enlace. Nunca se inventan.",
  "areas": {
   "133": [
    {
@@ -140,10 +140,31 @@
   ],
   "191": [
    {
+    "title": "Habitación en Calle de Villajimena, 18 (Ambroz)",
+    "price_eur_month": 350,
+    "source": "Idealista",
+    "url": "https://www.idealista.com/alquiler-habitacion/madrid/vicalvaro/con-precio-hasta_450/?ordenado-por=precios-asc",
+    "seen_on": "20/11/2026"
+   },
+   {
+    "title": "Habitación en Calle Efigenia, 19 (Ambroz)",
+    "price_eur_month": 370,
+    "source": "Idealista",
+    "url": "https://www.idealista.com/alquiler-habitacion/madrid/vicalvaro/con-precio-hasta_450/?ordenado-por=precios-asc",
+    "seen_on": "20/11/2026"
+   },
+   {
     "title": "Habitación en el Casco Histórico de Vicálvaro",
     "price_eur_month": 380,
     "source": "Fotocasa",
     "url": "https://www.fotocasa.es/es/compartir/vivienda/madrid-capital/aire-acondicionado-calefaccion-terraza-ascensor-amueblado/182747114/d",
+    "seen_on": "20/11/2026"
+   },
+   {
+    "title": "Habitación en Calle del Lago Titicaca (Casco Histórico de Vicálvaro)",
+    "price_eur_month": 380,
+    "source": "Idealista",
+    "url": "https://www.idealista.com/alquiler-habitacion/madrid/vicalvaro/con-precio-hasta_450/?ordenado-por=precios-asc",
     "seen_on": "20/11/2026"
    },
    {
@@ -158,6 +179,13 @@
     "price_eur_month": 420,
     "source": "Fotocasa",
     "url": "https://www.fotocasa.es/es/compartir/vivienda/madrid-capital/aire-acondicionado-calefaccion-terraza-ascensor-amueblado/182689395/d",
+    "seen_on": "20/11/2026"
+   },
+   {
+    "title": "Habitación en San Cipriano (Casco Histórico de Vicálvaro)",
+    "price_eur_month": 440,
+    "source": "Idealista",
+    "url": "https://www.idealista.com/alquiler-habitacion/madrid/vicalvaro/con-precio-hasta_450/?ordenado-por=precios-asc",
     "seen_on": "20/11/2026"
    }
   ],
@@ -174,6 +202,22 @@
     "price_eur_month": 400,
     "source": "Fotocasa",
     "url": "https://www.fotocasa.es/es/compartir/vivienda/madrid-capital/aire-acondicionado-terraza-ascensor-amueblado/187276995/d",
+    "seen_on": "20/11/2026"
+   }
+  ],
+  "194": [
+   {
+    "title": "Habitación en Ocaña, 85 (El Cañaveral)",
+    "price_eur_month": 350,
+    "source": "Idealista",
+    "url": "https://www.idealista.com/alquiler-habitacion/madrid/vicalvaro/con-precio-hasta_450/?ordenado-por=precios-asc",
+    "seen_on": "20/11/2026"
+   },
+   {
+    "title": "Habitación en Calle de Enrique Urquijo, 7 (El Cañaveral)",
+    "price_eur_month": 350,
+    "source": "Idealista",
+    "url": "https://www.idealista.com/alquiler-habitacion/madrid/vicalvaro/con-precio-hasta_450/?ordenado-por=precios-asc",
     "seen_on": "20/11/2026"
    }
   ]

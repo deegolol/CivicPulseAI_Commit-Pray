@@ -11,9 +11,15 @@ import { formatEuro, formatKm, formatMinutes } from '../utils/format';
 type Listing = { title: string; price_eur_month: number; source: string; url: string; seen_on: string };
 const LISTINGS = realListings.areas as Record<string, Listing[]>;
 
-/** Real room listings in this zone within the budget (all of them when there is no budget limit). */
+/** Real room listings in this zone's DISTRICT within the budget, cheapest first. District level on purpose: it is
+ *  exactly what the "Ver pisos" links open (portals search by district), so "desde X €" matches what you see there. */
 export function listingsFor(areaId: string, budget: number | null = null): Listing[] {
-  return (LISTINGS[areaId] ?? []).filter((l) => budget === null || l.price_eur_month <= budget);
+  const district = areaId.slice(0, 2);  // area ids = 2-digit district + barrio digit
+  return Object.entries(LISTINGS)
+    .filter(([id]) => id.slice(0, 2) === district)
+    .flatMap(([, items]) => items)
+    .filter((l) => budget === null || l.price_eur_month <= budget)
+    .sort((a, b) => a.price_eur_month - b.price_eur_month);
 }
 
 /** "🚇 25 min · 🚗 12 min" with icons; falls back to km by road. */
@@ -44,7 +50,7 @@ export function HeroFigure({ area, budget, housingType, large = false }: {
   const listings = housingType === 'room' ? listingsFor(area.id, budget) : [];
   const estimated = (area.rent_basis ?? '').startsWith('Estimado');
   const price = listings.length ? Math.min(...listings.map((l) => l.price_eur_month)) : area.est_rent_eur_month;
-  const caption = listings.length ? `anuncio real en ${[...new Set(listings.filter((l) => l.price_eur_month === price).map((l) => l.source))].join(' y ')}` : estimated ? 'precio estimado' : 'alquiler oficial de un piso aquí';
+  const caption = listings.length ? `anuncio real en ${[...new Set(listings.filter((l) => l.price_eur_month === price).map((l) => l.source))].join(' y ')} · ${area.district}` : estimated ? 'precio estimado' : 'alquiler oficial de un piso aquí';
   if (price == null) {
     return <div className="text-right text-sm font-semibold text-muted">Sin dato de precio</div>;
   }

@@ -264,7 +264,7 @@ function ZoneListImpl({
 
                 {/* Primary red "Ver pisos" (menu with every portal) + secondary "Ver detalles" */}
                 <div className="mt-4 flex items-center gap-2">
-                  <ListingsMenu links={recommendedArea.listing_links} listings={housingType === 'room' ? listingsFor(recommendedArea.id, budgetLimit) : []} primary />
+                  <ListingsMenu links={recommendedArea.listing_links} listings={housingType === 'room' ? listingsFor(recommendedArea.id, budgetLimit).slice(0, 5) : []} primary />
                   <button
                     type="button"
                     aria-expanded={selectedAreaId === recommendedArea.id}
@@ -367,7 +367,7 @@ function ZoneListImpl({
 
                     {/* Footer actions: "Ver pisos" menu + details; comparing lives in its own mode */}
                     <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border pt-2.5">
-                      <ListingsMenu links={area.listing_links} listings={housingType === 'room' ? listingsFor(area.id, budgetLimit) : []} />
+                      <ListingsMenu links={area.listing_links} listings={housingType === 'room' ? listingsFor(area.id, budgetLimit).slice(0, 5) : []} />
                       <button type="button" aria-expanded={isSelected}
                         onClick={() => onSelectArea(area.id)}
                         className="inline-flex min-h-[34px] items-center gap-1 rounded-lg px-2 text-xs font-medium text-ink hover:bg-surface">
