@@ -25,10 +25,13 @@ import type {
   AreaFeature,
   BarriosGeoJSON,
   Campus,
+  HousingType,
   ScoreResultItem,
 } from '../api/types';
 import { MADRID_CENTER, MADRID_DEFAULT_ZOOM } from '../config';
 import { formatEuro, formatKm, formatMinutes } from '../utils/format';
+import { NO_BUDGET_LIMIT } from '../config';
+import { listingsFor } from './ZoneFacts';
 import { MapLayersOverlay, MapLayersPanel, MapMoveFade, type LayerId } from './MapLayers';
 
 // Includes mainland Spain, the Balearic Islands and the Canary Islands.
@@ -59,6 +62,7 @@ interface MadridMapProps {
   onHoverArea: (areaId: string | null) => void;
   activeCampus: Campus | null;
   budget: number;
+  housingType?: HousingType;
   isScoring?: boolean;
   isVisible?: boolean;
   layers: ReadonlySet<LayerId>;
@@ -299,6 +303,7 @@ function MadridMapImpl({
   onHoverArea,
   activeCampus,
   budget,
+  housingType = 'room',
   isScoring = false,
   isVisible = true,
   layers,
@@ -426,7 +431,10 @@ function MadridMapImpl({
         const area = scoresById[id];
         if (!centroid || !area) return null;
         // Pills show the real travel time; a price only when it is an official published figure (flats).
-        const priceLabel = area.est_rent_eur_month != null
+        // Same figure as the card: the real listing when we have one in budget, else the (estimated / official) rent.
+        const real = housingType === 'room' ? listingsFor(id, budget >= NO_BUDGET_LIMIT ? null : budget) : [];
+        const priceLabel = real.length ? formatEuro(Math.min(...real.map((l) => l.price_eur_month)))
+          : area.est_rent_eur_month != null
           ? ((area.rent_basis ?? '').startsWith('Estimado') ? '~' : '') + formatEuro(area.est_rent_eur_month)
           : area.travel_min != null ? formatMinutes(area.travel_min) : formatKm(area.distance_km);
         return {
@@ -443,7 +451,7 @@ function MadridMapImpl({
       })
       .filter((x): x is NonNullable<typeof x> => Boolean(x))
       .sort((a, b) => b.rank - a.rank); // render #1 last so it stays on top
-  }, [top10RankById, centroidsById, scoresById, recommendedAreaId]);
+  }, [top10RankById, centroidsById, scoresById, recommendedAreaId, housingType, budget]);
 
   // Bounds points: active campus + the best 3 zones (a tight view: you can still see the streets)
   const boundsPoints = useMemo<[number, number][]>(() => {

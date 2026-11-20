@@ -762,6 +762,7 @@ export function App() {
             isScoring={isScoring}
             isVisible={mapVisible}
             onReady={handleMapReady}
+            housingType={housingType}
           /></Suspense>}
         </main>
 

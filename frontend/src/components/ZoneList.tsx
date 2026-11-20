@@ -1,7 +1,7 @@
 /**
  * Ordered list of recommended Madrid neighborhoods with featured Recommendation Hero Card (T28 + T25).
  * - Top: instant "Nuestra recomendación para ti" card from /api/score (headline, reasons with simple Check,
- *   optional "A tener en cuenta" caveats, primary red "Ver pisos" + "Ver detalle"). Does NOT wait for AI.
+ *   the AI explanation in plain sight, red "Ver pisos" menu + "Ver detalles"). Does NOT wait for AI.
  * - Below: clean ordered list with discreet highlight tags ("Más barata", "Más cerca", "Mejor aire", "Mejor comunicada").
  * - Bidirectional hover sync with MadridMap. No sparkles, no AI badges, no gradients, zero %.
  */
@@ -13,7 +13,7 @@ import { Check, ChevronDown, ChevronUp, ExternalLink, Scale, X } from 'lucide-re
 import type { HousingType, Recommendation, ScoreResultItem } from '../api/types';
 import { NO_BUDGET_LIMIT } from '../config';
 import { formatEuro } from '../utils/format';
-import { HeroFigure, listingsFor, RealListings, TravelTimes } from './ZoneFacts';
+import { HeroFigure, listingsFor, TravelTimes } from './ZoneFacts';
 import { normalizedToStars, StarRating } from './StarRating';
 
 interface ZoneListProps {
@@ -235,38 +235,36 @@ function ZoneListImpl({
                   </ul>
                 )}
 
-                {/* Discreet caveats block ("A tener en cuenta") */}
-                {recommendation.caveats && recommendation.caveats.length > 0 && (
-                  <div className="mt-3 rounded-[8px] border border-border bg-over-soft/60 px-3 py-2">
-                    <p className="text-[11px] font-semibold text-over">A tener en cuenta</p>
-                    <ul className="mt-1 space-y-0.5 text-xs text-ink">
-                      {recommendation.caveats.map((caveat) => (
-                        <li key={caveat}>· {caveat}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                <RealListings areaId={recommendedArea.id} budget={budgetLimit} housingType={housingType} />
-
+                {/* Why we recommend it: visible right away in readable text; "Leer más" opens the whole paragraph */}
                 {(explanationText || explanationLoading) && (
-                  <div className="mt-3 rounded-[8px] border border-border">
-                    <button type="button" onClick={() => setExplanationOpen((v) => !v)} aria-expanded={explanationOpen}
-                      className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-xs font-semibold text-ink hover:bg-surface">
-                      <span>{explanationLoading ? 'Preparando la explicación…' : 'Por qué te la recomendamos'}</span>
-                      {!explanationLoading && (explanationOpen
-                        ? <ChevronUp className="h-3.5 w-3.5" strokeWidth={1.75} />
-                        : <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.75} />)}
-                    </button>
-                    <Expandable open={explanationOpen && !explanationLoading}>
-                      <p className="border-t border-border px-3 py-2.5 text-xs leading-relaxed whitespace-pre-line text-muted">{explanationText}</p>
-                    </Expandable>
+                  <div className="mt-3 border-t border-border pt-3">
+                    <p className="text-xs font-semibold text-ink">Por qué te la recomendamos</p>
+                    {explanationLoading ? (
+                      <div className="mt-2 space-y-1.5">
+                        <div className="h-3.5 w-full animate-pulse rounded bg-surface" />
+                        <div className="h-3.5 w-11/12 animate-pulse rounded bg-surface" />
+                        <div className="h-3.5 w-4/5 animate-pulse rounded bg-surface" />
+                      </div>
+                    ) : (
+                      <>
+                        <p className={'mt-1.5 text-sm leading-relaxed whitespace-pre-line text-ink ' + (explanationOpen ? '' : 'line-clamp-5')}>
+                          {explanationText}
+                        </p>
+                        {(explanationText?.length ?? 0) > 280 && (
+                          <button type="button" onClick={() => setExplanationOpen((v) => !v)} aria-expanded={explanationOpen}
+                            className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-brand hover:underline">
+                            {explanationOpen ? 'Leer menos' : 'Leer más'}
+                            {explanationOpen ? <ChevronUp className="h-3.5 w-3.5" strokeWidth={2} /> : <ChevronDown className="h-3.5 w-3.5" strokeWidth={2} />}
+                          </button>
+                        )}
+                      </>
+                    )}
                   </div>
                 )}
 
                 {/* Primary red "Ver pisos" (menu with every portal) + secondary "Ver detalles" */}
                 <div className="mt-4 flex items-center gap-2">
-                  <ListingsMenu links={recommendedArea.listing_links} primary />
+                  <ListingsMenu links={recommendedArea.listing_links} listings={housingType === 'room' ? listingsFor(recommendedArea.id, budgetLimit) : []} primary />
                   <button
                     type="button"
                     aria-expanded={selectedAreaId === recommendedArea.id}
@@ -365,12 +363,11 @@ function ZoneListImpl({
                         <TravelTimes area={area} className="text-xs text-muted" />
                         <HeroFigure area={area} budget={budgetLimit} housingType={housingType} />
                       </div>
-                      <RealListings areaId={area.id} budget={budgetLimit} housingType={housingType} />
                     </div>
 
                     {/* Footer actions: "Ver pisos" menu + details; comparing lives in its own mode */}
                     <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border pt-2.5">
-                      <ListingsMenu links={area.listing_links} />
+                      <ListingsMenu links={area.listing_links} listings={housingType === 'room' ? listingsFor(area.id, budgetLimit) : []} />
                       <button type="button" aria-expanded={isSelected}
                         onClick={() => onSelectArea(area.id)}
                         className="inline-flex min-h-[34px] items-center gap-1 rounded-lg px-2 text-xs font-medium text-ink hover:bg-surface">
@@ -445,7 +442,9 @@ function CompareCheck({ checked, disabled, onChange }: { checked: boolean; disab
 }
 
 /** "Ver pisos": opens a small menu with every portal where this zone's listings are available. */
-function ListingsMenu({ links, primary = false }: { links: ScoreResultItem['listing_links']; primary?: boolean }) {
+function ListingsMenu({ links, listings = [], primary = false }: {
+  links: ScoreResultItem['listing_links']; listings?: ReturnType<typeof listingsFor>; primary?: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -466,7 +465,15 @@ function ListingsMenu({ links, primary = false }: { links: ScoreResultItem['list
         Ver pisos <ChevronDown className={'h-3.5 w-3.5 transition ' + (open ? 'rotate-180' : '')} strokeWidth={2} aria-hidden="true" />
       </button>
       {open && (
-        <div role="menu" className="absolute bottom-full left-0 z-30 mb-1.5 min-w-[200px] rounded-xl border border-border bg-bg p-1 shadow-popover">
+        <div role="menu" className="absolute bottom-full left-0 z-30 mb-1.5 w-[300px] max-w-[80vw] rounded-xl border border-border bg-bg p-1 shadow-popover">
+          {listings.map((listing) => (
+            <a key={listing.url} role="menuitem" href={listing.url} target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)}
+              className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm text-ink hover:bg-surface">
+              <span className="min-w-0 truncate">{listing.title}</span>
+              <span className="shrink-0 font-semibold tabular-nums">{formatEuro(listing.price_eur_month)}</span>
+            </a>
+          ))}
+          {listings.length > 0 && <div className="my-1 border-t border-border" />}
           {links.map((link) => (
             <a key={link.url} role="menuitem" href={link.url} target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)}
               className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm font-medium text-ink hover:bg-surface">
