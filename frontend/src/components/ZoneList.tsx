@@ -9,7 +9,7 @@ import { useReducedMotion } from 'motion/react';
 import { Expandable } from './Expandable';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { memo as reactMemo } from 'react';
-import { Check, ChevronDown, ChevronUp, ExternalLink, Scale, X } from 'lucide-react';
+import { Check, ChevronDown, ChevronUp, ExternalLink, Scale } from 'lucide-react';
 import type { HousingType, Recommendation, ScoreResultItem } from '../api/types';
 import { NO_BUDGET_LIMIT } from '../config';
 import { formatEuro } from '../utils/format';
@@ -34,6 +34,8 @@ interface ZoneListProps {
   onToggleCompare: (areaId: string) => void;
   onOpenCompare: () => void;
   onCompareTop3: () => void;
+  compareMode: boolean;
+  onCompareModeChange: (on: boolean) => void;
   loading: boolean;
 }
 
@@ -62,12 +64,19 @@ function ZoneListImpl({
   onToggleCompare,
   onOpenCompare,
   onCompareTop3,
+  compareMode,
+  onCompareModeChange,
   loading,
 }: ZoneListProps) {
   const reduced = useReducedMotion();
   const [explanationOpen, setExplanationOpen] = useState(false);
-  const [compareMode, setCompareMode] = useState(false);
   const budgetLimit = budget >= NO_BUDGET_LIMIT ? null : budget;
+  /** In compare mode a click anywhere on a card (except its buttons/links) ticks or unticks it. */
+  const pickForCompare = (event: React.MouseEvent, id: string) => {
+    if (!compareMode || (event.target as HTMLElement).closest('button, a')) return;
+    if (!compareIds.includes(id) && compareIds.length >= 3) return;
+    onToggleCompare(id);
+  };
 
   const scrollArea = useRef<HTMLDivElement>(null);
   const visibleResults = useMemo(() => {
@@ -137,24 +146,38 @@ function ZoneListImpl({
       <div className="border-b border-border bg-surface px-4 py-3">
         <div className="flex items-start justify-between gap-3">
           <p className="text-xs leading-relaxed text-ink">{summaryLine}</p>
-          {visibleResults.length >= 2 && (
-            <button type="button" aria-pressed={compareMode}
-              onClick={() => setCompareMode((v) => !v)}
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-[8px] border border-border bg-bg px-2.5 py-1.5 text-xs font-semibold text-ink transition hover:border-ink/40 aria-pressed:border-ink">
+          {visibleResults.length >= 2 && !compareMode && (
+            <button type="button" onClick={() => onCompareModeChange(true)}
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-[8px] border border-border bg-bg px-2.5 py-1.5 text-xs font-semibold text-ink transition hover:border-ink/40">
               <Scale className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden="true" />
-              {compareMode ? 'Cancelar' : 'Comparar zonas'}
+              Comparar zonas
             </button>
           )}
         </div>
-        {compareMode && (
-          <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 rounded-[8px] bg-bg px-3 py-2 text-xs text-ink">
-            <span>Marca 2 o 3 zonas para compararlas.</span>
-            <button type="button" onClick={() => { onCompareTop3(); setCompareMode(false); }} className="font-semibold underline underline-offset-2 hover:text-brand">
-              Comparar las 3 mejores
+      </div>
+      {compareMode && (
+        <div className="sticky top-0 z-20 border-b border-border bg-bg px-4 py-3 shadow-[0_6px_16px_-10px_rgb(13_17_23/0.25)]">
+          <p className="text-xs text-ink">
+            <span className="font-semibold">Elige 2 o 3 zonas</span> pulsando en la lista o en el mapa
+            {compareIds.length > 0 && <span className="text-muted"> · {compareIds.length} {compareIds.length === 1 ? 'elegida' : 'elegidas'}</span>}
+          </p>
+          <div className="mt-2 flex items-center gap-2">
+            <button type="button" disabled={compareIds.length < 2}
+              onClick={() => { onOpenCompare(); onCompareModeChange(false); }}
+              className="inline-flex min-h-[36px] flex-1 items-center justify-center gap-1.5 rounded-[8px] bg-brand px-3 text-xs font-semibold text-bg transition hover:bg-brand-hover disabled:bg-surface disabled:text-muted">
+              <Check className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden="true" />
+              {compareIds.length >= 2 ? `Listo, ver comparación (${compareIds.length})` : 'Listo, ver comparación'}
+            </button>
+            <button type="button" onClick={() => onCompareModeChange(false)}
+              className="min-h-[36px] rounded-[8px] border border-border px-3 text-xs font-semibold text-ink hover:bg-surface">
+              Cancelar
             </button>
           </div>
-        )}
-      </div>
+          <button type="button" onClick={() => { onCompareTop3(); onCompareModeChange(false); }} className="mt-2 text-xs font-medium text-muted underline underline-offset-2 hover:text-ink">
+            O compara directamente las 3 mejores
+          </button>
+        </div>
+      )}
 
       {/* Main scrollable list body */}
       <div className="space-y-3 p-4 pb-20 lg:pb-6">
@@ -175,12 +198,14 @@ function ZoneListImpl({
                 data-expanded={selectedAreaId === recommendedArea.id}
                 onMouseEnter={() => onHoverArea(recommendedArea.id)}
                 onMouseLeave={() => onHoverArea(null)}
-                className={`rounded-[10px] border-2 bg-bg p-4 transition duration-150 ${
+                onClick={(event) => pickForCompare(event, recommendedArea.id)}
+                className={`relative rounded-[10px] border-2 bg-bg p-4 transition duration-150 ${compareMode ? 'cursor-pointer' : ''} ${
                   selectedAreaId === recommendedArea.id || hoveredAreaId === recommendedArea.id
                     ? 'border-brand'
                     : 'border-brand/80'
                 }`}
               >
+                {compareMode && <CompareBadge on={compareIds.includes(recommendedArea.id)} />}
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-[11px] font-semibold tracking-wide text-brand uppercase">
                     Nuestra recomendación para ti
@@ -274,7 +299,6 @@ function ZoneListImpl({
                     {selectedAreaId === recommendedArea.id ? 'Ocultar detalles' : 'Ver detalles'}
                   </button>
                 </div>
-                {compareMode && <CompareCheck checked={compareIds.includes(recommendedArea.id)} disabled={!compareIds.includes(recommendedArea.id) && compareIds.length >= 3} onChange={() => onToggleCompare(recommendedArea.id)} />}
                 <Expandable open={selectedAreaId === recommendedArea.id}>{renderDetails(recommendedArea)}</Expandable>
               </article>
             )}
@@ -308,7 +332,8 @@ function ZoneListImpl({
                     data-expanded={isSelected}
                     onMouseEnter={() => onHoverArea(area.id)}
                     onMouseLeave={() => onHoverArea(null)}
-                    className={`rounded-[10px] border bg-bg p-4 transition duration-150 ${
+                    onClick={(event) => pickForCompare(event, area.id)}
+                    className={`relative rounded-[10px] border bg-bg p-4 transition duration-150 ${compareMode ? 'cursor-pointer' : ''} ${isCompared && compareMode ? 'ring-2 ring-brand' : ''} ${
                       isSelected
                         ? 'border-ink ring-1 ring-ink'
                         : isHovered
@@ -316,6 +341,7 @@ function ZoneListImpl({
                           : 'border-border hover:border-ink/40'
                     }`}
                   >
+                    {compareMode && <CompareBadge on={isCompared} />}
                     <div>
                       {/* Discreet highlight tags (Más barata, Más cerca, Mejor aire, Mejor comunicada) */}
                       {tags.length > 0 && (
@@ -374,7 +400,6 @@ function ZoneListImpl({
                         {isSelected ? 'Ocultar detalles' : 'Ver detalles'}
                         <ChevronDown className={isSelected ? 'rotate-180' : ''} size={14} aria-hidden="true" />
                       </button>
-                      {compareMode && <span className="ml-auto"><CompareCheck checked={isCompared} disabled={!isCompared && compareIds.length >= 3} onChange={() => onToggleCompare(area.id)} /></span>}
                     </div>
                     <Expandable open={isSelected}>{renderDetails(area)}</Expandable>
                   </article>
@@ -385,59 +410,19 @@ function ZoneListImpl({
         )}
       </div>
 
-      {/* Sticky Compare Dock at bottom of list whenever >= 1 zone is picked */}
-      <Expandable open={compareIds.length > 0}>
-        <div className="sticky bottom-0 z-20 shrink-0 border-t border-border bg-bg px-4 py-3 shadow-popover">
-          <div className="flex flex-wrap items-center gap-1.5 pb-2">
-            {compareIds.map((id) => {
-              const item = results.find((r) => r.id === id);
-              if (!item) return null;
-              return (
-                <span
-                  key={id}
-                  className="inline-flex items-center gap-1 rounded-[6px] border border-border bg-surface py-0.5 pr-1 pl-2 text-[11px] font-medium text-ink"
-                >
-                  <span>{item.name}</span>
-                  <button
-                    type="button"
-                    onClick={() => onToggleCompare(id)}
-                    aria-label={`Quitar ${item.name}`}
-                    className="rounded p-0.5 text-muted hover:text-ink"
-                  >
-                    <X className="h-3 w-3" strokeWidth={1.75} />
-                  </button>
-                </span>
-              );
-            })}
-          </div>
-          <button
-            type="button"
-            disabled={compareIds.length < 2}
-            onClick={onOpenCompare}
-            className="flex min-h-[38px] w-full items-center justify-center gap-2 rounded-[8px] bg-ink px-4 py-2 text-xs font-medium text-bg transition hover:opacity-90 disabled:bg-surface disabled:text-muted"
-          >
-            <Scale className="h-3.5 w-3.5" strokeWidth={1.75} />
-            <span>
-              {compareIds.length >= 2
-                ? `Comparar ahora (${compareIds.length})`
-                : 'Elige 1 barrio más para comparar'}
-            </span>
-          </button>
-        </div>
-      </Expandable>
     </div>
   );
 }
 
 /** Memoised: only re-renders when its own props change (hovering elsewhere doesn't redraw it). */
 
-/** Labelled checkbox shown on each card while choosing zones to compare. */
-function CompareCheck({ checked, disabled, onChange }: { checked: boolean; disabled: boolean; onChange: () => void }) {
+/** Round tick shown on each card while choosing zones to compare. */
+function CompareBadge({ on }: { on: boolean }) {
   return (
-    <label className={'mt-2 inline-flex min-h-[34px] cursor-pointer items-center gap-2 text-xs font-medium text-ink ' + (disabled ? 'opacity-40' : '')}>
-      <input type="checkbox" checked={checked} disabled={disabled} onChange={onChange} className="size-4 accent-brand" />
-      Comparar esta zona
-    </label>
+    <span aria-hidden="true" className={'absolute -top-2.5 -right-2.5 z-10 flex h-7 w-7 items-center justify-center rounded-full border-2 shadow-sm transition ' +
+      (on ? 'border-brand bg-brand text-bg' : 'border-border bg-bg text-transparent')}>
+      <Check className="h-4 w-4" strokeWidth={3} />
+    </span>
   );
 }
 

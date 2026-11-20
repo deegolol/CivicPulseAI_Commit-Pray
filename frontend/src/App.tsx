@@ -189,6 +189,7 @@ export function App() {
   const [hoveredAreaId, setHoveredAreaId] = useState<string | null>(null);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [compareOpen, setCompareOpen] = useState(false);
+  const [compareMode, setCompareMode] = useState(false);
   const [mobileView, setMobileView] = useState<'list' | 'map'>('list');
   const [mapLayers, setMapLayers] = useState<ReadonlySet<LayerId>>(() => new Set(DEFAULT_LAYERS));
   const [desktop, setDesktop] = useState(() => window.matchMedia('(min-width: 1024px)').matches);
@@ -590,11 +591,17 @@ export function App() {
   const locationLatest = useRef(location);
   locationLatest.current = location;
   const handleListSelect = useCallback((id: string) => setSelectedAreaId((current) => current === id ? null : id), []);
+  const compareModeLatest = useRef(false);
+  compareModeLatest.current = compareMode;
   const handleMapSelect = useCallback((id: string) => {
     if (locationLatest.current && !scoresLatest.current[id]) return;
+    if (compareModeLatest.current) {  // choosing zones to compare: a click on the map ticks the zone
+      handleToggleCompare(id);
+      return;
+    }
     setSelectedAreaId(id);
     setMobileView('list');
-  }, []);
+  }, [handleToggleCompare]);
   const handleMapHover = useCallback((id: string | null) => {
     setHoveredAreaId(id && locationLatest.current && !scoresLatest.current[id] ? null : id);
   }, []);
@@ -734,6 +741,8 @@ export function App() {
             onToggleCompare={handleToggleCompare}
             onOpenCompare={openCompare}
             onCompareTop3={handleCompareTop3}
+            compareMode={compareMode}
+            onCompareModeChange={setCompareMode}
             loading={loading || ((isScoring || aiLoading) && rawResults.length === 0)}
           />
         </section>

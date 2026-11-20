@@ -174,7 +174,7 @@ export function OnboardingScreen({
                   type="button"
                   disabled={searching}
                   title={example}
-                  onClick={() => { onQueryChange(example); onSearchSubmit(example); }}
+                  onClick={() => { onQueryChange(example); document.getElementById('onboarding-search')?.focus(); }}
                   className="rounded-full border border-border bg-bg/95 px-4 py-1.5 text-sm text-muted shadow-sm transition hover:border-ink/40 hover:text-ink disabled:opacity-60"
                 >
                   {EXAMPLE_LABELS[index] ?? example}

@@ -193,7 +193,7 @@ export function CompareModal({
                 </tr>
 
                 {activeCriteria.has('rent_eur_m2') && <tr>
-                  <td className="px-4 py-3 font-medium text-muted">Precio oficial (pisos)</td>
+                  <td className="px-4 py-3 font-medium text-muted">Precio</td>
                   {areas.map((area) => {
                     const over =
                       area.est_rent_eur_month != null && area.est_rent_eur_month > budget
@@ -203,7 +203,7 @@ export function CompareModal({
                       <td key={area.id} className="px-4 py-3">
                         <div className="font-display text-base font-bold text-ink">
                           {area.est_rent_eur_month != null
-                            ? `${formatEuro(area.est_rent_eur_month)}/mes`
+                            ? `${(area.rent_basis ?? '').startsWith('Estimado') ? '~' : ''}${formatEuro(area.est_rent_eur_month)}/mes`
                             : area.rent_median_eur_month != null
                               ? <span className="font-sans text-xs font-normal text-muted">Pisos: {formatEuro(area.rent_median_eur_month)}/mes (mediana oficial)</span>
                               : 'Sin dato oficial'}
