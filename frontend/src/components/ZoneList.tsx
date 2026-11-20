@@ -63,6 +63,7 @@ function ZoneListImpl({
 }: ZoneListProps) {
   const reduced = useReducedMotion();
   const [explanationOpen, setExplanationOpen] = useState(false);
+  const [compareMode, setCompareMode] = useState(false);
 
   const scrollArea = useRef<HTMLDivElement>(null);
   const visibleResults = useMemo(() => {
@@ -125,50 +126,30 @@ function ZoneListImpl({
     recommendedArea?.est_rent_eur_month != null && recommendedArea.est_rent_eur_month > budget
       ? Math.round(recommendedArea.est_rent_eur_month - budget)
       : 0;
-  const recPrimaryLink = recommendedArea?.listing_links[0];
 
   return (
     <div ref={scrollArea} className="flex h-full flex-col overflow-y-auto bg-bg">
-      {/* One-line search summary + collapsible explanation */}
+      {/* One-line search summary + a clear, labelled way to compare zones */}
       <div className="border-b border-border bg-surface px-4 py-3">
-        <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start justify-between gap-3">
           <p className="text-xs leading-relaxed text-ink">{summaryLine}</p>
-          {(explanationText || explanationLoading) && (
-            <button
-              type="button"
-              onClick={() => setExplanationOpen((v) => !v)}
-              aria-expanded={explanationOpen}
-              className="inline-flex shrink-0 items-center gap-1 rounded-[6px] px-2 py-1 text-xs font-medium text-ink underline decoration-border underline-offset-2 hover:bg-bg"
-            >
-              <span>
-                {explanationLoading
-                  ? 'Preparando explicación…'
-                  : explanationOpen
-                    ? 'Ocultar'
-                    : 'Leer explicación'}
-              </span>
-              {!explanationLoading &&
-                (explanationOpen ? (
-                  <ChevronUp className="h-3.5 w-3.5" strokeWidth={1.75} />
-                ) : (
-                  <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.75} />
-                ))}
+          {visibleResults.length >= 2 && (
+            <button type="button" aria-pressed={compareMode}
+              onClick={() => setCompareMode((v) => !v)}
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-[8px] border border-border bg-bg px-2.5 py-1.5 text-xs font-semibold text-ink transition hover:border-ink/40 aria-pressed:border-ink">
+              <Scale className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden="true" />
+              {compareMode ? 'Cancelar' : 'Comparar zonas'}
             </button>
           )}
         </div>
-
-        <Expandable open={explanationOpen}>
-          <div className="mt-2.5 border-t border-border pt-2.5 text-xs leading-relaxed text-muted">
-            {explanationLoading ? (
-              <div className="space-y-1.5">
-                <div className="h-3 w-4/5 animate-pulse rounded bg-border" />
-                <div className="h-3 w-full animate-pulse rounded bg-border" />
-              </div>
-            ) : (
-              explanationText
-            )}
+        {compareMode && (
+          <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 rounded-[8px] bg-bg px-3 py-2 text-xs text-ink">
+            <span>Marca 2 o 3 zonas para compararlas.</span>
+            <button type="button" onClick={() => { onCompareTop3(); setCompareMode(false); }} className="font-semibold underline underline-offset-2 hover:text-brand">
+              Comparar las 3 mejores
+            </button>
           </div>
-        </Expandable>
+        )}
       </div>
 
       {/* Main scrollable list body */}
@@ -261,39 +242,34 @@ function ZoneListImpl({
 
                 <RealListings areaId={recommendedArea.id} />
 
-                {/* Primary red "Ver pisos" + secondary "Ver detalle" */}
+                {(explanationText || explanationLoading) && (
+                  <div className="mt-3 rounded-[8px] border border-border">
+                    <button type="button" onClick={() => setExplanationOpen((v) => !v)} aria-expanded={explanationOpen}
+                      className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-xs font-semibold text-ink hover:bg-surface">
+                      <span>{explanationLoading ? 'Preparando la explicación…' : 'Por qué te la recomendamos'}</span>
+                      {!explanationLoading && (explanationOpen
+                        ? <ChevronUp className="h-3.5 w-3.5" strokeWidth={1.75} />
+                        : <ChevronDown className="h-3.5 w-3.5" strokeWidth={1.75} />)}
+                    </button>
+                    <Expandable open={explanationOpen && !explanationLoading}>
+                      <p className="border-t border-border px-3 py-2.5 text-xs leading-relaxed whitespace-pre-line text-muted">{explanationText}</p>
+                    </Expandable>
+                  </div>
+                )}
+
+                {/* Primary red "Ver pisos" (menu with every portal) + secondary "Ver detalles" */}
                 <div className="mt-4 flex items-center gap-2">
-                  {recPrimaryLink && (
-                    <a
-                      href={recPrimaryLink.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-[8px] bg-brand px-3.5 py-2 text-xs font-medium text-bg transition hover:bg-brand-hover"
-                    >
-                      <span>Ver pisos con precio exacto</span>
-                      <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.75} />
-                    </a>
-                  )}
+                  <ListingsMenu links={recommendedArea.listing_links} primary />
                   <button
                     type="button"
                     aria-expanded={selectedAreaId === recommendedArea.id}
                     onClick={() => onSelectArea(recommendedArea.id)}
                     className="inline-flex min-h-[40px] flex-1 items-center justify-center rounded-[8px] border border-border bg-bg px-3.5 py-2 text-xs font-medium text-ink transition hover:border-ink/40 hover:bg-surface"
                   >
-                    {selectedAreaId === recommendedArea.id ? 'Ocultar detalle' : 'Ver detalle'}
-                  </button>
-                  <button
-                    type="button"
-                    aria-label={`Comparar ${recommendedArea.name}`}
-                    aria-pressed={compareIds.includes(recommendedArea.id)}
-                    title="Añadir o quitar de la comparación"
-                    disabled={!compareIds.includes(recommendedArea.id) && compareIds.length >= 3}
-                    onClick={() => onToggleCompare(recommendedArea.id)}
-                    className="grid size-10 shrink-0 place-items-center rounded-lg border border-border text-muted hover:bg-surface aria-pressed:bg-surface aria-pressed:text-ink disabled:opacity-40"
-                  >
-                    <Scale size={16} aria-hidden="true" />
+                    {selectedAreaId === recommendedArea.id ? 'Ocultar detalles' : 'Ver detalles'}
                   </button>
                 </div>
+                {compareMode && <CompareCheck checked={compareIds.includes(recommendedArea.id)} disabled={!compareIds.includes(recommendedArea.id) && compareIds.length >= 3} onChange={() => onToggleCompare(recommendedArea.id)} />}
                 <Expandable open={selectedAreaId === recommendedArea.id}>{renderDetails(recommendedArea)}</Expandable>
               </article>
             )}
@@ -306,16 +282,6 @@ function ZoneListImpl({
                     ? 'Otras zonas por valoración'
                     : `Mostrando las ${Math.min(visibleResults.length, 15)} mejores zonas`}
                 </span>
-                {visibleResults.length >= 2 && (
-                  <button
-                    type="button"
-                    onClick={onCompareTop3}
-                    className="inline-flex items-center gap-1.5 rounded-[8px] border border-border bg-bg px-2.5 py-1 text-xs font-medium text-ink transition hover:border-ink/40 hover:bg-surface"
-                  >
-                    <Scale className="h-3.5 w-3.5" strokeWidth={1.75} />
-                    <span>Comparar top 3</span>
-                  </button>
-                )}
               </div>
             )}
 
@@ -325,7 +291,6 @@ function ZoneListImpl({
                 const isSelected = area.id === selectedAreaId;
                 const isHovered = area.id === hoveredAreaId;
                 const isCompared = compareIds.includes(area.id);
-                const firstLink = area.listing_links[0];
                 const tags = tagsByAreaId[area.id] ?? [];
                 const overAmount =
                   area.est_rent_eur_month != null && area.est_rent_eur_month > budget
@@ -396,50 +361,16 @@ function ZoneListImpl({
                       <RealListings areaId={area.id} />
                     </div>
 
-                    {/* Footer actions: secondary "Ver pisos" + Compare toggle */}
+                    {/* Footer actions: "Ver pisos" menu + details; comparing lives in its own mode */}
                     <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border pt-2.5">
-                      {firstLink ? (
-                        <a
-                          href={firstLink.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex min-h-[34px] items-center gap-1.5 rounded-[8px] border border-border bg-bg px-3 py-1.5 text-xs font-medium text-ink transition hover:border-ink/40 hover:bg-surface"
-                        >
-                          <span>Ver pisos</span>
-                          <ExternalLink className="h-3.5 w-3.5 text-muted" strokeWidth={1.75} />
-                        </a>
-                      ) : (
-                        <span />
-                      )}
-
+                      <ListingsMenu links={area.listing_links} />
                       <button type="button" aria-expanded={isSelected}
                         onClick={() => onSelectArea(area.id)}
                         className="inline-flex min-h-[34px] items-center gap-1 rounded-lg px-2 text-xs font-medium text-ink hover:bg-surface">
-                        {isSelected ? 'Ocultar detalle' : 'Ver detalle'}
+                        {isSelected ? 'Ocultar detalles' : 'Ver detalles'}
                         <ChevronDown className={isSelected ? 'rotate-180' : ''} size={14} aria-hidden="true" />
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => onToggleCompare(area.id)}
-                        disabled={!isCompared && compareIds.length >= 3}
-                        className={`ml-auto inline-flex min-h-[34px] items-center gap-1.5 rounded-[8px] px-2.5 py-1.5 text-xs font-medium transition disabled:opacity-40 ${
-                          isCompared
-                            ? 'bg-surface text-ink'
-                            : 'text-muted hover:bg-surface hover:text-ink'
-                        }`}
-                      >
-                        {isCompared ? (
-                          <>
-                            <Check className="h-3.5 w-3.5" strokeWidth={1.75} />
-                            <span>Comparando</span>
-                          </>
-                        ) : (
-                          <>
-                            <Scale className="h-3.5 w-3.5" strokeWidth={1.75} />
-                            <span>Comparar</span>
-                          </>
-                        )}
-                      </button>
+                      {compareMode && <span className="ml-auto"><CompareCheck checked={isCompared} disabled={!isCompared && compareIds.length >= 3} onChange={() => onToggleCompare(area.id)} /></span>}
                     </div>
                     <Expandable open={isSelected}>{renderDetails(area)}</Expandable>
                   </article>
@@ -495,4 +426,51 @@ function ZoneListImpl({
 }
 
 /** Memoised: only re-renders when its own props change (hovering elsewhere doesn't redraw it). */
+
+/** Labelled checkbox shown on each card while choosing zones to compare. */
+function CompareCheck({ checked, disabled, onChange }: { checked: boolean; disabled: boolean; onChange: () => void }) {
+  return (
+    <label className={'mt-2 inline-flex min-h-[34px] cursor-pointer items-center gap-2 text-xs font-medium text-ink ' + (disabled ? 'opacity-40' : '')}>
+      <input type="checkbox" checked={checked} disabled={disabled} onChange={onChange} className="size-4 accent-brand" />
+      Comparar esta zona
+    </label>
+  );
+}
+
+/** "Ver pisos": opens a small menu with every portal where this zone's listings are available. */
+function ListingsMenu({ links, primary = false }: { links: ScoreResultItem['listing_links']; primary?: boolean }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const close = (event: MouseEvent) => { if (!ref.current?.contains(event.target as Node)) setOpen(false); };
+    const esc = (event: KeyboardEvent) => { if (event.key === 'Escape') setOpen(false); };
+    document.addEventListener('mousedown', close);
+    document.addEventListener('keydown', esc);
+    return () => { document.removeEventListener('mousedown', close); document.removeEventListener('keydown', esc); };
+  }, [open]);
+  if (!links.length) return null;
+  const buttonClass = primary
+    ? 'inline-flex min-h-[40px] w-full items-center justify-center gap-1.5 rounded-[8px] bg-brand px-3.5 py-2 text-xs font-semibold text-bg transition hover:bg-brand-hover'
+    : 'inline-flex min-h-[34px] items-center gap-1.5 rounded-[8px] border border-border bg-bg px-3 py-1.5 text-xs font-medium text-ink transition hover:border-ink/40 hover:bg-surface';
+  return (
+    <div ref={ref} className={'relative ' + (primary ? 'flex-1' : '')}>
+      <button type="button" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((v) => !v)} className={buttonClass}>
+        Ver pisos <ChevronDown className={'h-3.5 w-3.5 transition ' + (open ? 'rotate-180' : '')} strokeWidth={2} aria-hidden="true" />
+      </button>
+      {open && (
+        <div role="menu" className="absolute bottom-full left-0 z-30 mb-1.5 min-w-[200px] rounded-xl border border-border bg-bg p-1 shadow-popover">
+          {links.map((link) => (
+            <a key={link.url} role="menuitem" href={link.url} target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)}
+              className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm font-medium text-ink hover:bg-surface">
+              {link.label}
+              <ExternalLink className="h-3.5 w-3.5 text-muted" strokeWidth={1.75} aria-hidden="true" />
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export const ZoneList = reactMemo(ZoneListImpl);

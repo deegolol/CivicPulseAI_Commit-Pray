@@ -32,7 +32,7 @@ export function TravelTimes({ area, className = '' }: { area: ScoreResultItem; c
   );
 }
 
-/** The big number on a card: the cheapest real listing we checked, the official flat rent, or the travel time. */
+/** The big number on a card is always a price: the cheapest real listing we checked, else the official flat rent of the barrio. */
 export function HeroFigure({ area, large = false }: { area: ScoreResultItem; large?: boolean }) {
   const size = large ? 'text-2xl' : 'text-xl';
   const listings = listingsFor(area.id);
@@ -43,17 +43,18 @@ export function HeroFigure({ area, large = false }: { area: ScoreResultItem; lar
         <div className={`font-display ${size} font-bold text-ink tabular-nums`}>
           {formatEuro(cheapest)}<span className="font-sans text-xs font-normal text-muted">/mes</span>
         </div>
-        <div className="text-[11px] text-muted">anuncio real más barato</div>
+        <div className="text-[11px] text-muted">desde · anuncio real</div>
       </div>
     );
   }
-  if (area.est_rent_eur_month != null) {
+  const officialFlat = area.est_rent_eur_month ?? area.rent_median_eur_month;
+  if (officialFlat != null) {
     return (
       <div className="text-right">
         <div className={`font-display ${size} font-bold text-ink tabular-nums`}>
-          {formatEuro(area.est_rent_eur_month)}<span className="font-sans text-xs font-normal text-muted">/mes</span>
+          {formatEuro(officialFlat)}<span className="font-sans text-xs font-normal text-muted">/mes</span>
         </div>
-        <div className="text-[11px] text-muted">mediana oficial de pisos</div>
+        <div className="text-[11px] text-muted">alquiler oficial de un piso aquí</div>
       </div>
     );
   }

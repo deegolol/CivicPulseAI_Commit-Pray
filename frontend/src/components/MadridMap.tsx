@@ -261,7 +261,9 @@ function MapViewportController({
     lastBoundsSig.current = boundsSignature;
     const bounds = L.latLngBounds(boundsPoints);
     if (!bounds.isValid()) return;
-    map.fitBounds(bounds, { padding: [60, 60], maxZoom: 14, animate: !window.matchMedia("(prefers-reduced-motion: reduce)").matches, duration: 0.35 });
+    // Leave room on the right for the layers panel so the recommended zone is never hidden under it.
+    const wide = size.x >= 900;
+    map.fitBounds(bounds, { paddingTopLeft: [60, 60], paddingBottomRight: [wide ? 300 : 60, 60], maxZoom: 14, animate: !window.matchMedia("(prefers-reduced-motion: reduce)").matches, duration: 0.35 });
   }, [map, boundsPoints, boundsSignature, visible]);
 
   // Smooth pan to selected neighborhood

@@ -40,5 +40,24 @@
    "distance_km": 0.9
   },
   "interpretation": "Buscas una habitación barata, bien comunicada en metro y cerca del Campus Sur, a un máximo de 6 km."
+ },
+ "estudio en la etsisi y busco una habitacion por menos de 450 euros al mes, a menos de 30 minutos en transporte publico": {
+  "on_topic": true,
+  "campus_id": "etsisi",
+  "budget_eur_month": 450.0,
+  "housing_type": "room",
+  "max_distance_km": null,
+  "max_travel_min": 30.0,
+  "travel_mode": "transit",
+  "priorities": {
+   "air_no2": 0.2,
+   "rent_eur_m2": 1.0,
+   "services_count": 0.2,
+   "transit_stops": 1.0,
+   "libraries_count": 0.2,
+   "sports_count": 0.2,
+   "distance_km": 1.0
+  },
+  "interpretation": "Buscas una habitación cerca de la ETSISI por menos de 450 € al mes y a menos de 30 minutos en transporte público."
  }
 }
