@@ -72,7 +72,7 @@
 | ¿Hacéis scraping de Idealista? | No. Solo generamos **enlaces** a sus búsquedas filtradas; el estudiante aterriza en el portal. |
 | ¿Por qué Montegancedo da barrios de Latina? | El campus está en Boadilla/Pozuelo, fuera del municipio, y nuestros datos son de los barrios de Madrid capital: los más cercanos están en Latina y Moncloa. Ampliar a municipios es una mejora siguiente. |
 | ¿Arquitectura? | ETL Python → JSON versionados → FastAPI (scoring, enlaces, IA) → React + Vite + TS + Leaflet. Un único contenedor Docker en Railway que se despliega en cada push a main. |
-| ¿Cómo habéis usado la IA para programar? | 3 personas y 5 agentes (Claude Code, Codex, Antigravity) en el mismo repo, coordinados con AGENTS.md, tareas con dueño, contratos fijos y un buzón de mensajes. Revisión cruzada: un agente de DATA encontró un bug en la API y se arregló con test de regresión. Detalle en AI_USAGE.md. |
+| ¿Cómo habéis usado la IA para programar? | 3 personas y 5 agentes (Claude Code, Codex, Antigravity) en el mismo repo, coordinados con reglas comunes, tareas con dueño, contratos fijos y un buzón de mensajes. Revisión cruzada: un agente de DATA encontró un bug en la API y se arregló con test de regresión. Detalle en AI_USAGE.md. |
 | ¿Existe ya algo así? | Madriwa recomienda barrios con datos abiertos, pero no usa presupuesto ni está pensada para estudiantes ni lleva a pisos. Los portales tienen pisos, pero no te dicen qué zona te conviene. Nosotros unimos las dos cosas. |
 
 ## Cifras para no equivocarse (comprobadas en la demo publicada tras el rediseño v2)

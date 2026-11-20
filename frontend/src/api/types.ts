@@ -1,5 +1,5 @@
 /**
- * TypeScript contract matching coordination/CONTRACTS.md §3–4.
+ * TypeScript contract matching the API contract (docs/ARCHITECTURE.md) §3–4.
  * Shared across API client, mock layer, and UI components.
  */
 import type { Feature, FeatureCollection, Geometry } from 'geojson';

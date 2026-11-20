@@ -7,7 +7,6 @@ frontend/dist
 data/raw
 .env
 .env.*
-coordination
 docs
 
 # Private account storage

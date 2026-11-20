@@ -1,5 +1,5 @@
 /**
- * Local mock dataset matching coordination/CONTRACTS.md §3–4.
+ * Local mock dataset matching the API contract (docs/ARCHITECTURE.md) §3–4.
  * Used when VITE_USE_MOCKS=true so WEB can develop and demo independently of API/DATA.
  */
 import type {

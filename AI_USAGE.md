@@ -8,22 +8,20 @@
 | Claude Code | `claude@diego` | API FastAPI, motor de puntuación, capa de IA, pruebas, enlaces a anuncios y configuración del despliegue. |
 | Antigravity | `antigravity@diego` | Aplicación React, mapa, panel de prioridades, detalle, comparador y búsqueda en lenguaje natural. |
 
-## 2. Coordinación de cinco agentes
+## 2. Cómo trabajamos
 
-Trabajamos con un clon por agente. [AGENTS.md](AGENTS.md) fija las reglas comunes. El [tablero de tareas](coordination/tasks/) recoge el dueño y el alcance de cada cambio, y el [contrato](coordination/CONTRACTS.md) permite desarrollar en paralelo con los mismos IDs, tipos y rutas.
-
-Los agentes usan el [inbox del repo](coordination/inbox/) con `sync.sh` y `msg.sh`. Los commits de coordinación quedan en GitHub y cada agente registra su trabajo en [su log](coordination/log/). Las primeras tandas pasaron por aprobación humana previa. Desde [D-22](coordination/DECISIONS.md), el equipo autorizó integrar tras los checks y mantener la revisión humana con la posibilidad de pausar y pedir cambios.
+Cada agente trabajó en su propia copia del repositorio, con reglas comunes, tareas con un dueño claro y un contrato de API fijo que permitió desarrollar datos, API y web en paralelo. Los humanos revisaron cada entrega y pidieron los cambios necesarios antes de publicarla.
 
 ## 3. Contribución por módulo
 
 | Módulo | Trabajo de la IA y comprobaciones | Decisiones y revisión humanas |
 |---|---|---|
-| Fuentes, geometría y alquiler | Codex contrastó siete archivos locales con fuentes oficiales, implementó la geometría de 131 barrios, verificó dos campus UPM y publicó la mediana distrital SERPAVI 2024. Probó el ETL y comprobó los datos en Railway. [Log](coordination/log/codex@adrian.md) | Adrián aportó los archivos y aprobó T01, incluida la selección de fuente y granularidad. |
-| Aire, Metro y servicios | Codex implementó los cruces espaciales, contrastó las 23 medias de NO₂ con la memoria municipal de 2025 y verificó el agregado por ID, valor y nota. [Log](coordination/log/codex@diego.md) | Diego fijó las reglas de fuentes y coordinación. Los agentes aplicaron el inventario revisado por Adrián. |
-| API y puntuación | Claude Code escribió modelos, endpoints, lógica de puntuación, estimaciones de presupuesto, enlaces filtrados y pruebas. [Log](coordination/log/claude@diego.md) | Diego dio el OK a T02 y T08. El equipo definió el enfoque de presupuesto primero y el uso de m² de referencia por tipo de vivienda. |
-| Búsqueda y explicación con IA | Claude Code implementó los prompts, la llamada a OpenAI y las alternativas sin proveedor. Añadió pruebas offline y comprobó de punta a punta el caso de Lucía. [Log](coordination/log/claude@diego.md) | Diego eligió OpenAI y configuró el modelo. El equipo limitó esta capa a interpretar la consulta y explicar resultados del motor. |
-| Interfaz | Antigravity implementó React, Leaflet y los paneles. Comprobó compilación y diseño en escritorio y móvil. [Log](coordination/log/antigravity@diego.md) | Diego definió la dirección visual, el coroplético monocromático y la presentación de métricas en unidades reales en T24. |
-| Desarrollo y despliegue | Codex preparó y probó los comandos `make dev`, `make data` y `make check`. Claude Code diagnosticó el fallo de Railway y añadió el Dockerfile y los filtros de despliegue. [Log SHIP](coordination/log/codex@techgallo.md), [log API](coordination/log/claude@diego.md) | Diego eligió Railway y pidió corregir el despliegue. La integración de estas tandas siguió D-22. |
+| Fuentes, geometría y alquiler | Codex contrastó siete archivos locales con fuentes oficiales, implementó la geometría de 131 barrios, verificó dos campus UPM y publicó la mediana distrital SERPAVI 2024. Probó el ETL y comprobó los datos en Railway. | Adrián aportó los archivos y aprobó T01, incluida la selección de fuente y granularidad. |
+| Aire, Metro y servicios | Codex implementó los cruces espaciales, contrastó las 23 medias de NO₂ con la memoria municipal de 2025 y verificó el agregado por ID, valor y nota. | Diego fijó las reglas de fuentes y coordinación. Los agentes aplicaron el inventario revisado por Adrián. |
+| API y puntuación | Claude Code escribió modelos, endpoints, lógica de puntuación, estimaciones de presupuesto, enlaces filtrados y pruebas. | Diego dio el OK a T02 y T08. El equipo definió el enfoque de presupuesto primero y el uso de m² de referencia por tipo de vivienda. |
+| Búsqueda y explicación con IA | Claude Code implementó los prompts, la llamada a OpenAI y las alternativas sin proveedor. Añadió pruebas offline y comprobó de punta a punta el caso de Lucía. | Diego eligió OpenAI y configuró el modelo. El equipo limitó esta capa a interpretar la consulta y explicar resultados del motor. |
+| Interfaz | Antigravity implementó React, Leaflet y los paneles. Comprobó compilación y diseño en escritorio y móvil. | Diego definió la dirección visual, el coroplético monocromático y la presentación de métricas en unidades reales en T24. |
+| Desarrollo y despliegue | Codex preparó y probó los comandos `make dev`, `make data` y `make check`. Claude Code diagnosticó el fallo de Railway y añadió el Dockerfile y los filtros de despliegue. | Diego eligió Railway y pidió corregir el despliegue. |
 
 ## 4. IA dentro del producto
 

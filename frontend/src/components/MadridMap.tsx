@@ -569,17 +569,6 @@ function MadridMapImpl({
         <MapLayersPanel enabled={layers} onToggle={onToggleLayer} />
       </div>
 
-      {/* Clean minimal map key */}
-      <div className="pointer-events-none absolute bottom-20 left-3 z-[400] flex max-w-[calc(100%-1.5rem)] flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-border bg-bg/95 px-3 py-1.5 text-[11px] text-muted lg:bottom-6 lg:left-4">
-        <span className="inline-flex items-center gap-1.5 font-medium text-ink">
-          <span className="h-2.5 w-2.5 rounded-full bg-brand" />
-          Recomendada
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full border border-ink/40 bg-bg" />
-          Minutos hasta tu campus
-        </span>
-      </div>
     </div>
   );
 }

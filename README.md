@@ -111,7 +111,7 @@ Sin `make`: `cd backend && uvicorn app.main:app --reload --port 8000` y, en otra
 
 ## 🔌 API
 
-Documentación interactiva: **[/docs](https://primerallave.up.railway.app/docs)**. Contrato completo en [coordination/CONTRACTS.md](coordination/CONTRACTS.md).
+Documentación interactiva: **[/docs](https://primerallave.up.railway.app/docs)**. Arquitectura en [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 | Método | Ruta | Para qué |
 |---|---|---|
@@ -130,14 +130,13 @@ backend/        FastAPI: app/ (routers, scoring, listings, llm, prompts, models)
 frontend/       React + Vite + TS: src/components (mapa, panel, detalle, comparador, IA), src/api
 etl/            Scripts de descarga y transformación de cada fuente + run_all.py
 data/           processed/ (salida versionada) y SOURCES.md (fuentes y licencias)
-coordination/   Cómo nos coordinamos humanos y agentes de IA (tareas, contratos, decisiones, logs)
 docs/           Capturas
 Dockerfile · railway.json · Makefile
 ```
 
 ## 🤖 Uso de IA
 
-Hemos trabajado 3 personas con 5 agentes de IA (Claude Code, ChatGPT Codex y Gemini Antigravity) en paralelo sobre este mismo repositorio, coordinados mediante ficheros: reglas comunes en [AGENTS.md](AGENTS.md), tareas con dueño, contratos de API fijos, un buzón de mensajes entre agentes y un registro de decisiones en [coordination/](coordination/). Detalle de qué hizo cada herramienta y qué revisaron los humanos en **[AI_USAGE.md](AI_USAGE.md)**.
+Hemos trabajado 3 personas con varios agentes de IA (Claude Code, ChatGPT Codex y Gemini Antigravity) en paralelo sobre este mismo repositorio, con reglas comunes, tareas con dueño y contratos de API fijos. Detalle de qué hizo cada herramienta y qué revisaron los humanos en **[AI_USAGE.md](AI_USAGE.md)**.
 
 ## 🔎 De dónde sale cada número
 

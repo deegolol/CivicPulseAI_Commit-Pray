@@ -1,4 +1,4 @@
-"""Pydantic schemas that mirror coordination/CONTRACTS.md §3–4. Field names here ARE the contract."""
+"""Pydantic schemas that mirror the API contract (docs/ARCHITECTURE.md) §3–4. Field names here ARE the contract."""
 from __future__ import annotations
 
 from typing import Literal
