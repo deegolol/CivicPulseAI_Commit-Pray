@@ -151,7 +151,7 @@ function buildTooltipHtml(
       ? `${(result.rent_basis ?? '').startsWith('Estimado') ? '~' : ''}${formatEuro(result.est_rent_eur_month)}/mes`
       : result?.travel_min != null ? `${formatMinutes(result.travel_min)} a tu campus` : '';
   const distText = result?.transit_min != null
-    ? `${formatMinutes(result.transit_min)} en transporte · ${formatMinutes(result.car_min)} en coche${result.est_rent_eur_month != null ? ((result.rent_basis ?? '').startsWith('Estimado') ? ' · precio estimado' : ' · alquiler oficial') : ''}`
+    ? `🚇 ${formatMinutes(result.transit_min)} · 🚗 ${formatMinutes(result.car_min)} · ${formatKm(result.distance_km)}${result.est_rent_eur_month != null ? ((result.rent_basis ?? '').startsWith('Estimado') ? ' · precio estimado' : ' · alquiler oficial') : ''}`
     : result ? `${formatKm(result.distance_km)} de tu campus` : '';
   const over =
     result?.est_rent_eur_month != null && result.est_rent_eur_month > budget
