@@ -44,13 +44,14 @@ export function HeroFigure({ area, budget, housingType, large = false }: {
   const listings = housingType === 'room' ? listingsFor(area.id, budget) : [];
   const estimated = (area.rent_basis ?? '').startsWith('Estimado');
   const price = listings.length ? Math.min(...listings.map((l) => l.price_eur_month)) : area.est_rent_eur_month;
-  const caption = listings.length ? 'desde · anuncio real' : estimated ? 'precio estimado' : 'alquiler oficial de un piso aquí';
+  const caption = listings.length ? `anuncio real en ${[...new Set(listings.filter((l) => l.price_eur_month === price).map((l) => l.source))].join(' y ')}` : estimated ? 'precio estimado' : 'alquiler oficial de un piso aquí';
   if (price == null) {
     return <div className="text-right text-sm font-semibold text-muted">Sin dato de precio</div>;
   }
   return (
     <div className="text-right">
       <div className={`font-display ${size} font-bold text-ink tabular-nums`}>
+        {listings.length ? <span className="mr-1 font-sans text-sm font-semibold text-muted">desde</span> : null}
         {!listings.length && estimated ? '~' : ''}{formatEuro(price)}<span className="font-sans text-xs font-normal text-muted">/mes</span>
       </div>
       <div className="text-[11px] text-muted">{caption}</div>

@@ -433,7 +433,7 @@ function MadridMapImpl({
         // Pills show the real travel time; a price only when it is an official published figure (flats).
         // Same figure as the card: the real listing when we have one in budget, else the (estimated / official) rent.
         const real = housingType === 'room' ? listingsFor(id, budget >= NO_BUDGET_LIMIT ? null : budget) : [];
-        const priceLabel = real.length ? formatEuro(Math.min(...real.map((l) => l.price_eur_month)))
+        const priceLabel = real.length ? 'desde ' + formatEuro(Math.min(...real.map((l) => l.price_eur_month)))
           : area.est_rent_eur_month != null
           ? ((area.rent_basis ?? '').startsWith('Estimado') ? '~' : '') + formatEuro(area.est_rent_eur_month)
           : area.travel_min != null ? formatMinutes(area.travel_min) : formatKm(area.distance_km);
