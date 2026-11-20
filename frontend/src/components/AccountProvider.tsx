@@ -150,7 +150,7 @@ export function AccountButton({ toolbar = false }: { toolbar?: boolean }) {
   if (!controls.user) {
     return (
       <button type="button" onClick={() => controls.show()}
-        className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-border px-3.5 text-sm font-semibold text-ink transition hover:border-ink/40 hover:bg-surface">
+        className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[10px] border border-border px-3.5 text-sm font-semibold text-ink transition hover:border-ink/40 hover:bg-surface">
         <CircleUserRound size={16} aria-hidden="true" /> Entrar
       </button>
     );

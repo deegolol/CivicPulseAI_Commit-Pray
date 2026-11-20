@@ -214,7 +214,11 @@ def _finish(raw: dict, campuses: list[Campus], keys: list[str], default_campus: 
     minutes = float(minutes) if isinstance(minutes, (int, float)) and 5 <= minutes <= 180 else None
     mode = raw.get("travel_mode") if raw.get("travel_mode") in ("transit", "car") else "transit"
     prio = raw.get("priorities") or {}
-    weights = {k: round(min(max(float(prio.get(k, 0.2) or 0), 0.0), 1.0), 2) for k in keys}
+    # Snap to 3 levels (poco / bastante / mucho): the AI may answer 0.8 one time and 0.9 the next for the same
+    # sentence; snapping makes the same sentence + options give the same ranking.
+    def snap(value: float) -> float:
+        return 0.2 if value < 0.4 else 0.6 if value < 0.8 else 1.0
+    weights = {k: snap(min(max(float(prio.get(k, 0.2) or 0), 0.0), 1.0)) for k in keys}
     if DISTANCE_KEY in weights:  # students commute daily: distance never drops below 0.6 (product rule, D-24)
         weights[DISTANCE_KEY] = max(weights[DISTANCE_KEY], 0.6)
     return {

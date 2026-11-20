@@ -6,9 +6,10 @@ import { AccountButton } from './AccountProvider';
 import { BrandLogo } from './BrandLogo';
 import { HowItWorksDialog } from './HowItWorksDialog';
 
-const navBase = 'h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium text-muted transition hover:bg-surface hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink';
+const navBase = 'h-9 items-center gap-1.5 rounded-[10px] px-3 text-sm font-medium text-muted transition hover:bg-surface hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink';
 const navClass = 'inline-flex ' + navBase;
-const headerGroup = 'flex h-[46px] items-center rounded-full border border-border/80 bg-bg/95 shadow-[0_4px_16px_-6px_rgb(13_17_23/0.18)]';
+// Option C chosen by Diego: rounded cards (14 px corners) with room around the logo, not tight pills.
+const headerGroup = 'flex h-[46px] items-center rounded-[14px] border border-border/80 bg-bg/95 shadow-[0_4px_16px_-6px_rgb(13_17_23/0.18)]';
 
 export function SiteHeader({ onBack, onHome, sources }: {
   onBack?: () => void;
@@ -20,7 +21,7 @@ export function SiteHeader({ onBack, onHome, sources }: {
   return (
     <header className="relative z-30 shrink-0">
       <div className="flex h-16 items-center justify-between gap-3 px-3 pt-2 sm:px-6">
-        <div className={`${headerGroup} min-w-0 gap-1 pr-1.5 pl-3 sm:gap-3 sm:pl-4`}>
+        <div className={`${headerGroup} min-w-0 gap-1 pl-4 sm:gap-3 ${onBack ? 'pr-1.5' : 'pr-5'}`}>
           <button type="button" onClick={onHome} aria-label="Ir al inicio" className="inline-flex h-9 items-center rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink">
             <BrandLogo />
           </button>
@@ -34,7 +35,7 @@ export function SiteHeader({ onBack, onHome, sources }: {
             </>
           )}
         </div>
-        <nav aria-label="Principal" className={`${headerGroup} shrink-0 gap-0.5 px-1 sm:gap-1`}>
+        <nav aria-label="Principal" className={`${headerGroup} shrink-0 gap-0.5 px-1.5 sm:gap-1`}>
           <button type="button" onClick={() => setOpen(true)} className={navClass}>
             <HelpCircle size={17} aria-hidden="true" className="sm:hidden" />
             <span className="hidden sm:inline">Cómo funciona</span>

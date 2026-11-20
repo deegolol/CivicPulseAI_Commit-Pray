@@ -183,18 +183,18 @@ export function OnboardingScreen({
           </div>
         </main>
       ) : (
-        <main key="manual" className="animate-fade-up mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-5 py-6 sm:pt-8 sm:pb-24">
-          <div className="mb-5 text-center">
-            <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+        <main key="manual" className="animate-fade-up mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-5 py-3 [@media(min-height:760px)]:pb-20">
+          <div className="mb-4 text-center">
+            <h1 className="font-display text-3xl font-bold tracking-tight sm:text-[2.1rem]">
               Cuéntanos lo básico
             </h1>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-muted sm:text-base">
+            <p className="mx-auto mt-1.5 max-w-2xl text-sm text-muted sm:text-base [@media(max-height:640px)]:hidden">
               Cuatro datos y lo que más te importa. Puedes cambiarlo después.
             </p>
           </div>
 
           <form
-            className="grid gap-x-10 gap-y-6 rounded-2xl border border-border bg-bg p-5 shadow-[0_16px_40px_-16px_rgb(13_17_23/0.16)] sm:p-7 lg:grid-cols-2"
+            className="grid gap-x-10 gap-y-5 rounded-2xl border border-border bg-bg p-5 shadow-[0_16px_40px_-16px_rgb(13_17_23/0.16)] sm:px-7 sm:py-6 lg:grid-cols-2"
             onSubmit={(event) => {
               event.preventDefault();
               if (!campusId) { setFormError('Elige tu campus de la lista.'); return; }
@@ -203,7 +203,7 @@ export function OnboardingScreen({
               onStart();
             }}
           >
-            <div className="space-y-6">
+            <div className="space-y-5">
               <CampusPicker campuses={campuses.length ? campuses : DEFAULT_CAMPUSES} campusId={campusId} onChange={onCampusChange} label="¿Dónde estudias?" />
 
               <div>
@@ -233,23 +233,21 @@ export function OnboardingScreen({
               </div>
 
                 <div>
-                  <span className={labelClass}>Cómo irás a clase</span>
-                  <div role="radiogroup" aria-label="Cómo irás a clase" className="mt-2 grid grid-cols-2 gap-1 rounded-xl bg-surface p-1">
-                    {(Object.entries(TRANSPORT_LABELS) as [TransportMode, string][]).map(([value, label]) => {
-                      const Icon = value === 'car' ? Car : TrainFront;
-                      return (
-                        <button key={value} type="button" role="radio" aria-checked={transportMode === value}
-                          onClick={() => onTransportModeChange(value)}
-                          className={'inline-flex min-h-10 items-center justify-center gap-2 rounded-lg text-sm font-semibold transition ' +
-                            (transportMode === value ? 'bg-bg text-ink shadow-sm ring-1 ring-ink/5' : 'text-muted hover:text-ink')}>
-                          <Icon size={15} aria-hidden="true" /> {label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <div className="mt-4 flex items-baseline justify-between">
-                    <label htmlFor="minutes-range" className={labelClass}>Tiempo máximo hasta el campus</label>
-                    <span className="text-sm font-semibold tabular-nums">{maxTravelMin === null ? 'Sin límite' : `${minValue} min`}</span>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <label htmlFor="minutes-range" className={labelClass}>Tiempo hasta el campus</label>
+                    <div role="radiogroup" aria-label="Cómo irás a clase" className="inline-flex gap-0.5 rounded-lg bg-surface p-0.5">
+                      {(Object.entries(TRANSPORT_LABELS) as [TransportMode, string][]).map(([value, label]) => {
+                        const Icon = value === 'car' ? Car : TrainFront;
+                        return (
+                          <button key={value} type="button" role="radio" aria-checked={transportMode === value}
+                            onClick={() => onTransportModeChange(value)}
+                            className={'inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 text-xs font-semibold transition ' +
+                              (transportMode === value ? 'bg-bg text-ink shadow-sm ring-1 ring-ink/5' : 'text-muted hover:text-ink')}>
+                            <Icon size={14} aria-hidden="true" /> {label}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                   <input id="minutes-range" type="range" min={MIN_MIN} max={MIN_UNLIMITED} step={5} value={minValue}
                     onChange={(event) => {
@@ -257,8 +255,8 @@ export function OnboardingScreen({
                       onMaxTravelChange(value > MIN_MAX ? null : value);
                     }}
                     className="clean-range mt-3 w-full" />
-                  <div className="mt-1 flex justify-between text-xs text-muted"><span>{MIN_MIN} min</span><span>{MIN_MAX} min · Sin límite</span></div>
-                  <p className="mt-1.5 text-xs text-muted">Tiempos reales puerta a puerta: horarios del Consorcio de Transportes y red de calles de OpenStreetMap.</p>
+                  <div className="mt-1 flex items-baseline justify-between text-xs text-muted"><span>{MIN_MIN} min</span><span className="text-sm font-semibold text-ink tabular-nums">{maxTravelMin === null ? 'Sin límite' : `Máximo ${minValue} min`}</span><span>{MIN_MAX} min · Sin límite</span></div>
+                  <p className="mt-1 text-xs text-muted">Tiempo real puerta a puerta (horarios del CRTM y calles de OpenStreetMap).</p>
                 </div>
             </div>
 
