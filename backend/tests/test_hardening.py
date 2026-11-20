@@ -43,6 +43,7 @@ def test_rate_limit_per_ip_returns_429(monkeypatch):
 
 
 def test_identical_parse_and_explain_hit_the_cache(monkeypatch):
+    monkeypatch.setenv("LLM_CACHE", "true")  # the cache is off by default
     calls = fake_llm(monkeypatch)
     for _ in range(3):
         assert client.post("/api/ai/parse", json={"query": "algo en la ETSISI por 400"}).json()["engine"] == "llm"
@@ -80,3 +81,11 @@ def test_rate_limit_cannot_be_dodged_by_spoofing_x_forwarded_for(monkeypatch):
     codes = [client.post("/api/ai/parse", json={"query": "ETSISI"}, headers={"x-forwarded-for": f"6.6.6.{i}, 1.2.3.4"}).status_code
              for i in range(3)]
     assert codes == [200, 200, 429]
+
+
+def test_cache_is_off_by_default_so_every_search_asks_the_ai(monkeypatch):
+    monkeypatch.delenv("LLM_CACHE", raising=False)
+    calls = fake_llm(monkeypatch)
+    for _ in range(2):
+        client.post("/api/ai/parse", json={"query": "algo en la ETSISI por 400"})
+    assert len(calls) == 2

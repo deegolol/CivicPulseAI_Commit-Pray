@@ -54,7 +54,14 @@ def llm_status() -> dict:
     return {"llm": llm_enabled(), "llm_calls_today": _usage["calls"] if _usage["day"] == date.today().isoformat() else 0}
 
 
+def _cache_enabled() -> bool:
+    """Answer cache for identical sentences. Off by default (LLM_CACHE=true turns it on): every search really asks the AI."""
+    return os.getenv("LLM_CACHE", "false").lower() == "true"
+
+
 def _cache_get(cache: OrderedDict, key: str):
+    if not _cache_enabled():
+        return None
     with _lock:
         if key in cache:
             cache.move_to_end(key)
@@ -63,6 +70,8 @@ def _cache_get(cache: OrderedDict, key: str):
 
 
 def _cache_put(cache: OrderedDict, key: str, value) -> None:
+    if not _cache_enabled():
+        return
     with _lock:
         cache[key] = value
         cache.move_to_end(key)
