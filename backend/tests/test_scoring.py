@@ -146,3 +146,10 @@ def test_optional_services_only_score_when_selected_and_budget_range_filters():
         assert included[0]["breakdown"][key]["value"] == max(area["breakdown"][key]["value"] for area in included)
         winners.append(included[0]["id"])
     assert winners[0] != winners[1]
+
+
+def test_barrio_rent_wins_over_district_rent():
+    rents = {"ch": {"median": 900}, "cheap": {"median": 700, "p25": 600, "p75": 800}}
+    flat = {r.id: r for r in score_areas(AREAS, IND, CAMPUS, req(weights={"rent_eur_m2": 1}, housing_type="flat"), rents=rents)}
+    assert flat["cheap"].est_rent_eur_month == 700 and "Barata" in flat["cheap"].rent_basis  # barrio figure, named
+    assert flat["mid"].est_rent_eur_month is None  # district "mi" has no data in this fixture
