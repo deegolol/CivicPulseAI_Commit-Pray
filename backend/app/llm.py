@@ -103,6 +103,11 @@ TOPIC_WORDS = (
 VOWELS = set("aeiouy")
 
 
+def _has_word(q: str, w: str) -> bool:
+    """Word-start match ("barat" → "barato"); short words must be whole ("bus" ≠ "busco", "mes" ≠ "mesa")."""
+    return bool(re.search(rf"\b{re.escape(w)}" + (r"\b" if len(w) <= 4 else ""), q))
+
+
 def looks_like_language(query: str) -> bool:
     """Cheap, deterministic check (no AI) that the text is made of real-looking words, not keyboard mashing.
 
@@ -111,14 +116,15 @@ def looks_like_language(query: str) -> bool:
     """
     q = _norm(query)
     letters = [c for c in q if c.isalpha()]
+    meaningful = [c for c in q if c.isalnum()]  # "500-600 euros" is fine: digits count as meaningful
     visible = [c for c in q if not c.isspace()]
-    if len(letters) < 3 or len(letters) < 0.5 * len(visible):
+    if len(letters) < 3 or len(meaningful) < 0.6 * len(visible):
         return False
     if re.search(r"([a-z])\1{3,}", q) or len(set(letters)) < min(5, max(3, len(letters) // 3)):
         return False
     words = re.findall(r"[a-z]+", q)
     def plausible(w: str) -> bool:
-        return (len(w) <= 3 or bool(VOWELS & set(w))) and len(w) < 25 and not re.search(r"[^aeiouy]{5,}", w)
+        return (len(w) <= 3 or bool(set("aeiou") & set(w))) and len(w) < 25 and not re.search(r"[^aeiou]{5,}", w)
     good = sum(plausible(w) for w in words)
     return good >= max(1, round(0.7 * len(words)))
 
@@ -126,7 +132,9 @@ def looks_like_language(query: str) -> bool:
 def on_topic_by_keywords(query: str, campuses: list[Campus]) -> bool:
     q = _norm(query)
     names = [_norm(a) for c in campuses for a in (c.id, c.name, *c.aliases)] + [a for v in CAMPUS_ALIASES.values() for a in v]
-    return any(w in q for w in TOPIC_WORDS) or any(n and n in q for n in names) or bool(re.search(r"\d{3,4}", q))
+    return (any(_has_word(q, w) for w in TOPIC_WORDS)
+            or any(n and re.search(rf"\b{re.escape(n)}\b", q) for n in names)
+            or bool(re.search(r"\b\d{3,4}\s*(?:euros?|eur|pavos|al mes)", q)))
 
 
 # ---------------------------------------------------------------- helpers
@@ -228,22 +236,24 @@ def keyword_parse(query: str, campuses: list[Campus], keys: list[str]) -> dict:
     q = _norm(query)
     campus_terms: dict[str, set[str]] = {}
     for item in campuses:
-        terms = (*CAMPUS_ALIASES.get(item.id, ()), item.name.split(" · ")[-1],
+        terms = (*CAMPUS_ALIASES.get(item.id, ()), item.name.split(" · ")[-1], item.name.split(" · ")[0],
                  item.id.split("-", maxsplit=1)[-1], *item.aliases)
         for alias in terms:
             campus_terms.setdefault(_norm(alias), set()).add(item.id)
     # Ignore ambiguous university names and prefer the most specific match.
     campus = next((next(iter(campus_terms[term])) for term in sorted(campus_terms, key=len, reverse=True)
                    if term and len(campus_terms[term]) == 1 and re.search(rf"\b{re.escape(term)}\b", q)), None)
-    m = re.search(r"(\d{2,5})(?:[.,]\d+)?\s*(?:€|eur|euros?|pavos|al mes|/mes)", q)
-    budget = float(m.group(1)) if m else None
+    # "1.200 €" / "1,200 euros" are thousands; "450 €" is not.
+    m = re.search(r"(\d{1,3}(?:[.,]\d{3})+|\d{2,5})(?:[.,]\d{1,2})?\s*(?:euros?|eur|pavos|al mes|/mes)", q)
+    budget = float(re.sub(r"[.,]", "", m.group(1))) if m else None
     # "Estudio en la ETSISI" is the verb, not a studio flat: require a noun-like context.
     is_studio = re.search(r"\b(un|el|busco|quiero|alquilar|alquilo)\s+estudio\b|\bestudio\s+(para|individual|solo|propio)", q)
     housing = "studio" if is_studio else "flat" if re.search(r"piso (entero|para mi|solo)|apartamento", q) else "room"
     km = re.search(r"(\d+(?:[.,]\d+)?)\s*km", q)
     minutes = re.search(r"(\d{1,3})\s*(?:min|minutos)", q)
     mode = "car" if re.search(r"\b(coche|carro|conduc|en moto)", q) else "transit"
-    priorities = {k: (1.0 if any(w in q for w in KEYWORDS.get(k, ())) else 0.2) for k in keys}
+    # Word-start matching: "bus" must not fire on "busco", nor "tren" on "entrenar".
+    priorities = {k: (1.0 if any(_has_word(q, w) for w in KEYWORDS.get(k, ())) else 0.2) for k in keys}
     if "rent_eur_m2" in priorities and (budget or priorities["rent_eur_m2"] < 1):
         priorities["rent_eur_m2"] = max(priorities["rent_eur_m2"], 0.6)
     parts = [next((item.name for item in campuses if item.id == campus), None), f"hasta {int(budget)} €/mes" if budget else None,

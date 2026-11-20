@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class Source(BaseModel):
@@ -77,6 +77,7 @@ TravelMode = Literal["transit", "car"]
 
 
 class ScoreFilters(BaseModel):
+    model_config = ConfigDict(allow_inf_nan=False)  # NaN/Infinity → 422, never a 500
     max_rent_eur_m2: float | None = None
     max_distance_km: float | None = None  # road km by car (OSRM); straight line only if no travel data
     max_travel_min: float | None = Field(default=None, gt=0)  # door-to-door minutes with `travel_mode`
@@ -87,6 +88,7 @@ class ScoreFilters(BaseModel):
 
 
 class ScoreRequest(BaseModel):
+    model_config = ConfigDict(allow_inf_nan=False)  # NaN/Infinity → 422, never a 500
     campus_id: str
     weights: dict[str, float] = Field(default_factory=dict)
     filters: ScoreFilters = Field(default_factory=ScoreFilters)
@@ -168,6 +170,7 @@ class AiParseResponse(BaseModel):
 
 
 class AiExplainRequest(BaseModel):
+    model_config = ConfigDict(allow_inf_nan=False)  # NaN/Infinity → 422, never a 500
     campus_id: str
     weights: dict[str, float] = Field(default_factory=dict)
     area_ids: list[str] = Field(min_length=1, max_length=5)

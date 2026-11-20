@@ -129,7 +129,7 @@ export function OnboardingScreen({
               className="mx-auto max-w-3xl rounded-2xl border border-border bg-bg shadow-[0_16px_40px_-12px_rgb(13_17_23/0.18)] transition focus-within:border-ink"
               onSubmit={(event) => {
                 event.preventDefault();
-                if (query.trim()) onSearchSubmit(query.trim());
+                if (query.trim() && !searching) onSearchSubmit(query.trim());
               }}
             >
               <label htmlFor="onboarding-search" className="sr-only">Cuéntanos qué buscas</label>
@@ -143,7 +143,7 @@ export function OnboardingScreen({
                 onKeyDown={(event) => {
                   if (event.key === 'Enter' && !event.shiftKey) {
                     event.preventDefault();
-                    if (query.trim()) onSearchSubmit(query.trim());
+                    if (query.trim() && !searching) onSearchSubmit(query.trim());
                   }
                 }}
                 placeholder={`Ej.: ${DEMO_QUERY}`}
@@ -183,7 +183,7 @@ export function OnboardingScreen({
           </div>
         </main>
       ) : (
-        <main key="manual" className="animate-fade-up mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-5 py-6 sm:py-8">
+        <main key="manual" className="animate-fade-up mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-5 py-6 sm:pt-8 sm:pb-24">
           <div className="mb-5 text-center">
             <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
               Cuéntanos lo básico

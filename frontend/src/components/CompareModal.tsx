@@ -235,7 +235,7 @@ export function CompareModal({
                 </tr>}
 
                 {/* Fractional 0–5 Star Ratings per dimension */}
-                {allMetrics.map((metric) => (
+                {allMetrics.filter((metric) => metric.key !== 'distance_km').map((metric) => (
                   <tr key={metric.key}>
                     <td className="px-4 py-3 font-medium text-muted">{metric.label}</td>
                     {areas.map((area) => {

@@ -251,7 +251,7 @@ export function AccountDialog({ open, pendingWatch, pendingFavorite, onClose, on
             <section aria-label="Guardados">
               <h3 className="flex items-center gap-2 text-sm font-semibold"><Bookmark size={15} aria-hidden="true" /> Guardados</h3>
               {workspace && !workspace.listings.length && !workspace.watches.length && (
-                <p className="mt-2 rounded-xl bg-surface px-3.5 py-3 text-sm text-muted">Aún no has guardado nada. Usa “Guardar” en cualquier zona o vivienda.</p>
+                <p className="mt-2 rounded-xl bg-surface px-3.5 py-3 text-sm text-muted">Aún no has guardado nada. Usa «Guardar búsqueda» o «Añadir favorito» en tus resultados.</p>
               )}
               <ul className="mt-2 space-y-2">
                 {workspace?.listings.map((listing) => (

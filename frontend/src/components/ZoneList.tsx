@@ -179,7 +179,7 @@ function ZoneListImpl({
               Ninguna zona encaja con estos filtros
             </p>
             <p className="mt-1 text-xs text-muted">
-              Prueba a ampliar el tiempo máximo hasta el campus o desactivar algún filtro en «Filtros».
+              Prueba a subir el presupuesto, ampliar el tiempo máximo hasta el campus o quitar algún filtro en «Filtros».
             </p>
           </div>
         ) : (

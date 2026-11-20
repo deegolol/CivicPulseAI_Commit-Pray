@@ -5,7 +5,7 @@
  * - Soft translucent polygon tints so Madrid streets stay legible.
  * - Auto-fit bounds to the active campus + Top 10 zones when results load or campus changes.
  */
-import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Feature } from 'geojson';
 import {
   GeoJSON,
@@ -110,6 +110,7 @@ interface PricePill {
   name: string;
   district: string;
   distanceKm: number;
+  travelMin: number | null;
   priceLabel: string;
   coords: [number, number];
   isRecommended: boolean;
@@ -130,7 +131,7 @@ const PricePillMarker = memo(function PricePillMarker({
       eventHandlers={handlers}>
       <Tooltip direction="top" offset={[0, -14]} className="clean-tooltip">
         <div className="text-xs font-semibold text-ink">{pill.name}</div>
-        <div className="text-[11px] text-muted">{pill.district} · {formatKm(pill.distanceKm)}</div>
+        <div className="text-[11px] text-muted">{pill.district} · {pill.travelMin != null ? `${formatMinutes(pill.travelMin)} a tu campus` : formatKm(pill.distanceKm)}</div>
       </Tooltip>
     </Marker>
   );
@@ -148,7 +149,7 @@ function buildTooltipHtml(
       ? `${formatEuro(result.est_rent_eur_month)}/mes`
       : result?.travel_min != null ? `${formatMinutes(result.travel_min)} a tu campus` : '';
   const distText = result?.transit_min != null
-    ? `🚇 ${formatMinutes(result.transit_min)} · 🚗 ${formatMinutes(result.car_min)}${result.est_rent_eur_month != null ? ' · mediana oficial de pisos' : ''}`
+    ? `${formatMinutes(result.transit_min)} en transporte · ${formatMinutes(result.car_min)} en coche${result.est_rent_eur_month != null ? ' · alquiler oficial de pisos' : ''}`
     : result ? `${formatKm(result.distance_km)} de tu campus` : '';
   const over =
     result?.est_rent_eur_month != null && result.est_rent_eur_month > budget
@@ -303,6 +304,13 @@ function MadridMapImpl({
     activeCampus ? [activeCampus.coords[1], activeCampus.coords[0]] : null, [activeCampus]);
   const geoJsonRef = useRef<LeafletGeoJSON | null>(null);
   const layersPanelRef = useRef<HTMLDivElement | null>(null);
+  // Nothing is drawn on top of the map until the basemap tiles have arrived (no icons floating on a blank page).
+  const [tilesReady, setTilesReady] = useState(false);
+  useEffect(() => {
+    const fallback = window.setTimeout(() => setTilesReady(true), 3000);
+    return () => window.clearTimeout(fallback);
+  }, []);
+  const tileEvents = useMemo(() => ({ load: () => setTilesReady(true) }), []);
   const pathsById = useRef(new Map<string, { path: L.Path; feature: AreaFeature }>());
   const previousInteraction = useRef({ selectedAreaId, hoveredAreaId });
   const scoresRef = useRef(scoresById);
@@ -412,6 +420,7 @@ function MadridMapImpl({
           name: area.name,
           district: area.district,
           distanceKm: area.distance_km,
+          travelMin: area.travel_min ?? null,
           priceLabel,
           coords: [centroid[1], centroid[0]] as [number, number],
           isRecommended: id === recommendedAreaId,
@@ -460,7 +469,7 @@ function MadridMapImpl({
   const campusShort = activeCampus?.name.split(' · ')[0] ?? '';
 
   return (
-    <div className="relative h-full w-full">
+    <div className={'relative h-full w-full' + (tilesReady ? '' : ' tiles-loading')}>
       <MapContainer
         center={MADRID_CENTER}
         zoom={MADRID_DEFAULT_ZOOM}
@@ -483,6 +492,7 @@ function MadridMapImpl({
           className="watercolor-basemap"
           updateWhenZooming={false}
           keepBuffer={4}
+          eventHandlers={tileEvents}
           noWrap
         />
         <MapLayersOverlay enabled={layers} />

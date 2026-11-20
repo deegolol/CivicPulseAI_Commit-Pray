@@ -137,7 +137,8 @@ def score_areas(areas: list[Area], indicators: list[Indicator], campus: Campus, 
             or (f.max_distance_km is not None and distances[idx] > f.max_distance_km)
             or (f.max_travel_min is not None and travel_min is not None and travel_min > f.max_travel_min)
             or (f.only_within_budget and fits is False)
-            or (f.min_budget_eur_month is not None and (est_rent is None or est_rent < f.min_budget_eur_month))
+            # A minimum only makes sense where an official price exists (flats); never empty a room search.
+            or (f.min_budget_eur_month is not None and est_rent is not None and est_rent < f.min_budget_eur_month)
             or (f.max_air_no2 is not None and (no2 is None or no2 > f.max_air_no2))
             or (f.min_transit_stops is not None and (transit is None or transit < f.min_transit_stops))
         )

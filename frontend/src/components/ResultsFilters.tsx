@@ -36,9 +36,7 @@ export function ResultsFilters({ availableKeys, campuses, areas, filters, onAppl
   const fieldId = useId();
   const priceId = fieldId + '-price';
   const distanceId = fieldId + '-distance';
-  const budgetErrorId = fieldId + '-budget-error';
   const [draft, setDraft] = useState(filters);
-  const [budgetError, setBudgetError] = useState(false);
   const [sliderCeiling] = useState(() => Math.max(3000, Math.ceil(filters.budget / 1000) * 1000));
   const areasByDistrict = useMemo(() => {
     const districts = new Map<string, FilterArea[]>();
@@ -56,8 +54,7 @@ export function ResultsFilters({ availableKeys, campuses, areas, filters, onAppl
   }
 
   function updateBudget(value: number) {
-    setBudgetError(false);
-    setDraft((previous) => ({ ...previous, budget: value, onlyWithinBudget: true }));
+    setDraft((previous) => ({ ...previous, budget: value, minBudget: null }));
   }
 
   function updatePriority(key: string, value: number) {
@@ -80,10 +77,6 @@ export function ResultsFilters({ availableKeys, campuses, areas, filters, onAppl
   return (
     <form className="flex min-h-0 flex-1 flex-col" onSubmit={(event) => {
       event.preventDefault();
-      if (draft.minBudget !== null && draft.minBudget > draft.budget) {
-        setBudgetError(true);
-        return;
-      }
       onApply(draft);
     }}>
       <div className="min-h-0 space-y-5 overflow-y-auto overscroll-contain p-4 sm:p-5">
@@ -114,32 +107,21 @@ export function ResultsFilters({ availableKeys, campuses, areas, filters, onAppl
             <label htmlFor={priceId} className="flex flex-wrap items-baseline justify-between gap-1 text-sm font-semibold">
               Alquiler máximo <span className="tabular-nums text-ink">{formatEuro(draft.budget)}/mes</span>
             </label>
-            <input id={priceId} type="range" min="1" max={budgetCeiling} step="any" value={draft.budget}
+            <input id={priceId} type="range" min="100" max={budgetCeiling} step="10" value={draft.budget}
               aria-label="Alquiler máximo" aria-valuetext={formatEuro(draft.budget) + ' al mes'}
               onChange={(event) => updateBudget(Math.round(event.target.valueAsNumber))} className={rangeClass} />
             <div aria-hidden="true" className="-mt-1 flex justify-between text-xs text-muted">
-              <span>1 €</span><span>{formatEuro(budgetCeiling)}</span>
+              <span>100 €</span><span>{formatEuro(budgetCeiling)}</span>
             </div>
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              <label className="text-xs font-semibold">Desde (€)
-                <input type="number" min="0" step="any" value={draft.minBudget ?? ''} placeholder="0" className={fieldClass}
-                  aria-invalid={budgetError} aria-describedby={budgetError ? budgetErrorId : undefined}
-                  onChange={(event) => {
-                    setBudgetError(false);
-                    update('minBudget', event.target.valueAsNumber || null);
-                  }} />
+            {draft.housingType === 'flat' ? (
+              <label className="mt-2 flex min-h-11 items-center gap-2 text-sm">
+                <input type="checkbox" checked={draft.onlyWithinBudget} onChange={(event) => update('onlyWithinBudget', event.target.checked)}
+                  className="size-4 shrink-0 accent-brand" />
+                Ocultar zonas cuyo alquiler oficial lo supera
               </label>
-              <label className="text-xs font-semibold">Hasta (€)
-                <input type="number" required min="1" step="any" value={draft.budget || ''} className={fieldClass}
-                  onChange={(event) => updateBudget(event.target.valueAsNumber || 0)} />
-              </label>
-            </div>
-            {budgetError && <p id={budgetErrorId} role="alert" className="mt-2 text-sm text-over">El mínimo debe ser menor o igual que el máximo.</p>}
-            <label className="mt-2 flex min-h-11 items-center gap-2 text-sm">
-              <input type="checkbox" checked={draft.onlyWithinBudget} onChange={(event) => update('onlyWithinBudget', event.target.checked)}
-                className="size-4 shrink-0 accent-brand" />
-              Solo dentro de mi presupuesto
-            </label>
+            ) : (
+              <p className="mt-2 text-xs text-muted">Tu presupuesto filtra los anuncios reales que abrimos en Fotocasa, Idealista y Badi.</p>
+            )}
           </section>
 
           <section aria-label="Tiempo hasta el campus" className="min-w-0 rounded-xl border border-border bg-surface p-3.5">

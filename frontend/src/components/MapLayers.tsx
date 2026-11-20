@@ -24,6 +24,10 @@ const ICONS: Record<Exclude<LayerId, 'roads'>, string> = {
   malls: '<path d="M6 7h12l1.2 13.2a1 1 0 0 1-1 1.1H5.8a1 1 0 0 1-1-1.1z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/>',
 };
 const iconCache = new Map<string, L.DivIcon>();
+/** Place names come from OpenStreetMap: escape them before putting them in tooltip HTML. */
+export function escapeHtml(text: string): string {
+  return text.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+}
 function iconFor(id: Exclude<LayerId, 'roads'>, color: string) {
   if (!iconCache.has(id)) {
     iconCache.set(id, L.divIcon({
@@ -39,17 +43,17 @@ const MAX_ICONS = 260; // DOM markers are only created for what is on screen, th
 
 /** minZoom: places appear as you zoom in, so the whole city view stays readable. */
 export const MAP_LAYERS: { id: LayerId; label: string; color: string; minZoom: number }[] = [
-  { id: 'supermarkets', label: 'Supermercados', color: '#E07A1F', minZoom: 14 },
+  { id: 'supermarkets', label: 'Supermercados', color: '#E07A1F', minZoom: 15 },
   { id: 'metro', label: 'Metro', color: '#2B4C9B', minZoom: 11 },
   { id: 'parks', label: 'Parques', color: '#3E9A57', minZoom: 13 },
-  { id: 'libraries', label: 'Bibliotecas', color: '#1C8FA8', minZoom: 13 },
-  { id: 'gyms', label: 'Gimnasios', color: '#8A4FC7', minZoom: 14 },
-  { id: 'sports', label: 'Polideportivos', color: '#14877C', minZoom: 13 },
+  { id: 'libraries', label: 'Bibliotecas', color: '#1C8FA8', minZoom: 14 },
+  { id: 'gyms', label: 'Gimnasios', color: '#8A4FC7', minZoom: 15 },
+  { id: 'sports', label: 'Polideportivos', color: '#14877C', minZoom: 14 },
   { id: 'malls', label: 'Centros comerciales', color: '#CC4A86', minZoom: 12 },
   { id: 'roads', label: 'Carreteras', color: '#E3A13B', minZoom: 0 },
 ];
-// Parks start switched off: with everything on, the city view is too busy (Diego).
-export const DEFAULT_LAYERS: LayerId[] = ['metro', 'supermarkets', 'libraries', 'gyms', 'sports'];
+// Parks, gyms and sports start switched off and places only appear when you zoom in: the city view stays clean (Diego).
+export const DEFAULT_LAYERS: LayerId[] = ['metro', 'supermarkets', 'libraries'];
 
 
 type Point = [number, number, string];
@@ -159,7 +163,7 @@ export function MapLayersOverlay({ enabled }: { enabled: ReadonlySet<LayerId> })
       for (const [key, w] of wanted) {
         if (markers.current.has(key)) continue;
         const marker = L.marker([w.lat, w.lon], { icon: iconFor(w.id, w.color), pane: 'studentLayers', keyboard: false, riseOnHover: true });
-        marker.bindTooltip(`<strong>${w.name || w.label}</strong><br><span style="color:#5D6673">${w.label}</span>`,
+        marker.bindTooltip(`<strong>${escapeHtml(w.name || w.label)}</strong><br><span style="color:#5D6673">${w.label}</span>`,
           { direction: 'top', offset: [0, -10], className: 'clean-tooltip' });
         markers.current.set(key, marker);
         icons.current.addLayer(marker);

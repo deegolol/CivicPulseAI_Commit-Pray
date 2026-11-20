@@ -1,1 +1,181 @@
-{"note": "Anuncios reales consultados a mano para la demo. Cada uno con fuente, enlace y fecha. Nunca se inventan.", "areas": {}}
+{
+ "note": "Anuncios reales de habitaciones consultados a mano en Fotocasa el 20/11/2026 (compartir piso en Moratalaz, Puente de Vallecas y Vicálvaro, hasta 450 €). Cada uno con su enlace. Nunca se inventan.",
+ "areas": {
+  "133": [
+   {
+    "title": "Habitación en Palomeras Bajas",
+    "price_eur_month": 340,
+    "source": "Fotocasa",
+    "url": "https://www.fotocasa.es/es/compartir/vivienda/madrid-capital/aire-acondicionado-calefaccion-terraza-ascensor-amueblado/183436036/d",
+    "seen_on": "20/11/2026"
+   },
+   {
+    "title": "Habitación en Palomeras Bajas",
+    "price_eur_month": 350,
+    "source": "Fotocasa",
+    "url": "https://www.fotocasa.es/es/compartir/vivienda/madrid-capital/aire-acondicionado-calefaccion-terraza-ascensor-amueblado/186066663/d",
+    "seen_on": "20/11/2026"
+   },
+   {
+    "title": "Habitación en Palomeras Bajas · Avenida de Palomeras",
+    "price_eur_month": 400,
+    "source": "Fotocasa",
+    "url": "https://www.fotocasa.es/es/compartir/vivienda/madrid-capital/calefaccion-amueblado-internet/183591325/d",
+    "seen_on": "20/11/2026"
+   }
+  ],
+  "134": [
+   {
+    "title": "Habitación en Palomeras Sureste",
+    "price_eur_month": 400,
+    "source": "Fotocasa",
+    "url": "https://www.fotocasa.es/es/compartir/vivienda/madrid-capital/aire-acondicionado-calefaccion-terraza-ascensor-amueblado/182703270/d",
+    "seen_on": "20/11/2026"
+   }
+  ],
+  "141": [
+   {
+    "title": "Habitación en Pavones",
+    "price_eur_month": 420,
+    "source": "Fotocasa",
+    "url": "https://www.fotocasa.es/es/compartir/vivienda/madrid-capital/aire-acondicionado-calefaccion-amueblado-internet/191321031/d",
+    "seen_on": "20/11/2026"
+   },
+   {
+    "title": "Habitación en Pavones",
+    "price_eur_month": 420,
+    "source": "Fotocasa",
+    "url": "https://www.fotocasa.es/es/compartir/vivienda/madrid-capital/no-amueblado/191284791/d",
+    "seen_on": "20/11/2026"
+   },
+   {
+    "title": "Habitación en Pavones",
+    "price_eur_month": 450,
+    "source": "Fotocasa",
+    "url": "https://www.fotocasa.es/es/compartir/vivienda/madrid-capital/aire-acondicionado-terraza-ascensor-amueblado/183549055/d",
+    "seen_on": "20/11/2026"
+   }
+  ],
+  "145": [
+   {
+    "title": "Habitación en Fontarrón",
+    "price_eur_month": 390,
+    "source": "Fotocasa",
+    "url": "https://www.fotocasa.es/es/compartir/vivienda/madrid-capital/aire-acondicionado-terraza-ascensor-amueblado/183553413/d",
+    "seen_on": "20/11/2026"
+   },
+   {
+    "title": "Habitación en Fontarrón",
+    "price_eur_month": 400,
+    "source": "Fotocasa",
+    "url": "https://www.fotocasa.es/es/compartir/vivienda/madrid-capital/aire-acondicionado-terraza-ascensor-amueblado/183553950/d",
+    "seen_on": "20/11/2026"
+   }
+  ],
+  "143": [
+   {
+    "title": "Habitación en Marroquina · Calle del Corregidor Señor de la Elipa",
+    "price_eur_month": 375,
+    "source": "Fotocasa",
+    "url": "https://www.fotocasa.es/es/compartir/vivienda/madrid-capital/ascensor-amueblado/190547126/d",
+    "seen_on": "20/11/2026"
+   },
+   {
+    "title": "Habitación en Marroquina · Calle del Corregidor Señor de la Elipa",
+    "price_eur_month": 450,
+    "source": "Fotocasa",
+    "url": "https://www.fotocasa.es/es/compartir/vivienda/madrid-capital/ascensor-amueblado/188085246/d",
+    "seen_on": "20/11/2026"
+   }
+  ],
+  "192": [
+   {
+    "title": "Habitación en Valdebernardo · Calle de los Juglares",
+    "price_eur_month": 435,
+    "source": "Fotocasa",
+    "url": "https://www.fotocasa.es/es/compartir/vivienda/madrid-capital/calefaccion-jardin-zona-comunitaria-ascensor-amueblado-television-internet/191034858/d",
+    "seen_on": "20/11/2026"
+   }
+  ],
+  "136": [
+   {
+    "title": "Habitación en Numancia · Calle de las Marismas",
+    "price_eur_month": 420,
+    "source": "Fotocasa",
+    "url": "https://www.fotocasa.es/es/compartir/vivienda/madrid-capital/calefaccion-ascensor-amueblado-internet/181147294/d",
+    "seen_on": "20/11/2026"
+   }
+  ],
+  "201": [
+   {
+    "title": "Habitación en Simancas",
+    "price_eur_month": 350,
+    "source": "Fotocasa",
+    "url": "https://www.fotocasa.es/es/compartir/vivienda/madrid-capital/aire-acondicionado-calefaccion-terraza-ascensor-amueblado/182762739/d",
+    "seen_on": "20/11/2026"
+   },
+   {
+    "title": "Habitación en Simancas",
+    "price_eur_month": 350,
+    "source": "Fotocasa",
+    "url": "https://www.fotocasa.es/es/compartir/vivienda/madrid-capital/aire-acondicionado-terraza-ascensor-amueblado/182712913/d",
+    "seen_on": "20/11/2026"
+   }
+  ],
+  "193": [
+   {
+    "title": "Habitación en Valdebernardo - Valderribas",
+    "price_eur_month": 400,
+    "source": "Fotocasa",
+    "url": "https://www.fotocasa.es/es/compartir/vivienda/madrid-capital/aire-acondicionado-calefaccion-terraza-ascensor-amueblado/182724963/d",
+    "seen_on": "20/11/2026"
+   },
+   {
+    "title": "Habitación en Valderrivas · Calle de Omega",
+    "price_eur_month": 450,
+    "source": "Fotocasa",
+    "url": "https://www.fotocasa.es/es/compartir/vivienda/madrid-capital/ascensor-patio-piscina-amueblado/188703888/d",
+    "seen_on": "20/11/2026"
+   }
+  ],
+  "191": [
+   {
+    "title": "Habitación en el Casco Histórico de Vicálvaro",
+    "price_eur_month": 380,
+    "source": "Fotocasa",
+    "url": "https://www.fotocasa.es/es/compartir/vivienda/madrid-capital/aire-acondicionado-calefaccion-terraza-ascensor-amueblado/182747114/d",
+    "seen_on": "20/11/2026"
+   },
+   {
+    "title": "Habitación en el Casco Histórico de Vicálvaro",
+    "price_eur_month": 400,
+    "source": "Fotocasa",
+    "url": "https://www.fotocasa.es/es/compartir/vivienda/madrid-capital/aire-acondicionado-calefaccion-terraza-ascensor-amueblado/182702136/d",
+    "seen_on": "20/11/2026"
+   },
+   {
+    "title": "Habitación en el Casco Histórico de Vicálvaro",
+    "price_eur_month": 420,
+    "source": "Fotocasa",
+    "url": "https://www.fotocasa.es/es/compartir/vivienda/madrid-capital/aire-acondicionado-calefaccion-terraza-ascensor-amueblado/182689395/d",
+    "seen_on": "20/11/2026"
+   }
+  ],
+  "181": [
+   {
+    "title": "Habitación en el Casco Histórico de Vallecas",
+    "price_eur_month": 320,
+    "source": "Fotocasa",
+    "url": "https://www.fotocasa.es/es/compartir/vivienda/madrid-capital/aire-acondicionado-terraza-ascensor-amueblado/187277018/d",
+    "seen_on": "20/11/2026"
+   },
+   {
+    "title": "Habitación en el Casco Histórico de Vallecas",
+    "price_eur_month": 400,
+    "source": "Fotocasa",
+    "url": "https://www.fotocasa.es/es/compartir/vivienda/madrid-capital/aire-acondicionado-terraza-ascensor-amueblado/187276995/d",
+    "seen_on": "20/11/2026"
+   }
+  ]
+ }
+}

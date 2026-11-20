@@ -5,10 +5,11 @@ Run locally:  cd backend && uvicorn app.main:app --reload --port 8000
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 
 from .data import REPO_ROOT
 from .routers import account, ai, areas, meta, score
@@ -16,6 +17,13 @@ from .routers import account, ai, areas, meta, score
 load_dotenv(REPO_ROOT / ".env")  # LLM_* settings; real env vars (Railway) take precedence
 
 app = FastAPI(title="PrimeraLlave API", version="0.1.0", description="Dónde buscar piso en Madrid para estudiantes, con datos abiertos.")
+
+
+@app.exception_handler(RequestValidationError)
+async def invalid_request(_: Request, exc: RequestValidationError) -> JSONResponse:
+    """422 without echoing the input back (an Infinity/NaN input would otherwise crash the error page itself)."""
+    errors = [{k: v for k, v in e.items() if k in ("type", "loc", "msg")} for e in exc.errors()]
+    return JSONResponse(status_code=422, content={"detail": errors})
 
 app.add_middleware(GZipMiddleware, minimum_size=1000)  # GeoJSON and score responses shrink ~5-10x
 app.add_middleware(

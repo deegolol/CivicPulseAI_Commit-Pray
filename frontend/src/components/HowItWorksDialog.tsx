@@ -55,7 +55,7 @@ export function HowItWorksDialog({ open, onClose, sources, section = 'how' }: {
           ))}
         </ol>
         <p className="mt-5 rounded-xl bg-surface px-4 py-3 text-sm leading-relaxed text-muted">
-          <strong className="text-ink">La IA no inventa datos.</strong> Solo entiende tu frase y explica cifras que ya hemos calculado con datos oficiales. El alquiler mensual es una estimación: el precio real está en los anuncios.
+          <strong className="text-ink">La IA no inventa datos.</strong> Solo entiende tu frase y explica cifras que ya hemos calculado con datos oficiales. Nunca calculamos precios: mostramos el alquiler oficial publicado por el Ministerio (pisos, por distrito) y anuncios reales; el precio exacto de cada piso está en los anuncios.
         </p>
 
         <h3 ref={dataHeading} className="mt-7 scroll-mt-20 font-display text-lg font-bold">Datos abiertos que usamos</h3>

@@ -307,3 +307,8 @@ input[type="range"].clean-range::-webkit-slider-thumb:hover {
 .map-fade { transition: opacity 180ms ease-out; }
 .map-fade.map-moving { opacity: 0.35; }
 .map-fade.map-moving > * { pointer-events: none; }
+
+/* The map shows its tiles first; areas, pills and place icons fade in once the basemap has loaded. */
+.leaflet-overlay-pane, .leaflet-marker-pane, .leaflet-studentLayers-pane, .leaflet-tooltip-pane { transition: opacity 260ms ease-out; }
+.tiles-loading .leaflet-overlay-pane, .tiles-loading .leaflet-marker-pane,
+.tiles-loading .leaflet-studentLayers-pane, .tiles-loading .leaflet-tooltip-pane { opacity: 0; }

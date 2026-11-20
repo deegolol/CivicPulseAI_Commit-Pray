@@ -53,7 +53,10 @@ def build_recommendation(results: list[ScoreResult], areas: list[Area], indicato
         return None
     best = candidates[0]
     area = next(a for a in areas if a.id == best.id)
-    weights = {k: w for k, w in req.weights.items()}
+    # Same scale as the scoring engine (0..1 and summing 1 would break the thresholds below): clamp only.
+    weights = {k: min(max(float(w), 0.0), 1.0) for k, w in req.weights.items()}
+    if weights and not any(weights.values()):
+        weights = {k: 1.0 for k in weights}
     all_vals = {i.key: [a.values[i.key] for a in areas if a.values.get(i.key) is not None] for i in indicators}
     timed = best.travel_min is not None
     distances = [(r.travel_min if timed and r.travel_min is not None else r.distance_km) for r in results]
@@ -114,13 +117,14 @@ def build_recommendation(results: list[ScoreResult], areas: list[Area], indicato
         if pct >= 50 or services_weight >= 0.6:
             reasons.append((weights.get("services_count", 0.2) + pct / 400, _service_reason(area, services)))
     sports_weight = weights.get("sports_count", 0)
+    combined_said = any(text == _service_reason(area, services) for _, text in reasons) if services else False
     for key, singular, plural in (
         ("sports_count", "equipamiento deportivo municipal", "equipamientos deportivos municipales"),
         ("libraries_count", "biblioteca", "bibliotecas"),
     ):
         count = area.values.get(key)
         weight = weights.get(key, 0)
-        if count and weight > 0:
+        if count and weight > 0 and not combined_said:
             reasons.append((weight, f"{_fmt(count)} {singular if count == 1 else plural} en el barrio"))
     if max(services_weight, sports_weight) >= 0.6:
         caveats.insert(0, "Si buscas un gimnasio, comprueba la oferta en la zona. El dato deportivo cubre equipamientos municipales.")

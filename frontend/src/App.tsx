@@ -263,10 +263,11 @@ export function App() {
   const scoreFilters = useMemo<ScoreFilters>(() => ({
     max_travel_min: maxTravelMin,
     only_within_budget: onlyWithinBudget,
-    min_budget_eur_month: minBudget,
+    // Only flats have an official price to compare with; for rooms/studios a minimum would exclude everything.
+    min_budget_eur_month: housingType === 'flat' ? minBudget : null,
     max_air_no2: activeCriteria.has('air_no2') ? AIR_LEVEL_THRESHOLDS[airLevel] : null,
     min_transit_stops: activeCriteria.has('transit_stops') && wellConnectedOnly ? WELL_CONNECTED_THRESHOLD : null,
-  }), [maxTravelMin, onlyWithinBudget, minBudget, activeCriteria, airLevel, wellConnectedOnly]);
+  }), [maxTravelMin, onlyWithinBudget, minBudget, housingType, activeCriteria, airLevel, wellConnectedOnly]);
 
   // Sync URL querystring only when on Screen B (so Screen A stays clean at "/")
   useEffect(() => {
@@ -331,7 +332,9 @@ export function App() {
             if (controller.signal.aborted) return;
             if (err instanceof ApiError && err.status === 429) setRateLimitNotice(err.detail);
             setAiExplanation(top3.map((item, index) =>
-              `${index + 1}) ${item.name}: ${formatMinutes(item.transit_min)} en transporte público y ${formatMinutes(item.car_min)} en coche.`,
+              item.transit_min != null
+                ? `${index + 1}) ${item.name}: ${formatMinutes(item.transit_min)} en transporte público y ${formatMinutes(item.car_min)} en coche.`
+                : `${index + 1}) ${item.name} (${item.district}).`,
             ).join(' '));
           }
         }
@@ -470,9 +473,9 @@ export function App() {
       const inferred = searchPreferences(queryText, parsed, new Set([...DEFAULT_PRIORITIES, ...indicatorKeys]), campus);
       if (inferred.inferredFields.has('campus')) setCampusId(parsed.campus_id);
       if (inferred.inferredFields.has('housing')) setHousingType(parsed.housing_type);
+      setMinBudget(inferred.minBudget);  // a new phrase never keeps the previous phrase's minimum
       if (inferred.budget !== null) {
         setBudget(inferred.budget);
-        setMinBudget(inferred.minBudget);
         setOnlyWithinBudget(inferred.minBudget !== null || (parsed.filters.only_within_budget ?? true));
       }
       setMaxTravelMin(parsed.filters.max_travel_min ?? maxTravelMin);

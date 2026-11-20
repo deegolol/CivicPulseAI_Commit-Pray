@@ -57,10 +57,18 @@ export function HeroFigure({ area, large = false }: { area: ScoreResultItem; lar
       </div>
     );
   }
-  const byCar = area.travel_min != null && area.travel_min === area.car_min && area.car_min !== area.transit_min;
+  if (area.travel_min == null) {
+    return (
+      <div className="text-right">
+        <div className={`font-display ${size} font-bold text-ink tabular-nums`}>{formatKm(area.distance_km)}</div>
+        <div className="text-[11px] text-muted">hasta tu campus</div>
+      </div>
+    );
+  }
+  const byCar = area.travel_min === area.car_min && area.car_min !== area.transit_min;
   return (
     <div className="text-right">
-      <div className={`font-display ${size} font-bold text-ink tabular-nums`}>{area.travel_min != null ? formatMinutes(area.travel_min) : formatKm(area.distance_km)}</div>
+      <div className={`font-display ${size} font-bold text-ink tabular-nums`}>{formatMinutes(area.travel_min)}</div>
       <div className="text-[11px] text-muted">{byCar ? 'en coche' : 'en transporte público'}</div>
     </div>
   );
@@ -86,7 +94,7 @@ export function RealListings({ areaId }: { areaId: string }) {
           </li>
         ))}
       </ul>
-      <p className="mt-1 text-[10px] text-muted">Anuncios publicados en {[...new Set(listings.map((l) => l.source))].join(', ')} · vistos el {listings[0].seen_on}. Pueden haber cambiado.</p>
+      <p className="mt-1 text-[10px] text-muted">Anuncios publicados en {[...new Set(listings.map((l) => l.source))].join(', ')} · vistos el {[...new Set(listings.map((l) => l.seen_on))].join(', ')}. Pueden haber cambiado.</p>
     </div>
   );
 }

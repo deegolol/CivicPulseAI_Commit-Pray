@@ -1,3 +1,4 @@
+import { formatEuro } from '../utils/format';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { Bell, Bookmark, CircleUserRound } from 'lucide-react';
 import { accountApi, isOfferNotice, saveFavorite, type CatalogOffer, type FavoriteTarget } from '../api/account';
@@ -123,7 +124,7 @@ export function DistrictOffers({ district, housingType }: { district: string; ho
         <div key={offer.url} className="flex flex-wrap items-center justify-between gap-2 rounded-[8px] border border-border p-3 text-sm">
           <div>
             <a href={offer.url} target="_blank" rel="noopener noreferrer" className="font-medium underline">{offer.title}</a>
-            <p className="text-muted">{offer.price_eur_month} €/mes</p>
+            <p className="text-muted">{formatEuro(offer.price_eur_month)}/mes</p>
           </div>
           <FavoriteButton target={offer} />
         </div>
