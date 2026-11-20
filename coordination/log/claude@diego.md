@@ -62,3 +62,7 @@
 - Qué: tiempos reales puerta a puerta (GTFS CRTM + OSRM), precios solo oficiales o anuncios reales, filtro de frases sin sentido o fuera de tema (sin IA) y IA siempre primero, panel único de capas que se atenúa al mover, parques apagados, zoom más cercano.
 - IA: Claude generó ETL, backend, frontend y tests (61 en verde); Diego pidió y revisó los cambios.
 - Siguiente: T33 (pendientes para el viernes).
+
+## 10:45 · T33 · done
+- Qué: pendientes del viernes + pasada de QA (bugs de filtros, mapa, parser, API 422, textos).
+- IA: Claude + 3 subagentes Haiku revisaron código; Claude probó en navegador y corrigió.
