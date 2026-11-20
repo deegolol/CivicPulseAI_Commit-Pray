@@ -10,7 +10,8 @@ import { Expandable } from './Expandable';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { memo as reactMemo } from 'react';
 import { Check, ChevronDown, ChevronUp, ExternalLink, Scale, X } from 'lucide-react';
-import type { Recommendation, ScoreResultItem } from '../api/types';
+import type { HousingType, Recommendation, ScoreResultItem } from '../api/types';
+import { NO_BUDGET_LIMIT } from '../config';
 import { formatEuro } from '../utils/format';
 import { HeroFigure, RealListings, TravelTimes } from './ZoneFacts';
 import { normalizedToStars, StarRating } from './StarRating';
@@ -20,6 +21,7 @@ interface ZoneListProps {
   recommendation: Recommendation | null;
   highlights: Record<string, string>;
   budget: number;
+  housingType: HousingType;
   summaryLine: string;
   explanationText: string | null;
   explanationLoading: boolean;
@@ -47,6 +49,7 @@ function ZoneListImpl({
   recommendation,
   highlights,
   budget,
+  housingType,
   summaryLine,
   explanationText,
   explanationLoading,
@@ -64,6 +67,7 @@ function ZoneListImpl({
   const reduced = useReducedMotion();
   const [explanationOpen, setExplanationOpen] = useState(false);
   const [compareMode, setCompareMode] = useState(false);
+  const budgetLimit = budget >= NO_BUDGET_LIMIT ? null : budget;
 
   const scrollArea = useRef<HTMLDivElement>(null);
   const visibleResults = useMemo(() => {
@@ -201,7 +205,7 @@ function ZoneListImpl({
                     <p className="text-xs text-muted">{recommendation.district}</p>
                     <TravelTimes area={recommendedArea} className="mt-0.5 text-xs text-muted" />
                   </div>
-                  <div className="shrink-0"><HeroFigure area={recommendedArea} large /></div>
+                  <div className="shrink-0"><HeroFigure area={recommendedArea} budget={budgetLimit} housingType={housingType} large /></div>
                 </div>
 
                 <div className="mt-2"><StarRating value={normalizedToStars(recommendedArea.score / 100)} size="md" /></div>
@@ -240,7 +244,7 @@ function ZoneListImpl({
                   </div>
                 )}
 
-                <RealListings areaId={recommendedArea.id} />
+                <RealListings areaId={recommendedArea.id} budget={budgetLimit} housingType={housingType} />
 
                 {(explanationText || explanationLoading) && (
                   <div className="mt-3 rounded-[8px] border border-border">
@@ -356,9 +360,9 @@ function ZoneListImpl({
                       {/* Real travel times + the one honest figure we have */}
                       <div className="mt-3 flex items-end justify-between gap-2">
                         <TravelTimes area={area} className="text-xs text-muted" />
-                        <HeroFigure area={area} />
+                        <HeroFigure area={area} budget={budgetLimit} housingType={housingType} />
                       </div>
-                      <RealListings areaId={area.id} />
+                      <RealListings areaId={area.id} budget={budgetLimit} housingType={housingType} />
                     </div>
 
                     {/* Footer actions: "Ver pisos" menu + details; comparing lives in its own mode */}

@@ -1,6 +1,8 @@
 import { useId, useMemo, useState } from 'react';
 import type { Campus, HousingType, ScoreResultItem } from '../api/types';
-import { HOUSING_TYPE_LABELS } from '../config';
+import { HOUSING_TYPE_LABELS, NO_BUDGET_LIMIT } from '../config';
+
+const BUDGET_SLIDER_MAX = 3000;
 import { TRANSPORT_LABELS, type AirLevelOption, type TransportMode } from '../constants/filters';
 import { formatEuro } from '../utils/format';
 import { CampusPicker } from './CampusPicker';
@@ -24,7 +26,7 @@ export interface ResultFilters {
 type FilterArea = Pick<ScoreResultItem, 'id' | 'name' | 'district'>;
 
 const fieldClass = 'mt-1 block h-11 w-full min-w-0 rounded-lg border border-border bg-bg px-3 text-base focus-visible:outline-2 focus-visible:outline-ink';
-const rangeClass = 'block h-11 w-full cursor-pointer accent-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink';
+const rangeClass = 'clean-range mt-3 mb-2 w-full';
 
 export function ResultsFilters({ availableKeys, campuses, areas, filters, onApply, onCancel }: {
   availableKeys: Set<string>;
@@ -38,7 +40,6 @@ export function ResultsFilters({ availableKeys, campuses, areas, filters, onAppl
   const priceId = fieldId + '-price';
   const distanceId = fieldId + '-distance';
   const [draft, setDraft] = useState(filters);
-  const [sliderCeiling] = useState(() => Math.max(3000, Math.ceil(filters.budget / 1000) * 1000));
   const areasByDistrict = useMemo(() => {
     const districts = new Map<string, FilterArea[]>();
     const sorted = [...areas].sort((a, b) => a.district.localeCompare(b.district, 'es') || a.name.localeCompare(b.name, 'es'));
@@ -71,9 +72,7 @@ export function ResultsFilters({ availableKeys, campuses, areas, filters, onAppl
   }
 
 
-  const budgetCeiling = Math.max(sliderCeiling, draft.budget);
-  const hasTravelTimes = campuses.find(({ id }) => id === draft.campusId)?.has_travel_times !== false;
-  const distance = draft.maxDistanceKm ?? 10;
+  const noLimit = draft.budget >= NO_BUDGET_LIMIT;
   const minutes = draft.maxTravelMin ?? filters.maxTravelMin ?? 45;
   const minutesText = draft.maxTravelMin === null ? 'Sin límite' : `${minutes} min`;
 
@@ -108,13 +107,13 @@ export function ResultsFilters({ availableKeys, campuses, areas, filters, onAppl
         <div className="grid gap-4 sm:grid-cols-2">
           <section aria-label="Presupuesto mensual" className="min-w-0 rounded-xl border border-border bg-surface p-3.5">
             <label htmlFor={priceId} className="flex flex-wrap items-baseline justify-between gap-1 text-sm font-semibold">
-              Alquiler máximo <span className="tabular-nums text-ink">{formatEuro(draft.budget)}/mes</span>
+              Alquiler máximo <span className="tabular-nums text-ink">{noLimit ? 'Sin límite' : `${formatEuro(draft.budget)}/mes`}</span>
             </label>
-            <input id={priceId} type="range" min="100" max={budgetCeiling} step="10" value={draft.budget}
-              aria-label="Alquiler máximo" aria-valuetext={formatEuro(draft.budget) + ' al mes'}
-              onChange={(event) => updateBudget(Math.round(event.target.valueAsNumber))} className={rangeClass} />
-            <div aria-hidden="true" className="-mt-1 flex justify-between text-xs text-muted">
-              <span>100 €</span><span>{formatEuro(budgetCeiling)}</span>
+            <input id={priceId} type="range" min="100" max={BUDGET_SLIDER_MAX + 50} step="10" value={noLimit ? BUDGET_SLIDER_MAX + 50 : Math.min(draft.budget, BUDGET_SLIDER_MAX)}
+              aria-label="Alquiler máximo" aria-valuetext={noLimit ? 'Sin límite' : formatEuro(draft.budget) + ' al mes'}
+              onChange={(event) => updateBudget(event.target.valueAsNumber > BUDGET_SLIDER_MAX ? NO_BUDGET_LIMIT : Math.round(event.target.valueAsNumber))} className={rangeClass} />
+            <div aria-hidden="true" className="flex justify-between text-xs text-muted">
+              <span>100 €</span><span>{formatEuro(BUDGET_SLIDER_MAX)} · Sin límite</span>
             </div>
             {draft.housingType === 'flat' ? (
               <label className="mt-2 flex min-h-11 items-center gap-2 text-sm">
@@ -127,8 +126,7 @@ export function ResultsFilters({ availableKeys, campuses, areas, filters, onAppl
             )}
           </section>
 
-          <section aria-label={hasTravelTimes ? "Tiempo hasta el campus" : "Distancia hasta el campus"} className="min-w-0 rounded-xl border border-border bg-surface p-3.5">
-            {hasTravelTimes ? <>
+          <section aria-label="Tiempo hasta el campus" className="min-w-0 rounded-xl border border-border bg-surface p-3.5">
             <label className="block text-xs font-semibold">
               Cómo irás a clase
               <select value={draft.transportMode} onChange={(event) => update('transportMode', event.target.value as TransportMode)} className={fieldClass}>
@@ -149,19 +147,6 @@ export function ResultsFilters({ availableKeys, campuses, areas, filters, onAppl
                 className="size-4 shrink-0 accent-brand" />
               Sin límite de tiempo
             </label>
-            </> : <>
-              <label htmlFor={distanceId} className="flex flex-wrap items-baseline justify-between gap-1 text-sm font-semibold">
-                Distancia en línea recta <span className="tabular-nums">{draft.maxDistanceKm === null ? 'Sin límite' : `${distance} km`}</span>
-              </label>
-              <input id={distanceId} type="range" min="1" max="60" step="1" value={distance}
-                onChange={(event) => update('maxDistanceKm', event.target.valueAsNumber)} className={rangeClass} />
-              <label className="flex min-h-11 items-center gap-2 text-sm">
-                <input type="checkbox" className="size-4 accent-brand" checked={draft.maxDistanceKm === null}
-                  onChange={(event) => update('maxDistanceKm', event.target.checked ? null : distance)} />
-                Sin límite de distancia
-              </label>
-              <p className="text-xs text-muted">Para este centro aún no hay tiempos de trayecto disponibles.</p>
-            </>}
           </section>
         </div>
 

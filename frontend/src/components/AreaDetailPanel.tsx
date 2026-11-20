@@ -87,7 +87,7 @@ export function AreaDetailPanel({
       medianValue: null as string | null,
       note: area.transit_min != null
         ? 'Puerta a puerta en día laborable: horarios oficiales del Consorcio de Transportes (Metro, Cercanías, EMT, interurbanos) y, en coche, red de calles de OpenStreetMap sin tráfico.'
-        : 'Distancia en línea recta al centroide del barrio',
+        : 'Distancia por carretera al barrio',
       source: undefined as SourceInfo | undefined,
     },
     ...indicators.map((ind) => {

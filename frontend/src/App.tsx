@@ -8,7 +8,7 @@
  */
 import { AnimatePresence, m, useReducedMotion } from 'motion/react';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { List, Map as MapIcon } from 'lucide-react';
+import { List, LoaderCircle, Map as MapIcon } from 'lucide-react';
 import {
   ApiError,
   getAreas,
@@ -29,7 +29,7 @@ import type {
   ScoreFilters,
   ScoreResultItem,
 } from './api/types';
-import { HOUSING_TYPE_LABELS } from './config';
+import { HOUSING_TYPE_LABELS, NO_BUDGET_LIMIT } from './config';
 import {
   AIR_LEVEL_THRESHOLDS,
   DEFAULT_PRIORITIES,
@@ -192,6 +192,14 @@ export function App() {
   const [mobileView, setMobileView] = useState<'list' | 'map'>('list');
   const [mapLayers, setMapLayers] = useState<ReadonlySet<LayerId>>(() => new Set(DEFAULT_LAYERS));
   const [desktop, setDesktop] = useState(() => window.matchMedia('(min-width: 1024px)').matches);
+  // The map loads once per visit; until then (max 7 s) the results page shows a short loading cover.
+  const [mapReady, setMapReady] = useState(false);
+  const handleMapReady = useCallback(() => setMapReady(true), []);
+  useEffect(() => {
+    if (screen !== 'results' || mapReady) return;
+    const timer = window.setTimeout(() => setMapReady(true), 7000);
+    return () => window.clearTimeout(timer);
+  }, [screen, mapReady]);
   const mapVisible = screen === 'results' && (desktop || mobileView === 'map');
 
   useEffect(() => {
@@ -311,7 +319,7 @@ export function App() {
           campus_id: campusId,
           weights: computedWeights,
           filters: scoreFilters,
-          budget_eur_month: budget,
+          budget_eur_month: budget >= NO_BUDGET_LIMIT ? null : budget,
           housing_type: housingType,
           travel_mode: transportMode,
         }, controller.signal);
@@ -332,7 +340,7 @@ export function App() {
               weights: computedWeights,
               area_ids: top3.map((item) => item.id),
               query: confirmedQuery,
-              budget_eur_month: budget,
+              budget_eur_month: budget >= NO_BUDGET_LIMIT ? null : budget,
               housing_type: housingType,
               travel_mode: transportMode,
               filters: scoreFilters,
@@ -597,11 +605,9 @@ export function App() {
   ), [meta, activeCriteria, budget, housingType]);
 
   const campusName = activeCampus?.name ?? campusId.toUpperCase();
-  const budgetRange = minBudget === null ? `hasta ${formatEuro(budget)}` : `${formatEuro(minBudget)}–${formatEuro(budget)}`;
-  const summaryLine = `${HOUSING_TYPE_LABELS[housingType]} · ${budgetRange}/mes · ${campusName}${
-    activeCampus?.has_travel_times === false
-      ? maxDistanceKm === null ? ' · Distancia en línea recta' : ` (≤ ${maxDistanceKm} km en línea recta)`
-      : maxTravelMin !== null ? ` (≤ ${maxTravelMin} min en ${transportMode === 'car' ? 'coche' : 'transporte público'})` : ''
+  const budgetRange = budget >= NO_BUDGET_LIMIT ? 'sin límite de precio' : minBudget === null ? `hasta ${formatEuro(budget)}/mes` : `${formatEuro(minBudget)}–${formatEuro(budget)}/mes`;
+  const summaryLine = `${HOUSING_TYPE_LABELS[housingType]} · ${budgetRange} · ${campusName}${
+    maxTravelMin !== null ? ` (≤ ${maxTravelMin} min en ${transportMode === 'car' ? 'coche' : 'transporte público'})` : ''
   }${locationLabel ? ' · ' + locationLabel : ''}`;
 
   const screenView = screen === 'onboarding' ? (
@@ -640,6 +646,14 @@ export function App() {
     </m.div>
     ) : (
     <m.div key="results" data-ui-motion="screen" {...viewMotion} className="fixed inset-0 flex flex-col overflow-hidden bg-bg">
+      {/* Results appear together with the map: a short cover until the basemap has loaded (7 s at most). */}
+      {desktop && !mapReady && (
+        <div role="status" className="absolute inset-0 z-[1200] flex flex-col items-center justify-center gap-3 bg-bg">
+          <LoaderCircle className="h-7 w-7 animate-spin text-brand" aria-hidden="true" />
+          <p className="text-sm font-medium text-ink">Preparando tu mapa…</p>
+          <p className="text-xs text-muted">Cruzando 131 barrios con tus preferencias</p>
+        </div>
+      )}
       <TopFilterBar
         availableKeys={availableKeys}
         onResetHome={handleResetHome}
@@ -706,6 +720,7 @@ export function App() {
             recommendation={visibleRecommendation}
             highlights={visibleHighlights}
             budget={budget}
+            housingType={housingType}
             summaryLine={summaryLine}
             explanationText={aiExplanation}
             explanationLoading={aiLoading}
@@ -745,6 +760,7 @@ export function App() {
             budget={budget}
             isScoring={isScoring}
             isVisible={mapVisible}
+            onReady={handleMapReady}
           /></Suspense>}
         </main>
 

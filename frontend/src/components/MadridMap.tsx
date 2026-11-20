@@ -63,6 +63,8 @@ interface MadridMapProps {
   isVisible?: boolean;
   layers: ReadonlySet<LayerId>;
   onToggleLayer: (id: LayerId) => void;
+  /** Called once the basemap has loaded (or after 7 s at most), so the page can reveal the results. */
+  onReady?: () => void;
 }
 
 function createPricePillIcon(
@@ -301,6 +303,7 @@ function MadridMapImpl({
   isVisible = true,
   layers,
   onToggleLayer,
+  onReady,
 }: MadridMapProps) {
   const campusLatLng = useMemo<[number, number] | null>(() =>
     activeCampus ? [activeCampus.coords[1], activeCampus.coords[0]] : null, [activeCampus]);
@@ -308,11 +311,21 @@ function MadridMapImpl({
   const layersPanelRef = useRef<HTMLDivElement | null>(null);
   // Nothing is drawn on top of the map until the basemap tiles have arrived (no icons floating on a blank page).
   const [tilesReady, setTilesReady] = useState(false);
+  // Same IGN map from a second IGN server if the first one fails or is slow (it happens at peak times).
+  const [tileSource, setTileSource] = useState<'tms' | 'wmts'>('tms');
+  const tileErrors = useRef(0);
   useEffect(() => {
-    const fallback = window.setTimeout(() => setTilesReady(true), 3000);
-    return () => window.clearTimeout(fallback);
+    const fallback = window.setTimeout(() => setTilesReady(true), 7000);
+    const slow = window.setTimeout(() => setTileSource((src) => (tilesReadyRef.current ? src : 'wmts')), 3500);
+    return () => { window.clearTimeout(fallback); window.clearTimeout(slow); };
   }, []);
-  const tileEvents = useMemo(() => ({ load: () => setTilesReady(true) }), []);
+  const tilesReadyRef = useRef(false);
+  tilesReadyRef.current = tilesReady;
+  useEffect(() => { if (tilesReady) onReady?.(); }, [tilesReady, onReady]);
+  const tileEvents = useMemo(() => ({
+    load: () => setTilesReady(true),
+    tileerror: () => { tileErrors.current += 1; if (tileErrors.current >= 4) setTileSource('wmts'); },
+  }), []);
   const pathsById = useRef(new Map<string, { path: L.Path; feature: AreaFeature }>());
   const previousInteraction = useRef({ selectedAreaId, hoveredAreaId });
   const scoresRef = useRef(scoresById);
@@ -481,15 +494,18 @@ function MadridMapImpl({
         maxZoom={19}
         scrollWheelZoom
         preferCanvas
-        zoomSnap={0.25}
-        zoomDelta={0.5}
-        wheelPxPerZoomLevel={90}
+        zoomSnap={1}
+        zoomDelta={1}
+        wheelPxPerZoomLevel={120}
         className="watercolor-map h-full w-full"
       >
         {/* Official IGN colour basemap (Instituto Geográfico Nacional) with a soft watercolour treatment (CSS) */}
         <TileLayer
           attribution={BASEMAP_ATTRIBUTION}
-          url="https://tms-ign-base.idee.es/1.0.0/IGNBaseTodo/{z}/{x}/{-y}.jpeg"
+          key={tileSource}
+          url={tileSource === 'tms'
+            ? 'https://tms-ign-base.idee.es/1.0.0/IGNBaseTodo/{z}/{x}/{-y}.jpeg'
+            : 'https://www.ign.es/wmts/ign-base?layer=IGNBaseTodo&style=default&tilematrixset=GoogleMapsCompatible&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image/jpeg&TileMatrix={z}&TileCol={x}&TileRow={y}'}
           maxNativeZoom={17}
           className="watercolor-basemap"
           updateWhenZooming={false}

@@ -21,3 +21,6 @@ export const HOUSING_REFERENCE_M2 = {
   studio: 35,
   flat: 60,
 } as const;
+
+/** Budget slider's last stop: no price limit (sent to the API as null, portals open without maxPrice). */
+export const NO_BUDGET_LIMIT = 100000;

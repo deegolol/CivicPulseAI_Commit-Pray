@@ -9,7 +9,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { Campus, HousingType, SourceInfo } from '../api/types';
-import { HOUSING_TYPE_LABELS } from '../config';
+import { HOUSING_TYPE_LABELS, NO_BUDGET_LIMIT } from '../config';
 import { DEMO_QUERY, EXAMPLE_QUERIES, TRANSPORT_LABELS, priorityOptions, type TransportMode } from '../constants/filters';
 import { CampusPicker } from './CampusPicker';
 import { SiteHeader } from './SiteHeader';
@@ -105,10 +105,10 @@ export function OnboardingScreen({
   const showForm = view === 'form';
   const options = priorityOptions(availableKeys);
   const activeCount = options.filter(({ key }) => (priorityWeights[key] ?? 0) > 0).length;
-  const hasTravelTimes = campuses.find(({ id }) => id === campusId)?.has_travel_times !== false;
   const minValue = maxTravelMin === null ? MIN_UNLIMITED : Math.min(MIN_MAX, Math.max(MIN_MIN, maxTravelMin));
   const [budgetMin, budgetMax] = BUDGET_BOUNDS[housingType];
-  const budgetValue = Math.min(budgetMax, Math.max(budgetMin, budget));
+  const noLimit = budget >= NO_BUDGET_LIMIT;
+  const budgetValue = noLimit ? budgetMax + 10 : Math.min(budgetMax, Math.max(budgetMin, budget));
 
   const goBack = () => { setFormError(null); onBack(); };
   const goHome = () => { setFormError(null); onHome(); };
@@ -229,16 +229,16 @@ export function OnboardingScreen({
               <div>
                 <div className="flex items-baseline justify-between">
                   <label htmlFor="budget-range" className={labelClass}>Presupuesto al mes</label>
-                  <span className="font-display text-2xl font-bold tabular-nums">{budgetValue.toLocaleString('es-ES')} €</span>
+                  <span className="font-display text-2xl font-bold tabular-nums">{noLimit ? 'Sin límite' : `${budgetValue.toLocaleString('es-ES')} €`}</span>
                 </div>
-                <input id="budget-range" type="range" min={budgetMin} max={budgetMax} step={1}
+                <input id="budget-range" type="range" min={budgetMin} max={budgetMax + 10} step={1}
                   value={budgetValue}
-                  onChange={(event) => onBudgetChange(Number(event.target.value))}
+                  onChange={(event) => { const v = Number(event.target.value); onBudgetChange(v > budgetMax ? NO_BUDGET_LIMIT : v); }}
                   className="clean-range mt-3 w-full" />
-                <div className="mt-1 flex justify-between text-xs text-muted"><span>{budgetMin.toLocaleString('es-ES')} €</span><span>{budgetMax.toLocaleString('es-ES')} €+</span></div>
+                <div className="mt-1 flex justify-between text-xs text-muted"><span>{budgetMin.toLocaleString('es-ES')} €</span><span>{budgetMax.toLocaleString('es-ES')} € · Sin límite</span></div>
               </div>
 
-                {hasTravelTimes ? <div>
+                <div>
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <label htmlFor="minutes-range" className={labelClass}>Tiempo hasta el campus</label>
                     <div role="radiogroup" aria-label="Cómo irás a clase" className="inline-flex gap-0.5 rounded-lg bg-surface p-0.5">
@@ -263,7 +263,7 @@ export function OnboardingScreen({
                     className="clean-range mt-3 w-full" />
                   <div className="mt-1 flex items-baseline justify-between text-xs text-muted"><span>{MIN_MIN} min</span><span className="text-sm font-semibold text-ink tabular-nums">{maxTravelMin === null ? 'Sin límite' : `Máximo ${minValue} min`}</span><span>{MIN_MAX} min · Sin límite</span></div>
                   <p className="mt-1 text-xs text-muted">Tiempo real puerta a puerta (horarios del CRTM y calles de OpenStreetMap).</p>
-                </div> : <p className="text-sm text-muted">Para este centro, las recomendaciones usan la distancia en línea recta.</p>}
+                </div>
             </div>
 
             <div className="flex flex-col">

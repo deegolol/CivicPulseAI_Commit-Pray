@@ -4,15 +4,16 @@
  * We never show a price of our own making.
  */
 import { Car, ExternalLink, TrainFront } from 'lucide-react';
-import type { ScoreResultItem } from '../api/types';
+import type { HousingType, ScoreResultItem } from '../api/types';
 import realListings from '../data/realListings.json';
 import { formatEuro, formatKm, formatMinutes } from '../utils/format';
 
 type Listing = { title: string; price_eur_month: number; source: string; url: string; seen_on: string };
 const LISTINGS = realListings.areas as Record<string, Listing[]>;
 
-export function listingsFor(areaId: string): Listing[] {
-  return LISTINGS[areaId] ?? [];
+/** Real room listings in this zone within the budget (all of them when there is no budget limit). */
+export function listingsFor(areaId: string, budget: number | null = null): Listing[] {
+  return (LISTINGS[areaId] ?? []).filter((l) => budget === null || l.price_eur_month <= budget);
 }
 
 /** "🚇 25 min · 🚗 12 min" with icons; falls back to km by road. */
@@ -32,52 +33,36 @@ export function TravelTimes({ area, className = '' }: { area: ScoreResultItem; c
   );
 }
 
-/** The big number on a card is always a price: the cheapest real listing we checked, else the official flat rent of the barrio. */
-export function HeroFigure({ area, large = false }: { area: ScoreResultItem; large?: boolean }) {
+/** The big number on a card is a price that matches what you search, never something else:
+ *  rooms → cheapest real listing within your budget; whole flats → official rent of that barrio. */
+export function HeroFigure({ area, budget, housingType, large = false }: {
+  area: ScoreResultItem; budget: number | null; housingType: HousingType; large?: boolean;
+}) {
   const size = large ? 'text-2xl' : 'text-xl';
-  const listings = listingsFor(area.id);
-  if (listings.length) {
-    const cheapest = Math.min(...listings.map((l) => l.price_eur_month));
+  const listings = housingType === 'room' ? listingsFor(area.id, budget) : [];
+  const price = listings.length ? Math.min(...listings.map((l) => l.price_eur_month))
+    : housingType === 'flat' ? area.est_rent_eur_month ?? area.rent_median_eur_month ?? null : null;
+  if (price != null) {
     return (
       <div className="text-right">
         <div className={`font-display ${size} font-bold text-ink tabular-nums`}>
-          {formatEuro(cheapest)}<span className="font-sans text-xs font-normal text-muted">/mes</span>
+          {formatEuro(price)}<span className="font-sans text-xs font-normal text-muted">/mes</span>
         </div>
-        <div className="text-[11px] text-muted">desde · anuncio real</div>
+        <div className="text-[11px] text-muted">{listings.length ? 'desde · anuncio real' : 'alquiler oficial de un piso aquí'}</div>
       </div>
     );
   }
-  const officialFlat = area.est_rent_eur_month ?? area.rent_median_eur_month;
-  if (officialFlat != null) {
-    return (
-      <div className="text-right">
-        <div className={`font-display ${size} font-bold text-ink tabular-nums`}>
-          {formatEuro(officialFlat)}<span className="font-sans text-xs font-normal text-muted">/mes</span>
-        </div>
-        <div className="text-[11px] text-muted">alquiler oficial de un piso aquí</div>
-      </div>
-    );
-  }
-  if (area.travel_min == null) {
-    return (
-      <div className="text-right">
-        <div className={`font-display ${size} font-bold text-ink tabular-nums`}>{formatKm(area.distance_km)}</div>
-        <div className="text-[11px] text-muted">hasta tu campus</div>
-      </div>
-    );
-  }
-  const byCar = area.travel_min === area.car_min && area.car_min !== area.transit_min;
   return (
     <div className="text-right">
-      <div className={`font-display ${size} font-bold text-ink tabular-nums`}>{formatMinutes(area.travel_min)}</div>
-      <div className="text-[11px] text-muted">{byCar ? 'en coche' : 'en transporte público'}</div>
+      <div className="text-sm font-semibold text-ink">Precio en los anuncios</div>
+      <div className="text-[11px] text-muted">pulsa «Ver pisos»</div>
     </div>
   );
 }
 
 /** Real listings checked by hand for this zone (only some zones have them). */
-export function RealListings({ areaId }: { areaId: string }) {
-  const listings = listingsFor(areaId);
+export function RealListings({ areaId, budget, housingType }: { areaId: string; budget: number | null; housingType: HousingType }) {
+  const listings = housingType === 'room' ? listingsFor(areaId, budget) : [];
   if (!listings.length) return null;
   return (
     <div className="mt-3 rounded-[8px] border border-border bg-surface px-3 py-2">

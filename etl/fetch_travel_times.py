@@ -271,19 +271,24 @@ def transit_times(campuses: list) -> tuple[dict, dict]:
     rev, grid = build_reverse_graph(stops, patterns)
     print(f"grafo: {len(stops)} paradas, {len(patterns)} patrones", file=sys.stderr)
     samples = sample_points(grid)
+    # Stops reachable on foot from every sample point: computed once, reused for every campus (fast for 300+ sites).
+    access = {aid: [(lat, lon, [(sid, walk_min(d)) for sid, d in (list(grid.near(lat, lon, ACCESS_M))
+                     or sorted(grid.near(lat, lon, 3000), key=lambda x: x[1])[:5])]) for lat, lon in pts]
+              for aid, pts in samples.items()}
     result = {}
     for campus in campuses:
         clon, clat = campus["coords"]
         sources = {sid: walk_min(d) for sid, d in grid.near(clat, clon, ACCESS_M)}
         dist = dijkstra(rev, sources)
         per_area = {}
-        for area_id, points in samples.items():
+        for area_id, points in access.items():
             times = []
-            for lat, lon in points:
+            for lat, lon, near in points:
                 best = walk_min(meters(lat, lon, clat, clon))
-                near = list(grid.near(lat, lon, ACCESS_M)) or sorted(grid.near(lat, lon, 3000), key=lambda x: x[1])[:5]
-                for sid, d in near:
-                    best = min(best, walk_min(d) + dist.get(sid, math.inf))
+                for sid, w in near:
+                    t = dist.get(sid)
+                    if t is not None and w + t < best:
+                        best = w + t
                 times.append(best)
             per_area[area_id] = round(statistics.median(times))
         result[campus["id"]] = per_area
@@ -319,16 +324,29 @@ def car_times(campuses: list, areas: dict) -> dict:
                 seconds, metres = data["durations"][i][0], data["distances"][i][0]
                 per_area[area_id] = (None if seconds is None else round(seconds / 60),
                                      None if metres is None else round(metres / 1000, 1))
-            time.sleep(1)
+            time.sleep(0.3)
         result[campus["id"]] = per_area
         print(f"  {campus['id']}: coche listo", file=sys.stderr)
     return result
 
 
 def main() -> None:
-    campuses = json.loads((PROCESSED / "campuses.json").read_text(encoding="utf-8"))
-    transit, areas = transit_times(campuses)
-    car = car_times(campuses, areas)
+    """Computes only the campuses that are missing from the existing output (the catalogue has ~335 sites)."""
+    catalogue = PROCESSED / "universities.json"
+    campuses = json.loads((catalogue if catalogue.exists() else PROCESSED / "campuses.json").read_text(encoding="utf-8"))
+    previous = json.loads(OUTPUT.read_text(encoding="utf-8")) if OUTPUT.exists() else {"campuses": {}}
+    todo = [c for c in campuses if c["id"] not in previous["campuses"]]
+    print(f"{len(todo)} campus nuevos de {len(campuses)}", file=sys.stderr)
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        transit_future = pool.submit(transit_times, todo)
+        car_campuses = todo
+        transit, areas = transit_future.result()
+    car = car_times(car_campuses, areas)
+    merged = dict(previous["campuses"])
+    for cid in transit:
+        merged[cid] = {aid: {"transit_min": transit[cid][aid], "car_min": car[cid][aid][0], "car_km": car[cid][aid][1]}
+                       for aid in areas}
     out = {
         "generated_at": datetime.now().isoformat(timespec="seconds"),
         "sources": {
@@ -341,14 +359,10 @@ def main() -> None:
             "car": "Tiempo de conducción sin tráfico ni aparcamiento (red viaria de OpenStreetMap).",
             "origin": "Mediana de puntos habitados del barrio (cada ~300 m, con parada a ≤ 400 m) → punto del campus.",
         },
-        "campuses": {
-            cid: {aid: {"transit_min": transit[cid][aid], "car_min": car[cid][aid][0], "car_km": car[cid][aid][1]}
-                  for aid in areas}
-            for cid in transit
-        },
+        "campuses": merged,
     }
     OUTPUT.write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    print(f"escrito {OUTPUT} ({OUTPUT.stat().st_size / 1024:.0f} KB)")
+    print(f"escrito {OUTPUT} ({OUTPUT.stat().st_size / 1024:.0f} KB, {len(merged)} campus)")
 
 
 if __name__ == "__main__":
