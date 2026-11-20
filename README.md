@@ -20,14 +20,15 @@ Equipo **Commit & Pray** · Hackatón **CivicPulse AI** — 2Campus1Code (DA-ETS
 
 Cada curso, miles de estudiantes llegan a Madrid sin conocer la ciudad y con un presupuesto ajustado. Los portales de anuncios enseñan pisos, pero no te dicen **qué zona te conviene**: cuánto se paga allí de verdad, a qué distancia queda tu campus, cómo es el aire o si está bien comunicada. Esa información existe, pero está repartida en datasets públicos difíciles de cruzar.
 
-> **Lucía**, 18 años, empieza 1.º en la ETSISI (Campus Sur, Vallecas). Tiene 500 €/mes y no conoce Madrid. Escribe *"Estudio en la ETSISI, tengo 500 euros y quiero una zona tranquila con aire limpio"* y en segundos ve en el mapa las zonas que encajan, cuánto le costaría una habitación en cada una y un botón para ver pisos reales allí.
+> **Lucía**, 18 años, empieza 1.º en la ETSISI (Campus Sur, Vallecas). Tiene 500 €/mes y no conoce Madrid. Escribe *"Estudio en la ETSISI y busco una habitación por menos de 450 € al mes, a menos de 30 minutos en transporte público"* y en segundos ve en el mapa las zonas que encajan, cuántos minutos tarda a clase en transporte público y en coche, y anuncios reales con su precio exacto.
 
 ## ✨ Qué hace
 
-- **Búsqueda en lenguaje natural** — escribe lo que buscas; la IA lo convierte en campus, presupuesto, tipo de vivienda, distancia y prioridades (y los controles se ajustan solos).
-- **Mapa de los 131 barrios** coloreado según lo bien que encajan contigo, con el campus y el radio de distancia.
-- **"Con tu presupuesto aquí: ~X €/mes"** — alquiler estimado para habitación, estudio o piso a partir de la mediana oficial en €/m², y si encaja o no en tu bolsillo.
-- **Controles en unidades reales**: €/mes, km, tipo de vivienda y lo que más te importa (sin porcentajes).
+- **Búsqueda en lenguaje natural** — escribe lo que buscas; la IA lo convierte en campus, presupuesto, tipo de vivienda, tiempo máximo, modo de transporte y prioridades. Antes de llamar a la IA, un filtro sin IA descarta frases sin sentido, y las preguntas que no tratan de buscar vivienda no se buscan.
+- **Tiempos reales puerta a puerta** al campus en **transporte público** (horarios oficiales del CRTM: Metro, Cercanías, Metro Ligero, EMT e interurbanos) y en **coche** (red de calles de OpenStreetMap). Nunca distancia en línea recta.
+- **Mapa de los 131 barrios** con los minutos hasta tu campus y capas útiles (Metro, supermercados, bibliotecas, gimnasios, parques…).
+- **Precios sin inventar**: alquiler oficial publicado por el Ministerio (pisos, por distrito) y anuncios reales con su precio exacto y enlace; nunca una estimación nuestra.
+- **Controles en unidades reales**: €/mes, minutos, tipo de vivienda y lo que más te importa (sin porcentajes).
 - **Top 3, detalle de cada zona y comparador** con las cifras y la fuente oficial de cada dato.
 - **"Ver pisos en esta zona"** — enlaces a Idealista, Fotocasa y Badi ya filtrados por distrito y precio máximo (solo enlaces, sin scraping).
 - **Explicación en lenguaje natural** del top 3, citando únicamente cifras reales.
@@ -43,6 +44,9 @@ Todos oficiales, descargados el 19/11/2026 y transformados con scripts reproduci
 | Alquiler (€/m²) | SERPAVI 2011–2024 · mediana del alquiler de vivienda colectiva (por distrito) | Ministerio de Vivienda y Agenda Urbana | [XLSX](https://cdn.mivau.gob.es/portal-web-mivau/vivienda/serpavi/2026-03_09_bd_SERPAVI_2011-2024%20-%20DEFINITIVO%20WEB_v2.xlsx) |
 | Calidad del aire (NO₂) | Calidad del aire · datos horarios + estaciones de control | Ayuntamiento de Madrid | [datos horarios](https://datos.madrid.es/dataset/201200-0-calidad-aire-horario) · [estaciones](https://datos.madrid.es/dataset/212629-0-estaciones-control-aire) |
 | Transporte | Estaciones de Metro (M4) · *Powered by CRTM* | Consorcio Regional de Transportes de Madrid | [crtm.es](https://www.crtm.es/) |
+| Tiempo en transporte público | GTFS Metro, Cercanías, Metro Ligero, EMT e interurbanos · *Powered by CRTM* | Consorcio Regional de Transportes de Madrid | [datos.crtm.es](https://datos.crtm.es/) |
+| Tiempo en coche | Red de calles de OpenStreetMap (motor OSRM) | © OpenStreetMap contributors (ODbL) | [osrm](https://project-osrm.org/) |
+| Alquiler mensual (€/mes) | SERPAVI 2024 · mediana y percentiles 25/75 del alquiler mensual de pisos (por distrito) | Ministerio de Vivienda y Agenda Urbana | mismo XLSX |
 | Servicios | Bibliotecas municipales · Centros deportivos municipales | Ayuntamiento de Madrid | [bibliotecas](https://datos.madrid.es/dataset/201747-0-bibliobuses-bibliotecas) · [polideportivos](https://datos.madrid.es/dataset/200186-0-polideportivos) |
 | Campus | Ubicación de ETSISI y ETSIINF | Universidad Politécnica de Madrid | [ETSISI](https://www.etsisi.upm.es/ubicacion-como-llegar/) · [ETSIINF](https://dia.etsiinf.upm.es/index.php?pagina=166) |
 
@@ -137,11 +141,9 @@ Hemos trabajado 3 personas con 5 agentes de IA (Claude Code, ChatGPT Codex y Gem
 
 ## ⚠️ Limitaciones conocidas
 
-- El alquiler oficial más fino y completo disponible es **por distrito** (SERPAVI 2024): todos los barrios de un distrito comparten €/m², y la app lo indica.
-- El alquiler mensual es una **estimación** (€/m² × m² de referencia); el precio real está en los anuncios enlazados.
-- La distancia al campus es en línea recta, no el tiempo en transporte público.
-- Transporte = estaciones de Metro (no incluye EMT ni Cercanías); servicios = bibliotecas y polideportivos municipales.
-- Idealista no permite comprobar sus URLs automáticamente; sus enlaces siguen su formato público.
+- **No hay datos abiertos con el precio de cada piso.** No calculamos precios: mostramos el alquiler oficial publicado (SERPAVI 2024, pisos, **por distrito**) y anuncios reales con enlace. Para habitaciones y estudios no existe cifra oficial, así que solo enseñamos anuncios reales. Los anuncios se consultaron a mano el 20/11/2026 para las zonas de la demo; integrarlos en directo para toda la ciudad requiere la API de Idealista (acceso para socios) o un acuerdo con el portal: no hacemos scraping.
+- **Tiempos de viaje**: transporte público en día laborable de 07:00 a 10:00 (espera = mitad de la frecuencia), desde las zonas habitadas de cada barrio; en coche, **sin tráfico ni aparcamiento**.
+- Idealista bloquea las comprobaciones automáticas, así que sus enlaces siguen su formato público. Los enlaces de Fotocasa están comprobados.
 
 ## 👥 Equipo — Commit & Pray
 
