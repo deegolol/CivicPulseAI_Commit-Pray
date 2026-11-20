@@ -12,6 +12,8 @@
 |---|---|
 | <img src="docs/screenshots/resultados.jpg" alt="Resultados: zona recomendada con precio real y mapa" width="560"> | <img src="docs/screenshots/movil.jpg" alt="PrimeraLlave en móvil" width="220"> |
 
+<img src="docs/screenshots/inicio.jpg" alt="Página de inicio de PrimeraLlave" width="560">
+
 Equipo **Commit & Pray** · Hackatón **CivicPulse AI** — 2Campus1Code (DA-ETSISI · DA-ETSIINF · Orange), noviembre de 2026.
 
 ---
@@ -27,8 +29,9 @@ Cada curso, miles de estudiantes llegan a Madrid sin conocer la ciudad y con un 
 - **Búsqueda en lenguaje natural** — escribe lo que buscas; la IA lo convierte en campus, presupuesto, tipo de vivienda, tiempo máximo, modo de transporte y prioridades. Antes de llamar a la IA, un filtro sin IA descarta frases sin sentido, y las preguntas que no tratan de buscar vivienda no se buscan.
 - **Tiempos reales puerta a puerta** al campus en **transporte público** (horarios oficiales del CRTM: Metro, Cercanías, Metro Ligero, EMT e interurbanos) y en **coche** (red de calles de OpenStreetMap). Nunca distancia en línea recta.
 - **Mapa de los 131 barrios** con los minutos hasta tu campus y capas útiles (Metro, supermercados, bibliotecas, gimnasios, parques…).
-- **Precios sin inventar**: alquiler oficial publicado por el Ministerio para cada barrio y anuncios reales con su precio exacto y enlace; nunca una estimación nuestra.
-- **Controles en unidades reales**: €/mes, minutos, tipo de vivienda y lo que más te importa (sin porcentajes).
+- **Precio de cada zona**: «desde X €» con el anuncio real más barato (Idealista, Fotocasa) cuando lo hay; si no, un precio aproximado (~) calculado con el €/m² oficial del barrio. Para pisos enteros, el alquiler oficial del barrio.
+- **Controles en unidades reales**: €/mes (hasta «sin límite»), distancia máxima en km por carretera, transporte público o coche y lo que más te importa (sin porcentajes).
+- **Comparador**: marca 2 o 3 zonas en la lista o en el mapa y compáralas lado a lado.
 - **Top 3, detalle de cada zona y comparador** con las cifras y la fuente oficial de cada dato.
 - **"Ver pisos en esta zona"** — enlaces a Idealista, Fotocasa y Badi ya filtrados por distrito y precio máximo (solo enlaces, sin scraping).
 - **Explicación en lenguaje natural** del top 3, citando únicamente cifras reales.
@@ -77,7 +80,7 @@ Railway: un único contenedor (Dockerfile) — FastAPI sirve la API y el fronten
 1. Cada indicador se normaliza de 0 a 1 entre los 131 barrios (min–max), donde 1 es siempre "mejor" (se invierte en alquiler, NO₂ y distancia). Un dato ausente cuenta como la mediana de la ciudad.
 2. La distancia al campus se calcula en línea recta (haversine) desde el centroide del barrio.
 3. Las prioridades del estudiante se convierten en pesos que suman 1, y el encaje es Σ normalizado × peso.
-4. Presupuesto: **alquiler estimado = mediana oficial €/m² × m² de referencia** (habitación 25 m², estudio 35 m², piso 60 m²). Es una estimación con datos oficiales, no el precio de un anuncio.
+4. Presupuesto: piso entero = alquiler mensual oficial del barrio (SERPAVI); habitación o estudio = €/m² oficial del barrio × m² de referencia (25 y 35 m²), marcado con «~». Donde hay anuncios reales, la app muestra «desde X €» con el más barato.
 5. Los filtros (presupuesto, distancia máxima) excluyen zonas sin alterar la puntuación de las demás.
 
 **IA con los pies en el suelo** (`backend/app/llm.py`, `backend/app/prompts.py`):
@@ -119,7 +122,7 @@ Documentación interactiva: **[/docs](https://primerallave.up.railway.app/docs)*
 | GET | `/api/meta` | Indicadores, fuentes, campus y valores por defecto |
 | GET | `/api/areas` · `/api/areas/{id}` | Barrios con sus valores; detalle con media del distrito y mediana de la ciudad |
 | GET | `/api/geo` | Polígonos de los barrios (GeoJSON) |
-| POST | `/api/score` | Ranking personalizado: encaje, desglose, alquiler estimado, ¿encaja en el presupuesto?, enlaces a anuncios |
+| POST | `/api/score` | Ranking personalizado: encaje, desglose, precio, ¿encaja en el presupuesto?, tiempos y distancia al campus, enlaces a anuncios |
 | POST | `/api/ai/parse` | Frase en lenguaje natural → parámetros de búsqueda |
 | POST | `/api/ai/explain` | Explicación del top 3 con cifras reales |
 
@@ -140,8 +143,8 @@ Hemos trabajado 3 personas con varios agentes de IA (Claude Code, ChatGPT Codex 
 
 ## 🔎 De dónde sale cada número
 
-- **Precio por barrio**: alquiler mensual oficial de pisos de los **131 barrios** (SERPAVI 2024), agrupando las 2.397 secciones censales de Madrid por barrio con los límites del INE (mediana ponderada por número de contratos). No calculamos ni estimamos precios.
-- **Anuncios reales**: habitaciones publicadas en Fotocasa con su precio exacto, enlace y fecha de consulta. Los botones «Ver pisos con precio exacto» abren Fotocasa, Idealista y Badi ya filtrados por zona y presupuesto, con los anuncios del momento.
+- **Precio por barrio**: alquiler mensual oficial de pisos de los **131 barrios** (SERPAVI 2024), agrupando las 2.397 secciones censales de Madrid por barrio con los límites del INE (mediana ponderada por número de contratos). Para habitaciones y estudios usamos ese €/m² oficial con unos m² de referencia, y lo marcamos con «~».
+- **Anuncios reales**: habitaciones publicadas en Idealista y Fotocasa con su precio exacto, enlace y fecha de consulta. El botón «Ver pisos» muestra esos anuncios y abre Fotocasa, Idealista y Badi ya filtrados por zona y presupuesto.
 - **Tiempos de viaje**: transporte público con los horarios oficiales del CRTM en día laborable de 07:00 a 10:00 (incluida la espera según la frecuencia), desde las zonas habitadas de cada barrio; en coche, minutos de conducción por la red de calles de OpenStreetMap, sin contar el tráfico de ese momento.
 - **IA**: solo interpreta la frase (con un filtro previo sin IA para frases sin sentido o fuera de tema) y redacta explicaciones con cifras que ya calculamos. Misma frase y mismas opciones → mismo resultado.
 
