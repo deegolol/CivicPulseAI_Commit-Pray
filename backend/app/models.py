@@ -29,6 +29,10 @@ class Campus(BaseModel):
     name: str
     coords: tuple[float, float]  # [lon, lat]
     aliases: list[str] = Field(default_factory=list)
+    university: str | None = None
+    acronym: str | None = None
+    municipality: str | None = None
+    has_travel_times: bool | None = None
 
 
 class Area(BaseModel):
@@ -159,6 +163,7 @@ class AiParseRequest(BaseModel):
 
 class AiParseResponse(BaseModel):
     campus_id: str
+    campus_candidates: list[str] = Field(default_factory=list)
     weights: dict[str, float]
     filters: ScoreFilters
     budget_eur_month: float | None

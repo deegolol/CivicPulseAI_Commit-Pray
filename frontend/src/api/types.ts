@@ -37,6 +37,10 @@ export interface Campus {
   id: string;
   name: string;
   aliases?: string[];
+  university?: string | null;
+  acronym?: string | null;
+  municipality?: string | null;
+  has_travel_times?: boolean | null;
   /** [lon, lat] */
   coords: [number, number];
 }
@@ -165,6 +169,7 @@ export interface AiParseRequest {
 
 export interface AiParseResponse {
   campus_id: string;
+  campus_candidates?: string[];
   weights: Record<string, number>;
   filters: {
     max_rent_eur_m2: number | null;

@@ -1,0 +1,5211 @@
+[
+  {
+    "id": "etsisi",
+    "name": "ETSISI · Campus Sur UPM",
+    "coords": [
+      -3.62789444,
+      40.3897
+    ],
+    "aliases": [
+      "Universidad Politécnica de Madrid",
+      "Vallecas",
+      "Sistemas Informáticos",
+      "Politécnica de Madrid",
+      "E.T.S. Ingeniería de Sistemas Informáticos",
+      "Informática",
+      "Ingeniería Informática"
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "municipality": "Madrid"
+  },
+  {
+    "id": "etsiinf",
+    "name": "ETSIINF · Campus Montegancedo UPM",
+    "coords": [
+      -3.839679,
+      40.405474
+    ],
+    "aliases": [
+      "Universidad Politécnica de Madrid",
+      "Boadilla",
+      "Facultad de Informática",
+      "FI UPM",
+      "Politécnica de Madrid",
+      "E.T.S. Ingenieros Informáticos",
+      "Informática",
+      "Ingeniería Informática",
+      "Campus Boadilla del Monte",
+      "Boadilla del Monte"
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "municipality": "Boadilla del Monte"
+  },
+  {
+    "id": "upm-arquitectura",
+    "name": "ETSAM · Arquitectura UPM",
+    "coords": [
+      -3.730669,
+      40.442954
+    ],
+    "aliases": [
+      "Universidad Politécnica de Madrid",
+      "Ciudad Universitaria",
+      "Arquitectura UPM",
+      "Politécnica de Madrid",
+      "E.T.S. de Arquitectura",
+      "Campus Arquitectura",
+      "Arquitectura"
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "municipality": "Madrid"
+  },
+  {
+    "id": "upm-industriales",
+    "name": "ETSII · Industriales UPM",
+    "coords": [
+      -3.686851,
+      40.443066
+    ],
+    "aliases": [
+      "Universidad Politécnica de Madrid",
+      "Industriales UPM",
+      "Castellana",
+      "Politécnica de Madrid",
+      "E.T.S. Ingenieros Industriales",
+      "Campus ETSI Industriales",
+      "ETSI Industriales"
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "municipality": "Madrid"
+  },
+  {
+    "id": "ucm-moncloa",
+    "name": "UCM · Ciudad Universitaria",
+    "coords": [
+      -3.725361,
+      40.450194
+    ],
+    "aliases": [
+      "Universidad Complutense de Madrid",
+      "Campus Moncloa",
+      "Complutense"
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM"
+  },
+  {
+    "id": "uam-cantoblanco",
+    "name": "UAM · Cantoblanco",
+    "coords": [
+      -3.690783,
+      40.548003
+    ],
+    "aliases": [
+      "Universidad Autónoma de Madrid",
+      "Autónoma de Madrid",
+      "Campus Cantoblanco",
+      "Cantoblanco"
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM"
+  },
+  {
+    "id": "uc3m-getafe",
+    "name": "UC3M · Getafe",
+    "coords": [
+      -3.726833,
+      40.318611
+    ],
+    "aliases": [
+      "Universidad Carlos III de Madrid",
+      "Carlos III",
+      "Campus Getafe",
+      "Getafe"
+    ],
+    "university": "Universidad Carlos III",
+    "acronym": "UC3M"
+  },
+  {
+    "id": "uc3m-leganes",
+    "name": "UC3M · Leganés",
+    "coords": [
+      -3.766889,
+      40.33225
+    ],
+    "aliases": [
+      "Universidad Carlos III de Madrid",
+      "Carlos III",
+      "Campus Leganés Escuela Politécnica",
+      "Leganés Escuela Politécnica",
+      "Informática",
+      "Ingeniería Informática"
+    ],
+    "university": "Universidad Carlos III",
+    "acronym": "UC3M"
+  },
+  {
+    "id": "uc3m-puerta-toledo",
+    "name": "UC3M · Puerta de Toledo",
+    "coords": [
+      -3.710167,
+      40.407028
+    ],
+    "aliases": [
+      "Universidad Carlos III de Madrid",
+      "Carlos III"
+    ],
+    "university": "Universidad Carlos III",
+    "acronym": "UC3M"
+  },
+  {
+    "id": "urjc-vicalvaro",
+    "name": "URJC · Madrid-Vicálvaro",
+    "coords": [
+      -3.610704,
+      40.406144
+    ],
+    "aliases": [
+      "Universidad Rey Juan Carlos",
+      "Rey Juan Carlos",
+      "Campus Vicálvaro",
+      "Vicálvaro"
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC"
+  },
+  {
+    "id": "urjc-mostoles",
+    "name": "URJC · Móstoles",
+    "coords": [
+      -3.873217,
+      40.335913
+    ],
+    "aliases": [
+      "Universidad Rey Juan Carlos",
+      "Rey Juan Carlos"
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC"
+  },
+  {
+    "id": "urjc-alcorcon",
+    "name": "URJC · Alcorcón",
+    "coords": [
+      -3.844464,
+      40.350665
+    ],
+    "aliases": [
+      "Universidad Rey Juan Carlos",
+      "Rey Juan Carlos",
+      "Campus Alcorcón",
+      "Alcorcón"
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC"
+  },
+  {
+    "id": "urjc-fuenlabrada",
+    "name": "URJC · Fuenlabrada",
+    "coords": [
+      -3.818944,
+      40.285583
+    ],
+    "aliases": [
+      "Universidad Rey Juan Carlos",
+      "Rey Juan Carlos",
+      "Campus Fuenlabrada",
+      "Fuenlabrada"
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC"
+  },
+  {
+    "id": "comillas-icai",
+    "name": "Comillas · ICAI (Alberto Aguilera)",
+    "coords": [
+      -3.711436,
+      40.431861
+    ],
+    "aliases": [
+      "Universidad Pontificia Comillas",
+      "Universidad Pontificia de Comillas",
+      "Comillas",
+      "E.T.S. Ingeniería (ICAI)",
+      "ICAI",
+      "Campus ICAI"
+    ],
+    "university": "Universidad Pontificia de Comillas",
+    "acronym": "UPCO",
+    "municipality": "Madrid"
+  },
+  {
+    "id": "ceu-moncloa",
+    "name": "CEU San Pablo · Moncloa",
+    "coords": [
+      -3.718045,
+      40.446684
+    ],
+    "aliases": [
+      "Universidad San Pablo CEU",
+      "Universidad CEU San Pablo",
+      "CEU San Pablo",
+      "Campus Moncloa",
+      "Moncloa"
+    ],
+    "university": "Universidad San Pablo CEU",
+    "acronym": "CEU"
+  },
+  {
+    "id": "nomecalles-centro-1",
+    "name": "UNED · Instituto Universitario General Gutiérrez Mellado de Estudios sobre la Paz, la Seguridad y la Defensa",
+    "coords": [
+      -3.7145149,
+      40.4285957
+    ],
+    "university": "Universidad Nacional de Educación a Distancia",
+    "acronym": "UNED",
+    "aliases": [
+      "Instituto Universitario General Gutiérrez Mellado de Estudios sobre la Paz, la Seguridad y la Defensa"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-2",
+    "name": "UNED · Rectorado",
+    "coords": [
+      -3.7039376,
+      40.4379964
+    ],
+    "university": "Universidad Nacional de Educación a Distancia",
+    "acronym": "UNED",
+    "aliases": [
+      "Rectorado"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-3",
+    "name": "UNED · Facultad de Geografía e Historia",
+    "coords": [
+      -3.7353023,
+      40.4364834
+    ],
+    "university": "Universidad Nacional de Educación a Distancia",
+    "acronym": "UNED",
+    "aliases": [
+      "Facultad de Geografía e Historia"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-4",
+    "name": "UNED · Facultad de Filosofía",
+    "coords": [
+      -3.7353621,
+      40.4365641
+    ],
+    "university": "Universidad Nacional de Educación a Distancia",
+    "acronym": "UNED",
+    "aliases": [
+      "Facultad de Filosofía"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-5",
+    "name": "UNED · Facultad de Ciencias",
+    "coords": [
+      -3.7359946,
+      40.4372538
+    ],
+    "university": "Universidad Nacional de Educación a Distancia",
+    "acronym": "UNED",
+    "aliases": [
+      "Facultad de Ciencias"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-6",
+    "name": "UNED · Facultad de Ciencias Económicas y Empresariales.",
+    "coords": [
+      -3.7365318,
+      40.437863
+    ],
+    "university": "Universidad Nacional de Educación a Distancia",
+    "acronym": "UNED",
+    "aliases": [
+      "Facultad de Ciencias Económicas y Empresariales."
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-7",
+    "name": "UNED · Facultad de Derecho",
+    "coords": [
+      -3.7335479,
+      40.4356117
+    ],
+    "university": "Universidad Nacional de Educación a Distancia",
+    "acronym": "UNED",
+    "aliases": [
+      "Facultad de Derecho"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-8",
+    "name": "UNED · Facultad de Ciencias Políticas y Sociología",
+    "coords": [
+      -3.7334149,
+      40.4353346
+    ],
+    "university": "Universidad Nacional de Educación a Distancia",
+    "acronym": "UNED",
+    "aliases": [
+      "Facultad de Ciencias Políticas y Sociología"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-9",
+    "name": "UNED · E.T.S. Ingenieros Industriales",
+    "coords": [
+      -3.737094,
+      40.451553
+    ],
+    "university": "Universidad Nacional de Educación a Distancia",
+    "acronym": "UNED",
+    "aliases": [
+      "E.T.S. Ingenieros Industriales"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-10",
+    "name": "UNED · Facultad de Psicología",
+    "coords": [
+      -3.7358158,
+      40.4522188
+    ],
+    "university": "Universidad Nacional de Educación a Distancia",
+    "acronym": "UNED",
+    "aliases": [
+      "Facultad de Psicología"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-11",
+    "name": "UNED · E.T.S. Ingeniería Informática",
+    "coords": [
+      -3.7378764,
+      40.4508453
+    ],
+    "university": "Universidad Nacional de Educación a Distancia",
+    "acronym": "UNED",
+    "aliases": [
+      "E.T.S. Ingeniería Informática",
+      "Informática",
+      "Ingeniería Informática"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-12",
+    "name": "UNED · Facultad de Filología",
+    "coords": [
+      -3.7352064,
+      40.4363399
+    ],
+    "university": "Universidad Nacional de Educación a Distancia",
+    "acronym": "UNED",
+    "aliases": [
+      "Facultad de Filología"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-13",
+    "name": "UNED · Instituto Universitario de Investigación sobre Seguridad Interior",
+    "coords": [
+      -3.7151874,
+      40.4581564
+    ],
+    "university": "Universidad Nacional de Educación a Distancia",
+    "acronym": "UNED",
+    "aliases": [
+      "Instituto Universitario de Investigación sobre Seguridad Interior"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-14",
+    "name": "UNED · Escuela Internacional de Doctorado de la UNED (EIDUNED)",
+    "coords": [
+      -3.7038268,
+      40.4380757
+    ],
+    "university": "Universidad Nacional de Educación a Distancia",
+    "acronym": "UNED",
+    "aliases": [
+      "Escuela Internacional de Doctorado de la UNED (EIDUNED)",
+      "EIDUNED"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-15",
+    "name": "UDIMA · Facultad de Ciencias Técnicas e Ingeniería. UDIMA",
+    "coords": [
+      -3.998912,
+      40.6313654
+    ],
+    "university": "Universidad a Distancia de Madrid",
+    "acronym": "UDIMA",
+    "aliases": [
+      "Facultad de Ciencias Técnicas e Ingeniería. UDIMA"
+    ],
+    "municipality": "Collado Villalba"
+  },
+  {
+    "id": "nomecalles-centro-16",
+    "name": "UDIMA · Facultad de Ciencias Sociales y Humanidades. UDIMA",
+    "coords": [
+      -3.9990244,
+      40.6314105
+    ],
+    "university": "Universidad a Distancia de Madrid",
+    "acronym": "UDIMA",
+    "aliases": [
+      "Facultad de Ciencias Sociales y Humanidades. UDIMA"
+    ],
+    "municipality": "Collado Villalba"
+  },
+  {
+    "id": "nomecalles-centro-17",
+    "name": "UDIMA · Facultad de Ciencias Jurídicas. UDIMA",
+    "coords": [
+      -3.9992299,
+      40.6312726
+    ],
+    "university": "Universidad a Distancia de Madrid",
+    "acronym": "UDIMA",
+    "aliases": [
+      "Facultad de Ciencias Jurídicas. UDIMA"
+    ],
+    "municipality": "Collado Villalba"
+  },
+  {
+    "id": "nomecalles-centro-18",
+    "name": "UDIMA · Facultad de Ciencias Económicas y Empresariales. UDIMA",
+    "coords": [
+      -3.9991227,
+      40.6312195
+    ],
+    "university": "Universidad a Distancia de Madrid",
+    "acronym": "UDIMA",
+    "aliases": [
+      "Facultad de Ciencias Económicas y Empresariales. UDIMA"
+    ],
+    "municipality": "Collado Villalba"
+  },
+  {
+    "id": "nomecalles-centro-19",
+    "name": "UDIMA · Facultad de Ciencias de la Salud y de la Educación. UDIMA",
+    "coords": [
+      -3.999032,
+      40.6314815
+    ],
+    "university": "Universidad a Distancia de Madrid",
+    "acronym": "UDIMA",
+    "aliases": [
+      "Facultad de Ciencias de la Salud y de la Educación. UDIMA"
+    ],
+    "municipality": "Collado Villalba"
+  },
+  {
+    "id": "nomecalles-centro-20",
+    "name": "UAX · Escuela Politécnica Superior",
+    "coords": [
+      -3.9837715,
+      40.4518339
+    ],
+    "university": "Universidad Alfonso X El Sabio",
+    "acronym": "UAX",
+    "aliases": [
+      "Escuela Politécnica Superior",
+      "Alfonso X el Sabio"
+    ],
+    "municipality": "Villanueva de la Cañada"
+  },
+  {
+    "id": "nomecalles-centro-21",
+    "name": "UAX · Facultad de Ciencias de la Salud",
+    "coords": [
+      -3.9843737,
+      40.4518829
+    ],
+    "university": "Universidad Alfonso X El Sabio",
+    "acronym": "UAX",
+    "aliases": [
+      "Facultad de Ciencias de la Salud",
+      "Alfonso X el Sabio"
+    ],
+    "municipality": "Villanueva de la Cañada"
+  },
+  {
+    "id": "nomecalles-centro-22",
+    "name": "UAX · Facultad de Estudios Sociales y Lenguas Aplicadas",
+    "coords": [
+      -3.9850344,
+      40.4519043
+    ],
+    "university": "Universidad Alfonso X El Sabio",
+    "acronym": "UAX",
+    "aliases": [
+      "Facultad de Estudios Sociales y Lenguas Aplicadas",
+      "Alfonso X el Sabio"
+    ],
+    "municipality": "Villanueva de la Cañada"
+  },
+  {
+    "id": "nomecalles-centro-23",
+    "name": "UAX · Facultad de Farmacia",
+    "coords": [
+      -3.9850298,
+      40.451589
+    ],
+    "university": "Universidad Alfonso X El Sabio",
+    "acronym": "UAX",
+    "aliases": [
+      "Facultad de Farmacia",
+      "Alfonso X el Sabio"
+    ],
+    "municipality": "Villanueva de la Cañada"
+  },
+  {
+    "id": "nomecalles-centro-24",
+    "name": "UAX · Facultad de Música y Artes Escénicas",
+    "coords": [
+      -3.6768002,
+      40.4653938
+    ],
+    "university": "Universidad Alfonso X El Sabio",
+    "acronym": "UAX",
+    "aliases": [
+      "Facultad de Música y Artes Escénicas",
+      "Alfonso X el Sabio"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-25",
+    "name": "UAX · Facultad de Veterinaria",
+    "coords": [
+      -3.9863557,
+      40.451938
+    ],
+    "university": "Universidad Alfonso X El Sabio",
+    "acronym": "UAX",
+    "aliases": [
+      "Facultad de Veterinaria",
+      "Alfonso X el Sabio"
+    ],
+    "municipality": "Villanueva de la Cañada"
+  },
+  {
+    "id": "nomecalles-centro-26",
+    "name": "UAX · Instituto de Ciencias de la Educación",
+    "coords": [
+      -3.9873124,
+      40.452038
+    ],
+    "university": "Universidad Alfonso X El Sabio",
+    "acronym": "UAX",
+    "aliases": [
+      "Instituto de Ciencias de la Educación",
+      "Alfonso X el Sabio"
+    ],
+    "municipality": "Villanueva de la Cañada"
+  },
+  {
+    "id": "nomecalles-centro-27",
+    "name": "UAN · Facultad de Comunicación y Artes. Campus San Fransico de Sales",
+    "coords": [
+      -3.7108446,
+      40.4434925
+    ],
+    "university": "Universidad Antonio de Nebrija",
+    "acronym": "UAN",
+    "aliases": [
+      "Facultad de Comunicación y Artes. Campus San Fransico de Sales",
+      "Universidad Nebrija",
+      "Nebrija",
+      "San Fransico de Sales",
+      "Campus San Fransico de Sales"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-28",
+    "name": "UAN · Facultad de Ciencias de la Vida y de la Naturaleza. Campus de la Berzosa",
+    "coords": [
+      -3.9501705,
+      40.600681
+    ],
+    "university": "Universidad Antonio de Nebrija",
+    "acronym": "UAN",
+    "aliases": [
+      "Facultad de Ciencias de la Vida y de la Naturaleza. Campus de la Berzosa",
+      "Universidad Nebrija",
+      "Nebrija",
+      "de la Berzosa",
+      "Campus de la Berzosa"
+    ],
+    "municipality": "Hoyo de Manzanares"
+  },
+  {
+    "id": "nomecalles-centro-29",
+    "name": "UAN · Centro de Investigación Nebrija Aerospace Research and Innovation in Electronic Systems (ARIES)",
+    "coords": [
+      -3.7129153,
+      40.4294382
+    ],
+    "university": "Universidad Antonio de Nebrija",
+    "acronym": "UAN",
+    "aliases": [
+      "Centro de Investigación Nebrija Aerospace Research and Innovation in Electronic Systems (ARIES)",
+      "Universidad Nebrija",
+      "Nebrija",
+      "ARIES"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-30",
+    "name": "UAN · Escuela de doctorado. Campus de la Berzosa",
+    "coords": [
+      -3.949533,
+      40.6013148
+    ],
+    "university": "Universidad Antonio de Nebrija",
+    "acronym": "UAN",
+    "aliases": [
+      "Escuela de doctorado. Campus de la Berzosa",
+      "Universidad Nebrija",
+      "Nebrija",
+      "de la Berzosa",
+      "Campus de la Berzosa"
+    ],
+    "municipality": "Hoyo de Manzanares"
+  },
+  {
+    "id": "nomecalles-centro-31",
+    "name": "UNED · Centro Asociado Ramón Areces",
+    "coords": [
+      -3.6983356,
+      40.4030548
+    ],
+    "university": "Universidad Nacional de Educación a Distancia",
+    "acronym": "UNED",
+    "aliases": [
+      "Centro Asociado Ramón Areces"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-32",
+    "name": "UAM · Escuela Universitaria de Enfermería de la Fundación Jiménez Díaz",
+    "coords": [
+      -3.7187765,
+      40.4391008
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Escuela Universitaria de Enfermería de la Fundación Jiménez Díaz",
+      "Autónoma de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-33",
+    "name": "UAM · Instituto de Investigaciones Biomédicas Alberto Sols",
+    "coords": [
+      -3.6912431,
+      40.4824399
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Instituto de Investigaciones Biomédicas Alberto Sols",
+      "Autónoma de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-34",
+    "name": "UAM · Instituto Universitario de Investigación Gerontológica y Metabólica",
+    "coords": [
+      -3.6757164,
+      40.4344056
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Instituto Universitario de Investigación Gerontológica y Metabólica",
+      "Autónoma de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-35",
+    "name": "UAM · Instituto de Biología Molecular",
+    "coords": [
+      -3.6909895,
+      40.5499269
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Instituto de Biología Molecular",
+      "Autónoma de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-36",
+    "name": "UAM · Instituto de Derecho Local",
+    "coords": [
+      -3.6906812,
+      40.5417577
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Instituto de Derecho Local",
+      "Autónoma de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-37",
+    "name": "UAM · Instituto Universitario de Administración de Empresas (IADE)",
+    "coords": [
+      -3.696491,
+      40.5451642
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Instituto Universitario de Administración de Empresas (IADE)",
+      "Autónoma de Madrid",
+      "IADE"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-38",
+    "name": "UAM · Instituto Universitario de Ciencia de Materiales Nicolás Cabrera",
+    "coords": [
+      -3.6895954,
+      40.5437558
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Instituto Universitario de Ciencia de Materiales Nicolás Cabrera",
+      "Autónoma de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-39",
+    "name": "UAM · Instituto Universitario de Ciencias de la Educación (IUCE)",
+    "coords": [
+      -3.6985074,
+      40.5437377
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Instituto Universitario de Ciencias de la Educación (IUCE)",
+      "Autónoma de Madrid",
+      "IUCE"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-40",
+    "name": "UAM · Instituto Universitario de Estudios de la Mujer",
+    "coords": [
+      -3.6970447,
+      40.5450348
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Instituto Universitario de Estudios de la Mujer",
+      "Autónoma de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-41",
+    "name": "UAM · Instituto Universitario de Predicción Económica Lawrence R. Klein",
+    "coords": [
+      -3.69681,
+      40.5451803
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Instituto Universitario de Predicción Económica Lawrence R. Klein",
+      "Autónoma de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-42",
+    "name": "UAM · Instituto Universitario de Sociología de las Nuevas Tecnologías",
+    "coords": [
+      -3.6964925,
+      40.5453084
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Instituto Universitario de Sociología de las Nuevas Tecnologías",
+      "Autónoma de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-43",
+    "name": "UAM · Escuela de Doctorado Multidisciplinar de la Universidad Autónoma de Madrid",
+    "coords": [
+      -3.6983179,
+      40.5436848
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Escuela de Doctorado Multidisciplinar de la Universidad Autónoma de Madrid",
+      "Autónoma de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-44",
+    "name": "UAM · Rectorado de la Universidad Autonóma de Madrid",
+    "coords": [
+      -3.6954549,
+      40.5443237
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Rectorado de la Universidad Autonóma de Madrid",
+      "Autónoma de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-45",
+    "name": "UAM · Facultad de Ciencias. Edificio Principal",
+    "coords": [
+      -3.6952013,
+      40.5454478
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Facultad de Ciencias. Edificio Principal",
+      "Autónoma de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-46",
+    "name": "UAM · Facultad de Derecho",
+    "coords": [
+      -3.691046,
+      40.5416384
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Facultad de Derecho",
+      "Autónoma de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-47",
+    "name": "UAM · Facultad de Filosofía y Letras",
+    "coords": [
+      -3.6980902,
+      40.544506
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Facultad de Filosofía y Letras",
+      "Autónoma de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-48",
+    "name": "UAM · Facultad de Psicología",
+    "coords": [
+      -3.6924383,
+      40.5438193
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Facultad de Psicología",
+      "Autónoma de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-49",
+    "name": "UAM · Facultad de Ciencias Económicas y Empresariales",
+    "coords": [
+      -3.6967142,
+      40.5450458
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Facultad de Ciencias Económicas y Empresariales",
+      "Autónoma de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-50",
+    "name": "UAM · Facultad de Formación de Profesorado y Educación",
+    "coords": [
+      -3.6974421,
+      40.544636
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Facultad de Formación de Profesorado y Educación",
+      "Autónoma de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-51",
+    "name": "UAM · Escuela Politécnica Superior",
+    "coords": [
+      -3.69162,
+      40.546971
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Escuela Politécnica Superior",
+      "Autónoma de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-52",
+    "name": "UAM · Facultad de Medicina",
+    "coords": [
+      -3.690254,
+      40.482232
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Facultad de Medicina",
+      "Autónoma de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-53",
+    "name": "UAM · Escuela Universitaria de Fisioterapia de la O.N.C.E",
+    "coords": [
+      -3.7079382,
+      40.4939062
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Escuela Universitaria de Fisioterapia de la O.N.C.E",
+      "Autónoma de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-54",
+    "name": "UAM · Centro Superior de Estudios Universitarios La Salle",
+    "coords": [
+      -3.7819729,
+      40.4663572
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Centro Superior de Estudios Universitarios La Salle",
+      "Autónoma de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-55",
+    "name": "UAM · Escuela de Enfermería de la Comunidad de Madrid",
+    "coords": [
+      -3.769443,
+      40.3201342
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Escuela de Enfermería de la Comunidad de Madrid",
+      "Autónoma de Madrid"
+    ],
+    "municipality": "Leganés"
+  },
+  {
+    "id": "nomecalles-centro-56",
+    "name": "UAM · Escuela de Enfermería de la Cruz Roja",
+    "coords": [
+      -3.7096779,
+      40.4473282
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Escuela de Enfermería de la Cruz Roja",
+      "Autónoma de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-57",
+    "name": "UAM · Escuela de Enfermería La Paz",
+    "coords": [
+      -3.6866056,
+      40.4802692
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Escuela de Enfermería La Paz",
+      "Autónoma de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-58",
+    "name": "UAM · Escuela de Enfermería Puerta de Hierro",
+    "coords": [
+      -3.8732129,
+      40.4492431
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Escuela de Enfermería Puerta de Hierro",
+      "Autónoma de Madrid"
+    ],
+    "municipality": "Majadahonda"
+  },
+  {
+    "id": "nomecalles-centro-59",
+    "name": "UCJC · Escuela de Posgrado",
+    "coords": [
+      -3.695051,
+      40.4285702
+    ],
+    "university": "Universidad Camilo José Cela",
+    "acronym": "UCJC",
+    "aliases": [
+      "Escuela de Posgrado"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-60",
+    "name": "UCJC · Facultad de Ciencias de la Salud",
+    "coords": [
+      -3.9400171,
+      40.4736482
+    ],
+    "university": "Universidad Camilo José Cela",
+    "acronym": "UCJC",
+    "aliases": [
+      "Facultad de Ciencias de la Salud"
+    ],
+    "municipality": "Villanueva de la Cañada"
+  },
+  {
+    "id": "nomecalles-centro-61",
+    "name": "UCJC · Rectorado y Servicios. Campus Villafranca",
+    "coords": [
+      -3.9400601,
+      40.4716569
+    ],
+    "university": "Universidad Camilo José Cela",
+    "acronym": "UCJC",
+    "aliases": [
+      "Rectorado y Servicios. Campus Villafranca",
+      "Villafranca",
+      "Campus Villafranca"
+    ],
+    "municipality": "Villanueva de la Cañada"
+  },
+  {
+    "id": "nomecalles-centro-62",
+    "name": "UCJC · Centro Universitario de Tecnología y Arte Digital (U-Tad)",
+    "coords": [
+      -3.8933067,
+      40.5398462
+    ],
+    "university": "Universidad Camilo José Cela",
+    "acronym": "UCJC",
+    "aliases": [
+      "Centro Universitario de Tecnología y Arte Digital (U-Tad)"
+    ],
+    "municipality": "Las Rozas de Madrid"
+  },
+  {
+    "id": "nomecalles-centro-63",
+    "name": "UCJC · Escuela Internacional de Doctorado de la Universidad Camilo José Cela",
+    "coords": [
+      -3.9404026,
+      40.4716901
+    ],
+    "university": "Universidad Camilo José Cela",
+    "acronym": "UCJC",
+    "aliases": [
+      "Escuela Internacional de Doctorado de la Universidad Camilo José Cela"
+    ],
+    "municipality": "Villanueva de la Cañada"
+  },
+  {
+    "id": "nomecalles-centro-64",
+    "name": "UCJC · Facultad de Comunicación y Humanidades",
+    "coords": [
+      -3.9399199,
+      40.4717571
+    ],
+    "university": "Universidad Camilo José Cela",
+    "acronym": "UCJC",
+    "aliases": [
+      "Facultad de Comunicación y Humanidades"
+    ],
+    "municipality": "Villanueva de la Cañada"
+  },
+  {
+    "id": "nomecalles-centro-65",
+    "name": "UCJC · Facultad de Tecnología y Ciencia",
+    "coords": [
+      -3.6885938,
+      40.4601411
+    ],
+    "university": "Universidad Camilo José Cela",
+    "acronym": "UCJC",
+    "aliases": [
+      "Facultad de Tecnología y Ciencia"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-66",
+    "name": "UCJC · Centro de Educación Superior Instituto de Ciencias Empresariales IMF",
+    "coords": [
+      -3.7107123,
+      40.4134119
+    ],
+    "university": "Universidad Camilo José Cela",
+    "acronym": "UCJC",
+    "aliases": [
+      "Centro de Educación Superior Instituto de Ciencias Empresariales IMF"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-67",
+    "name": "UCJC · Facultad de Educación",
+    "coords": [
+      -3.9401969,
+      40.4716663
+    ],
+    "university": "Universidad Camilo José Cela",
+    "acronym": "UCJC",
+    "aliases": [
+      "Facultad de Educación"
+    ],
+    "municipality": "Villanueva de la Cañada"
+  },
+  {
+    "id": "nomecalles-centro-68",
+    "name": "UC3M · Facultad Ciencias Sociales y Jurídicas",
+    "coords": [
+      -4.0120626,
+      40.5460285
+    ],
+    "university": "Universidad Carlos III",
+    "acronym": "UC3M",
+    "aliases": [
+      "Facultad Ciencias Sociales y Jurídicas",
+      "Universidad Carlos III de Madrid",
+      "Carlos III"
+    ],
+    "municipality": "Colmenarejo"
+  },
+  {
+    "id": "nomecalles-centro-69",
+    "name": "UC3M · Escuela Politécnica Superior",
+    "coords": [
+      -4.0122661,
+      40.5460086
+    ],
+    "university": "Universidad Carlos III",
+    "acronym": "UC3M",
+    "aliases": [
+      "Escuela Politécnica Superior",
+      "Universidad Carlos III de Madrid",
+      "Carlos III"
+    ],
+    "municipality": "Colmenarejo"
+  },
+  {
+    "id": "nomecalles-centro-70",
+    "name": "UC3M · Facultad Ciencias de la Salud",
+    "coords": [
+      -3.7289932,
+      40.3173273
+    ],
+    "university": "Universidad Carlos III",
+    "acronym": "UC3M",
+    "aliases": [
+      "Facultad Ciencias de la Salud",
+      "Universidad Carlos III de Madrid",
+      "Carlos III"
+    ],
+    "municipality": "Getafe"
+  },
+  {
+    "id": "nomecalles-centro-71",
+    "name": "UC3M · Facultad Humanidades, Documentación y Comunicación",
+    "coords": [
+      -4.0119759,
+      40.5461433
+    ],
+    "university": "Universidad Carlos III",
+    "acronym": "UC3M",
+    "aliases": [
+      "Facultad Humanidades, Documentación y Comunicación",
+      "Universidad Carlos III de Madrid",
+      "Carlos III"
+    ],
+    "municipality": "Colmenarejo"
+  },
+  {
+    "id": "nomecalles-centro-72",
+    "name": "UC3M · Facultad Humanidades, Comunicación y Documentación",
+    "coords": [
+      -3.7262196,
+      40.3180102
+    ],
+    "university": "Universidad Carlos III",
+    "acronym": "UC3M",
+    "aliases": [
+      "Facultad Humanidades, Comunicación y Documentación",
+      "Universidad Carlos III de Madrid",
+      "Carlos III"
+    ],
+    "municipality": "Getafe"
+  },
+  {
+    "id": "nomecalles-centro-73",
+    "name": "UC3M · Escuela Politécnica Superior",
+    "coords": [
+      -3.7670207,
+      40.3317811
+    ],
+    "university": "Universidad Carlos III",
+    "acronym": "UC3M",
+    "aliases": [
+      "Escuela Politécnica Superior",
+      "Universidad Carlos III de Madrid",
+      "Carlos III"
+    ],
+    "municipality": "Leganés"
+  },
+  {
+    "id": "nomecalles-centro-74",
+    "name": "UC3M · Centro Universitario de la Guardia Civil",
+    "coords": [
+      -3.6011587,
+      40.0519204
+    ],
+    "university": "Universidad Carlos III",
+    "acronym": "UC3M",
+    "aliases": [
+      "Centro Universitario de la Guardia Civil",
+      "Universidad Carlos III de Madrid",
+      "Carlos III"
+    ],
+    "municipality": "Aranjuez"
+  },
+  {
+    "id": "nomecalles-centro-75",
+    "name": "UC3M · Instituto \"Pascual Madoz\" del Territorio, Urbanismo y Medio Ambiente",
+    "coords": [
+      -3.7259094,
+      40.3140853
+    ],
+    "university": "Universidad Carlos III",
+    "acronym": "UC3M",
+    "aliases": [
+      "Instituto \"Pascual Madoz\" del Territorio, Urbanismo y Medio Ambiente",
+      "Universidad Carlos III de Madrid",
+      "Carlos III"
+    ],
+    "municipality": "Getafe"
+  },
+  {
+    "id": "nomecalles-centro-76",
+    "name": "UC3M · Instituto Universitario de Derechos Humanos \"Gregorio Peces-Barba\"",
+    "coords": [
+      -3.7246007,
+      40.3156741
+    ],
+    "university": "Universidad Carlos III",
+    "acronym": "UC3M",
+    "aliases": [
+      "Instituto Universitario de Derechos Humanos \"Gregorio Peces-Barba\"",
+      "Universidad Carlos III de Madrid",
+      "Carlos III"
+    ],
+    "municipality": "Getafe"
+  },
+  {
+    "id": "nomecalles-centro-77",
+    "name": "UC3M · Instituto Universitario \"Flores de Lemus\" de Estudios Avanzados en Economía",
+    "coords": [
+      -3.7245653,
+      40.3159325
+    ],
+    "university": "Universidad Carlos III",
+    "acronym": "UC3M",
+    "aliases": [
+      "Instituto Universitario \"Flores de Lemus\" de Estudios Avanzados en Economía",
+      "Universidad Carlos III de Madrid",
+      "Carlos III"
+    ],
+    "municipality": "Getafe"
+  },
+  {
+    "id": "nomecalles-centro-78",
+    "name": "UC3M · Instituto Universitario \"Francisco de Vitoria\" de Estudios Internacionales y Europeos",
+    "coords": [
+      -3.7263613,
+      40.3169636
+    ],
+    "university": "Universidad Carlos III",
+    "acronym": "UC3M",
+    "aliases": [
+      "Instituto Universitario \"Francisco de Vitoria\" de Estudios Internacionales y Europeos",
+      "Universidad Carlos III de Madrid",
+      "Carlos III"
+    ],
+    "municipality": "Getafe"
+  },
+  {
+    "id": "nomecalles-centro-79",
+    "name": "UC3M · Escuela de Doctorado de la Universidad Carlos III de Madrid",
+    "coords": [
+      -3.7273537,
+      40.3188592
+    ],
+    "university": "Universidad Carlos III",
+    "acronym": "UC3M",
+    "aliases": [
+      "Escuela de Doctorado de la Universidad Carlos III de Madrid",
+      "Universidad Carlos III de Madrid",
+      "Carlos III"
+    ],
+    "municipality": "Getafe"
+  },
+  {
+    "id": "nomecalles-centro-80",
+    "name": "UC3M · Centro de Postgrado",
+    "coords": [
+      -3.7653594,
+      40.3316569
+    ],
+    "university": "Universidad Carlos III",
+    "acronym": "UC3M",
+    "aliases": [
+      "Centro de Postgrado",
+      "Universidad Carlos III de Madrid",
+      "Carlos III"
+    ],
+    "municipality": "Leganés"
+  },
+  {
+    "id": "nomecalles-centro-81",
+    "name": "UCM · Instituto Superior de Derecho y Economía (ISDE)",
+    "coords": [
+      -3.6816252,
+      40.4509475
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Instituto Superior de Derecho y Economía (ISDE)",
+      "Complutense",
+      "ISDE"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-82",
+    "name": "UCM · Centro de Enseñanza Superior Instituto de Estudios Bursátiles",
+    "coords": [
+      -3.6906468,
+      40.4186777
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Centro de Enseñanza Superior Instituto de Estudios Bursátiles",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-83",
+    "name": "UCM · Centro de Enseñanza Superior Cardenal Cisneros",
+    "coords": [
+      -3.6766239,
+      40.4308417
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Centro de Enseñanza Superior Cardenal Cisneros",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-84",
+    "name": "UCM · Facultad de Bellas Artes",
+    "coords": [
+      -3.73385,
+      40.4395467
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Facultad de Bellas Artes",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-85",
+    "name": "UCM · Facultad de Ciencias Fisicas",
+    "coords": [
+      -3.7261665,
+      40.4508925
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Facultad de Ciencias Fisicas",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-86",
+    "name": "UCM · Facultad de Ciencias Matemáticas",
+    "coords": [
+      -3.7258561,
+      40.449444
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Facultad de Ciencias Matemáticas",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-87",
+    "name": "UCM · Facultad de Educación",
+    "coords": [
+      -3.7178175,
+      40.4509266
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Facultad de Educación",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-88",
+    "name": "UCM · Facultad de Informática",
+    "coords": [
+      -3.7339598,
+      40.4528883
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Facultad de Informática",
+      "Complutense",
+      "Informática",
+      "Ingeniería Informática"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-89",
+    "name": "UCM · Facultad de Ciencias Geológicas",
+    "coords": [
+      -3.7258875,
+      40.4489076
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Facultad de Ciencias Geológicas",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-90",
+    "name": "UCM · Facultad de Veterinaria",
+    "coords": [
+      -3.7390326,
+      40.4498199
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Facultad de Veterinaria",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-91",
+    "name": "UCM · Facultad de Ciencias de la Información",
+    "coords": [
+      -3.7281861,
+      40.4457086
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Facultad de Ciencias de la Información",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-92",
+    "name": "UCM · Facultad de Ciencias Químicas",
+    "coords": [
+      -3.7252352,
+      40.4498263
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Facultad de Ciencias Químicas",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-93",
+    "name": "UCM · Facultad de Farmacia",
+    "coords": [
+      -3.7263521,
+      40.4451256
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Facultad de Farmacia",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-94",
+    "name": "UCM · Facultad de Odontología",
+    "coords": [
+      -3.7257907,
+      40.4422642
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Facultad de Odontología",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-95",
+    "name": "UCM · Facultad de Ciencias de la Documentación",
+    "coords": [
+      -3.701351,
+      40.4380998
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Facultad de Ciencias de la Documentación",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-96",
+    "name": "UCM · Facultad de Estudios Estadísticos",
+    "coords": [
+      -3.7368371,
+      40.4468561
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Facultad de Estudios Estadísticos",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-97",
+    "name": "UCM · Facultad de Ciencias Políticas y Sociología",
+    "coords": [
+      -3.7897382,
+      40.4304126
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Facultad de Ciencias Políticas y Sociología",
+      "Complutense"
+    ],
+    "municipality": "Pozuelo de Alarcón"
+  },
+  {
+    "id": "nomecalles-centro-98",
+    "name": "UCM · Facultad de Ciencias Económicas y Empresariales",
+    "coords": [
+      -3.7893231,
+      40.4332263
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Facultad de Ciencias Económicas y Empresariales",
+      "Complutense"
+    ],
+    "municipality": "Pozuelo de Alarcón"
+  },
+  {
+    "id": "nomecalles-centro-99",
+    "name": "UCM · Facultad de Trabajo Social",
+    "coords": [
+      -3.789344,
+      40.4309829
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Facultad de Trabajo Social",
+      "Complutense"
+    ],
+    "municipality": "Pozuelo de Alarcón"
+  },
+  {
+    "id": "nomecalles-centro-100",
+    "name": "UCM · Centro de Enseñanza Superior Real Centro Universitario Escorial-María Cristina",
+    "coords": [
+      -4.1505231,
+      40.588533
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Centro de Enseñanza Superior Real Centro Universitario Escorial-María Cristina",
+      "Complutense"
+    ],
+    "municipality": "San Lorenzo de El Escorial"
+  },
+  {
+    "id": "nomecalles-centro-101",
+    "name": "UCM · Facultad de Psicología",
+    "coords": [
+      -3.7931253,
+      40.4327228
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Facultad de Psicología",
+      "Complutense"
+    ],
+    "municipality": "Pozuelo de Alarcón"
+  },
+  {
+    "id": "nomecalles-centro-102",
+    "name": "UCM · Facultad de Derecho",
+    "coords": [
+      -3.7308818,
+      40.4507186
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Facultad de Derecho",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-103",
+    "name": "UCM · Facultad de Filología",
+    "coords": [
+      -3.7304457,
+      40.4485592
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Facultad de Filología",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-104",
+    "name": "UCM · Facultad de Ciencias Biológicas",
+    "coords": [
+      -3.7268235,
+      40.4490836
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Facultad de Ciencias Biológicas",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-105",
+    "name": "UCM · Facultad de Filosofía",
+    "coords": [
+      -3.7312839,
+      40.448644
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Facultad de Filosofía",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-106",
+    "name": "UCM · Facultad de Medicina",
+    "coords": [
+      -3.7248948,
+      40.4444861
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Facultad de Medicina",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-107",
+    "name": "UCM · Facultad de Geografía e Historia",
+    "coords": [
+      -3.7345361,
+      40.4492195
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Facultad de Geografía e Historia",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-108",
+    "name": "UCM · Facultad de Comercio y Turismo",
+    "coords": [
+      -3.7115328,
+      40.4398303
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Facultad de Comercio y Turismo",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-109",
+    "name": "UCM · Facultad de Enfermería, Fisioterapia y Podología",
+    "coords": [
+      -3.7245751,
+      40.4432628
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Facultad de Enfermería, Fisioterapia y Podología",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-110",
+    "name": "UCM · Facultad de Óptica y Optometria",
+    "coords": [
+      -3.6131837,
+      40.4255199
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Facultad de Óptica y Optometria",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-111",
+    "name": "UCM · Centro de Enseñanza Superior en Humanidades y Ciencias de la Educación Don Bosco",
+    "coords": [
+      -3.7152595,
+      40.4576992
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Centro de Enseñanza Superior en Humanidades y Ciencias de la Educación Don Bosco",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-112",
+    "name": "UCM · Instituto Universitario de Ciencias Ambientales (IUCA)",
+    "coords": [
+      -3.72037,
+      40.4425774
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Instituto Universitario de Ciencias Ambientales (IUCA)",
+      "Complutense",
+      "IUCA"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-113",
+    "name": "UCM · Instituto Universitario de Ciencias de las Religiones",
+    "coords": [
+      -3.7311071,
+      40.4486541
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Instituto Universitario de Ciencias de las Religiones",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-114",
+    "name": "UCM · Instituto Universitario de Ciencias Musicales",
+    "coords": [
+      -3.7329026,
+      40.4495696
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Instituto Universitario de Ciencias Musicales",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-115",
+    "name": "UCM · Instituto Universitario de Drogodependencias",
+    "coords": [
+      -3.7246635,
+      40.4449019
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Instituto Universitario de Drogodependencias",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-116",
+    "name": "UCM · Instituto Universitario de Evaluación Sanitaria",
+    "coords": [
+      -3.7248807,
+      40.4442699
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Instituto Universitario de Evaluación Sanitaria",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-117",
+    "name": "UCM · Instituto Universitario de Farmacia Industrial",
+    "coords": [
+      -3.725811,
+      40.4452461
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Instituto Universitario de Farmacia Industrial",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-118",
+    "name": "UCM · Instituto Universitario de Magnetismo Aplicado (IMA)",
+    "coords": [
+      -3.8846915,
+      40.5285524
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Instituto Universitario de Magnetismo Aplicado (IMA)",
+      "Complutense",
+      "IMA"
+    ],
+    "municipality": "Las Rozas de Madrid"
+  },
+  {
+    "id": "nomecalles-centro-119",
+    "name": "UCM · Instituto Universitario Ortega y Gasset",
+    "coords": [
+      -3.6906817,
+      40.4347676
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Instituto Universitario Ortega y Gasset",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-120",
+    "name": "UCM · Instituto Universitario Pluridisciplinar",
+    "coords": [
+      -3.7200645,
+      40.4437865
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Instituto Universitario Pluridisciplinar",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-121",
+    "name": "UCM · Euro-Mediterranean University Institute (EMUI)",
+    "coords": [
+      -3.7076981,
+      40.424962
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Euro-Mediterranean University Institute (EMUI)",
+      "Complutense",
+      "EMUI"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-122",
+    "name": "UCM · Instituto de Análisis Económico (ICAE)",
+    "coords": [
+      -3.7931362,
+      40.4336506
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Instituto de Análisis Económico (ICAE)",
+      "Complutense",
+      "ICAE"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-123",
+    "name": "UCM · Instituto de Ciencia de la Administración (ICCA)",
+    "coords": [
+      -3.7903448,
+      40.432886
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Instituto de Ciencia de la Administración (ICCA)",
+      "Complutense",
+      "ICCA"
+    ],
+    "municipality": "Pozuelo de Alarcón"
+  },
+  {
+    "id": "nomecalles-centro-124",
+    "name": "UCM · Instituto de Ciencias Matemáticas (ICMAT)",
+    "coords": [
+      -3.6872537,
+      40.5495618
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Instituto de Ciencias Matemáticas (ICMAT)",
+      "Complutense",
+      "ICMAT"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-125",
+    "name": "UCM · Instituto de Derecho Parlamentario (IDP)",
+    "coords": [
+      -3.7307845,
+      40.45044
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Instituto de Derecho Parlamentario (IDP)",
+      "Complutense",
+      "IDP"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-126",
+    "name": "UCM · Instituto de Estudios Internacionales (ICEI)",
+    "coords": [
+      -3.7905094,
+      40.4298218
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Instituto de Estudios Internacionales (ICEI)",
+      "Complutense",
+      "ICEI"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-127",
+    "name": "UCM · Instituto de Física de Partículas y del Cosmos (IPARCOS)",
+    "coords": [
+      -3.7261586,
+      40.4512529
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Instituto de Física de Partículas y del Cosmos (IPARCOS)",
+      "Complutense",
+      "IPARCOS"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-128",
+    "name": "UCM · Instituto de Geociencias (IGEO)",
+    "coords": [
+      -3.7235982,
+      40.4434311
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Instituto de Geociencias (IGEO)",
+      "Complutense",
+      "IGEO"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-129",
+    "name": "UCM · Instituto de Investigación en Neuroquímica",
+    "coords": [
+      -3.723548,
+      40.4431522
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Instituto de Investigación en Neuroquímica",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-130",
+    "name": "UCM · Instituto de Investigaciones Feministas",
+    "coords": [
+      -3.7194681,
+      40.4366985
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Instituto de Investigaciones Feministas",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-131",
+    "name": "UCM · Instituto de Matemática Interdisciplinar (IMI)",
+    "coords": [
+      -3.725843,
+      40.4493179
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Instituto de Matemática Interdisciplinar (IMI)",
+      "Complutense",
+      "IMI"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-132",
+    "name": "UCM · Instituto de Transformaciones Sociales (TRANSOC)",
+    "coords": [
+      -3.7076157,
+      40.4249715
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Instituto de Transformaciones Sociales (TRANSOC)",
+      "Complutense",
+      "TRANSOC"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-133",
+    "name": "UCM · Instituto del Teatro de Madrid (ITEM)",
+    "coords": [
+      -3.7327595,
+      40.4487878
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Instituto del Teatro de Madrid (ITEM)",
+      "Complutense",
+      "ITEM"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-134",
+    "name": "UCM · Instituto Universitario de Investigaciones Oftalmológicas Ramón Castroviejo",
+    "coords": [
+      -3.7247866,
+      40.4442885
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Instituto Universitario de Investigaciones Oftalmológicas Ramón Castroviejo",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-135",
+    "name": "UCM · Instituto Universitario de Lenguas Modenas y Traductores (IULMYT)",
+    "coords": [
+      -3.7301955,
+      40.448838
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Instituto Universitario de Lenguas Modenas y Traductores (IULMYT)",
+      "Complutense",
+      "IULMYT"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-136",
+    "name": "UCM · Instituto Universitario Seminario Menéndez Pidal",
+    "coords": [
+      -3.730484,
+      40.4488292
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Instituto Universitario Seminario Menéndez Pidal",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-137",
+    "name": "UCM · Instituto de Criminología",
+    "coords": [
+      -3.7314091,
+      40.450409
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Instituto de Criminología",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-138",
+    "name": "UAH · Centro Universitario Cardenal Cisneros",
+    "coords": [
+      -3.360707,
+      40.4980791
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Centro Universitario Cardenal Cisneros",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares"
+    ],
+    "municipality": "Alcalá de Henares"
+  },
+  {
+    "id": "nomecalles-centro-139",
+    "name": "UAH · Escuela de Posgrado",
+    "coords": [
+      -3.3630283,
+      40.4842881
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Escuela de Posgrado",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares"
+    ],
+    "municipality": "Alcalá de Henares"
+  },
+  {
+    "id": "nomecalles-centro-140",
+    "name": "UAH · Facultad de Ciencias",
+    "coords": [
+      -3.3452739,
+      40.5101623
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Facultad de Ciencias",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares"
+    ],
+    "municipality": "Alcalá de Henares"
+  },
+  {
+    "id": "nomecalles-centro-141",
+    "name": "UAH · Facultad de Ciencias Económicas, Empresariales y Turismo",
+    "coords": [
+      -3.3708645,
+      40.4798654
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Facultad de Ciencias Económicas, Empresariales y Turismo",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares"
+    ],
+    "municipality": "Alcalá de Henares"
+  },
+  {
+    "id": "nomecalles-centro-142",
+    "name": "UAH · Facultad de Derecho",
+    "coords": [
+      -3.3621178,
+      40.4854844
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Facultad de Derecho",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares"
+    ],
+    "municipality": "Alcalá de Henares"
+  },
+  {
+    "id": "nomecalles-centro-143",
+    "name": "UAH · Facultad de Farmacia",
+    "coords": [
+      -3.3429976,
+      40.5105024
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Facultad de Farmacia",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares"
+    ],
+    "municipality": "Alcalá de Henares"
+  },
+  {
+    "id": "nomecalles-centro-144",
+    "name": "UAH · Facultad de Filosofía y Letras",
+    "coords": [
+      -3.3635031,
+      40.481125
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Facultad de Filosofía y Letras",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares"
+    ],
+    "municipality": "Alcalá de Henares"
+  },
+  {
+    "id": "nomecalles-centro-145",
+    "name": "UAH · Facultad de Medicina y Ciencias de la Salud",
+    "coords": [
+      -3.3450333,
+      40.5115774
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Facultad de Medicina y Ciencias de la Salud",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares"
+    ],
+    "municipality": "Alcalá de Henares"
+  },
+  {
+    "id": "nomecalles-centro-146",
+    "name": "UAH · Escuela Politécnica Superior",
+    "coords": [
+      -3.3496331,
+      40.5131582
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Escuela Politécnica Superior",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares"
+    ],
+    "municipality": "Alcalá de Henares"
+  },
+  {
+    "id": "nomecalles-centro-147",
+    "name": "UAH · Escuela de Arquitectura",
+    "coords": [
+      -3.3653303,
+      40.4812653
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Escuela de Arquitectura",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares"
+    ],
+    "municipality": "Alcalá de Henares"
+  },
+  {
+    "id": "nomecalles-centro-148",
+    "name": "UAH · Centro de Educación Superior CUNIMAD",
+    "coords": [
+      -3.7148243,
+      40.4489091
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Centro de Educación Superior CUNIMAD",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-149",
+    "name": "UAH · Centro Universitario de la Defensa",
+    "coords": [
+      -3.7478026,
+      40.3866643
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Centro Universitario de la Defensa",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-150",
+    "name": "UAH · Instituto de Dirección y Organización de Empresas (IDOE)",
+    "coords": [
+      -3.3704505,
+      40.4795945
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Instituto de Dirección y Organización de Empresas (IDOE)",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares",
+      "IDOE"
+    ],
+    "municipality": "Alcalá de Henares"
+  },
+  {
+    "id": "nomecalles-centro-151",
+    "name": "UAH · Instituto Universitario de Análisis Económico y Social - IAES",
+    "coords": [
+      -3.370506,
+      40.4794806
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Instituto Universitario de Análisis Económico y Social - IAES",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares"
+    ],
+    "municipality": "Alcalá de Henares"
+  },
+  {
+    "id": "nomecalles-centro-152",
+    "name": "UAH · Instituto Universitario de Investigación en Ciencias Policiales",
+    "coords": [
+      -3.3625504,
+      40.4852267
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Instituto Universitario de Investigación en Ciencias Policiales",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares"
+    ],
+    "municipality": "Alcalá de Henares"
+  },
+  {
+    "id": "nomecalles-centro-153",
+    "name": "UAH · Instituto Universitario de Investigación en Estudios Norteamericanos Benjamín Franklin",
+    "coords": [
+      -3.3637276,
+      40.4805021
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Instituto Universitario de Investigación en Estudios Norteamericanos Benjamín Franklin",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares"
+    ],
+    "municipality": "Alcalá de Henares"
+  },
+  {
+    "id": "nomecalles-centro-154",
+    "name": "UEM · Facultad Ciencias Biomédicas y de la Salud. Campus Villaviciosa de Odón",
+    "coords": [
+      -3.918763,
+      40.3708287
+    ],
+    "university": "Universidad Europea de Madrid",
+    "acronym": "UEM",
+    "aliases": [
+      "Facultad Ciencias Biomédicas y de la Salud. Campus Villaviciosa de Odón",
+      "Universidad Europea",
+      "Villaviciosa de Odón",
+      "Campus Villaviciosa de Odón"
+    ],
+    "municipality": "Villaviciosa de Odón"
+  },
+  {
+    "id": "nomecalles-centro-155",
+    "name": "UEM · Facultad Ciencias Sociales y de la Comunicación. Campus Villaviciosa Odón",
+    "coords": [
+      -3.9182626,
+      40.3738777
+    ],
+    "university": "Universidad Europea de Madrid",
+    "acronym": "UEM",
+    "aliases": [
+      "Facultad Ciencias Sociales y de la Comunicación. Campus Villaviciosa Odón",
+      "Universidad Europea",
+      "Villaviciosa Odón",
+      "Campus Villaviciosa Odón"
+    ],
+    "municipality": "Villaviciosa de Odón"
+  },
+  {
+    "id": "nomecalles-centro-156",
+    "name": "UEM · Escuela de Arquitectura, Ingeniería y Diseño. Campus Villaviciosa de Odón",
+    "coords": [
+      -3.919299,
+      40.3729956
+    ],
+    "university": "Universidad Europea de Madrid",
+    "acronym": "UEM",
+    "aliases": [
+      "Escuela de Arquitectura, Ingeniería y Diseño. Campus Villaviciosa de Odón",
+      "Universidad Europea",
+      "Villaviciosa de Odón",
+      "Campus Villaviciosa de Odón"
+    ],
+    "municipality": "Villaviciosa de Odón"
+  },
+  {
+    "id": "nomecalles-centro-157",
+    "name": "UEM · Facultad Ciencias de la Actividad Física y el Deporte. Campus de Villaviciosa Odón",
+    "coords": [
+      -3.9207133,
+      40.3739213
+    ],
+    "university": "Universidad Europea de Madrid",
+    "acronym": "UEM",
+    "aliases": [
+      "Facultad Ciencias de la Actividad Física y el Deporte. Campus de Villaviciosa Odón",
+      "Universidad Europea",
+      "de Villaviciosa Odón",
+      "Campus de Villaviciosa Odón"
+    ],
+    "municipality": "Villaviciosa de Odón"
+  },
+  {
+    "id": "nomecalles-centro-158",
+    "name": "UEM · Escuela de Doctorado e Investigación",
+    "coords": [
+      -3.9188538,
+      40.3740442
+    ],
+    "university": "Universidad Europea de Madrid",
+    "acronym": "UEM",
+    "aliases": [
+      "Escuela de Doctorado e Investigación",
+      "Universidad Europea"
+    ],
+    "municipality": "Villaviciosa de Odón"
+  },
+  {
+    "id": "nomecalles-centro-159",
+    "name": "UFV · Escuela Politécnica Superior",
+    "coords": [
+      -3.8340073,
+      40.441916
+    ],
+    "university": "Universidad Francisco de Vitoria",
+    "acronym": "UFV",
+    "aliases": [
+      "Escuela Politécnica Superior"
+    ],
+    "municipality": "Pozuelo de Alarcón"
+  },
+  {
+    "id": "nomecalles-centro-160",
+    "name": "UFV · Facultad de Ciencias Experimentales",
+    "coords": [
+      -3.8353693,
+      40.4395363
+    ],
+    "university": "Universidad Francisco de Vitoria",
+    "acronym": "UFV",
+    "aliases": [
+      "Facultad de Ciencias Experimentales"
+    ],
+    "municipality": "Pozuelo de Alarcón"
+  },
+  {
+    "id": "nomecalles-centro-161",
+    "name": "UFV · Facultad de Educación y Psicología",
+    "coords": [
+      -3.8348465,
+      40.4410956
+    ],
+    "university": "Universidad Francisco de Vitoria",
+    "acronym": "UFV",
+    "aliases": [
+      "Facultad de Educación y Psicología"
+    ],
+    "municipality": "Pozuelo de Alarcón"
+  },
+  {
+    "id": "nomecalles-centro-162",
+    "name": "UFV · Escuela de Postgrado y Formación Permanente",
+    "coords": [
+      -3.8356124,
+      40.439631
+    ],
+    "university": "Universidad Francisco de Vitoria",
+    "acronym": "UFV",
+    "aliases": [
+      "Escuela de Postgrado y Formación Permanente"
+    ],
+    "municipality": "Pozuelo de Alarcón"
+  },
+  {
+    "id": "nomecalles-centro-163",
+    "name": "UFV · Facultad de Medicina",
+    "coords": [
+      -3.8348949,
+      40.4402394
+    ],
+    "university": "Universidad Francisco de Vitoria",
+    "acronym": "UFV",
+    "aliases": [
+      "Facultad de Medicina"
+    ],
+    "municipality": "Pozuelo de Alarcón"
+  },
+  {
+    "id": "nomecalles-centro-164",
+    "name": "UFV · Escuela Internacional de Doctorado",
+    "coords": [
+      -3.8339993,
+      40.4421918
+    ],
+    "university": "Universidad Francisco de Vitoria",
+    "acronym": "UFV",
+    "aliases": [
+      "Escuela Internacional de Doctorado"
+    ],
+    "municipality": "Pozuelo de Alarcón"
+  },
+  {
+    "id": "nomecalles-centro-165",
+    "name": "UFV · Facultad de Ciencias de la Comunicación",
+    "coords": [
+      -3.8348308,
+      40.4407804
+    ],
+    "university": "Universidad Francisco de Vitoria",
+    "acronym": "UFV",
+    "aliases": [
+      "Facultad de Ciencias de la Comunicación"
+    ],
+    "municipality": "Pozuelo de Alarcón"
+  },
+  {
+    "id": "nomecalles-centro-166",
+    "name": "UFV · Facultad de Ciencias de la Salud",
+    "coords": [
+      -3.8352416,
+      40.4396784
+    ],
+    "university": "Universidad Francisco de Vitoria",
+    "acronym": "UFV",
+    "aliases": [
+      "Facultad de Ciencias de la Salud"
+    ],
+    "municipality": "Pozuelo de Alarcón"
+  },
+  {
+    "id": "nomecalles-centro-167",
+    "name": "UFV · Facultad de Derecho, Empresa y Gobierno",
+    "coords": [
+      -3.8342299,
+      40.4417668
+    ],
+    "university": "Universidad Francisco de Vitoria",
+    "acronym": "UFV",
+    "aliases": [
+      "Facultad de Derecho, Empresa y Gobierno"
+    ],
+    "municipality": "Pozuelo de Alarcón"
+  },
+  {
+    "id": "nomecalles-centro-168",
+    "name": "UPM · Centro Superior de Diseño de Moda de Madrid",
+    "coords": [
+      -3.6287298,
+      40.3884722
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "Centro Superior de Diseño de Moda de Madrid",
+      "Politécnica de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-169",
+    "name": "UPM · Instituto de Microgravedad Ignacio da Riva",
+    "coords": [
+      -3.8320014,
+      40.4063775
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "Instituto de Microgravedad Ignacio da Riva",
+      "Politécnica de Madrid"
+    ],
+    "municipality": "Pozuelo de Alarcón"
+  },
+  {
+    "id": "nomecalles-centro-170",
+    "name": "UPM · Instituto Universitario de Investigación del Automóvil Francisco Aparicio Izquierdo",
+    "coords": [
+      -3.6314978,
+      40.3871237
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "Instituto Universitario de Investigación del Automóvil Francisco Aparicio Izquierdo",
+      "Politécnica de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-171",
+    "name": "UPM · Instituto de Sistemas Optoelectrónicos y Microtecnología (ISOM)",
+    "coords": [
+      -3.7262777,
+      40.4524503
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "Instituto de Sistemas Optoelectrónicos y Microtecnología (ISOM)",
+      "Politécnica de Madrid",
+      "ISOM"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-172",
+    "name": "UPM · Instituto de Energía Solar (IES)",
+    "coords": [
+      -3.7269352,
+      40.453275
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "Instituto de Energía Solar (IES)",
+      "Politécnica de Madrid",
+      "IES"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-173",
+    "name": "UPM · Instituto de Ciencias de la Educación",
+    "coords": [
+      -3.731647,
+      40.4473354
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "Instituto de Ciencias de la Educación",
+      "Politécnica de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-174",
+    "name": "UPM · Instituto de Fusión Nuclear Guillermo Velarde",
+    "coords": [
+      -3.6897836,
+      40.4403405
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "Instituto de Fusión Nuclear Guillermo Velarde",
+      "Politécnica de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-177",
+    "name": "UPM · E.T.S. Ingenieros de Minas y Energía",
+    "coords": [
+      -3.7004384,
+      40.4421954
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "E.T.S. Ingenieros de Minas y Energía",
+      "Politécnica de Madrid",
+      "ETSIME"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-178",
+    "name": "UPM · E.T.S. Ingenieros Navales",
+    "coords": [
+      -3.7239948,
+      40.4393225
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "E.T.S. Ingenieros Navales",
+      "Politécnica de Madrid",
+      "ETSIN"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-179",
+    "name": "UPM · E.T.S. Ingenieros Telecomunicación",
+    "coords": [
+      -3.7260931,
+      40.4524488
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "E.T.S. Ingenieros Telecomunicación",
+      "Politécnica de Madrid",
+      "ETSIT"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-180",
+    "name": "UPM · E.T.S. Ingenieros Topografía, Geodesia y Cartografía",
+    "coords": [
+      -3.6299849,
+      40.389132
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "E.T.S. Ingenieros Topografía, Geodesia y Cartografía",
+      "Politécnica de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-182",
+    "name": "UPM · E.T.S. de Ingeniería Agronómica, Alimentaria y de Biosistemas",
+    "coords": [
+      -3.7282671,
+      40.4422847
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "E.T.S. de Ingeniería Agronómica, Alimentaria y de Biosistemas",
+      "Politécnica de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-183",
+    "name": "UPM · E.T.S. Ingenieros Caminos, Canales y Puertos",
+    "coords": [
+      -3.732034,
+      40.4471348
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "E.T.S. Ingenieros Caminos, Canales y Puertos",
+      "Politécnica de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-184",
+    "name": "UPM · E.T.S. Ingeniería de Montes, Forestal y del Medio Natural",
+    "coords": [
+      -3.7224632,
+      40.4497535
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "E.T.S. Ingeniería de Montes, Forestal y del Medio Natural",
+      "Politécnica de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-185",
+    "name": "UPM · Facultad de Ciencias de la Actividad Física y del Deporte (INEF)",
+    "coords": [
+      -3.7326791,
+      40.4381217
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "Facultad de Ciencias de la Actividad Física y del Deporte (INEF)",
+      "Politécnica de Madrid",
+      "INEF"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-186",
+    "name": "UPM · E.T.S. Edificación",
+    "coords": [
+      -3.7319081,
+      40.4387842
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "E.T.S. Edificación",
+      "Politécnica de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-188",
+    "name": "UPM · E.T.S. Ingeniería Aeronáutica y del Espacio",
+    "coords": [
+      -3.7242195,
+      40.4408957
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "E.T.S. Ingeniería Aeronáutica y del Espacio",
+      "Politécnica de Madrid",
+      "ETSIAE"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-189",
+    "name": "UPM · E.T.S. Ingeniería y Diseño Industrial",
+    "coords": [
+      -3.6998466,
+      40.4055773
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "E.T.S. Ingeniería y Diseño Industrial",
+      "Politécnica de Madrid",
+      "ETSIDI"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-190",
+    "name": "UPM · E.T.S. de Ingenieros de Caminos, Canales y Puertos",
+    "coords": [
+      -3.6861932,
+      40.4072717
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "E.T.S. de Ingenieros de Caminos, Canales y Puertos",
+      "Politécnica de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-191",
+    "name": "UPM · E.T.S. Ingeniería y Sistemas Telecomunicación",
+    "coords": [
+      -3.6291766,
+      40.3896319
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "E.T.S. Ingeniería y Sistemas Telecomunicación",
+      "Politécnica de Madrid",
+      "ETSIST"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-192",
+    "name": "UPM · Centro de Investigación en Biotecnología y Genómica de Plantas (CBGP)",
+    "coords": [
+      -3.8322291,
+      40.4057272
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "Centro de Investigación en Biotecnología y Genómica de Plantas (CBGP)",
+      "Politécnica de Madrid",
+      "CBGP"
+    ],
+    "municipality": "Pozuelo de Alarcón"
+  },
+  {
+    "id": "nomecalles-centro-193",
+    "name": "UPM · Escuela Internacional de Doctorado de la Universidad Politécnica de Madrid",
+    "coords": [
+      -3.7192094,
+      40.4487468
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "Escuela Internacional de Doctorado de la Universidad Politécnica de Madrid",
+      "Politécnica de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-194",
+    "name": "UPM · Escuela Politécnica de Enseñanza Superior",
+    "coords": [
+      -3.7178483,
+      40.4483017
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "Escuela Politécnica de Enseñanza Superior",
+      "Politécnica de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-195",
+    "name": "UPCO · Instituto de Investigación Tecnológica (IIT)",
+    "coords": [
+      -3.7129713,
+      40.4297854
+    ],
+    "university": "Universidad Pontificia de Comillas",
+    "acronym": "UPCO",
+    "aliases": [
+      "Instituto de Investigación Tecnológica (IIT)",
+      "Universidad Pontificia Comillas",
+      "Comillas",
+      "IIT"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-196",
+    "name": "UPCO · Facultad Derecho Canónico",
+    "coords": [
+      -3.6822633,
+      40.5520205
+    ],
+    "university": "Universidad Pontificia de Comillas",
+    "acronym": "UPCO",
+    "aliases": [
+      "Facultad Derecho Canónico",
+      "Universidad Pontificia Comillas",
+      "Comillas"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-197",
+    "name": "UPCO · Escuela Universitaria de Enfermería y Fisioterapia San Juan de Dios",
+    "coords": [
+      -3.6131046,
+      40.1603147
+    ],
+    "university": "Universidad Pontificia de Comillas",
+    "acronym": "UPCO",
+    "aliases": [
+      "Escuela Universitaria de Enfermería y Fisioterapia San Juan de Dios",
+      "Universidad Pontificia Comillas",
+      "Comillas"
+    ],
+    "municipality": "Ciempozuelos"
+  },
+  {
+    "id": "nomecalles-centro-198",
+    "name": "UPCO · Escuela Internacional Doctorado",
+    "coords": [
+      -3.7114003,
+      40.4299389
+    ],
+    "university": "Universidad Pontificia de Comillas",
+    "acronym": "UPCO",
+    "aliases": [
+      "Escuela Internacional Doctorado",
+      "Universidad Pontificia Comillas",
+      "Comillas"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-200",
+    "name": "UPCO · Facultad Ciencias Humanas y Sociales",
+    "coords": [
+      -3.6824659,
+      40.5521316
+    ],
+    "university": "Universidad Pontificia de Comillas",
+    "acronym": "UPCO",
+    "aliases": [
+      "Facultad Ciencias Humanas y Sociales",
+      "Universidad Pontificia Comillas",
+      "Comillas"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-201",
+    "name": "UPCO · Facultad de Teología",
+    "coords": [
+      -3.6824986,
+      40.5523197
+    ],
+    "university": "Universidad Pontificia de Comillas",
+    "acronym": "UPCO",
+    "aliases": [
+      "Facultad de Teología",
+      "Universidad Pontificia Comillas",
+      "Comillas"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-202",
+    "name": "UPCO · Facultad de Filosofía Eclesiástica",
+    "coords": [
+      -3.682506,
+      40.5518872
+    ],
+    "university": "Universidad Pontificia de Comillas",
+    "acronym": "UPCO",
+    "aliases": [
+      "Facultad de Filosofía Eclesiástica",
+      "Universidad Pontificia Comillas",
+      "Comillas"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-203",
+    "name": "UPCO · Facultad de Ciencias Económicas y Empresariales (ICADE)",
+    "coords": [
+      -3.7109565,
+      40.4298969
+    ],
+    "university": "Universidad Pontificia de Comillas",
+    "acronym": "UPCO",
+    "aliases": [
+      "Facultad de Ciencias Económicas y Empresariales (ICADE)",
+      "Universidad Pontificia Comillas",
+      "Comillas",
+      "ICADE"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-204",
+    "name": "UPCO · Instituto Universitario de Espiritualidad",
+    "coords": [
+      -3.6826578,
+      40.5521663
+    ],
+    "university": "Universidad Pontificia de Comillas",
+    "acronym": "UPCO",
+    "aliases": [
+      "Instituto Universitario de Espiritualidad",
+      "Universidad Pontificia Comillas",
+      "Comillas"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-205",
+    "name": "UPCO · Instituto Universitario de Estudios sobre Migraciones",
+    "coords": [
+      -3.7113557,
+      40.4295262
+    ],
+    "university": "Universidad Pontificia de Comillas",
+    "acronym": "UPCO",
+    "aliases": [
+      "Instituto Universitario de Estudios sobre Migraciones",
+      "Universidad Pontificia Comillas",
+      "Comillas"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-206",
+    "name": "UPCO · Facultad de Derecho (ICADE)",
+    "coords": [
+      -3.7118692,
+      40.4296525
+    ],
+    "university": "Universidad Pontificia de Comillas",
+    "acronym": "UPCO",
+    "aliases": [
+      "Facultad de Derecho (ICADE)",
+      "Universidad Pontificia Comillas",
+      "Comillas",
+      "ICADE"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-207",
+    "name": "UPCO · Instituto Universitario de la Familia",
+    "coords": [
+      -3.7128615,
+      40.4297576
+    ],
+    "university": "Universidad Pontificia de Comillas",
+    "acronym": "UPCO",
+    "aliases": [
+      "Instituto Universitario de la Familia",
+      "Universidad Pontificia Comillas",
+      "Comillas"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-208",
+    "name": "UPSAM · Facultad de Enfermería y Fisioterapia SALUS INFIRMORUM",
+    "coords": [
+      -3.7155769,
+      40.4320306
+    ],
+    "university": "Universidad Pontificia de Salamanca",
+    "acronym": "UPSAM",
+    "aliases": [
+      "Facultad de Enfermería y Fisioterapia SALUS INFIRMORUM"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-209",
+    "name": "URJC · Facultad de Ciencias Jurídicas y Sociales. Campus Aranjuez.",
+    "coords": [
+      -3.6016121,
+      40.0295817
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Facultad de Ciencias Jurídicas y Sociales. Campus Aranjuez.",
+      "Rey Juan Carlos",
+      "Aranjuez.",
+      "Campus Aranjuez."
+    ],
+    "municipality": "Aranjuez"
+  },
+  {
+    "id": "nomecalles-centro-210",
+    "name": "URJC · Facultad de Ciencias de la Salud. Campus Aranjuez",
+    "coords": [
+      -3.5939749,
+      40.0336228
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Facultad de Ciencias de la Salud. Campus Aranjuez",
+      "Rey Juan Carlos",
+      "Aranjuez",
+      "Campus Aranjuez"
+    ],
+    "municipality": "Aranjuez"
+  },
+  {
+    "id": "nomecalles-centro-211",
+    "name": "URJC · Escuela de Ingeniería de Fuenlabrada",
+    "coords": [
+      -3.8194841,
+      40.2834292
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Escuela de Ingeniería de Fuenlabrada",
+      "Rey Juan Carlos"
+    ],
+    "municipality": "Fuenlabrada"
+  },
+  {
+    "id": "nomecalles-centro-212",
+    "name": "URJC · Facultad Ciencias de la Comunicación. Campus de Madrid",
+    "coords": [
+      -3.6099858,
+      40.4059322
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Facultad Ciencias de la Comunicación. Campus de Madrid",
+      "Rey Juan Carlos",
+      "de Madrid",
+      "Campus de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-213",
+    "name": "URJC · Escuela Superior Ciencias Experimentales y Tecnología. Campus de Madrid",
+    "coords": [
+      -3.609698,
+      40.4056019
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Escuela Superior Ciencias Experimentales y Tecnología. Campus de Madrid",
+      "Rey Juan Carlos",
+      "de Madrid",
+      "Campus de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-214",
+    "name": "URJC · E.T.S. Ingeniería Informática. Campus de Madrid",
+    "coords": [
+      -3.6100646,
+      40.4056415
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "E.T.S. Ingeniería Informática. Campus de Madrid",
+      "Rey Juan Carlos",
+      "de Madrid",
+      "Campus de Madrid",
+      "Informática",
+      "Ingeniería Informática"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-215",
+    "name": "URJC · E.T.S. Ingeniería Informática. Campus de Móstoles",
+    "coords": [
+      -3.8738961,
+      40.3374682
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "E.T.S. Ingeniería Informática. Campus de Móstoles",
+      "Rey Juan Carlos",
+      "de Móstoles",
+      "Campus de Móstoles",
+      "Informática",
+      "Ingeniería Informática"
+    ],
+    "municipality": "Móstoles"
+  },
+  {
+    "id": "nomecalles-centro-216",
+    "name": "URJC · Escuela Internacional de Doctorado",
+    "coords": [
+      -3.8739558,
+      40.3376285
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Escuela Internacional de Doctorado",
+      "Rey Juan Carlos"
+    ],
+    "municipality": "Móstoles"
+  },
+  {
+    "id": "nomecalles-centro-217",
+    "name": "URJC · Escuela de Másteres Oficiales",
+    "coords": [
+      -3.8742797,
+      40.3375301
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Escuela de Másteres Oficiales",
+      "Rey Juan Carlos"
+    ],
+    "municipality": "Móstoles"
+  },
+  {
+    "id": "nomecalles-centro-218",
+    "name": "URJC · Facultad Ciencias de la Salud. Campus de Alcorcón",
+    "coords": [
+      -3.844122,
+      40.3492443
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Facultad Ciencias de la Salud. Campus de Alcorcón",
+      "Rey Juan Carlos",
+      "de Alcorcón",
+      "Campus de Alcorcón"
+    ],
+    "municipality": "Alcorcón"
+  },
+  {
+    "id": "nomecalles-centro-219",
+    "name": "URJC · Facultad Ciencias de la Comunicación. Campus de Fuenlabrada",
+    "coords": [
+      -3.8197993,
+      40.2834632
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Facultad Ciencias de la Comunicación. Campus de Fuenlabrada",
+      "Rey Juan Carlos",
+      "de Fuenlabrada",
+      "Campus de Fuenlabrada"
+    ],
+    "municipality": "Fuenlabrada"
+  },
+  {
+    "id": "nomecalles-centro-220",
+    "name": "URJC · Escuela Superior de Ciencias Experimentales y Tecnología. Campus Móstoles",
+    "coords": [
+      -3.8741633,
+      40.3374377
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Escuela Superior de Ciencias Experimentales y Tecnología. Campus Móstoles",
+      "Rey Juan Carlos",
+      "Móstoles",
+      "Campus Móstoles"
+    ],
+    "municipality": "Móstoles"
+  },
+  {
+    "id": "nomecalles-centro-221",
+    "name": "URJC · Centro de Estudios Universitarios CEDEU",
+    "coords": [
+      -3.6731853,
+      40.4345188
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Centro de Estudios Universitarios CEDEU",
+      "Rey Juan Carlos"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-222",
+    "name": "URJC · Centro Universitario Gestión IEB Global",
+    "coords": [
+      -3.6907179,
+      40.4187133
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Centro Universitario Gestión IEB Global",
+      "Rey Juan Carlos"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-223",
+    "name": "URJC · Escuela Universitaria de Artes y Espectáculos (TAI)",
+    "coords": [
+      -3.6890945,
+      40.4213446
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Escuela Universitaria de Artes y Espectáculos (TAI)",
+      "Rey Juan Carlos",
+      "TAI"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-224",
+    "name": "URJC · Instituto Universitario de Estudios Jurídicos Internacionales Conde de Aranda",
+    "coords": [
+      -3.6095272,
+      40.4062145
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Instituto Universitario de Estudios Jurídicos Internacionales Conde de Aranda",
+      "Rey Juan Carlos"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-225",
+    "name": "URJC · Escuela Universitaria de Turismo ESERP",
+    "coords": [
+      -3.6751859,
+      40.4587701
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Escuela Universitaria de Turismo ESERP",
+      "Rey Juan Carlos"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-226",
+    "name": "URJC · Unidad de Postgrado",
+    "coords": [
+      -3.8740797,
+      40.3375262
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Unidad de Postgrado",
+      "Rey Juan Carlos"
+    ],
+    "municipality": "Móstoles"
+  },
+  {
+    "id": "nomecalles-centro-227",
+    "name": "URJC · Centro de Educación Superior de Negocios, Innovación y Tecnología",
+    "coords": [
+      -3.6852762,
+      40.4493133
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Centro de Educación Superior de Negocios, Innovación y Tecnología",
+      "Rey Juan Carlos"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-228",
+    "name": "UCM · Centro de Estudios Superiores Felipe II",
+    "coords": [
+      -3.6066564,
+      40.031292
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Centro de Estudios Superiores Felipe II",
+      "Complutense"
+    ],
+    "municipality": "Aranjuez"
+  },
+  {
+    "id": "nomecalles-centro-229",
+    "name": "ESIC · Escuela Superior de Gestión Empresarial y Marketing (ESIC)",
+    "coords": [
+      -3.8017934,
+      40.4369152
+    ],
+    "university": "ESIC Universidad",
+    "acronym": "ESIC",
+    "aliases": [
+      "Escuela Superior de Gestión Empresarial y Marketing (ESIC)",
+      "ESIC"
+    ],
+    "municipality": "Pozuelo de Alarcón"
+  },
+  {
+    "id": "nomecalles-centro-230",
+    "name": "URJC · Escuela de Ingeniería de Fuenlabrada. Campus de Alcorcón",
+    "coords": [
+      -3.8432004,
+      40.3489898
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Escuela de Ingeniería de Fuenlabrada. Campus de Alcorcón",
+      "Rey Juan Carlos",
+      "de Alcorcón",
+      "Campus de Alcorcón"
+    ],
+    "municipality": "Alcorcón"
+  },
+  {
+    "id": "nomecalles-centro-231",
+    "name": "URJC · Escuela Técnica Superior de Ingeniería Informática. Campus de Fuenlabrada",
+    "coords": [
+      -3.8196896,
+      40.2841217
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Escuela Técnica Superior de Ingeniería Informática. Campus de Fuenlabrada",
+      "Rey Juan Carlos",
+      "de Fuenlabrada",
+      "Campus de Fuenlabrada",
+      "Informática",
+      "Ingeniería Informática"
+    ],
+    "municipality": "Fuenlabrada"
+  },
+  {
+    "id": "nomecalles-centro-232",
+    "name": "URJC · Facultad de Ciencias de la Comunicación. Campus de Aranjuez",
+    "coords": [
+      -3.601615,
+      40.0299129
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Facultad de Ciencias de la Comunicación. Campus de Aranjuez",
+      "Rey Juan Carlos",
+      "de Aranjuez",
+      "Campus de Aranjuez"
+    ],
+    "municipality": "Aranjuez"
+  },
+  {
+    "id": "nomecalles-centro-233",
+    "name": "CEU · Facultad Farmacia",
+    "coords": [
+      -3.8364212,
+      40.399742
+    ],
+    "university": "Universidad San Pablo CEU",
+    "acronym": "CEU",
+    "aliases": [
+      "Facultad Farmacia",
+      "Universidad CEU San Pablo",
+      "CEU San Pablo"
+    ],
+    "municipality": "Alcorcón"
+  },
+  {
+    "id": "nomecalles-centro-234",
+    "name": "CEU · Facultad de Ciencias Económicas y Empresariales",
+    "coords": [
+      -3.7174582,
+      40.4426406
+    ],
+    "university": "Universidad San Pablo CEU",
+    "acronym": "CEU",
+    "aliases": [
+      "Facultad de Ciencias Económicas y Empresariales",
+      "Universidad CEU San Pablo",
+      "CEU San Pablo"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-235",
+    "name": "CEU · Escuela Politécnica Superior",
+    "coords": [
+      -3.8354519,
+      40.3999549
+    ],
+    "university": "Universidad San Pablo CEU",
+    "acronym": "CEU",
+    "aliases": [
+      "Escuela Politécnica Superior",
+      "Universidad CEU San Pablo",
+      "CEU San Pablo"
+    ],
+    "municipality": "Alcorcón"
+  },
+  {
+    "id": "nomecalles-centro-236",
+    "name": "CEU · Facultad Medicina",
+    "coords": [
+      -3.8357141,
+      40.4006931
+    ],
+    "university": "Universidad San Pablo CEU",
+    "acronym": "CEU",
+    "aliases": [
+      "Facultad Medicina",
+      "Universidad CEU San Pablo",
+      "CEU San Pablo"
+    ],
+    "municipality": "Alcorcón"
+  },
+  {
+    "id": "nomecalles-centro-237",
+    "name": "CEU · Facultad Humanidades y Ciencias de la Comunicación",
+    "coords": [
+      -3.719721,
+      40.4447436
+    ],
+    "university": "Universidad San Pablo CEU",
+    "acronym": "CEU",
+    "aliases": [
+      "Facultad Humanidades y Ciencias de la Comunicación",
+      "Universidad CEU San Pablo",
+      "CEU San Pablo"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-238",
+    "name": "CEU · Facultad de Derecho",
+    "coords": [
+      -3.7179013,
+      40.4432865
+    ],
+    "university": "Universidad San Pablo CEU",
+    "acronym": "CEU",
+    "aliases": [
+      "Facultad de Derecho",
+      "Universidad CEU San Pablo",
+      "CEU San Pablo"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-239",
+    "name": "CEU · Instituto Universitario de Estudios Europeos",
+    "coords": [
+      -3.7179696,
+      40.4430518
+    ],
+    "university": "Universidad San Pablo CEU",
+    "acronym": "CEU",
+    "aliases": [
+      "Instituto Universitario de Estudios Europeos",
+      "Universidad CEU San Pablo",
+      "CEU San Pablo"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-240",
+    "name": "UCM · Escuela de Doctorado de la Universidad Complutense de Madrid",
+    "coords": [
+      -3.7282869,
+      40.4435743
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Escuela de Doctorado de la Universidad Complutense de Madrid",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-241",
+    "name": "UAH · Instituto Universitario de Investigación en Estudios Latinoamericanos",
+    "coords": [
+      -3.3639267,
+      40.4805193
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Instituto Universitario de Investigación en Estudios Latinoamericanos",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares"
+    ],
+    "municipality": "Alcalá de Henares"
+  },
+  {
+    "id": "nomecalles-centro-242",
+    "name": "UAH · Instituto Universitario de Investigación en Estudios Medievales y del Siglo de Oro Miguel de Cervantes",
+    "coords": [
+      -3.3637733,
+      40.4810846
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Instituto Universitario de Investigación en Estudios Medievales y del Siglo de Oro Miguel de Cervantes",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares"
+    ],
+    "municipality": "Alcalá de Henares"
+  },
+  {
+    "id": "nomecalles-centro-243",
+    "name": "UAX · Facultad de Medicina",
+    "coords": [
+      -3.9872548,
+      40.4518903
+    ],
+    "university": "Universidad Alfonso X El Sabio",
+    "acronym": "UAX",
+    "aliases": [
+      "Facultad de Medicina",
+      "Alfonso X el Sabio"
+    ],
+    "municipality": "Villanueva de la Cañada"
+  },
+  {
+    "id": "nomecalles-centro-244",
+    "name": "UAX · Facultad de Odontología",
+    "coords": [
+      -3.9864808,
+      40.4517726
+    ],
+    "university": "Universidad Alfonso X El Sabio",
+    "acronym": "UAX",
+    "aliases": [
+      "Facultad de Odontología",
+      "Alfonso X el Sabio"
+    ],
+    "municipality": "Villanueva de la Cañada"
+  },
+  {
+    "id": "nomecalles-centro-245",
+    "name": "UAX · Facultad de Medicina (Campus de Chamartín)",
+    "coords": [
+      -3.9832946,
+      40.4529995
+    ],
+    "university": "Universidad Alfonso X El Sabio",
+    "acronym": "UAX",
+    "aliases": [
+      "Facultad de Medicina (Campus de Chamartín)",
+      "Alfonso X el Sabio"
+    ],
+    "municipality": "Villanueva de la Cañada"
+  },
+  {
+    "id": "nomecalles-centro-246",
+    "name": "UAX · Facultad de Estudios Sociales y Lenguas Aplicadas (Campus de Chamartín)",
+    "coords": [
+      -3.9840516,
+      40.4515133
+    ],
+    "university": "Universidad Alfonso X El Sabio",
+    "acronym": "UAX",
+    "aliases": [
+      "Facultad de Estudios Sociales y Lenguas Aplicadas (Campus de Chamartín)",
+      "Alfonso X el Sabio"
+    ],
+    "municipality": "Villanueva de la Cañada"
+  },
+  {
+    "id": "nomecalles-centro-247",
+    "name": "UCJC · Sede Alameda",
+    "coords": [
+      -3.693918,
+      40.4113525
+    ],
+    "university": "Universidad Camilo José Cela",
+    "acronym": "UCJC",
+    "aliases": [
+      "Sede Alameda"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-248",
+    "name": "UAH · Escuela de Doctorado de la Universidad de Alcalá",
+    "coords": [
+      -3.3629419,
+      40.4843413
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Escuela de Doctorado de la Universidad de Alcalá",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares"
+    ],
+    "municipality": "Alcalá de Henares"
+  },
+  {
+    "id": "nomecalles-centro-249",
+    "name": "UEM · Centro de Estudios Garrigues",
+    "coords": [
+      -3.6163259,
+      40.5353919
+    ],
+    "university": "Universidad Europea de Madrid",
+    "acronym": "UEM",
+    "aliases": [
+      "Centro de Estudios Garrigues",
+      "Universidad Europea"
+    ],
+    "municipality": "Alcobendas"
+  },
+  {
+    "id": "nomecalles-centro-250",
+    "name": "UPSAM · Instituto Superior Pastoral",
+    "coords": [
+      -3.7199583,
+      40.4452716
+    ],
+    "university": "Universidad Pontificia de Salamanca",
+    "acronym": "UPSAM",
+    "aliases": [
+      "Instituto Superior Pastoral"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-251",
+    "name": "UPSAM · Fundación Pablo VI",
+    "coords": [
+      -3.7199451,
+      40.4453937
+    ],
+    "university": "Universidad Pontificia de Salamanca",
+    "acronym": "UPSAM",
+    "aliases": [
+      "Fundación Pablo VI"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-252",
+    "name": "UCM · Escuela de Práctica Jurídica",
+    "coords": [
+      -3.7090848,
+      40.4249845
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Escuela de Práctica Jurídica",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-253",
+    "name": "UCM · Escuela de Especialización Profesional de Relaciones Laborales",
+    "coords": [
+      -3.7075971,
+      40.4250404
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Escuela de Especialización Profesional de Relaciones Laborales",
+      "Complutense"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-254",
+    "name": "UCM · Escuela de Especialización Profesional de Estudios Cooperativos",
+    "coords": [
+      -3.7924781,
+      40.4324125
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Escuela de Especialización Profesional de Estudios Cooperativos",
+      "Complutense"
+    ],
+    "municipality": "Pozuelo de Alarcón"
+  },
+  {
+    "id": "nomecalles-centro-255",
+    "name": "UNED · Facultad de Educación",
+    "coords": [
+      -3.737764,
+      40.4513506
+    ],
+    "university": "Universidad Nacional de Educación a Distancia",
+    "acronym": "UNED",
+    "aliases": [
+      "Facultad de Educación"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-256",
+    "name": "CEU · Escuela Internacional de Doctorado (CEINDO)",
+    "coords": [
+      -3.716141,
+      40.442964
+    ],
+    "university": "Universidad San Pablo CEU",
+    "acronym": "CEU",
+    "aliases": [
+      "Escuela Internacional de Doctorado (CEINDO)",
+      "Universidad CEU San Pablo",
+      "CEU San Pablo",
+      "CEINDO"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-257",
+    "name": "UNIE · Campus Arapiles",
+    "coords": [
+      -3.7077675,
+      40.4329355
+    ],
+    "university": "Universidad Internacional de la Empresa",
+    "acronym": "UNIE",
+    "aliases": [
+      "Campus Arapiles"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-258",
+    "name": "UNIE · Campus Tres Cantos",
+    "coords": [
+      -3.7271414,
+      40.6181645
+    ],
+    "university": "Universidad Internacional de la Empresa",
+    "acronym": "UNIE",
+    "aliases": [
+      "Campus Tres Cantos"
+    ],
+    "municipality": "Tres Cantos"
+  },
+  {
+    "id": "nomecalles-centro-259",
+    "name": "UC3M · Escuela Internacional Carlos III",
+    "coords": [
+      -3.725338,
+      40.316036
+    ],
+    "university": "Universidad Carlos III",
+    "acronym": "UC3M",
+    "aliases": [
+      "Escuela Internacional Carlos III",
+      "Universidad Carlos III de Madrid",
+      "Carlos III"
+    ],
+    "municipality": "Getafe"
+  },
+  {
+    "id": "nomecalles-centro-260",
+    "name": "UC3M · Facultad Ciencias Sociales y Jurídicas",
+    "coords": [
+      -3.7258242,
+      40.3150823
+    ],
+    "university": "Universidad Carlos III",
+    "acronym": "UC3M",
+    "aliases": [
+      "Facultad Ciencias Sociales y Jurídicas",
+      "Universidad Carlos III de Madrid",
+      "Carlos III"
+    ],
+    "municipality": "Getafe"
+  },
+  {
+    "id": "nomecalles-centro-261",
+    "name": "UC3M · Centro de Postgrado",
+    "coords": [
+      -3.7274853,
+      40.3182357
+    ],
+    "university": "Universidad Carlos III",
+    "acronym": "UC3M",
+    "aliases": [
+      "Centro de Postgrado",
+      "Universidad Carlos III de Madrid",
+      "Carlos III"
+    ],
+    "municipality": "Getafe"
+  },
+  {
+    "id": "nomecalles-centro-262",
+    "name": "UC3M · Centro de Postgrado",
+    "coords": [
+      -3.7097767,
+      40.4068677
+    ],
+    "university": "Universidad Carlos III",
+    "acronym": "UC3M",
+    "aliases": [
+      "Centro de Postgrado",
+      "Universidad Carlos III de Madrid",
+      "Carlos III"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-263",
+    "name": "UDIMA · Centro Universitario SAIUS. UDIMA",
+    "coords": [
+      -3.705943,
+      40.4328704
+    ],
+    "university": "Universidad a Distancia de Madrid",
+    "acronym": "UDIMA",
+    "aliases": [
+      "Centro Universitario SAIUS. UDIMA"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-264",
+    "name": "UAN · Facultad de Lenguas y Educación. Campus Arturo Soria",
+    "coords": [
+      -3.6541057,
+      40.4578129
+    ],
+    "university": "Universidad Antonio de Nebrija",
+    "acronym": "UAN",
+    "aliases": [
+      "Facultad de Lenguas y Educación. Campus Arturo Soria",
+      "Universidad Nebrija",
+      "Nebrija",
+      "Arturo Soria",
+      "Campus Arturo Soria"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-265",
+    "name": "UAN · Escuela Politécnica Superior",
+    "coords": [
+      -3.7130776,
+      40.4291074
+    ],
+    "university": "Universidad Antonio de Nebrija",
+    "acronym": "UAN",
+    "aliases": [
+      "Escuela Politécnica Superior",
+      "Universidad Nebrija",
+      "Nebrija"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-266",
+    "name": "UAN · Facultad de Economía y Empresa",
+    "coords": [
+      -3.7128404,
+      40.4292728
+    ],
+    "university": "Universidad Antonio de Nebrija",
+    "acronym": "UAN",
+    "aliases": [
+      "Facultad de Economía y Empresa",
+      "Universidad Nebrija",
+      "Nebrija"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-267",
+    "name": "UAN · Facultad de Derecho y Relaciones Internacionales",
+    "coords": [
+      -3.7130907,
+      40.4292946
+    ],
+    "university": "Universidad Antonio de Nebrija",
+    "acronym": "UAN",
+    "aliases": [
+      "Facultad de Derecho y Relaciones Internacionales",
+      "Universidad Nebrija",
+      "Nebrija"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-268",
+    "name": "UCJC · Centro de Educación Superior de Enseñanza e Investigación Educativa CEIE",
+    "coords": [
+      -3.7069759,
+      40.4186933
+    ],
+    "university": "Universidad Camilo José Cela",
+    "acronym": "UCJC",
+    "aliases": [
+      "Centro de Educación Superior de Enseñanza e Investigación Educativa CEIE"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-269",
+    "name": "UPM · Centro de Tecnología Biomédica (CTB)",
+    "coords": [
+      -3.8338943,
+      40.4066933
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "Centro de Tecnología Biomédica (CTB)",
+      "Politécnica de Madrid",
+      "CTB"
+    ],
+    "municipality": "Pozuelo de Alarcón"
+  },
+  {
+    "id": "nomecalles-centro-270",
+    "name": "UPM · Centro domótica Integral (CeDInt)",
+    "coords": [
+      -3.8345922,
+      40.4044991
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "Centro domótica Integral (CeDInt)",
+      "Politécnica de Madrid"
+    ],
+    "municipality": "Pozuelo de Alarcón"
+  },
+  {
+    "id": "nomecalles-centro-271",
+    "name": "UPM · Centro de Investigación en Tecnologías Software y Sistemas Multimedia para la Sostenibilidad (CITSEM)",
+    "coords": [
+      -3.6267209,
+      40.3899704
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "Centro de Investigación en Tecnologías Software y Sistemas Multimedia para la Sostenibilidad (CITSEM)",
+      "Politécnica de Madrid",
+      "CITSEM"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-272",
+    "name": "UPM · Centro Láser UPM",
+    "coords": [
+      -3.6264646,
+      40.3896903
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "Centro Láser UPM",
+      "Politécnica de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-273",
+    "name": "UPCO · Unidad Clínica de Psicología (UNINPSI)",
+    "coords": [
+      -3.6803642,
+      40.4677973
+    ],
+    "university": "Universidad Pontificia de Comillas",
+    "acronym": "UPCO",
+    "aliases": [
+      "Unidad Clínica de Psicología (UNINPSI)",
+      "Universidad Pontificia Comillas",
+      "Comillas",
+      "UNINPSI"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-274",
+    "name": "URJC · Escuela de Ingeniería de Fuenlabrada",
+    "coords": [
+      -3.6020073,
+      40.0296011
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Escuela de Ingeniería de Fuenlabrada",
+      "Rey Juan Carlos"
+    ],
+    "municipality": "Aranjuez"
+  },
+  {
+    "id": "nomecalles-centro-275",
+    "name": "URJC · Facultad de Artes y Humanidades",
+    "coords": [
+      -3.6019762,
+      40.0299287
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Facultad de Artes y Humanidades",
+      "Rey Juan Carlos"
+    ],
+    "municipality": "Aranjuez"
+  },
+  {
+    "id": "nomecalles-centro-276",
+    "name": "URJC · Facultad de Artes y Humanidades. Campus de Fuenlabrada",
+    "coords": [
+      -3.8193173,
+      40.2821049
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Facultad de Artes y Humanidades. Campus de Fuenlabrada",
+      "Rey Juan Carlos",
+      "de Fuenlabrada",
+      "Campus de Fuenlabrada"
+    ],
+    "municipality": "Fuenlabrada"
+  },
+  {
+    "id": "nomecalles-centro-277",
+    "name": "URJC · Facultad de Ciencias de la Educación y del Deporte y Estudios Interdisciplinares. Campus de Fuenlabrada",
+    "coords": [
+      -3.820202,
+      40.2821171
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Facultad de Ciencias de la Educación y del Deporte y Estudios Interdisciplinares. Campus de Fuenlabrada",
+      "Rey Juan Carlos",
+      "de Fuenlabrada",
+      "Campus de Fuenlabrada"
+    ],
+    "municipality": "Fuenlabrada"
+  },
+  {
+    "id": "nomecalles-centro-278",
+    "name": "URJC · Facultad de Ciencias de la Economía y de la Empresa. Campus de Fuenlabrada",
+    "coords": [
+      -3.8188165,
+      40.2829156
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Facultad de Ciencias de la Economía y de la Empresa. Campus de Fuenlabrada",
+      "Rey Juan Carlos",
+      "de Fuenlabrada",
+      "Campus de Fuenlabrada"
+    ],
+    "municipality": "Fuenlabrada"
+  },
+  {
+    "id": "nomecalles-centro-279",
+    "name": "URJC · Facultad de Ciencias Jurídicas y Políticas. Campus de Fuenlabrada",
+    "coords": [
+      -3.8205547,
+      40.2828145
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Facultad de Ciencias Jurídicas y Políticas. Campus de Fuenlabrada",
+      "Rey Juan Carlos",
+      "de Fuenlabrada",
+      "Campus de Fuenlabrada"
+    ],
+    "municipality": "Fuenlabrada"
+  },
+  {
+    "id": "nomecalles-centro-280",
+    "name": "URJC · Facultad de Artes y Humanidades. Campus de Móstoles",
+    "coords": [
+      -3.8748447,
+      40.3363521
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Facultad de Artes y Humanidades. Campus de Móstoles",
+      "Rey Juan Carlos",
+      "de Móstoles",
+      "Campus de Móstoles"
+    ],
+    "municipality": "Móstoles"
+  },
+  {
+    "id": "nomecalles-centro-281",
+    "name": "URJC · Facultad de Ciencias de la Educación y del Deporte y Estudios Interdisciplinares. Campus de Móstoles",
+    "coords": [
+      -3.8757302,
+      40.3363639
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Facultad de Ciencias de la Educación y del Deporte y Estudios Interdisciplinares. Campus de Móstoles",
+      "Rey Juan Carlos",
+      "de Móstoles",
+      "Campus de Móstoles"
+    ],
+    "municipality": "Móstoles"
+  },
+  {
+    "id": "nomecalles-centro-282",
+    "name": "URJC · Facultad de Ciencias de la Economía y de la Empresa. Campus de Móstoles",
+    "coords": [
+      -3.8743443,
+      40.3371631
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Facultad de Ciencias de la Economía y de la Empresa. Campus de Móstoles",
+      "Rey Juan Carlos",
+      "de Móstoles",
+      "Campus de Móstoles"
+    ],
+    "municipality": "Móstoles"
+  },
+  {
+    "id": "nomecalles-centro-283",
+    "name": "URJC · Facultad de Ciencias Jurídicas y Políticas. Campus de Móstoles",
+    "coords": [
+      -3.8751488,
+      40.3371281
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Facultad de Ciencias Jurídicas y Políticas. Campus de Móstoles",
+      "Rey Juan Carlos",
+      "de Móstoles",
+      "Campus de Móstoles"
+    ],
+    "municipality": "Móstoles"
+  },
+  {
+    "id": "nomecalles-centro-284",
+    "name": "URJC · Facultad de Ciencias de la Educación y del Deporte y Estudios Interdisciplinares. Campus de Alcorcón",
+    "coords": [
+      -3.8444874,
+      40.3486087
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Facultad de Ciencias de la Educación y del Deporte y Estudios Interdisciplinares. Campus de Alcorcón",
+      "Rey Juan Carlos",
+      "de Alcorcón",
+      "Campus de Alcorcón"
+    ],
+    "municipality": "Alcorcón"
+  },
+  {
+    "id": "nomecalles-centro-285",
+    "name": "URJC · Facultad de Ciencias Jurídicas y Políticas. Campus de Alcorcón",
+    "coords": [
+      -3.8443855,
+      40.3497454
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Facultad de Ciencias Jurídicas y Políticas. Campus de Alcorcón",
+      "Rey Juan Carlos",
+      "de Alcorcón",
+      "Campus de Alcorcón"
+    ],
+    "municipality": "Alcorcón"
+  },
+  {
+    "id": "nomecalles-centro-286",
+    "name": "URJC · Facultad de Ciencias de la Educación y del Deporte y Estudios Interdisciplinares. Campus de Madrid",
+    "coords": [
+      -3.6107128,
+      40.406399
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Facultad de Ciencias de la Educación y del Deporte y Estudios Interdisciplinares. Campus de Madrid",
+      "Rey Juan Carlos",
+      "de Madrid",
+      "Campus de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-287",
+    "name": "URJC · Facultad de Ciencias de la Economía y de la Empresa. Campus de Madrid",
+    "coords": [
+      -3.6105638,
+      40.405933
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Facultad de Ciencias de la Economía y de la Empresa. Campus de Madrid",
+      "Rey Juan Carlos",
+      "de Madrid",
+      "Campus de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-288",
+    "name": "URJC · Facultad de Ciencias Jurídicas y Políticas. Campus de Madrid",
+    "coords": [
+      -3.6102254,
+      40.4068058
+    ],
+    "university": "Universidad Rey Juan Carlos",
+    "acronym": "URJC",
+    "aliases": [
+      "Facultad de Ciencias Jurídicas y Políticas. Campus de Madrid",
+      "Rey Juan Carlos",
+      "de Madrid",
+      "Campus de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-289",
+    "name": "UAX · Campus Madrid Chamberí",
+    "coords": [
+      -3.706401,
+      40.4327161
+    ],
+    "university": "Universidad Alfonso X El Sabio",
+    "acronym": "UAX",
+    "aliases": [
+      "Campus Madrid Chamberí",
+      "Alfonso X el Sabio"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-290",
+    "name": "CUNEF · Campus Pirineos",
+    "coords": [
+      -3.7195386,
+      40.4533254
+    ],
+    "university": "CUNEF Universidad",
+    "acronym": "CUNEF",
+    "aliases": [
+      "Campus Pirineos"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-291",
+    "name": "CUNEF · Campus Almansa",
+    "coords": [
+      -3.7146808,
+      40.4489274
+    ],
+    "university": "CUNEF Universidad",
+    "acronym": "CUNEF",
+    "aliases": [
+      "Campus Almansa"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-292",
+    "name": "UIV · Universidad Villanueva",
+    "coords": [
+      -3.7018852,
+      40.4959361
+    ],
+    "university": "Universidad Villanueva",
+    "acronym": "UIV",
+    "aliases": [
+      "Universidad Villanueva",
+      "Universidad Internacional Villanueva"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-centro-293",
+    "name": "UNAV · Campus de Madrid",
+    "coords": [
+      -3.6222809,
+      40.4485774
+    ],
+    "university": "Universidad de Navarra",
+    "acronym": "UNAV",
+    "aliases": [
+      "Campus de Madrid"
+    ],
+    "municipality": "Madrid"
+  },
+  {
+    "id": "nomecalles-campus-1",
+    "name": "UAH · Campus F Filosofía",
+    "coords": [
+      -3.3649527,
+      40.4800319
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Campus F Filosofía",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares",
+      "F Filosofía"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-2",
+    "name": "UAH · Campus F Documentación",
+    "coords": [
+      -3.3606982,
+      40.4795752
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Campus F Documentación",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares",
+      "F Documentación"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-5",
+    "name": "UPCO · Campus Ciempozuelos",
+    "coords": [
+      -3.6130038,
+      40.1603321
+    ],
+    "university": "Universidad Pontificia de Comillas",
+    "acronym": "UPCO",
+    "aliases": [
+      "Campus Ciempozuelos",
+      "Universidad Pontificia Comillas",
+      "Comillas",
+      "Ciempozuelos"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-6",
+    "name": "UC3M · Campus Colmenarejo",
+    "coords": [
+      -4.0127172,
+      40.5442999
+    ],
+    "university": "Universidad Carlos III",
+    "acronym": "UC3M",
+    "aliases": [
+      "Campus Colmenarejo",
+      "Universidad Carlos III de Madrid",
+      "Carlos III",
+      "Colmenarejo",
+      "Informática",
+      "Ingeniería Informática"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-9",
+    "name": "UAM · Campus EU Fisoterapia ONCE",
+    "coords": [
+      -3.7074548,
+      40.4937821
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Campus EU Fisoterapia ONCE",
+      "Autónoma de Madrid",
+      "EU Fisoterapia ONCE"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-10",
+    "name": "UAM · Campus Medicina - Enfermería La Paz",
+    "coords": [
+      -3.687296,
+      40.4813494
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Campus Medicina - Enfermería La Paz",
+      "Autónoma de Madrid",
+      "Medicina - Enfermería La Paz"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-11",
+    "name": "UPCO · Campus Enfermería San Juan de Dios",
+    "coords": [
+      -3.681823,
+      40.4525299
+    ],
+    "university": "Universidad Pontificia de Comillas",
+    "acronym": "UPCO",
+    "aliases": [
+      "Campus Enfermería San Juan de Dios",
+      "Universidad Pontificia Comillas",
+      "Comillas",
+      "Enfermería San Juan de Dios"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-12",
+    "name": "UEM · Campus Clínica Universitaria Odontología",
+    "coords": [
+      -3.725671,
+      40.4138188
+    ],
+    "university": "Universidad Europea de Madrid",
+    "acronym": "UEM",
+    "aliases": [
+      "Campus Clínica Universitaria Odontología",
+      "Universidad Europea",
+      "Clínica Universitaria Odontología"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-13",
+    "name": "UPCO · Campus Derecho - Económicas",
+    "coords": [
+      -3.7114613,
+      40.4295963
+    ],
+    "university": "Universidad Pontificia de Comillas",
+    "acronym": "UPCO",
+    "aliases": [
+      "Campus Derecho - Económicas",
+      "Universidad Pontificia Comillas",
+      "Comillas",
+      "Derecho - Económicas"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-15",
+    "name": "UAN · Campus La Berzosa",
+    "coords": [
+      -3.949247,
+      40.6009929
+    ],
+    "university": "Universidad Antonio de Nebrija",
+    "acronym": "UAN",
+    "aliases": [
+      "Campus La Berzosa",
+      "Universidad Nebrija",
+      "Nebrija",
+      "La Berzosa"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-16",
+    "name": "UC3M · Campus Leganés Parque Científico",
+    "coords": [
+      -3.7706998,
+      40.3367617
+    ],
+    "university": "Universidad Carlos III",
+    "acronym": "UC3M",
+    "aliases": [
+      "Campus Leganés Parque Científico",
+      "Universidad Carlos III de Madrid",
+      "Carlos III",
+      "Leganés Parque Científico"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-18",
+    "name": "UAM · Campus Leganés UE Enfermería",
+    "coords": [
+      -3.7709359,
+      40.3218063
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Campus Leganés UE Enfermería",
+      "Autónoma de Madrid",
+      "Leganés UE Enfermería"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-19",
+    "name": "UAH · Campus Filosofía",
+    "coords": [
+      -3.3635216,
+      40.4811106
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Campus Filosofía",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares",
+      "Filosofía"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-20",
+    "name": "UAH · Campus EU C. Cisneros",
+    "coords": [
+      -3.3598807,
+      40.4982883
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Campus EU C. Cisneros",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares",
+      "EU C. Cisneros"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-21",
+    "name": "UAH · Campus F Derecho",
+    "coords": [
+      -3.362365,
+      40.4851497
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Campus F Derecho",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares",
+      "F Derecho"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-22",
+    "name": "UAH · Campus F Económicas",
+    "coords": [
+      -3.3705987,
+      40.4794392
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Campus F Económicas",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares",
+      "F Económicas"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-23",
+    "name": "UAH · Campus Ciencias",
+    "coords": [
+      -3.3446461,
+      40.5091341
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Campus Ciencias",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares",
+      "Ciencias"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-24",
+    "name": "UAH · Campus Rectorado",
+    "coords": [
+      -3.3633658,
+      40.4825186
+    ],
+    "university": "Universidad de Alcalá",
+    "acronym": "UAH",
+    "aliases": [
+      "Campus Rectorado",
+      "Universidad de Alcalá de Henares",
+      "Universidad Alcalá de Henares",
+      "Rectorado"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-26",
+    "name": "UCM · Campus F Odontología",
+    "coords": [
+      -3.7258413,
+      40.4424881
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Campus F Odontología",
+      "Complutense",
+      "F Odontología"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-29",
+    "name": "UCM · Campus EU E. Empresariales",
+    "coords": [
+      -3.7117349,
+      40.4400347
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Campus EU E. Empresariales",
+      "Complutense",
+      "EU E. Empresariales"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-30",
+    "name": "CEU · Campus F Económicas",
+    "coords": [
+      -3.7177954,
+      40.4419622
+    ],
+    "university": "Universidad San Pablo CEU",
+    "acronym": "CEU",
+    "aliases": [
+      "Campus F Económicas",
+      "Universidad CEU San Pablo",
+      "CEU San Pablo",
+      "F Económicas"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-31",
+    "name": "UPM · Campus ETSI Minas",
+    "coords": [
+      -3.700237,
+      40.442316
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "Campus ETSI Minas",
+      "Politécnica de Madrid",
+      "ETSI Minas"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-34",
+    "name": "UCM · Campus F Medicina",
+    "coords": [
+      -3.7241132,
+      40.4440188
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Campus F Medicina",
+      "Complutense",
+      "F Medicina"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-35",
+    "name": "UCM · Campus F Farmacia",
+    "coords": [
+      -3.7263291,
+      40.4451829
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Campus F Farmacia",
+      "Complutense",
+      "F Farmacia"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-36",
+    "name": "UCM · Campus Biología - Geología",
+    "coords": [
+      -3.7250207,
+      40.4456955
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Campus Biología - Geología",
+      "Complutense",
+      "Biología - Geología"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-37",
+    "name": "UCM · Campus F Ciencias Información",
+    "coords": [
+      -3.7291317,
+      40.4461861
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Campus F Ciencias Información",
+      "Complutense",
+      "F Ciencias Información"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-38",
+    "name": "UPM · Campus Rectorado",
+    "coords": [
+      -3.7184345,
+      40.4480363
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "Campus Rectorado",
+      "Politécnica de Madrid",
+      "Rectorado"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-39",
+    "name": "UCM · Campus F Derecho",
+    "coords": [
+      -3.7307843,
+      40.4510746
+    ],
+    "university": "Universidad Complutense de Madrid",
+    "acronym": "UCM",
+    "aliases": [
+      "Campus F Derecho",
+      "Complutense",
+      "F Derecho"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-40",
+    "name": "UPM · Campus EUIT Telecomunicación",
+    "coords": [
+      -3.6281836,
+      40.3892933
+    ],
+    "university": "Universidad Politécnica de Madrid",
+    "acronym": "UPM",
+    "aliases": [
+      "Campus EUIT Telecomunicación",
+      "Politécnica de Madrid",
+      "EUIT Telecomunicación"
+    ]
+  },
+  {
+    "id": "nomecalles-campus-41",
+    "name": "UAM · Campus EU Enfermería Puerta de Hierro",
+    "coords": [
+      -3.7268618,
+      40.4663447
+    ],
+    "university": "Universidad Autónoma de Madrid",
+    "acronym": "UAM",
+    "aliases": [
+      "Campus EU Enfermería Puerta de Hierro",
+      "Autónoma de Madrid",
+      "EU Enfermería Puerta de Hierro"
+    ]
+  },
+  {
+    "id": "udit-diseno",
+    "name": "UDIT · Campus de Diseño e Industrias Creativas",
+    "coords": [
+      -3.6674173,
+      40.4571071
+    ],
+    "university": "Universidad de Diseño, Innovación y Tecnología",
+    "acronym": "UDIT",
+    "municipality": "Madrid",
+    "aliases": [
+      "Campus de Diseño e Industrias Creativas",
+      "Alfonso XIII"
+    ]
+  },
+  {
+    "id": "udit-tecnologia",
+    "name": "UDIT · Campus de Tecnología, Innovación y Ciencias Aplicadas",
+    "coords": [
+      -3.6271881,
+      40.440531
+    ],
+    "university": "Universidad de Diseño, Innovación y Tecnología",
+    "acronym": "UDIT",
+    "municipality": "Madrid",
+    "aliases": [
+      "Campus de Tecnología, Innovación y Ciencias Aplicadas",
+      "Campus de Alcalá",
+      "Calle de Alcalá"
+    ]
+  }
+]

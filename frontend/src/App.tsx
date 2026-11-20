@@ -20,7 +20,9 @@ import {
   USE_MOCKS,
 } from './api/client';
 import type {
+  AiParseResponse,
   BarriosGeoJSON,
+  Campus,
   HousingType,
   MetaResponse,
   Recommendation,
@@ -46,14 +48,13 @@ import { TopFilterBar } from './components/TopFilterBar';
 import type { ResultFilters } from './components/ResultsFilters';
 import { ZoneList } from './components/ZoneList';
 import { formatEuro, formatMinutes } from './utils/format';
-import { looksLikeLanguage } from './utils/sanity';
 import { searchPreferences } from './utils/searchPreferences';
 
 function readInitialUrlParams() {
   if (typeof window === 'undefined') return { hasParams: false };
   const params = new URLSearchParams(window.location.search);
   const hasParams =
-    params.has('campus') || params.has('budget') || params.has('type') || params.has('mins');
+    params.has('campus') || params.has('budget') || params.has('type') || params.has('mins') || params.has('km');
   const campus = params.get('campus') || undefined;
   const budgetRaw = Number(params.get('budget'));
   const budget =
@@ -72,6 +73,8 @@ function readInitialUrlParams() {
       : minsParam && Number.isFinite(Number(minsParam))
         ? Math.max(5, Math.min(180, Number(minsParam)))
         : undefined;
+  const km = Number(params.get('km'));
+  const maxDistanceKm = Number.isFinite(km) && km > 0 && km <= 60 ? km : null;
   const min = Number(params.get('min'));
   const minBudget = min > 0 && budget !== undefined && min <= budget ? min : null;
   const preferences = params.get('criteria')?.split(',').flatMap((entry) => {
@@ -84,7 +87,7 @@ function readInitialUrlParams() {
   const onlyWithinBudget = params.get('range') === '1' || minBudget !== null;
   const locationParam = params.get('location') ?? '';
   const location = /^(area|district):.+$/.test(locationParam) ? locationParam : '';
-  return { hasParams: hasParams || Boolean(location), campus, budget, housingType, maxTravelMin, minBudget, preferences, transportMode, onlyWithinBudget, location };
+  return { hasParams: hasParams || Boolean(location), campus, budget, housingType, maxTravelMin, maxDistanceKm, minBudget, preferences, transportMode, onlyWithinBudget, location };
 }
 
 /** T29: every page has its own URL so the browser's back button moves between pages of the app. */
@@ -162,6 +165,7 @@ export function App() {
   const [maxTravelMin, setMaxTravelMin] = useState<number | null>(
     initial.maxTravelMin !== undefined ? initial.maxTravelMin : 45,
   );
+  const [maxDistanceKm, setMaxDistanceKm] = useState<number | null>(initial.maxDistanceKm ?? null);
   const [airLevel, setAirLevel] = useState<AirLevelOption>('any');
   const [wellConnectedOnly, setWellConnectedOnly] = useState(false);
   const [onlyWithinBudget, setOnlyWithinBudget] = useState(initial.onlyWithinBudget ?? false);
@@ -175,6 +179,9 @@ export function App() {
   const [aiLoading, setAiLoading] = useState(false);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [campusChoice, setCampusChoice] = useState<{
+    query: string; parsed: AiParseResponse; meta: MetaResponse; campuses: Campus[];
+  } | null>(null);
   const pendingExplanation = useRef<string | null>(null);
 
   // Selection, hover, comparison & mobile view state
@@ -262,12 +269,13 @@ export function App() {
 
   const scoreFilters = useMemo<ScoreFilters>(() => ({
     max_travel_min: maxTravelMin,
+    max_distance_km: maxDistanceKm,
     only_within_budget: onlyWithinBudget,
     // Only flats have an official price to compare with; for rooms/studios a minimum would exclude everything.
     min_budget_eur_month: housingType === 'flat' ? minBudget : null,
     max_air_no2: activeCriteria.has('air_no2') ? AIR_LEVEL_THRESHOLDS[airLevel] : null,
     min_transit_stops: activeCriteria.has('transit_stops') && wellConnectedOnly ? WELL_CONNECTED_THRESHOLD : null,
-  }), [maxTravelMin, onlyWithinBudget, minBudget, housingType, activeCriteria, airLevel, wellConnectedOnly]);
+  }), [maxTravelMin, maxDistanceKm, onlyWithinBudget, minBudget, housingType, activeCriteria, airLevel, wellConnectedOnly]);
 
   // Sync URL querystring only when on Screen B (so Screen A stays clean at "/")
   useEffect(() => {
@@ -277,6 +285,8 @@ export function App() {
     params.set('budget', String(budget));
     params.set('type', housingType);
     params.set('mins', maxTravelMin === null ? 'any' : String(maxTravelMin));
+    if (maxDistanceKm === null) params.delete('km');
+    else params.set('km', String(maxDistanceKm));
     if (minBudget !== null) params.set('min', String(minBudget));
     else params.delete('min');
     params.set('criteria', Object.entries(computedWeights).map(([key, weight]) => weight === 1 ? key : key + ':' + weight).join(','));
@@ -286,7 +296,7 @@ export function App() {
     if (location) params.set('location', location);
     else params.delete('location');
     window.history.replaceState(window.history.state, '', `${ROUTE_PATHS.results}?${params.toString()}`);
-  }, [screen, campusId, budget, housingType, maxTravelMin, minBudget, computedWeights, transportMode, onlyWithinBudget, location]);
+  }, [screen, campusId, budget, housingType, maxTravelMin, maxDistanceKm, minBudget, computedWeights, transportMode, onlyWithinBudget, location]);
 
   // Cancel obsolete rankings so a slower response cannot replace a newer search.
   useEffect(() => {
@@ -451,14 +461,11 @@ export function App() {
     if (searching) return false;
     const fromPath = window.location.pathname;
     setSearching(true);
+    setCampusChoice(null);
     setSearchError(null);
     setRateLimitNotice(null);
 
     try {
-      if (!looksLikeLanguage(queryText)) {  // instant check, no AI call for keyboard mashing
-        setSearchError('No he entendido lo que has escrito. Cuéntame con palabras qué buscas, por ejemplo dónde estudias y cuánto puedes pagar.');
-        return false;
-      }
       const [parsed, searchMeta] = await Promise.all([
         postAiParse({ query: queryText }),
         (metaRequest.current ??= getMeta()).catch(() => null),
@@ -468,25 +475,17 @@ export function App() {
         setSearchError(parsed.interpretation);
         return false;
       }
-      const campus = searchMeta?.campuses.find((item) => item.id === parsed.campus_id);
-      const indicatorKeys = searchMeta?.indicators.map(({ key }) => key) ?? Object.keys(parsed.weights);
-      const inferred = searchPreferences(queryText, parsed, new Set([...DEFAULT_PRIORITIES, ...indicatorKeys]), campus);
-      if (inferred.inferredFields.has('campus')) setCampusId(parsed.campus_id);
-      if (inferred.inferredFields.has('housing')) setHousingType(parsed.housing_type);
-      setMinBudget(inferred.minBudget);  // a new phrase never keeps the previous phrase's minimum
-      if (inferred.budget !== null) {
-        setBudget(inferred.budget);
-        setOnlyWithinBudget(inferred.minBudget !== null || (parsed.filters.only_within_budget ?? true));
+      const ids = parsed.campus_candidates ?? [];
+      if (ids.length > 1 && !searchMeta) {
+        setSearchError('No se ha podido cargar la lista de campus. Vuelve a intentarlo.');
+        return false;
       }
-      setMaxTravelMin(parsed.filters.max_travel_min ?? maxTravelMin);
-      setAirLevel('any');
-      setWellConnectedOnly(false);
-      setTransportMode(parsed.travel_mode ?? inferred.transportMode);
-      setPreferenceWeights(Object.fromEntries(inferred.selectedPriorities.map((key) => {
-        const weight = parsed.weights[key] ?? 0;
-        return [key, weight >= 0.5 ? weight : 1];
-      })));
-      startResults(queryText);
+      const choices = searchMeta?.campuses.filter((campus) => ids.includes(campus.id)) ?? [];
+      if (choices.length > 1 && searchMeta) {
+        setCampusChoice({ query: queryText, parsed, meta: searchMeta, campuses: choices });
+        return false;
+      }
+      applyPhrase(queryText, parsed, searchMeta, ids.length === 1 ? ids[0] : choices[0]?.id);
       return true;
     } catch (err) {
       if (window.location.pathname === fromPath) {
@@ -498,6 +497,42 @@ export function App() {
     } finally {
       setSearching(false);
     }
+  }
+
+  function applyPhrase(queryText: string, parsed: AiParseResponse, searchMeta: MetaResponse | null, chosenId?: string) {
+    const campus = searchMeta?.campuses.find((item) => item.id === parsed.campus_id);
+    const indicatorKeys = searchMeta?.indicators.map(({ key }) => key) ?? Object.keys(parsed.weights);
+    const inferred = searchPreferences(queryText, parsed, new Set([...DEFAULT_PRIORITIES, ...indicatorKeys]), campus);
+    if (chosenId) setCampusId(chosenId);
+    else if (parsed.campus_candidates === undefined && inferred.inferredFields.has('campus')) setCampusId(parsed.campus_id);
+    if (inferred.inferredFields.has('housing')) setHousingType(parsed.housing_type);
+    setMinBudget(inferred.minBudget);
+    if (inferred.budget !== null) {
+      setBudget(inferred.budget);
+      setOnlyWithinBudget(inferred.minBudget !== null || (parsed.filters.only_within_budget ?? true));
+    }
+    setMaxTravelMin(parsed.filters.max_travel_min ?? maxTravelMin);
+    setMaxDistanceKm(parsed.filters.max_distance_km);
+    setAirLevel('any');
+    setWellConnectedOnly(false);
+    setTransportMode(parsed.travel_mode ?? inferred.transportMode);
+    setPreferenceWeights(Object.fromEntries(inferred.selectedPriorities.map((key) => {
+      const weight = parsed.weights[key] ?? 0;
+      return [key, weight >= 0.5 ? weight : 1];
+    })));
+    startResults(queryText);
+  }
+
+  function handleCampusChoice(id: string) {
+    if (!campusChoice?.campuses.some((campus) => campus.id === id)) return;
+    setCampusChoice(null);
+    applyPhrase(campusChoice.query, campusChoice.parsed, campusChoice.meta, id);
+  }
+
+  function updateQuery(value: string) {
+    setQuery(value);
+    setCampusChoice(null);
+    setSearchError(null);
   }
 
   const handleStart = () => {
@@ -525,6 +560,7 @@ export function App() {
     setMinBudget(filters.minBudget);
     setHousingType(filters.housingType);
     setMaxTravelMin(filters.maxTravelMin);
+    setMaxDistanceKm(filters.maxDistanceKm);
     setAirLevel(filters.airLevel);
     setWellConnectedOnly(filters.wellConnectedOnly);
     setOnlyWithinBudget(filters.onlyWithinBudget);
@@ -563,17 +599,21 @@ export function App() {
   const campusName = activeCampus?.name ?? campusId.toUpperCase();
   const budgetRange = minBudget === null ? `hasta ${formatEuro(budget)}` : `${formatEuro(minBudget)}–${formatEuro(budget)}`;
   const summaryLine = `${HOUSING_TYPE_LABELS[housingType]} · ${budgetRange}/mes · ${campusName}${
-    maxTravelMin !== null ? ` (≤ ${maxTravelMin} min en ${transportMode === 'car' ? 'coche' : 'transporte público'})` : ''
+    activeCampus?.has_travel_times === false
+      ? maxDistanceKm === null ? ' · Distancia en línea recta' : ` (≤ ${maxDistanceKm} km en línea recta)`
+      : maxTravelMin !== null ? ` (≤ ${maxTravelMin} min en ${transportMode === 'car' ? 'coche' : 'transporte público'})` : ''
   }${locationLabel ? ' · ' + locationLabel : ''}`;
 
   const screenView = screen === 'onboarding' ? (
     <m.div key={route} data-ui-motion="screen" {...viewMotion}>
       <OnboardingScreen
         query={query}
-        onQueryChange={setQuery}
+        onQueryChange={updateQuery}
         onSearchSubmit={handleSearchSubmit}
         searching={searching}
         searchError={searchError}
+        campusChoices={campusChoice?.campuses ?? []}
+        onCampusChoice={handleCampusChoice}
         view={route === 'form' ? 'form' : 'phrase'}
         onOpenForm={() => navigate('form')}
         onBack={() => goBack('home')}
@@ -606,12 +646,14 @@ export function App() {
         query={query}
         searching={searching}
         searchError={searchError}
-        onQueryChange={setQuery}
+        campusChoices={campusChoice?.campuses ?? []}
+        onCampusChoice={handleCampusChoice}
+        onQueryChange={updateQuery}
         onSearchSubmit={handleSearchSubmit}
         campuses={meta?.campuses ?? []}
         areas={rawResults}
         filters={{
-          campusId, budget, minBudget, housingType, maxTravelMin, airLevel, wellConnectedOnly, onlyWithinBudget,
+          campusId, budget, minBudget, housingType, maxTravelMin, maxDistanceKm, airLevel, wellConnectedOnly, onlyWithinBudget,
           priorityWeights: computedWeights, transportMode, location,
         }}
         onApplyFilters={handleApplyFilters}

@@ -21,6 +21,8 @@ interface OnboardingScreenProps {
   onSearchSubmit: (query: string) => void;
   searching: boolean;
   searchError: string | null;
+  campusChoices: Campus[];
+  onCampusChoice: (campusId: string) => void;
   view: 'phrase' | 'form';
   onOpenForm: () => void;
   onBack: () => void;
@@ -94,7 +96,7 @@ const primaryButton = 'inline-flex min-h-12 items-center justify-center gap-2 ro
 const labelClass = 'text-sm font-semibold text-ink';
 
 export function OnboardingScreen({
-  query, onQueryChange, onSearchSubmit, searching, searchError, view, onOpenForm, onBack, onHome,
+  query, onQueryChange, onSearchSubmit, searching, searchError, campusChoices, onCampusChoice, view, onOpenForm, onBack, onHome,
   campuses, campusId, onCampusChange, budget, onBudgetChange, housingType, onHousingTypeChange,
   maxTravelMin, onMaxTravelChange, transportMode, onTransportModeChange, availableKeys, priorityWeights, onPriorityChange,
   onStart, sources,
@@ -103,6 +105,7 @@ export function OnboardingScreen({
   const showForm = view === 'form';
   const options = priorityOptions(availableKeys);
   const activeCount = options.filter(({ key }) => (priorityWeights[key] ?? 0) > 0).length;
+  const hasTravelTimes = campuses.find(({ id }) => id === campusId)?.has_travel_times !== false;
   const minValue = maxTravelMin === null ? MIN_UNLIMITED : Math.min(MIN_MAX, Math.max(MIN_MIN, maxTravelMin));
   const [budgetMin, budgetMax] = BUDGET_BOUNDS[housingType];
   const budgetValue = Math.min(budgetMax, Math.max(budgetMin, budget));
@@ -179,6 +182,9 @@ export function OnboardingScreen({
               ))}
             </div>
             {searching && <ThinkingSteps />}
+            {!!campusChoices.length && <div className="mx-auto mt-4 max-w-xl rounded-xl border border-border bg-bg p-4">
+              <CampusPicker campuses={campusChoices} campusId="" keepSelection label="¿En qué campus estudias?" onChange={onCampusChoice} />
+            </div>}
             {searchError && <p role="alert" className="mx-auto mt-4 max-w-xl rounded-xl border border-over/30 bg-bg/95 px-4 py-3 text-center text-sm text-over">{searchError}</p>}
           </div>
         </main>
@@ -232,7 +238,7 @@ export function OnboardingScreen({
                 <div className="mt-1 flex justify-between text-xs text-muted"><span>{budgetMin.toLocaleString('es-ES')} €</span><span>{budgetMax.toLocaleString('es-ES')} €+</span></div>
               </div>
 
-                <div>
+                {hasTravelTimes ? <div>
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <label htmlFor="minutes-range" className={labelClass}>Tiempo hasta el campus</label>
                     <div role="radiogroup" aria-label="Cómo irás a clase" className="inline-flex gap-0.5 rounded-lg bg-surface p-0.5">
@@ -257,7 +263,7 @@ export function OnboardingScreen({
                     className="clean-range mt-3 w-full" />
                   <div className="mt-1 flex items-baseline justify-between text-xs text-muted"><span>{MIN_MIN} min</span><span className="text-sm font-semibold text-ink tabular-nums">{maxTravelMin === null ? 'Sin límite' : `Máximo ${minValue} min`}</span><span>{MIN_MAX} min · Sin límite</span></div>
                   <p className="mt-1 text-xs text-muted">Tiempo real puerta a puerta (horarios del CRTM y calles de OpenStreetMap).</p>
-                </div>
+                </div> : <p className="text-sm text-muted">Para este centro, las recomendaciones usan la distancia en línea recta.</p>}
             </div>
 
             <div className="flex flex-col">

@@ -12,6 +12,7 @@ export interface ResultFilters {
   minBudget: number | null;
   housingType: HousingType;
   maxTravelMin: number | null;
+  maxDistanceKm: number | null;
   airLevel: AirLevelOption;
   wellConnectedOnly: boolean;
   onlyWithinBudget: boolean;
@@ -71,6 +72,8 @@ export function ResultsFilters({ availableKeys, campuses, areas, filters, onAppl
 
 
   const budgetCeiling = Math.max(sliderCeiling, draft.budget);
+  const hasTravelTimes = campuses.find(({ id }) => id === draft.campusId)?.has_travel_times !== false;
+  const distance = draft.maxDistanceKm ?? 10;
   const minutes = draft.maxTravelMin ?? filters.maxTravelMin ?? 45;
   const minutesText = draft.maxTravelMin === null ? 'Sin límite' : `${minutes} min`;
 
@@ -124,7 +127,8 @@ export function ResultsFilters({ availableKeys, campuses, areas, filters, onAppl
             )}
           </section>
 
-          <section aria-label="Tiempo hasta el campus" className="min-w-0 rounded-xl border border-border bg-surface p-3.5">
+          <section aria-label={hasTravelTimes ? "Tiempo hasta el campus" : "Distancia hasta el campus"} className="min-w-0 rounded-xl border border-border bg-surface p-3.5">
+            {hasTravelTimes ? <>
             <label className="block text-xs font-semibold">
               Cómo irás a clase
               <select value={draft.transportMode} onChange={(event) => update('transportMode', event.target.value as TransportMode)} className={fieldClass}>
@@ -145,6 +149,19 @@ export function ResultsFilters({ availableKeys, campuses, areas, filters, onAppl
                 className="size-4 shrink-0 accent-brand" />
               Sin límite de tiempo
             </label>
+            </> : <>
+              <label htmlFor={distanceId} className="flex flex-wrap items-baseline justify-between gap-1 text-sm font-semibold">
+                Distancia en línea recta <span className="tabular-nums">{draft.maxDistanceKm === null ? 'Sin límite' : `${distance} km`}</span>
+              </label>
+              <input id={distanceId} type="range" min="1" max="60" step="1" value={distance}
+                onChange={(event) => update('maxDistanceKm', event.target.valueAsNumber)} className={rangeClass} />
+              <label className="flex min-h-11 items-center gap-2 text-sm">
+                <input type="checkbox" className="size-4 accent-brand" checked={draft.maxDistanceKm === null}
+                  onChange={(event) => update('maxDistanceKm', event.target.checked ? null : distance)} />
+                Sin límite de distancia
+              </label>
+              <p className="text-xs text-muted">Para este centro aún no hay tiempos de trayecto disponibles.</p>
+            </>}
           </section>
         </div>
 

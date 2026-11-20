@@ -1,10 +1,12 @@
 /** Searchable picker for the campuses supported by the recommendation engine. */
 import { AnimatePresence, m, useReducedMotion } from 'motion/react';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { Campus } from '../api/types';
 
 function normalize(value: string) {
-  return value.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+  return value.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
+    .replace(/\b(?:infromatica|infomatica|informatcia)\b/g, 'informatica')
+    .replace(/[^a-z0-9]+/g, ' ').trim();
 }
 
 export function CampusPicker({
@@ -21,14 +23,28 @@ export function CampusPicker({
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
   const selected = campuses.find((item) => item.id === campusId);
-  const terms = normalize(draft ?? '').trim().split(/\s+/).filter(Boolean);
-  const matches = campuses.filter((item) => {
-    const name = normalize([item.name, item.id, ...(item.aliases ?? [])].join(' '));
-    return terms.every((term) => name.includes(term));
-  });
+  const indexed = useMemo(() => campuses.map((campus) => ({
+    campus,
+    university: normalize(campus.university ?? ''),
+    text: normalize([campus.name, campus.university, campus.acronym, campus.municipality, ...(campus.aliases ?? [])].join(' ')),
+  })), [campuses]);
+  const query = normalize(draft ?? '');
+  const terms = query.split(' ').filter(Boolean);
+  const exactUniversity = indexed.find(({ campus, university }) =>
+    query && (query === university || query === normalize(campus.acronym ?? '')));
+  const matches = indexed.filter(({ campus, text }) =>
+    exactUniversity ? campus.acronym === exactUniversity.campus.acronym : terms.every((term) => text.includes(term)),
+  ).map(({ campus }) => campus);
 
   useEffect(() => {
-    if (open) activeOption.current?.scrollIntoView({ block: 'nearest' });
+    if (!open || !activeOption.current) return;
+    const option = activeOption.current;
+    const list = option.parentElement!;
+    const offset = option.offsetTop;
+    if (offset < list.scrollTop) list.scrollTop = offset;
+    else if (offset + option.offsetHeight > list.scrollTop + list.clientHeight) {
+      list.scrollTop = offset + option.offsetHeight - list.clientHeight;
+    }
   }, [active, open]);
 
   const select = (campus: Campus) => {
@@ -56,7 +72,10 @@ export function CampusPicker({
           setActive(0);
           setOpen(true);
         }}
-        onBlur={() => setOpen(false)}
+        onBlur={() => {
+          setOpen(false);
+          if (keepSelection) setDraft(null);
+        }}
         onChange={(event) => {
           setDraft(event.target.value);
           if (!keepSelection) onChange('');
@@ -101,7 +120,10 @@ export function CampusPicker({
               onMouseDown={(event) => event.preventDefault()}
               onClick={() => select(campus)}
             >
-              {campus.name}
+              <span className="block">{campus.name}</span>
+              {campus.university && <span className="block text-xs text-muted">
+                {campus.university}{campus.municipality ? ` · ${campus.municipality}` : ''}
+              </span>}
             </li>
           ))}
         </m.ul>

@@ -25,6 +25,7 @@ def main():
                 parser.error(f"--offline requires data/processed/{filename}")
     else:
         run(ETL / "fetch_geometry.py")
+        run(ETL / "fetch_universities.py")
         for source in SOURCE_SCRIPTS:
             script = ETL / f"fetch_{source}.py"
             if script.is_file():

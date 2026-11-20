@@ -62,9 +62,12 @@ def explain(req: AiExplainRequest) -> AiExplainResponse:
         if r is None:
             continue
         best = sorted(r.breakdown.items(), key=lambda kv: kv[1].contribution, reverse=True)[:3]
+        timed = r.travel_min is not None
+        labels["distance_km"] = ("Tiempo al campus", "min") if timed else ("Distancia al campus en línea recta", "km")
         items.append({
             "name": r.name, "district": r.district,
-            "min_transporte_publico": r.transit_min, "min_coche": r.car_min,
+            **({"min_transporte_publico": r.transit_min, "min_coche": r.car_min} if timed else
+               {"distancia_en_linea_recta_km": r.distance_km}),
             "alquiler_oficial_piso_mediana": r.rent_median_eur_month, "fits_budget": r.fits_budget,
             "puntos_fuertes": [{"criterio": labels[k][0], "valor": b.value, "unidad": labels[k][1]} for k, b in best],
             "nota": ds.area(area_id).notes if ds.area(area_id) else {},

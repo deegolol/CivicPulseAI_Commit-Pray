@@ -4,6 +4,7 @@ import { Search, SlidersHorizontal, X } from 'lucide-react';
 import type { Campus, ScoreResultItem } from '../api/types';
 import { EXAMPLE_QUERIES } from '../constants/filters';
 import { AccountButton } from './AccountProvider';
+import { CampusPicker } from './CampusPicker';
 import { BrandLogo } from './BrandLogo';
 import { ResultsFilters, type ResultFilters } from './ResultsFilters';
 
@@ -13,6 +14,8 @@ interface TopFilterBarProps {
   query: string;
   searching: boolean;
   searchError: string | null;
+  campusChoices: Campus[];
+  onCampusChoice: (campusId: string) => void;
   onQueryChange: (value: string) => void;
   onSearchSubmit: (value: string) => Promise<boolean>;
   campuses: Campus[];
@@ -26,7 +29,7 @@ type Panel = 'search' | 'filters';
 const controlClass = 'inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-border px-2 min-[360px]:gap-2 min-[360px]:px-2.5 text-sm font-semibold text-ink hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink sm:px-3.5';
 
 export function TopFilterBar({
-  availableKeys, onResetHome, query, searching, searchError, onQueryChange, onSearchSubmit, campuses, areas, filters, onApplyFilters,
+  availableKeys, onResetHome, query, searching, searchError, campusChoices, onCampusChoice, onQueryChange, onSearchSubmit, campuses, areas, filters, onApplyFilters,
 }: TopFilterBarProps) {
   const [openPanel, setOpenPanel] = useState<Panel | null>(null);
   const [filterRevision, setFilterRevision] = useState(0);
@@ -160,7 +163,11 @@ export function TopFilterBar({
                     className="min-h-11 rounded-lg bg-brand px-3 text-sm font-semibold text-bg hover:bg-brand-hover disabled:opacity-60">{searching ? 'Buscando…' : 'Buscar'}</button>
                 </form>
                 {searchError && <p role="alert" className="text-sm text-over">{searchError}</p>}
-                {EXAMPLE_QUERIES.map((example) => (
+                {!!campusChoices.length && <div className="min-h-56 pb-2">
+                  <CampusPicker campuses={campusChoices} campusId="" keepSelection label="¿En qué campus estudias?"
+                    onChange={(id) => { onCampusChoice(id); closePanel(); }} />
+                </div>}
+                {!campusChoices.length && EXAMPLE_QUERIES.map((example) => (
                   <button key={example} type="button" disabled={searching} onClick={() => { onQueryChange(example); submitSearch(example); }}
                     className="block min-h-11 w-full rounded-lg border border-border px-3 py-2 text-left text-sm hover:bg-surface disabled:opacity-60">
                     {example}

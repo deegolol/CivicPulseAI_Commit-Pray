@@ -115,3 +115,32 @@ def test_gibberish_and_off_topic_are_not_searched():
     assert body["understood"] is False and "dónde vivir" in body["interpretation"]
     ok = client.post("/api/ai/parse", json={"query": "busco habitación cerca de la UAM, a menos de 30 minutos en coche"}).json()
     assert ok["understood"] is True and ok["travel_mode"] == "car" and ok["filters"]["max_travel_min"] == 30
+
+
+def test_named_university_and_degree_resolve_to_the_right_campus():
+    ds = get_dataset()
+    query = "Busco habitación por 500 € cerca de la Universidad Complutense de Madrid, donde estudio Derecho"
+    result = client.post("/api/ai/parse", json={"query": query}).json()
+    campus = next(c for c in ds.campuses if c.id == result["campus_id"])
+    assert campus.acronym == "UCM" and campus.name.endswith("Facultad de Derecho")
+    assert result["campus_candidates"] == [campus.id]
+    assert result["budget_eur_month"] == 500
+    scores = client.post("/api/score", json={
+        "campus_id": campus.id, "filters": {"max_distance_km": 5}, "budget_eur_month": 500,
+    }).json()["results"]
+    assert any(not row["excluded"] and row["distance_km"] < 5 for row in scores)
+    assert all(row["excluded"] for row in scores if row["distance_km"] > 5)
+
+
+def test_ambiguous_computing_query_offers_matching_campuses():
+    result = client.post("/api/ai/parse", json={"query": "Estudio infromatica en la UPM y tengo 500 € al mes"}).json()
+    assert result["understood"] is True
+    assert set(result["campus_candidates"]) == {"etsisi", "etsiinf"}
+    assert result["budget_eur_month"] == 500
+
+
+def test_bare_university_acronym_uses_the_catalogue():
+    ds = get_dataset()
+    result = client.post("/api/ai/parse", json={"query": "UPM"}).json()
+    assert set(result["campus_candidates"]) == {c.id for c in ds.campuses if c.acronym == "UPM"}
+    assert len(result["campus_candidates"]) > 4

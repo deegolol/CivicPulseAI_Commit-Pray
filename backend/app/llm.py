@@ -20,6 +20,7 @@ from pathlib import Path
 import httpx
 from dotenv import load_dotenv
 
+from .campus_search import match_campuses
 from .models import Campus, Indicator
 from .prompts import EXPLAIN_INSTRUCTIONS, PARSE_INSTRUCTIONS
 
@@ -87,12 +88,6 @@ KEYWORDS = {
     "libraries_count": ("biblioteca", "leer", "lectura", "cultura", "ocio"),
     "sports_count": ("gimnas", "deporte", "deportiv", "polideportiv", "entren", "piscina"),
 }
-CAMPUS_ALIASES = {
-    "etsisi": ("etsisi", "campus sur", "vallecas", "sistemas informaticos", "software"),
-    "etsiinf": ("etsiinf", "montegancedo", "boadilla", "fi upm", "facultad de informatica"),
-}
-
-
 # Words that show the sentence is about finding somewhere to live / study (keyword topic check, no AI).
 TOPIC_WORDS = (
     "piso", "habitacion", "alquil", "estudio", "apartamento", "casa", "vivienda", "vivir", "residencia", "compart",
@@ -131,7 +126,7 @@ def looks_like_language(query: str) -> bool:
 
 def on_topic_by_keywords(query: str, campuses: list[Campus]) -> bool:
     q = _norm(query)
-    names = [_norm(a) for c in campuses for a in (c.id, c.name, *c.aliases)] + [a for v in CAMPUS_ALIASES.values() for a in v]
+    names = [_norm(a) for c in campuses for a in (c.id, c.name, *c.aliases)]
     return (any(_has_word(q, w) for w in TOPIC_WORDS)
             or any(n and re.search(rf"\b{re.escape(n)}\b", q) for n in names)
             or bool(re.search(r"\b\d{3,4}\s*(?:euros?|eur|pavos|al mes)", q)))
@@ -235,18 +230,12 @@ def _finish(raw: dict, campuses: list[Campus], keys: list[str], default_campus: 
     }
 
 
-def keyword_parse(query: str, campuses: list[Campus], keys: list[str]) -> dict:
+def keyword_parse(query: str, campuses: list[Campus], keys: list[str],
+                  matches: list[Campus] | None = None) -> dict:
     """Offline fallback: regex + keywords. Less smart, but never fails."""
     q = _norm(query)
-    campus_terms: dict[str, set[str]] = {}
-    for item in campuses:
-        terms = (*CAMPUS_ALIASES.get(item.id, ()), item.name.split(" · ")[-1], item.name.split(" · ")[0],
-                 item.id.split("-", maxsplit=1)[-1], *item.aliases)
-        for alias in terms:
-            campus_terms.setdefault(_norm(alias), set()).add(item.id)
-    # Ignore ambiguous university names and prefer the most specific match.
-    campus = next((next(iter(campus_terms[term])) for term in sorted(campus_terms, key=len, reverse=True)
-                   if term and len(campus_terms[term]) == 1 and re.search(rf"\b{re.escape(term)}\b", q)), None)
+    matches = match_campuses(query, campuses) if matches is None else matches
+    campus = matches[0].id if len(matches) == 1 else None
     # "1.200 €" / "1,200 euros" are thousands; "450 €" is not.
     m = re.search(r"(\d{1,3}(?:[.,]\d{3})+|\d{2,5})(?:[.,]\d{1,2})?\s*(?:euros?|eur|pavos|al mes|/mes)", q)
     budget = float(re.sub(r"[.,]", "", m.group(1))) if m else None
@@ -267,7 +256,7 @@ def keyword_parse(query: str, campuses: list[Campus], keys: list[str]) -> dict:
     raw = {"campus_id": campus, "budget_eur_month": budget, "housing_type": housing,
            "max_distance_km": float(km.group(1).replace(",", ".")) if km else None, "priorities": priorities,
            "max_travel_min": float(minutes.group(1)) if minutes else None, "travel_mode": mode,
-           "on_topic": on_topic_by_keywords(query, campuses),
+           "on_topic": bool(matches) or on_topic_by_keywords(query, campuses),
            "interpretation": "He entendido: " + ", ".join(p for p in parts if p) + "."}
     return raw
 
@@ -280,18 +269,20 @@ NOT_UNDERSTOOD = {
 
 def parse_query(query: str, campuses: list[Campus], indicators: list[Indicator], default_campus: str) -> dict:
     keys = [i.key for i in indicators] + [DISTANCE_KEY]
-    if not looks_like_language(query):  # no AI call for keyboard mashing
-        return _not_understood("gibberish", keys, default_campus)
     cache_key = json.dumps([_norm(query), keys, [c.id for c in campuses], default_campus])
     hit = _cache_get(_parse_cache, cache_key)
     if hit:
         return dict(hit)
+    matches = match_campuses(query, campuses)
+    if not matches and not looks_like_language(query):
+        return _not_understood("gibberish", keys, default_campus)
     result = None
     if llm_enabled():
         try:
-            campus_list = "; ".join(f"{c.id} = {c.name}" for c in campuses)
+            prompt_campuses = matches if len(matches) <= 12 else []
+            campus_list = "; ".join(f"{c.id} = {c.name}" for c in prompt_campuses)
             text = _call_openai(PARSE_INSTRUCTIONS + f"\nCampus disponibles: {campus_list}\nCriterios: {', '.join(keys)}",
-                                query, parse_schema(campuses, keys))
+                                query, parse_schema(prompt_campuses, keys))
             result = _finish(json.loads(text), campuses, keys, default_campus, "llm")
         except Exception:  # noqa: BLE001 — any failure means "use the fallback", the demo must not break
             result = None
@@ -299,8 +290,12 @@ def parse_query(query: str, campuses: list[Campus], indicators: list[Indicator],
         cached = _demo_cache().get(_norm(query))  # pitch sentences still work offline
         # A cached pitch answer was written by the AI earlier, so it keeps the "llm" label.
         result = _finish(cached, campuses, keys, default_campus, "llm") if cached else \
-            _finish(keyword_parse(query, campuses, keys), campuses, keys, default_campus, "keywords")
-    if not result["understood"]:
+            _finish(keyword_parse(query, campuses, keys, matches), campuses, keys, default_campus, "keywords")
+    if result["understood"]:
+        result["campus_candidates"] = [campus.id for campus in matches]
+        if len(matches) == 1:
+            result["campus_id"] = matches[0].id
+    else:
         result = _not_understood("off_topic", keys, default_campus, result["engine"])
     _cache_put(_parse_cache, cache_key, result)
     return dict(result)
@@ -327,7 +322,12 @@ def template_explain(items: list[dict], housing_type: str) -> str:
     """Deterministic fallback explanation built only from our numbers."""
     lines = []
     for i, it in enumerate(items, 1):
-        txt = f"{i}) {it['name']} ({it['district']}): {_fmt(it.get('min_transporte_publico'))} min en transporte público y {_fmt(it.get('min_coche'))} min en coche hasta tu campus"
+        txt = f"{i}) {it['name']} ({it['district']}): "
+        if it.get("distancia_en_linea_recta_km") is not None:
+            txt += f"a {_fmt(it['distancia_en_linea_recta_km'], 1)} km en línea recta del campus"
+        else:
+            txt += (f"{_fmt(it.get('min_transporte_publico'))} min en transporte público "
+                    f"y {_fmt(it.get('min_coche'))} min en coche hasta tu campus")
         if it.get("alquiler_oficial_piso_mediana") is not None:
             txt += f"; pisos del distrito: {_fmt(it['alquiler_oficial_piso_mediana'])} €/mes de alquiler mediano oficial (2024)"
         if it.get("fits_budget") is True:

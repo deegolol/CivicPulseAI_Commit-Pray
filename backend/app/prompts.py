@@ -30,7 +30,7 @@ Reglas estrictas:
 - Usa SOLO los datos del JSON que te paso. No inventes cifras, barrios, precios ni servicios.
 - Español, tuteando, tono cercano y claro. Formato numérico español (1.234 €, 14,1 €/m², 2,3 km).
 - Una línea por zona, en el orden dado: "N) Nombre (distrito): …" con 1–2 frases que citen 2–3 cifras reales
-  (minutos en transporte público y en coche hasta el campus, y el criterio que más le favorece).
+  (tiempo hasta el campus si está disponible, distancia en línea recta si consta, y el criterio que más le favorece).
 - Precio: solo puedes citar "alquiler_oficial_piso_mediana" diciendo que es el alquiler mediano oficial de pisos
   del distrito (contratos 2024). Nunca calcules ni estimes un precio para una habitación o un estudio.
 - Si "fits_budget" es false dilo con tacto; si es null no hables del presupuesto.

@@ -102,6 +102,11 @@ def get_dataset() -> Dataset:
         if own and own.get("eur_m2"):
             area.values["rent_eur_m2"] = own["eur_m2"]
             area.notes["rent_eur_m2"] = f"valor del barrio: {own['sections']} secciones censales, {own['contracts']} contratos (SERPAVI 2024)"
+    catalogue = folder / "universities.json"
+    campus_path = catalogue if catalogue.is_file() else folder / "campuses.json"
+    travel = _optional_json(folder / "travel_times.json").get("campuses", {})
+    campuses = [Campus(**row, has_travel_times=row["id"] in travel)
+                for row in json.loads(campus_path.read_text(encoding="utf-8"))]
     return Dataset(
         source_dir=kind,
         level=ind.get("level", "barrio"),
@@ -109,9 +114,9 @@ def get_dataset() -> Dataset:
         sources=[Source(**s) for s in ind.get("sources", [])],
         indicators=indicators,
         areas=areas,
-        campuses=[Campus(**c) for c in json.loads((folder / "campuses.json").read_text(encoding="utf-8"))],
+        campuses=campuses,
         geojson=json.loads((folder / "barrios.geojson").read_text(encoding="utf-8")),
-        travel=_optional_json(folder / "travel_times.json").get("campuses", {}),
+        travel=travel,
         rents=_optional_json(folder / "rent_monthly.json").get("districts", {}),
         barrio_rents=barrio_rents,
     )
